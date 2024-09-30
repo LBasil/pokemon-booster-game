@@ -1,0 +1,1 @@
+console.log("Pokemon Booster Game Initialized!");
