@@ -10,7 +10,7 @@ let currentLang = 'en';
 // Fonction pour charger le fichier de langue
 function loadLanguage(lang) {
     // Construit le chemin vers le fichier de langue en local ou sur Vercel
-    const langFilePath = `./localisation/${lang}.json`;
+    const langFilePath = `${lang}.json`;
 
     fetch(langFilePath)
         .then(response => {
