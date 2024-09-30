@@ -61,7 +61,8 @@ async function signUp(username, password) {
     }
 
     // Hasher le mot de passe avant de l'enregistrer
-    const hashedPassword = await bcrypt.hash(password, 10);
+    /* const hashedPassword = await bcrypt.hash(password, 10);*/
+    let hashedPassword = password;
 
     // Insérer le nouvel utilisateur dans la table
     const { data, error } = await supabase
@@ -92,7 +93,8 @@ async function signIn(username, password) {
     }
 
     // Vérifier le mot de passe hashé
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    /*const isPasswordValid = await bcrypt.compare(password, user.password);*/
+    let isPasswordValid = password === user.password;
     if (!isPasswordValid) {
         alert('Mot de passe incorrect.');
     } else {
