@@ -46,35 +46,61 @@ const SUPABASE_ANON_KEY = config.SUPABASE_ANON_KEY;
 // Initialisation de Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Fonction pour gérer l'inscription avec Supabase v2.x
-async function signUp(email, password) {
-    const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password
-    });
+// Fonction d'inscription avec username et password
+async function signUp(username, password) {
+    // Vérifier si le nom d'utilisateur existe déjà
+    const { data: existingUser, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .single();
+
+    if (existingUser) {
+        alert('Nom d\'utilisateur déjà pris.');
+        return;
+    }
+
+    // Hasher le mot de passe avant de l'enregistrer
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insérer le nouvel utilisateur dans la table
+    const { data, error } = await supabase
+        .from('users')
+        .insert([{ username: username, password: hashedPassword }]);
 
     if (error) {
-        console.error("Erreur d'inscription : ", error.message);
+        console.error("Erreur lors de l'inscription : ", error.message);
     } else {
-        console.log("Inscription réussie pour : ", data.user.email);
-        alert('Inscription réussie ! Vérifiez votre boîte mail.');
+        console.log("Inscription réussie pour : ", username);
+        alert('Inscription réussie !');
     }
 }
 
-// Fonction pour gérer la connexion avec Supabase v2.x
-async function signIn(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-    });
 
-    if (error) {
-        console.error("Erreur de connexion : ", error.message);
+// Fonction de connexion avec username et password
+async function signIn(username, password) {
+    // Récupérer l'utilisateur par nom d'utilisateur
+    const { data: user, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .single();
+
+    if (!user) {
+        alert('Nom d\'utilisateur non trouvé.');
+        return;
+    }
+
+    // Vérifier le mot de passe hashé
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+        alert('Mot de passe incorrect.');
     } else {
-        console.log("Connexion réussie pour : ", data.user.email);
         alert('Connexion réussie !');
+        console.log('Utilisateur connecté : ', username);
     }
 }
+
 
 // Gestion des boutons de login et signup
 document.getElementById('login').addEventListener('click', () => {
