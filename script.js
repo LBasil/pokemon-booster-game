@@ -46,9 +46,9 @@ const SUPABASE_ANON_KEY = config.SUPABASE_ANON_KEY;
 // Initialisation de Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Fonction pour gérer l'inscription
+// Fonction pour gérer l'inscription avec Supabase v2.x
 async function signUp(email, password) {
-    const { user, error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password
     });
@@ -56,14 +56,14 @@ async function signUp(email, password) {
     if (error) {
         console.error("Erreur d'inscription : ", error.message);
     } else {
-        console.log("Inscription réussie pour : ", user.email);
+        console.log("Inscription réussie pour : ", data.user.email);
         alert('Inscription réussie ! Vérifiez votre boîte mail.');
     }
 }
 
-// Fonction pour gérer la connexion
+// Fonction pour gérer la connexion avec Supabase v2.x
 async function signIn(email, password) {
-    const { user, error } = await supabase.auth.signIn({
+    const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password
     });
@@ -71,7 +71,7 @@ async function signIn(email, password) {
     if (error) {
         console.error("Erreur de connexion : ", error.message);
     } else {
-        console.log("Connexion réussie pour : ", user.email);
+        console.log("Connexion réussie pour : ", data.user.email);
         alert('Connexion réussie !');
     }
 }
