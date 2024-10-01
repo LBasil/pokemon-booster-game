@@ -30,7 +30,6 @@ async function populateSets() {
         page++;
     }
     console.log("Peuplement des sets terminé.");
-    populateCards();
 }
 
 async function populateCards() {
@@ -42,7 +41,7 @@ async function populateCards() {
             headers: { 'X-Api-Key': config.API_KEY }
         });
         const data = await response.json();
-        console.log(date);
+        console.log(data);
 
         if (data.data.length === 0) {
             hasMore = false;
