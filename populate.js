@@ -14,7 +14,7 @@ async function populateSets() {
         }
 
         const sets = data.data.map(set => ({
-            set_id: set.id,
+            id: set.id,
             set_name: set.name,
             release_date: set.releaseDate,
             printed_total: set.printedTotal,
