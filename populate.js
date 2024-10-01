@@ -16,7 +16,7 @@ async function populateSets() {
         const sets = data.data.map(set => ({
             id: set.id,
             name: set.name,
-            releaseDate: set.releaseDate,
+            releaseDate: convertToTimestamp(set.releaseDate),
             printedTotal: set.printedTotal,
             total: set.total
         }));
@@ -77,3 +77,8 @@ async function populateCards() {
 
 
 populateSets();
+
+function convertToTimestamp(dateString) {
+    const date = new Date(dateString);
+    return date.getTime();  // Renvoie le timestamp en millisecondes
+}
