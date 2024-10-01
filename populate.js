@@ -76,7 +76,7 @@ async function populateCards() {
 }
 
 
-populateSets();
+populateCards();
 
 function convertToTimestamp(dateString) {
     const date = new Date(dateString);
