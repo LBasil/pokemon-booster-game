@@ -61,7 +61,7 @@ async function populateCards() {
                 artist: card.artist || null,
                 nationalPokedexNumber: card.nationalPokedexNumbers ? card.nationalPokedexNumbers[0] : null,
                 supertype: card.supertype,
-                subtypes: card.subtypes ? card.subtypes.join(", ") : null,
+                type: card.subtypes ? card.subtypes.join(", ") : null,
                 hp: card.hp || null,
                 types: card.types ? card.types.join(", ") : null,
                 imageSmall: card.images.small,
