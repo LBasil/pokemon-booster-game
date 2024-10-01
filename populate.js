@@ -42,6 +42,7 @@ async function populateCards() {
             headers: { 'X-Api-Key': config.API_KEY }
         });
         const data = await response.json();
+        console.log(date);
 
         if (data.data.length === 0) {
             hasMore = false;
