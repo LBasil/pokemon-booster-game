@@ -15,9 +15,9 @@ async function populateSets() {
 
         const sets = data.data.map(set => ({
             id: set.id,
-            set_name: set.name,
-            release_date: set.releaseDate,
-            printed_total: set.printedTotal,
+            name: set.name,
+            releaseDate: set.releaseDate,
+            printedTotal: set.printedTotal,
             total: set.total
         }));
 
@@ -53,15 +53,15 @@ async function populateCards() {
             name: card.name,
             rarity: card.rarity || null,
             value: card.cardMarket ? card.cardMarket.prices.averageSellPrice : 0,
-            image_url: card.images.large,
+            imageUrl: card.images.large,
             artist: card.artist || null,
             nationalPokedexNumber: card.nationalPokedexNumbers ? card.nationalPokedexNumbers[0] : null,
             supertype: card.supertype,
             subtypes: card.subtypes ? card.subtypes.join(", ") : null,
             hp: card.hp || null,
             types: card.types ? card.types.join(", ") : null,
-            image_small: card.images.small,
-            set_id: card.set.id // Associer la carte à son set
+            imageSmall: card.images.small,
+            setId: card.set.id // Associer la carte à son set
         }));
 
         const { error } = await supabase.from('cards').insert(cards);
