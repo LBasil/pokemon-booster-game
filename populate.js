@@ -80,5 +80,6 @@ populateSets();
 
 function convertToTimestamp(dateString) {
     const date = new Date(dateString);
-    return date.getTime();  // Renvoie le timestamp en millisecondes
+    return Math.floor(date.getTime() / 1000);  // Convertir en secondes
+
 }
