@@ -34,7 +34,7 @@ async function populateSets() {
 
 async function populateCards() {
     let hasMore = true;
-    let page = 1;
+    let page = 50;
 
     while (hasMore) {
         try {
@@ -88,10 +88,6 @@ async function populateCards() {
     }
     console.log("Peuplement des cartes terminé.");
 }
-
-
-
-populateCards();
 
 function convertToTimestamp(dateString) {
     const date = new Date(dateString);
