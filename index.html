@@ -11,15 +11,19 @@
         <div class="container">
             <h1 id="welcome-message"></h1>
 
-            <!-- Sélecteur de langue -->
-            <select id="language-select">
-                <option value="en" selected>English</option>
-                <option value="fr">Français</option>
-                <!-- Ajouter d'autres langues ici -->
-            </select>
-
-            <button id="login" class="btn btn-primary"></button>
-            <button id="signup" class="btn btn-secondary"></button>
+            <div class="language">
+                <!-- Sélecteur de langue -->
+                <select id="language-select">
+                    <option value="en" selected>English</option>
+                    <option value="fr">Français</option>
+                    <!-- Ajouter d'autres langues ici -->
+                </select>
+                
+                <div class="buttonContainer">
+                    <button id="login" class="btn btn-primary"></button>
+                    <button id="signup" class="btn btn-secondary"></button>
+                </div>
+            </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

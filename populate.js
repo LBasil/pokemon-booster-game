@@ -16,8 +16,8 @@ async function populateSets() {
         const sets = data.data.map(set => ({
             set_id: set.id,
             set_name: set.name,
-            releaseDate: set.releaseDate,
-            printedTotal: set.printedTotal,
+            release_date: set.releaseDate,
+            printed_total: set.printedTotal,
             total: set.total
         }));
 
@@ -52,7 +52,7 @@ async function populateCards() {
             id: card.id,
             name: card.name,
             rarity: card.rarity || null,
-            value: card.prices ? card.prices.market : 0,
+            value: card.cardMarket ? card.cardMarket.prices.averageSellPrice : 0,
             image_url: card.images.large,
             artist: card.artist || null,
             nationalPokedexNumber: card.nationalPokedexNumbers ? card.nationalPokedexNumbers[0] : null,
