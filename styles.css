@@ -11,20 +11,3 @@ button {
     width: 200px;
     font-size: 1.2rem;
 }
-
-.container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.language {
-    display: flex;
-    flex-direction: column-reverse;
-}
-
-#language-select {
-    width: 50%;
-    align-self: center;
-    margin-top: 2%;
-}
