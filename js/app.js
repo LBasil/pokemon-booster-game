@@ -4,7 +4,7 @@ let currentLang = 'en';
 
 // Fonction pour charger la langue
 function loadLanguage(lang) {
-    const langFilePath = `${lang}.json`;
+    const langFilePath = `./${lang}.json`;
 
     fetch(langFilePath)
         .then(response => response.json())
