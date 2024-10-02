@@ -51,20 +51,25 @@ async function signUp(username, password) {
     }
 }
 
-// Fonction de connexion
+// Fonction de connexion 
 async function signIn(username, password) {
-    const { data: user } = await supabase
+    const { data: user, error } = await supabase
         .from('users')
         .select('*')
         .eq('username', username)
         .single();
 
-    if (!user || password !== user.password) {
-        alert('Nom d\'utilisateur ou mot de passe incorrect.');
+    if (!user) {
+        alert('Nom d\'utilisateur non trouvé.');
         return;
     }
 
-    alert('Connexion réussie !');
+    let isPasswordValid = password === user.password;
+    if (!isPasswordValid) {
+        alert('Mot de passe incorrect.');
+    } else {
+        window.location.href = 'game.html'; // Rediriger vers la page de jeu
+    }
 }
 
 // Gestion des boutons

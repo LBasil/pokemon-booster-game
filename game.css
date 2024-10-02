@@ -1,0 +1,56 @@
+/* Conteneur principal */
+.game-container {
+    height: 100vh;
+    background-color: var(--dark-bg-color); /* Utiliser le mode sombre par défaut */
+}
+
+/* Titre principal */
+.game-title {
+    font-size: 3rem;
+    color: var(--primary-text-color);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Cartes de navigation */
+.game-card {
+    background-color: var(--card-bg-color);
+    border-radius: 15px;
+    width: 250px;
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease-in-out, background-color 0.3s ease;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Bordure légère */
+    border-radius: 10px; /* Bordure arrondie */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre subtile */
+}
+
+.game-card:hover {
+    transform: scale(1.05);
+    background-color: var(--hover-card-bg-color);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Ombre accentuée */
+}
+
+/* Icônes et texte dans les cartes */
+.game-card h2 {
+    font-size: 1.8rem;
+    color: var(--primary-text-color);
+    margin-bottom: 10px;
+}
+
+.game-card p {
+    font-size: 1rem;
+    color: var(--secondary-text-color);
+}
+
+/* Theme Toggle */
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
