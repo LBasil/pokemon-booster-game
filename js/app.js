@@ -53,22 +53,23 @@ async function signUp(username, password) {
 
 // Fonction de connexion 
 async function signIn(username, password) {
-    const { data: user, error } = await supabase
+    const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('username', username)
-        .single();
+        .eq('password', password);
 
-    if (!user) {
-        alert('Nom d\'utilisateur non trouvé.');
+    if (error) {
+        console.error('Erreur lors de la connexion :', error.message);
         return;
     }
 
-    let isPasswordValid = password === user.password;
-    if (!isPasswordValid) {
-        alert('Mot de passe incorrect.');
+    if (data.length > 0) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('username', username);
+        window.location.href = 'game.html';
     } else {
-        window.location.href = 'game.html'; // Rediriger vers la page de jeu
+        alert('Nom d’utilisateur ou mot de passe incorrect.');
     }
 }
 
