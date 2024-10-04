@@ -1,76 +1,82 @@
-// Fake cards data for the demo
-const cards = [
-    { type: 'Common', name: 'Common Card 1' },
-    { type: 'Common', name: 'Common Card 2' },
-    { type: 'Common', name: 'Common Card 3' },
-    { type: 'Common', name: 'Common Card 4' },
-    { type: 'Uncommon', name: 'Uncommon Card 1' },
-    { type: 'Uncommon', name: 'Uncommon Card 2' },
-    { type: 'Uncommon', name: 'Uncommon Card 3' },
-    { type: 'Shiny', name: 'Shiny Card 1' },
-    { type: 'Shiny', name: 'Shiny Card 2' },
-    { type: 'Energy', name: 'Energy Card' }
-];
-
 let currentCardIndex = 0;
+let cards = [];
 
-// Function to reveal the next card
-function revealNextCard() {
-    const cardElements = document.querySelectorAll('.card');
-    
-    if (currentCardIndex < cardElements.length) {
-        // Show the next card
-        cardElements[currentCardIndex].classList.remove('hidden');
-        cardElements[currentCardIndex].classList.add('revealed');
-        currentCardIndex++;
-    } else {
-        // No more cards, so stop listening for clicks
-        document.getElementById('card-stack').removeEventListener('click', revealNextCard);
+// Fonction pour récupérer 10 cartes aléatoires depuis la base de données
+async function fetchRandomCards() {
+    try {
+        // Appel de la fonction RPC pour tirer 10 cartes aléatoires
+        const { data, error } = await supabase.rpc('random_cards', { num_cards: 10 });
+        
+        if (error) {
+            console.error('Erreur lors de la récupération des cartes:', error);
+            return [];
+        }
+
+        return data; // Retourne les cartes récupérées
+    } catch (err) {
+        console.error("Erreur lors de l'appel de l'API Supabase : ", err);
+        return [];
     }
 }
 
-// Function to remove the current card
-function removeCurrentCard() {
-    const cardElements = document.querySelectorAll('.card');
-    
-    if (currentCardIndex > 0) {
-        // Remove the last revealed card
-        cardElements[currentCardIndex - 1].classList.add('removed');
-    }
-}
-
-// Function to generate the card stack
-function generateCardStack() {
+// Fonction pour afficher les cartes sur la pile
+function displayCards(cards) {
     const cardStack = document.getElementById('card-stack');
-    
+    cardStack.style.marginTop = '-350px';
+
+    // Vider le stack de cartes précédent
+    cardStack.innerHTML = '';
+
     cards.forEach((card, index) => {
         const cardDiv = document.createElement('div');
         cardDiv.classList.add('card', 'hidden');
-        cardDiv.innerText = `${card.type}: ${card.name}`;
+        cardDiv.innerHTML = `<img src="${card.imageUrl}" alt="${card.name}" class="card-img">`; // Affiche l'image de la carte
         cardStack.appendChild(cardDiv);
     });
 }
 
-// Event listener for booster click
-document.getElementById('booster').addEventListener('click', function () {
+// Fonction pour révéler la prochaine carte
+function revealNextCard() {
+    const cardElements = document.querySelectorAll('.card');
+    
+    if (currentCardIndex < cardElements.length) {
+        // Montrer la carte suivante
+        cardElements[currentCardIndex].classList.remove('hidden');
+        cardElements[currentCardIndex].classList.add('revealed');
+        currentCardIndex++;
+    } else {
+        // Plus de cartes à révéler
+        document.getElementById('card-stack').removeEventListener('click', revealNextCard);
+    }
+}
+
+// Fonction pour retirer la carte actuelle
+function removeCurrentCard() {
+    const cardElements = document.querySelectorAll('.card');
+    
+    if (currentCardIndex > 0) {
+        // Retirer la dernière carte révélée
+        cardElements[currentCardIndex - 1].classList.add('removed');
+    }
+}
+
+// Fonction pour ouvrir le booster et révéler les cartes
+document.getElementById('booster').addEventListener('click', async function () {
     const booster = document.getElementById('booster');
     
-    if (booster.classList.contains('opening')) {
-        return;
-    }
-
-    // Add the class that triggers the animation
+    // Ajouter la classe d'animation d'ouverture du booster
     booster.classList.add('opening');
 
-    // After the animation, reveal the first card and allow user to reveal others
-    setTimeout(() => {
-        revealNextCard();
-        document.getElementById('card-stack').addEventListener('click', function () {
-            removeCurrentCard();
-            revealNextCard();
-        });
-    }, 2000);  // Wait for the booster animation to complete
-});
+    // Récupérer les 10 cartes depuis la base de données
+    cards = await fetchRandomCards();
 
-// Initialize the card stack when the page loads
-window.onload = generateCardStack;
+    // Après l'animation d'ouverture, afficher les cartes
+    setTimeout(() => {
+        displayCards(cards); // Afficher les cartes dans le stack
+        revealNextCard(); // Révéler la première carte
+        document.getElementById('card-stack').addEventListener('click', function () {
+            removeCurrentCard(); // Retirer la carte actuelle
+            revealNextCard(); // Révéler la suivante
+        });
+    }, 2000); // Attendre que l'animation d'ouverture du booster soit terminée
+});
