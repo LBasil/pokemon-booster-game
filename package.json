@@ -1,0 +1,28 @@
+{
+  "name": "pokemon-booster-game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "populate:sets": "node scripts/populate.mjs sets",
+    "populate:cards": "node scripts/populate.mjs cards"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "bootstrap": "^5.3.3",
+    "pinia": "^2.2.2",
+    "vue": "^3.4.38",
+    "vue-i18n": "^11.4.12",
+    "vue-router": "^4.4.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.9",
+    "dotenv": "^16.4.5",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  }
+}

@@ -1,0 +1,50 @@
+import { defineStore } from 'pinia'
+import { supabase } from '@/lib/supabaseClient'
+
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    session: null,
+    ready: false,
+  }),
+  getters: {
+    isLoggedIn: (state) => Boolean(state.session),
+    user: (state) => state.session?.user ?? null,
+    displayName: (state) =>
+      state.session?.user?.user_metadata?.username ?? state.session?.user?.email ?? '',
+  },
+  actions: {
+    async init() {
+      const { data } = await supabase.auth.getSession()
+      this.session = data.session
+      this.ready = true
+
+      supabase.auth.onAuthStateChange((_event, session) => {
+        this.session = session
+      })
+    },
+
+    async signUp({ email, password, username }) {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username } },
+      })
+      if (error) throw error
+      this.session = data.session
+      return data
+    },
+
+    async signIn({ email, password }) {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) throw error
+      this.session = data.session
+      return data
+    },
+
+    async signOut() {
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+      this.session = null
+    },
+  },
+})

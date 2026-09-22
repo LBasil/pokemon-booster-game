@@ -1,0 +1,70 @@
+{
+  "common": {
+    "language": "Language",
+    "logout": "Log out",
+    "back": "Back",
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "home": {
+    "welcome": "Welcome to the Pokémon Booster Game",
+    "tagline": "Open unlimited boosters, of any type, and build your dream collection.",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "Optional, shown on your profile",
+    "login": "Log in",
+    "signup": "Sign up",
+    "submitLogin": "Log in",
+    "submitSignup": "Create account",
+    "switchToSignup": "No account yet? Sign up",
+    "switchToLogin": "Already have an account? Log in",
+    "signupSuccess": "Account created! Check your email if confirmation is required, otherwise you're logged in.",
+    "genericError": "Something went wrong. Please try again."
+  },
+  "game": {
+    "title": "Pokémon Collection Game",
+    "greeting": "Welcome back, {name}!",
+    "openBoosters": "Open Boosters",
+    "openBoostersDesc": "Tear open packs from any set, as many as you like.",
+    "viewCollection": "View Collection",
+    "viewCollectionDesc": "Browse every card you own.",
+    "profile": "Profile",
+    "profileDesc": "Your account and stats."
+  },
+  "boosters": {
+    "title": "Open Your Pokémon Booster!",
+    "setLabel": "Booster type",
+    "anySet": "Any set (mixed)",
+    "countLabel": "Number of boosters",
+    "openButton": "Open {count} booster | Open {count} boosters",
+    "opening": "Opening...",
+    "tapToReveal": "Tap the stack to reveal the next card",
+    "openAnother": "Open more boosters",
+    "boosterProgress": "Booster {current} of {total}",
+    "loadError": "Could not load booster sets.",
+    "openError": "Could not open the booster. Please try again."
+  },
+  "collection": {
+    "title": "My Collection",
+    "empty": "You haven't opened any boosters yet.",
+    "goOpen": "Go open a booster",
+    "owned": "{owned} / {total} unique cards",
+    "quantity": "x{quantity}",
+    "loadError": "Could not load your collection."
+  },
+  "profile": {
+    "title": "Profile",
+    "email": "Email",
+    "username": "Username",
+    "notSet": "Not set",
+    "memberSince": "Member since",
+    "cardsOwned": "Unique cards owned",
+    "totalCards": "Total cards drawn"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "backHome": "Back to home"
+  }
+}

@@ -1,0 +1,153 @@
+/* Global theme, shared across every view */
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #121212;
+  color: #ffffff;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+body.light-mode {
+  background-color: #f4f4f4;
+  color: #333333;
+}
+
+a {
+  text-decoration: none;
+}
+
+.text-shadow {
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+}
+
+h1 {
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.glow-button {
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-button:hover {
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.6),
+    0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+body.light-mode .glow-button {
+  box-shadow: none;
+}
+
+/* Theme toggle switch */
+.theme-toggle {
+  position: fixed;
+  top: 15px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider::before {
+  position: absolute;
+  content: '';
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #2196f3;
+}
+
+input:checked + .slider::before {
+  transform: translateX(26px);
+}
+
+/* Language select */
+.language-select select {
+  max-width: 300px;
+  margin: 0 auto;
+  background-color: #2e2e2e;
+  color: #ffffff;
+  border: none;
+  padding: 10px;
+}
+
+body.light-mode .language-select select {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+/* Nav cards used on the game hub */
+.game-card {
+  background-color: var(--bs-dark);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+
+.game-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.game-card .card-title {
+  font-size: 1.5rem;
+  color: var(--bs-light);
+}
+
+@media (max-width: 767px) {
+  .game-card .card-title {
+    font-size: 1.2rem;
+  }
+
+  .game-card {
+    margin: 0 auto;
+    width: 100%;
+  }
+}

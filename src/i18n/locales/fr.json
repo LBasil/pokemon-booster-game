@@ -1,0 +1,70 @@
+{
+  "common": {
+    "language": "Langue",
+    "logout": "Déconnexion",
+    "back": "Retour",
+    "loading": "Chargement...",
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
+  },
+  "home": {
+    "welcome": "Bienvenue dans le jeu Pokémon Booster",
+    "tagline": "Ouvre autant de boosters que tu veux, de tout type, et construis la collection de tes rêves.",
+    "emailLabel": "Email",
+    "passwordLabel": "Mot de passe",
+    "usernameLabel": "Pseudo",
+    "usernamePlaceholder": "Optionnel, affiché sur ton profil",
+    "login": "Connexion",
+    "signup": "Inscription",
+    "submitLogin": "Se connecter",
+    "submitSignup": "Créer un compte",
+    "switchToSignup": "Pas encore de compte ? Inscris-toi",
+    "switchToLogin": "Déjà un compte ? Connecte-toi",
+    "signupSuccess": "Compte créé ! Vérifie ton email si une confirmation est requise, sinon tu es déjà connecté.",
+    "genericError": "Une erreur est survenue. Réessaie."
+  },
+  "game": {
+    "title": "Pokémon Collection Game",
+    "greeting": "Content de te revoir, {name} !",
+    "openBoosters": "Ouvrir des boosters",
+    "openBoostersDesc": "Déchire des paquets de n'importe quelle série, autant que tu veux.",
+    "viewCollection": "Voir la collection",
+    "viewCollectionDesc": "Parcours toutes les cartes que tu possèdes.",
+    "profile": "Profil",
+    "profileDesc": "Ton compte et tes statistiques."
+  },
+  "boosters": {
+    "title": "Ouvre ton booster Pokémon !",
+    "setLabel": "Type de booster",
+    "anySet": "Toutes séries confondues",
+    "countLabel": "Nombre de boosters",
+    "openButton": "Ouvrir {count} booster | Ouvrir {count} boosters",
+    "opening": "Ouverture...",
+    "tapToReveal": "Touche la pile pour révéler la carte suivante",
+    "openAnother": "Ouvrir d'autres boosters",
+    "boosterProgress": "Booster {current} sur {total}",
+    "loadError": "Impossible de charger les types de boosters.",
+    "openError": "Impossible d'ouvrir le booster. Réessaie."
+  },
+  "collection": {
+    "title": "Ma collection",
+    "empty": "Tu n'as encore ouvert aucun booster.",
+    "goOpen": "Aller ouvrir un booster",
+    "owned": "{owned} / {total} cartes uniques",
+    "quantity": "x{quantity}",
+    "loadError": "Impossible de charger ta collection."
+  },
+  "profile": {
+    "title": "Profil",
+    "email": "Email",
+    "username": "Pseudo",
+    "notSet": "Non défini",
+    "memberSince": "Membre depuis",
+    "cardsOwned": "Cartes uniques possédées",
+    "totalCards": "Total de cartes tirées"
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "backHome": "Retour à l'accueil"
+  }
+}
