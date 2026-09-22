@@ -93,6 +93,21 @@ committed or used client-side.
 npm run dev
 ```
 
+## Deploying (Vercel)
+
+Two things a static-file host doesn't give you for free:
+
+1. **Env vars.** `.env` is gitignored and never pushed, so Vite has nothing
+   to inline at build time unless you set them in the host itself. On
+   Vercel: **Project Settings > Environment Variables**, add
+   `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, then redeploy (Vite
+   bakes them in at build time, not runtime — a redeploy is required after
+   adding/changing them).
+2. **SPA routing.** Vue Router runs in `history` mode, so a direct hit or
+   refresh on `/boosters`, `/collection`, etc. must fall back to
+   `index.html` instead of 404ing. `vercel.json` in the repo root already
+   handles this with a catch-all rewrite.
+
 ## Scripts
 
 | Command                | What it does                                   |

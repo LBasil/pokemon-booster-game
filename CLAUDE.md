@@ -108,6 +108,12 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 - Legacy static files (`index.html`/`booster.html`/`game.html`,
   `js/*.js`, `*.css`, `en.json`/`fr.json` at the repo root) were deleted —
   fully superseded by `src/`. Recoverable from git history if ever needed.
+- Deployed to Vercel for manual testing. Needed two things not obvious from
+  a plain `vite build`: the `VITE_*` env vars set in the Vercel dashboard
+  (Vite inlines them at build time — a redeploy is required after
+  setting/changing them), and `vercel.json` (catch-all rewrite to
+  `index.html`, since Vue Router's `history` mode 404s on a direct hit to
+  `/boosters` etc. without it). Both are now in place.
 - `scripts/populate.mjs` has retry-with-backoff built in — the pokemontcg.io
   free-tier API (especially under the old, publicly-leaked key still in git
   history, now reused) returns frequent transient 500/502s. It also accepts
