@@ -30,15 +30,44 @@ if (!POKEMONTCG_API_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 const BASE_URL = 'https://api.pokemontcg.io/v2'
 const headers = { 'X-Api-Key': POKEMONTCG_API_KEY }
+const PAGE_SIZE = 250
+const MAX_ATTEMPTS = 6
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+// Fetches one page and returns its `data` array, or null once the API has
+// no more pages. pokemontcg.io's free tier is flaky under load (transient
+// 5xx, or an out-of-range page answered with a non-JSON/empty body instead
+// of `{ data: [] }`) — retried with backoff before being treated as "no
+// more data".
+async function fetchPage(endpoint, page) {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const response = await fetch(`${endpoint}?page=${page}&pageSize=${PAGE_SIZE}`, { headers })
+
+    if (response.ok) {
+      try {
+        const { data } = await response.json()
+        return data && data.length > 0 ? data : null
+      } catch {
+        console.warn(`Page ${page}: could not parse response as JSON (attempt ${attempt}/${MAX_ATTEMPTS}).`)
+      }
+    } else {
+      console.warn(`Page ${page}: request failed with status ${response.status} (attempt ${attempt}/${MAX_ATTEMPTS}).`)
+    }
+
+    if (attempt < MAX_ATTEMPTS) await sleep(attempt * 1000)
+  }
+
+  console.warn(`Page ${page}: giving up after ${MAX_ATTEMPTS} attempts, stopping.`)
+  return null
+}
 
 async function populateSets() {
   let page = 1
 
   while (true) {
-    const response = await fetch(`${BASE_URL}/sets?page=${page}`, { headers })
-    const { data } = await response.json()
-
-    if (!data || data.length === 0) break
+    const data = await fetchPage(`${BASE_URL}/sets`, page)
+    if (!data) break
 
     const sets = data.map((set) => ({
       id: set.id,
@@ -55,20 +84,19 @@ async function populateSets() {
     }
 
     console.log(`Sets page ${page} done (${sets.length} sets)`)
+    if (data.length < PAGE_SIZE) break
     page++
   }
 
   console.log('Sets populated.')
 }
 
-async function populateCards() {
-  let page = 1
+async function populateCards(startPage = 1) {
+  let page = startPage
 
   while (true) {
-    const response = await fetch(`${BASE_URL}/cards?page=${page}&pageSize=250`, { headers })
-    const { data } = await response.json()
-
-    if (!data || data.length === 0) break
+    const data = await fetchPage(`${BASE_URL}/cards`, page)
+    if (!data) break
 
     const cards = data.map((card) => ({
       id: card.id,
@@ -94,20 +122,22 @@ async function populateCards() {
 
     console.log(`Cards page ${page} done (${cards.length} cards)`)
 
-    if (data.length < 250) break
+    if (data.length < PAGE_SIZE) break
     page++
+    await sleep(300)
   }
 
   console.log('Cards populated.')
 }
 
 const target = process.argv[2]
+const startPage = Number(process.argv[3]) || 1
 
 if (target === 'sets') {
   await populateSets()
 } else if (target === 'cards') {
-  await populateCards()
+  await populateCards(startPage)
 } else {
-  console.error('Usage: node scripts/populate.mjs <sets|cards>')
+  console.error('Usage: node scripts/populate.mjs <sets|cards> [startPage]')
   process.exit(1)
 }

@@ -82,27 +82,46 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 
 ## Current state (updated 2026-09-22)
 
-- Full Vue rewrite scaffolded: auth (login/signup via Supabase Auth), game
-  hub, booster opening (set selector + quantity, unlimited), collection view,
-  profile view, i18n (en/fr), persisted theme toggle — all implemented and
-  verified rendering correctly in a headless browser (dark/light theme
+- Full Vue rewrite in place: auth (login/signup via Supabase Auth), game hub,
+  booster opening (set selector + quantity, unlimited), collection view,
+  profile view, i18n (en/fr), persisted theme toggle.
+- **Supabase project is live and fully wired up.** Both migrations
+  (`0001_schema.sql`, `0002_functions.sql`) are applied. `sets` (176 rows)
+  and `cards` (20,670 rows) are populated via `scripts/populate.mjs`.
+  `.env` and `scripts/.env.local` are filled in locally (gitignored, not
+  committed).
+- End-to-end flow verified directly against the live backend (via a
+  throwaway admin-created test user, cleaned up after): signup ->
+  sign-in -> draw booster (any-set RPC) -> draw booster (by-set RPC) ->
+  atomic collection upsert (incl. duplicate increments) -> collection
+  fetch -> confirmed RLS blocks one user from reading another's
+  collection. Also verified in a headless browser: dark/light theme
   toggle + persistence, language switching, signup form, and the
-  `requiresAuth` route guard redirect all confirmed working).
+  `requiresAuth` route guard redirect.
 - `npm test` (5 tests) and `npm run build` both pass. Zero npm audit
   vulnerabilities.
-- **No Supabase project exists yet.** The user has none currently — auth and
-  data flows (`npm run dev` beyond the static UI, the populate scripts) are
-  untested against a live backend. This is the top-of-list next step, to be
-  done together: create a project, run the two migration files, fill in
-  `.env` and `scripts/.env.local`, then smoke-test signup -> open booster ->
-  collection end to end.
+- **Not yet manually tested through the actual browser UI with a real
+  account** (the E2E check above used the admin API to bypass email
+  confirmation, which is still ON on the Supabase project — real signups
+  need to click the confirmation email). Worth a manual click-through pass
+  when convenient.
 - Legacy static files (`index.html`/`booster.html`/`game.html`,
   `js/*.js`, `*.css`, `en.json`/`fr.json` at the repo root) were deleted —
   fully superseded by `src/`. Recoverable from git history if ever needed.
+- `scripts/populate.mjs` has retry-with-backoff built in — the pokemontcg.io
+  free-tier API (especially under the old, publicly-leaked key still in git
+  history, now reused) returns frequent transient 500/502s. It also accepts
+  an optional resume page: `node scripts/populate.mjs cards <startPage>`.
 
 ## TODO / known gaps
 
-- No live Supabase project — everything downstream of that is unverified end-to-end.
+- No manual browser click-through with a real (non-admin-created) account yet.
 - No automated E2E tests (Playwright etc.) — only Vitest unit tests on pure logic.
-- No password reset / email confirmation UX beyond Supabase's default flow.
-- No pagination on the collection view — fine at current data volumes, revisit if it grows.
+- No password reset UX beyond Supabase's default flow; email confirmation is
+  still ON for the project (not disabled per the user's preference) — real
+  signups require clicking the confirmation email.
+- No pagination on the collection view — fine at current data volumes (20k
+  cards in the pool), revisit if it grows.
+- The pokemontcg.io API key in use is the one already exposed in this repo's
+  git history — works, but consider rotating to a fresh key if the repo is
+  ever made public.

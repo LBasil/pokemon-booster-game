@@ -106,8 +106,10 @@ npm run dev
 
 ## Status
 
-The Vue app is fully built and verified in the browser (theme, language,
-auth forms, route guarding). No Supabase project is connected yet, so the
-end-to-end auth/booster/collection flow against a live backend is the next
-step — see [CLAUDE.md](./CLAUDE.md) for the full project rules and current
-state.
+Fully built and working end to end against a live Supabase project: auth,
+booster opening (any set or a specific one, unlimited count), atomic
+collection writes, RLS-isolated per-user collections. `sets` (176) and
+`cards` (20,670) are populated. Still worth a manual click-through with a
+real account through the actual UI (the automated check used an
+admin-created test account to bypass email confirmation) — see
+[CLAUDE.md](./CLAUDE.md) for the full project rules and current state.
