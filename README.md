@@ -12,7 +12,11 @@ collection. A Vue 3 single-page app backed by Supabase (Postgres + Auth).
 - **Collection**: every card you've pulled, with quantities, and how many
   unique cards you own out of the total card pool.
 - **Profile**: account info and quick stats.
-- **Dark/light theme** and **English/French** UI, both persisted locally.
+- **Dark/light theme** (follows the OS preference until you pick one) and
+  **English/French** UI, both persisted locally.
+- **"Holo Collector" design**: a landing page with holographic, tilt-on-hover
+  showcase cards, built on shared design tokens (`--pb-*` CSS variables in
+  `src/assets/styles/global.css`) that the rest of the app reuses. Mobile-first.
 
 ## Tech stack
 
@@ -37,6 +41,8 @@ scripts/populate.mjs   admin script that seeds `sets` and `cards` from pokemontc
 ## Setup
 
 ### 1. Install dependencies
+
+Requires Node 20+ (Vite 8). An `.nvmrc` pins Node 22 — run `nvm use` first.
 
 ```bash
 npm install

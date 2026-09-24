@@ -76,6 +76,20 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 - Keep the animations from the original prototype (booster tear-open, card
   reveal) — they're one of the few things that already worked well. They live
   as scoped styles on `BoosterPack.vue` / `CardStack.vue`.
+- **Design system ("Holo Collector")**: dark-first, night-blue background,
+  holographic foil accents, yellow primary actions. Fonts: Unbounded
+  (display/headings) + Manrope (body), loaded from Google Fonts in
+  `index.html`. All colors/radii/shadows are `--pb-*` tokens in
+  `src/assets/styles/global.css`, redefined under `[data-bs-theme='light']`;
+  the theme store sets `data-bs-theme` on `<html>` so Bootstrap follows too.
+  Never hardcode colors in components — use the tokens. Shared building
+  blocks: `.pb-glass`, `.pb-holo-text`, `.pb-eyebrow`, `.glow-button`,
+  `HoloCard.vue` (tilt + foil shine, reuse it for rare cards),
+  `BrandLogo.vue`, `ThemeToggle` (`:floating="false"` to place it inline),
+  `LanguageSwitcher` (EN/FR segmented). Legibility beats effects: anything
+  sitting over imagery must be near-opaque. Check both themes at phone width.
+- vue-i18n treats `@` as special: write `{'@'}` in locale strings (e.g. email
+  placeholders) or the message fails to compile at runtime.
 - New pure logic (sampling, grouping, formatting) goes in `src/utils/` with a
   co-located `*.test.js` — these are the only tests that don't need a live
   Supabase project to run.
@@ -98,7 +112,10 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
   collection. Also verified in a headless browser: dark/light theme
   toggle + persistence, language switching, signup form, and the
   `requiresAuth` route guard redirect.
-- `npm test` (5 tests) and `npm run build` both pass. Zero npm audit
+- Landing/login page redesigned (2026-09-24) with the "Holo Collector"
+  design system; the other views pick up the tokens (colors, fonts,
+  buttons, inputs) but haven't had a dedicated redesign pass yet.
+- `npm test` (9 tests) and `npm run build` both pass. Zero npm audit
   vulnerabilities.
 - **Not yet manually tested through the actual browser UI with a real
   account** (the E2E check above used the admin API to bypass email
@@ -121,6 +138,12 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 
 ## TODO / known gaps
 
+- Redesign the inner views (game hub, boosters, collection, profile) with the
+  design system — they only inherit the tokens so far. Good candidates:
+  a shared app header (BrandLogo + LanguageSwitcher + ThemeToggle, like the
+  landing), `HoloCard` for rare pulls in the reveal and the collection grid.
+- Node: this machine's nvm default was Node 6; the project needs Node 20+
+  (`.nvmrc` = 22). `.env` must be recreated on each new machine.
 - No manual browser click-through with a real (non-admin-created) account yet.
 - No automated E2E tests (Playwright etc.) — only Vitest unit tests on pure logic.
 - No password reset UX beyond Supabase's default flow; email confirmation is

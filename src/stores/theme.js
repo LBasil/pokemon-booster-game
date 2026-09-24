@@ -2,13 +2,20 @@ import { defineStore } from 'pinia'
 
 const STORAGE_KEY = 'theme'
 
+function initialIsLight() {
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (stored) return stored === 'light'
+  return window.matchMedia?.('(prefers-color-scheme: light)').matches ?? false
+}
+
+// data-bs-theme drives both Bootstrap's components and our --pb-* tokens
 function applyTheme(isLight) {
-  document.body.classList.toggle('light-mode', isLight)
+  document.documentElement.dataset.bsTheme = isLight ? 'light' : 'dark'
 }
 
 export const useThemeStore = defineStore('theme', {
   state: () => ({
-    isLight: localStorage.getItem(STORAGE_KEY) === 'light',
+    isLight: initialIsLight(),
   }),
   actions: {
     init() {

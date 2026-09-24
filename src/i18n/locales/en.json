@@ -5,11 +5,13 @@
     "back": "Back",
     "loading": "Loading...",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "brand": "PokéBooster",
+    "switchToDark": "Switch to dark theme",
+    "switchToLight": "Switch to light theme"
   },
   "home": {
-    "welcome": "Welcome to the Pokémon Booster Game",
-    "tagline": "Open unlimited boosters, of any type, and build your dream collection.",
+    "tagline": "Pick any set — or mix them all — open as many packs as you like, and watch your collection grow with every pull.",
     "emailLabel": "Email",
     "passwordLabel": "Password",
     "usernameLabel": "Username",
@@ -18,10 +20,21 @@
     "signup": "Sign up",
     "submitLogin": "Log in",
     "submitSignup": "Create account",
-    "switchToSignup": "No account yet? Sign up",
-    "switchToLogin": "Already have an account? Log in",
     "signupSuccess": "Account created! Check your email if confirmation is required, otherwise you're logged in.",
-    "genericError": "Something went wrong. Please try again."
+    "genericError": "Something went wrong. Please try again.",
+    "eyebrow": "Every set, from 1999 to today",
+    "titleLead": "Rip open boosters.",
+    "titleHighlight": "Collect them all.",
+    "statSets": "sets",
+    "statCards": "cards to collect",
+    "statBoosters": "boosters",
+    "loginIntro": "Welcome back, trainer. Your binder is waiting.",
+    "signupIntro": "Create your free account and open your first booster in seconds.",
+    "emailPlaceholder": "you{'@'}example.com",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordHint": "At least 6 characters.",
+    "disclaimer": "Fan project, not affiliated with Nintendo, Creatures, GAME FREAK or The Pokémon Company. Card data and images: pokemontcg.io."
   },
   "game": {
     "title": "Pokémon Collection Game",
