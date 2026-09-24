@@ -7,8 +7,11 @@ collection. A Vue 3 single-page app backed by Supabase (Postgres + Auth).
 
 - **Real authentication** via Supabase Auth (email/password) — no plaintext
   passwords, no homemade session logic.
-- **Unlimited boosters, any type**: pick a specific Pokémon set or "any set
-  (mixed)", and how many boosters to open in one go.
+- **Unlimited boosters, any type**: pick a specific Pokémon set (searchable,
+  grouped by year, each pack shows the set's logo and chase card) or "any
+  set (mixed)", and how many boosters to open in one go. Tear each pack
+  open, flip the cards one by one (rarest last, with rarity and "New!"
+  badges), then get a summary with your best pull.
 - **Hub**: greeting, quick access to boosters, collection completion
   progress, profile summary and your latest pulled cards. Phone-friendly
   bottom tab bar on every signed-in page.

@@ -73,9 +73,26 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 - Composition API + `<script setup>` everywhere, no Options API.
 - Pinia stores own async state + the loading/error flags for it; views stay
   thin and call store actions / `api/*` functions.
-- Keep the animations from the original prototype (booster tear-open, card
-  reveal) — they're one of the few things that already worked well. They live
-  as scoped styles on `BoosterPack.vue` / `CardStack.vue`.
+- Booster opening animations (the one thing the original prototype did
+  well) were rebuilt in the design system, keeping their spirit: the pack
+  pulses while drawing, then tears along a zigzag (`BoosterPack.vue`, two
+  clipped copies of `BoosterArt`; `TEAR_MS` is exported for the view), and
+  cards flip face-up one by one from a face-down pile (`CardStack.vue`).
+  Keep them as scoped styles on those two components.
+- **Booster art per set**: pokemontcg.io has no booster-wrapper images, so
+  packs are generated: set logo + symbol from the CDN (deterministic URLs,
+  `src/utils/sets.js`, no DB column needed) and the set's chase card
+  (`fetchSetCover`: most valuable Pokémon by `value`) cropped into a window.
+  "Any set" = the generic foil pack.
+- **Opening flow** (`BoosterView.vue`): select (set picker inline on
+  desktop, `<dialog>` bottom sheet on phones) -> per pack: draw + save
+  immediately (so leaving mid-reveal never loses cards) -> tap to tear ->
+  tap to flip each card (sorted commons first, best last via
+  `sortForReveal`) -> summary with best pull. Rarity tiers
+  (common/rare/ultra) come from `rarityTier` in `src/utils/rarity.js`;
+  "New!" badges compare against the collection loaded on page mount.
+- Touch screens keep `:hover` after a tap: wrap hover-only effects in
+  `@media (hover: hover)` (see `.glow-button`).
 - **Design system ("Holo Collector")**: dark-first, night-blue background,
   holographic foil accents, yellow primary actions. Fonts: Unbounded
   (display/headings) + Manrope (body), loaded from Google Fonts in
@@ -123,9 +140,10 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 - Landing/login page and game hub redesigned (2026-09-24) with the "Holo
   Collector" design system. Hub = greeting, "open boosters" feature tile,
   collection progress tile (`completionPercent` in `src/utils/progress.js`),
-  profile tile, and a "latest additions" row of `HoloCard`s. Booster,
-  collection and profile views still only inherit the tokens (next in line,
-  in that order) and still use the old floating `ThemeToggle`.
+  profile tile, and a "latest additions" row of `HoloCard`s. Booster
+  opening page redesigned too (see Conventions). Collection and profile
+  views still only inherit the tokens (next in line, in that order) and
+  still use the old floating `ThemeToggle`.
 - WCAG contrast of the token pairs was checked numerically (text >= 16:1,
   muted >= 6.6:1, primary button 12:1, holo title stops >= 4.6:1 in light).
   Re-check if you change a color token.
@@ -163,10 +181,10 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 
 ## TODO / known gaps
 
-- Redesign the remaining views (boosters, collection, profile) with the
-  design system + AppHeader shell. Ideas: `BoosterArt`/`HoloCard` in the
-  opening flow and for rare pulls, `HoloCard` grid in the collection,
-  an "edit username" field on the profile.
+- Redesign the remaining views (collection, profile) with the design
+  system + AppHeader shell. Ideas: `HoloCard` grid in the collection with
+  rarity/set filters, an "edit username" field on the profile.
+  `CardTile.vue` is then probably dead code.
 - Node: this machine's nvm default was Node 6; the project needs Node 20+
   (`.nvmrc` = 22). `.env` must be recreated on each new machine.
 - No manual browser click-through with a real (non-admin-created) account yet.

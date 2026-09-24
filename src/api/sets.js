@@ -21,3 +21,20 @@ export async function fetchPoolStats() {
   if (cards.error) throw cards.error
   return { sets: sets.count ?? 0, cards: cards.count ?? 0 }
 }
+
+/**
+ * The set's chase card (most valuable Pokémon), used as booster pack artwork.
+ * Returns null if the set has no priced Pokémon card.
+ */
+export async function fetchSetCover(setId) {
+  const { data, error } = await supabase
+    .from('cards')
+    .select('id, name, image_small, image_url')
+    .eq('set_id', setId)
+    .eq('supertype', 'Pokémon')
+    .order('value', { ascending: false })
+    .limit(1)
+
+  if (error) throw error
+  return data[0] ?? null
+}

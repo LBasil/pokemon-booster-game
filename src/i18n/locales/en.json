@@ -9,7 +9,8 @@
     "brand": "PokéBooster",
     "switchToDark": "Switch to dark theme",
     "switchToLight": "Switch to light theme",
-    "booster": "Booster"
+    "booster": "Booster",
+    "boosterCount": "{count} cards"
   },
   "nav": {
     "main": "Main navigation",
@@ -64,17 +65,42 @@
     "loadError": "Couldn't load your collection. Try refreshing the page."
   },
   "boosters": {
-    "title": "Open Your Pokémon Booster!",
-    "setLabel": "Booster type",
-    "anySet": "Any set (mixed)",
+    "title": "Pick your booster",
+    "setLabel": "Set",
+    "anySet": "Any set",
     "countLabel": "Number of boosters",
     "openButton": "Open {count} booster | Open {count} boosters",
-    "opening": "Opening...",
-    "tapToReveal": "Tap the stack to reveal the next card",
-    "openAnother": "Open more boosters",
+    "tapToReveal": "Tap the pile to flip the next card",
     "boosterProgress": "Booster {current} of {total}",
     "loadError": "Could not load booster sets.",
-    "openError": "Could not open the booster. Please try again."
+    "openError": "Couldn't open the booster. Please try again.",
+    "eyebrow": "Unlimited boosters",
+    "anySetDesc": "A mix of every set ever released",
+    "seriesTitle": "Sets",
+    "searchLabel": "Search sets",
+    "searchPlaceholder": "Search a set…",
+    "noResults": "No set matches your search.",
+    "undated": "Undated",
+    "cardCount": "{count} cards",
+    "releasedIn": "Released in {year}",
+    "changeSet": "Change set",
+    "closePicker": "Close",
+    "preparing": "Preparing your booster…",
+    "tapToOpen": "Tap the booster to tear it open",
+    "tapToContinue": "Tap to open the next booster",
+    "tapToFinish": "Tap to see your haul",
+    "skip": "Skip this booster",
+    "skipToSummary": "Skip to summary",
+    "tier": {
+      "rare": "Rare",
+      "ultra": "Ultra rare"
+    },
+    "newBadge": "New!",
+    "doneTitle": "card pulled | cards pulled",
+    "newCount": "{count} new | {count} new",
+    "rareCount": "{count} rare | {count} rares",
+    "bestPull": "Best pull",
+    "openAgain": "Open {count} more | Open {count} more"
   },
   "collection": {
     "title": "My Collection",

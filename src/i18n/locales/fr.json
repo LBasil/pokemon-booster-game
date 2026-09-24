@@ -9,7 +9,8 @@
     "brand": "PokéBooster",
     "switchToDark": "Passer au thème sombre",
     "switchToLight": "Passer au thème clair",
-    "booster": "Booster"
+    "booster": "Booster",
+    "boosterCount": "{count} cartes"
   },
   "nav": {
     "main": "Navigation principale",
@@ -64,17 +65,42 @@
     "loadError": "Impossible de charger ta collection. Essaie de rafraîchir la page."
   },
   "boosters": {
-    "title": "Ouvre ton booster Pokémon !",
-    "setLabel": "Type de booster",
-    "anySet": "Toutes séries confondues",
+    "title": "Choisis ton booster",
+    "setLabel": "Série",
+    "anySet": "Toutes séries",
     "countLabel": "Nombre de boosters",
     "openButton": "Ouvrir {count} booster | Ouvrir {count} boosters",
-    "opening": "Ouverture...",
-    "tapToReveal": "Touche la pile pour révéler la carte suivante",
-    "openAnother": "Ouvrir d'autres boosters",
+    "tapToReveal": "Touche la pile pour retourner la carte suivante",
     "boosterProgress": "Booster {current} sur {total}",
     "loadError": "Impossible de charger les types de boosters.",
-    "openError": "Impossible d'ouvrir le booster. Réessaie."
+    "openError": "Impossible d'ouvrir le booster. Réessaie.",
+    "eyebrow": "Boosters illimités",
+    "anySetDesc": "Un mélange de toutes les séries",
+    "seriesTitle": "Séries",
+    "searchLabel": "Rechercher une série",
+    "searchPlaceholder": "Rechercher une série…",
+    "noResults": "Aucune série ne correspond à ta recherche.",
+    "undated": "Sans date",
+    "cardCount": "{count} cartes",
+    "releasedIn": "Sortie en {year}",
+    "changeSet": "Changer de série",
+    "closePicker": "Fermer",
+    "preparing": "Préparation du booster…",
+    "tapToOpen": "Touche le booster pour le déchirer",
+    "tapToContinue": "Touche pour ouvrir le booster suivant",
+    "tapToFinish": "Touche pour voir ton butin",
+    "skip": "Passer ce booster",
+    "skipToSummary": "Passer au récap",
+    "tier": {
+      "rare": "Rare",
+      "ultra": "Ultra rare"
+    },
+    "newBadge": "Nouvelle !",
+    "doneTitle": "carte obtenue | cartes obtenues",
+    "newCount": "{count} nouvelle | {count} nouvelles",
+    "rareCount": "{count} rare | {count} rares",
+    "bestPull": "Meilleure carte",
+    "openAgain": "Rouvrir {count} booster | Rouvrir {count} boosters"
   },
   "collection": {
     "title": "Ma collection",
