@@ -1,10 +1,11 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { fetchSetCover, fetchSets } from '@/api/sets'
+import { fetchSetCover } from '@/api/sets'
 import { drawBooster } from '@/api/boosters'
 import { addCardsToCollection } from '@/api/collection'
 import { useCollectionStore } from '@/stores/collection'
+import { useSetsStore } from '@/stores/sets'
 import { groupCardsByQuantity } from '@/utils/cards'
 import { bestPull, rarityLabelKey, rarityRank, rarityTier, sortForReveal } from '@/utils/rarity'
 import { setLogoUrl, setSymbolUrl } from '@/utils/sets'
@@ -17,16 +18,17 @@ import SetPicker from '@/components/SetPicker.vue'
 
 const { t, locale } = useI18n()
 const collectionStore = useCollectionStore()
+const setsStore = useSetsStore()
 
 const COUNT_OPTIONS = [1, 3, 5, 10]
 
 // ---------- Set selection ----------
 
-const sets = ref([])
+const sets = computed(() => setsStore.sets)
 const selectedSetId = ref('')
 const count = ref(1)
-const setsLoading = ref(true)
-const loadError = ref('')
+const setsLoading = computed(() => !setsStore.loaded && !setsStore.error)
+const loadError = computed(() => (setsStore.error ? t('boosters.loadError') : ''))
 
 const selectedSet = computed(() => sets.value.find((set) => set.id === selectedSetId.value) ?? null)
 
@@ -79,20 +81,14 @@ watch(selectedSetId, () => {
 // Card ids the user owned before this visit, to flag new pulls (null = unknown)
 let ownedIds = null
 
-onMounted(async () => {
+onMounted(() => {
   desktopQuery.addEventListener('change', onMediaChange)
 
   collectionStore.load().then(() => {
     if (!collectionStore.error) ownedIds = new Set(collectionStore.entries.map((entry) => entry.card_id))
   })
 
-  try {
-    sets.value = await fetchSets()
-  } catch {
-    loadError.value = t('boosters.loadError')
-  } finally {
-    setsLoading.value = false
-  }
+  setsStore.load()
 })
 
 onBeforeUnmount(() => {

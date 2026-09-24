@@ -17,8 +17,10 @@ collection. A Vue 3 single-page app backed by Supabase (Postgres + Auth).
 - **Hub**: greeting, quick access to boosters, collection completion
   progress, profile summary and your latest pulled cards. Phone-friendly
   bottom tab bar on every signed-in page.
-- **Collection**: every card you've pulled, with quantities, and how many
-  unique cards you own out of the total card pool.
+- **Collection**: every card you've pulled with quantities, completion
+  stats and an estimated Cardmarket value; search, filter by set, rarity or
+  duplicates, and sort; per-set completion; a detailed view for each card.
+  Filters live in the URL, so they survive back/forward and can be shared.
 - **Profile**: account info and quick stats.
 - **Dark/light theme** (follows the OS preference until you pick one) and
   **English/French** UI, both persisted locally.

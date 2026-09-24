@@ -23,7 +23,7 @@ entire backend.
 src/
   main.js, App.vue          entry point, mounts pinia/router/i18n, applies saved theme
   router/index.js           routes + auth guard (requiresAuth meta -> redirect to "/")
-  stores/                   pinia: auth (session), theme (persisted), collection (cache)
+  stores/                   pinia: auth (session), theme (persisted), collection (cache), sets (shared set list)
   lib/supabaseClient.js     the one Supabase client instance, reads VITE_ env vars
   api/                      thin wrappers around supabase-js calls (sets, boosters, collection)
   views/                    one per route
@@ -158,9 +158,17 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
   Collector" design system. Hub = greeting, "open boosters" feature tile,
   collection progress tile (`completionPercent` in `src/utils/progress.js`),
   profile tile, and a "latest additions" row of `HoloCard`s. Booster
-  opening page redesigned too (see Conventions). Collection and profile
-  views still only inherit the tokens (next in line, in that order) and
-  still use the old floating `ThemeToggle`.
+  opening page redesigned too (see Conventions).
+- Collection redesigned (2026-09-24): header stats (unique/pool with
+  progress, cards pulled, sets started, estimated Cardmarket value), tabs
+  Cards / Sets (per-set completion, "Complete!" badge, click = filter that
+  set), search + set + rarity chips + duplicates + sort, all mirrored in
+  the URL (tab/set changes push a history entry, the rest replaces), and a
+  `CardDetail.vue` dialog (prev/next via arrows, buttons or swipe). Pure
+  logic in `src/utils/collection.js`. The grid renders 48 cards at a time
+  (IntersectionObserver), so no server pagination is needed yet.
+  `CardTile.vue` was removed. Only the profile view is left on the old
+  look (still uses the floating `ThemeToggle`).
 - WCAG contrast of the token pairs was checked numerically (text >= 16:1,
   muted >= 6.6:1, primary button 12:1, holo title stops >= 4.6:1 in light).
   Re-check if you change a color token.
@@ -198,19 +206,16 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 
 ## TODO / known gaps
 
-- **Migration 0003 written, NOT yet applied** (as of 2026-09-24): the user
-  must run `supabase/migrations/0003_realistic_boosters.sql` in the SQL
-  editor, then `npm run populate:sets` to fill `logo_url` / `symbol_url`.
-  Until then the app works but draws uniformly and 2026 sets have no logo.
-  The SQL was verified locally with PGlite (Postgres 18 in WASM, npm
+- Migration 0003 is applied (user ran it in the SQL editor on 2026-09-24,
+  checked the new columns/function exist, then re-ran
+  `NODE_USE_SYSTEM_CA=1 npm run populate:sets`: 176 sets). The SQL was
+  verified locally beforehand with PGlite (Postgres 18 in WASM, npm
   `@electric-sql/pglite`): idempotent, 10 cards/pack, no duplicates, no
   set mixing, promo-only sets excluded, and over 3000 simulated packs per
   set (151, Evolving Skies, Perfect Order, Base) ~1 ex/holo in 5 packs,
   ~1 ultra+ in 5.5, ~1 secret in 50.
-- Redesign the remaining views (collection, profile) with the design
-  system + AppHeader shell. Ideas: `HoloCard` grid in the collection with
-  rarity/set filters, an "edit username" field on the profile.
-  `CardTile.vue` is then probably dead code.
+- Redesign the profile view with the design system + AppHeader shell.
+  Ideas: an "edit username" field (Supabase Auth metadata), stats, logout.
 - Node: this machine's nvm default was Node 6; the project needs Node 20+
   (`.nvmrc` = 22). `.env` must be recreated on each new machine.
 - This machine's network intercepts HTTPS with its own root CA (curl is fine,
@@ -223,8 +228,9 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 - No password reset UX beyond Supabase's default flow; email confirmation is
   still ON for the project (not disabled per the user's preference) — real
   signups require clicking the confirmation email.
-- No pagination on the collection view — fine at current data volumes (20k
-  cards in the pool), revisit if it grows.
+- The collection is fetched in one query (all owned entries); the grid only
+  renders progressively. Revisit with server-side paging if collections get
+  into the tens of thousands of distinct cards.
 - The pokemontcg.io API key in use is the one already exposed in this repo's
   git history — works, but consider rotating to a fresh key if the repo is
   ever made public.
