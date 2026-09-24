@@ -1,38 +1,58 @@
 import { describe, expect, it } from 'vitest'
-import { bestPull, rarityTier, sortForReveal } from './rarity'
+import { bestPull, rarityBucket, rarityTier, sortForReveal } from './rarity'
 
-describe('rarityTier', () => {
+describe('rarityBucket', () => {
   it.each([
     [null, 'common'],
     ['Common', 'common'],
-    ['Uncommon', 'common'],
     ['Promo', 'common'],
+    ['Uncommon', 'uncommon'],
     ['Rare', 'rare'],
-    ['Rare Holo', 'rare'],
-    ['Rare Holo GX', 'rare'],
-    ['Double Rare', 'rare'],
-    ['Radiant Rare', 'rare'],
-    ['ACE SPEC Rare', 'rare'],
-    ['Rare Holo VMAX', 'ultra'],
+    ['Rare Holo', 'holo'],
+    ['Rare Holo GX', 'holo'],
+    ['Rare Holo VMAX', 'holo'],
+    ['Holo Rare VSTAR', 'holo'],
+    ['Double Rare', 'holo'],
+    ['Radiant Rare', 'holo'],
+    ['ACE SPEC Rare', 'holo'],
+    ['LEGEND', 'holo'],
     ['Rare Ultra', 'ultra'],
-    ['Rare Secret', 'ultra'],
+    ['Ultra Rare', 'ultra'],
     ['Illustration Rare', 'ultra'],
-    ['Special Illustration Rare', 'ultra'],
-    ['Hyper Rare', 'ultra'],
+    ['Trainer Gallery Rare Holo', 'ultra'],
     ['Rare Holo Star', 'ultra'],
+    ['MEGA_ATTACK_RARE', 'ultra'],
+    ['Special Illustration Rare', 'secret'],
+    ['Hyper Rare', 'secret'],
+    ['Mega Hyper Rare', 'secret'],
+    ['Rare Secret', 'secret'],
+    ['Rare Rainbow', 'secret'],
+    ['Some Future Rare', 'holo'],
     ['Something new', 'common'],
-  ])('%s -> %s', (rarity, tier) => {
-    expect(rarityTier(rarity)).toBe(tier)
+  ])('%s -> %s', (rarity, bucket) => {
+    expect(rarityBucket(rarity)).toBe(bucket)
+  })
+})
+
+describe('rarityTier', () => {
+  it('groups buckets into three visual tiers', () => {
+    expect(rarityTier({ rarity: 'Uncommon' })).toBe('common')
+    expect(rarityTier({ rarity: 'Double Rare' })).toBe('rare')
+    expect(rarityTier({ rarity: 'Hyper Rare' })).toBe('ultra')
+  })
+
+  it('prefers the bucket computed by the database', () => {
+    expect(rarityTier({ rarity: 'Common', rarity_bucket: 'secret' })).toBe('ultra')
   })
 })
 
 describe('sortForReveal', () => {
-  it('puts rarer cards last and keeps draw order within a tier', () => {
+  it('puts rarer cards last and keeps draw order within a bucket', () => {
     const cards = [
       { id: 'a', rarity: 'Rare Ultra' },
       { id: 'b', rarity: 'Common' },
       { id: 'c', rarity: 'Rare Holo' },
-      { id: 'd', rarity: 'Uncommon' },
+      { id: 'd', rarity: 'Common' },
     ]
     expect(sortForReveal(cards).map((c) => c.id)).toEqual(['b', 'd', 'c', 'a'])
   })
@@ -45,11 +65,11 @@ describe('sortForReveal', () => {
 })
 
 describe('bestPull', () => {
-  it('prefers the highest tier, then the highest value', () => {
+  it('prefers the highest bucket, then the highest value', () => {
     const cards = [
       { id: 'a', rarity: 'Rare Holo', value: 50 },
       { id: 'b', rarity: 'Illustration Rare', value: 3 },
-      { id: 'c', rarity: 'Hyper Rare', value: 12 },
+      { id: 'c', rarity: 'Ultra Rare', value: 12 },
     ]
     expect(bestPull(cards).id).toBe('c')
   })

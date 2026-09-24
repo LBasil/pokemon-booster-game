@@ -6,7 +6,7 @@ import { drawBooster } from '@/api/boosters'
 import { addCardsToCollection } from '@/api/collection'
 import { useCollectionStore } from '@/stores/collection'
 import { groupCardsByQuantity } from '@/utils/cards'
-import { TIERS, bestPull, rarityTier, sortForReveal } from '@/utils/rarity'
+import { bestPull, rarityLabelKey, rarityRank, rarityTier, sortForReveal } from '@/utils/rarity'
 import { setLogoUrl, setSymbolUrl } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
@@ -43,16 +43,18 @@ watch(selectedSetId, async (setId) => {
   }
 })
 
-const pack = computed(() => {
-  const set = selectedSet.value
+// Props for BoosterArt / BoosterPack; no set = the generic "any set" pack
+function packArt(set) {
   if (!set) return {}
   return {
     name: set.name,
-    logo: setLogoUrl(set.id),
-    symbol: setSymbolUrl(set.id),
+    logo: setLogoUrl(set),
+    symbol: setSymbolUrl(set),
     artwork: covers.value[set.id]?.image_url ?? null,
   }
-})
+}
+
+const pack = computed(() => packArt(selectedSet.value))
 
 const releaseYear = computed(() => selectedSet.value?.release_date?.slice(0, 4) ?? null)
 
@@ -110,6 +112,7 @@ const revealedCount = ref(0)
 const pulled = ref([]) // same shape, every card of this session
 const openError = ref('')
 const openedSetId = ref('')
+const packSetId = ref('') // set the current pack came from (differs for "any set")
 const stage = ref(null)
 let tearTimer = null
 
@@ -135,6 +138,7 @@ async function prepareBooster() {
     const cards = await drawBooster(openedSetId.value || null)
     await addCardsToCollection(cards)
     collectionStore.invalidate()
+    packSetId.value = cards[0]?.set_id ?? openedSetId.value
 
     currentCards.value = sortForReveal(cards).map((card, index) => {
       const isNew = ownedIds ? !ownedIds.has(card.id) : false
@@ -208,9 +212,22 @@ const hint = computed(() => {
   return isLastBooster.value ? t('boosters.tapToFinish') : t('boosters.tapToContinue')
 })
 
-const openedSetName = computed(
-  () => sets.value.find((set) => set.id === openedSetId.value)?.name ?? t('boosters.anySet'),
-)
+const setName = (setId) => sets.value.find((set) => set.id === setId)?.name ?? null
+const openedSetName = computed(() => setName(openedSetId.value) ?? t('boosters.anySet'))
+const openedPackArt = computed(() => packArt(sets.value.find((set) => set.id === openedSetId.value)))
+
+// "Any set" packs stay a mystery until torn open, then show where they're from
+const stageLabel = computed(() => {
+  if (openedSetId.value || step.value !== 'reveal') return openedSetName.value
+  const from = setName(packSetId.value)
+  return from ? `${t('boosters.anySet')} · ${from}` : openedSetName.value
+})
+
+// Chip label for anything rarer than an uncommon
+function rarityChip(card) {
+  const key = rarityLabelKey(card)
+  return key === 'common' || key === 'uncommon' ? null : t(`boosters.bucket.${key}`)
+}
 
 // ---------- Summary ----------
 
@@ -218,16 +235,17 @@ const summary = computed(() => {
   const newIds = new Set(pulled.value.filter((item) => item.isNew).map((item) => item.card.id))
   const grouped = groupCardsByQuantity(pulled.value.map((item) => item.card)).map((entry) => ({
     ...entry,
-    tier: rarityTier(entry.card.rarity),
+    tier: rarityTier(entry.card),
+    chip: rarityChip(entry.card),
     isNew: newIds.has(entry.card.id),
   }))
-  grouped.sort((a, b) => TIERS.indexOf(b.tier) - TIERS.indexOf(a.tier) || b.isNew - a.isNew)
+  grouped.sort((a, b) => rarityRank(b.card) - rarityRank(a.card) || b.isNew - a.isNew)
 
   return {
     entries: grouped,
     total: pulled.value.length,
     newCount: newIds.size,
-    rareCount: pulled.value.filter((item) => rarityTier(item.card.rarity) !== 'common').length,
+    rareCount: pulled.value.filter((item) => rarityTier(item.card) !== 'common').length,
     best: bestPull(pulled.value.map((item) => item.card)),
   }
 })
@@ -313,7 +331,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
       <!-- ============ Opening ============ -->
       <section v-else-if="phase === 'open'" class="open-layout">
         <div class="open-top">
-          <span class="pb-eyebrow">{{ openedSetName }}</span>
+          <span class="pb-eyebrow">{{ stageLabel }}</span>
           <p v-if="totalToOpen > 1" class="open-progress-label">
             {{ t('boosters.boosterProgress', { current: boosterIndex + 1, total: totalToOpen }) }}
           </p>
@@ -324,31 +342,28 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
             v-if="step === 'pack'"
             :key="`pack-${boosterIndex}`"
             :state="packState"
-            v-bind="
-              openedSetId
-                ? {
-                    name: openedSetName,
-                    logo: setLogoUrl(openedSetId),
-                    symbol: setSymbolUrl(openedSetId),
-                    artwork: covers[openedSetId]?.image_url ?? null,
-                  }
-                : {}
-            "
+            v-bind="openedPackArt"
             @open="tearPack"
           />
           <CardStack v-else :cards="currentCards" :revealed-count="revealedCount" @tap="onStackTap" />
         </div>
 
         <div class="open-caption" aria-live="polite">
-          <template v-if="currentCard">
+          <!-- Keyed per card so the fade-in replays; hits wait for their flip -->
+          <div
+            v-if="currentCard"
+            :key="currentCard.key"
+            class="open-card-info"
+            :data-tier="rarityTier(currentCard.card)"
+          >
             <p class="open-card-name">{{ currentCard.card.name }}</p>
             <div class="open-card-badges">
-              <span v-if="rarityTier(currentCard.card.rarity) !== 'common'" class="tier-chip" :data-tier="rarityTier(currentCard.card.rarity)">
-                {{ t(`boosters.tier.${rarityTier(currentCard.card.rarity)}`) }}
+              <span v-if="rarityChip(currentCard.card)" class="tier-chip" :data-tier="rarityTier(currentCard.card)">
+                {{ rarityChip(currentCard.card) }}
               </span>
               <span v-if="currentCard.isNew" class="new-chip">{{ t('boosters.newBadge') }}</span>
             </div>
-          </template>
+          </div>
           <p class="open-hint">{{ hint }}</p>
         </div>
 
@@ -356,7 +371,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
           <span
             v-for="(item, index) in currentCards"
             :key="item.key"
-            :class="{ done: index < revealedCount, rare: index < revealedCount && rarityTier(item.card.rarity) !== 'common' }"
+            :class="{ done: index < revealedCount, rare: index < revealedCount && rarityTier(item.card) !== 'common' }"
           ></span>
         </div>
 
@@ -402,7 +417,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
               </div>
               <span class="done-card-name">{{ entry.card.name }}</span>
               <span class="done-card-badges">
-                <span v-if="entry.tier !== 'common'" class="tier-chip" :data-tier="entry.tier">{{ t(`boosters.tier.${entry.tier}`) }}</span>
+                <span v-if="entry.chip" class="tier-chip" :data-tier="entry.tier">{{ entry.chip }}</span>
                 <span v-if="entry.isNew" class="new-chip">{{ t('boosters.newBadge') }}</span>
               </span>
             </li>
@@ -699,6 +714,23 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   min-height: 5.5rem;
 }
 
+/* Name and badges appear as the card turns face-up (later for hits, which
+   charge up for ~1s first — revealing "Secret rare" early would spoil it) */
+.open-card-info {
+  animation: caption-in 0.3s 0.3s backwards;
+}
+
+.open-card-info[data-tier='ultra'] {
+  animation-delay: 1s;
+}
+
+@keyframes caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
 .open-card-name {
   margin: 0 0 0.4rem;
   font-family: var(--pb-font-display);
@@ -738,6 +770,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 
 .open-dots span.rare {
   background: var(--pb-accent);
+  transition-delay: 1s;
 }
 
 .open-skip {

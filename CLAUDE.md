@@ -56,9 +56,13 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 5. **Every user-facing string goes through vue-i18n.** Add the key to both
    `src/i18n/locales/en.json` and `fr.json` in the same change — no bare
    strings in templates.
-6. **Booster "type" = a Pokémon set.** `random_cards_by_set(num_cards,
-   p_set_id)` draws from one set; `random_cards(num_cards)` (no set id) draws
-   from everything — that's the "any type" option, not a separate code path.
+6. **Booster "type" = a Pokémon set, and packs follow real pull rates.**
+   Packs come from `open_booster(p_set_id)` (migration 0003): 10 cards built
+   slot by slot (4 common, 3 uncommon, 2 reverse slots, 1 rare slot) with
+   weighted rarity buckets. `p_set_id = null` ("any set") = one random real
+   set per pack, never a mix. Never go back to a uniform random draw (it gave
+   ~4 rares and 1-2 hits per pack). `random_cards*` from 0002 only remain as
+   the client's fallback while 0003 isn't applied.
 7. **I have no direct access to the Supabase database** (no MCP/CLI
    connection). Any schema change ships as a new
    `supabase/migrations/000N_*.sql` file with a comment explaining what it
@@ -80,17 +84,30 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
   cards flip face-up one by one from a face-down pile (`CardStack.vue`).
   Keep them as scoped styles on those two components.
 - **Booster art per set**: pokemontcg.io has no booster-wrapper images, so
-  packs are generated: set logo + symbol from the CDN (deterministic URLs,
-  `src/utils/sets.js`, no DB column needed) and the set's chase card
-  (`fetchSetCover`: most valuable Pokémon by `value`) cropped into a window.
-  "Any set" = the generic foil pack.
+  packs are generated: set logo + symbol and the set's chase card
+  (`fetchSetCover`: most valuable Pokémon among its holo+ hits) cropped into
+  a window. "Any set" = the generic foil pack (a mystery until torn open).
+  Logo/symbol URLs are stored in `sets.logo_url` / `symbol_url` (0003):
+  **since 2026 new sets' images live on images.scrydex.com** with another
+  URL scheme, so never derive them from the set id again —
+  `setLogoUrl(set)` only falls back to the old pattern for unfilled rows.
 - **Opening flow** (`BoosterView.vue`): select (set picker inline on
   desktop, `<dialog>` bottom sheet on phones) -> per pack: draw + save
   immediately (so leaving mid-reveal never loses cards) -> tap to tear ->
-  tap to flip each card (sorted commons first, best last via
-  `sortForReveal`) -> summary with best pull. Rarity tiers
-  (common/rare/ultra) come from `rarityTier` in `src/utils/rarity.js`;
-  "New!" badges compare against the collection loaded on page mount.
+  tap (or swipe, on the face-up card) to flip each card (sorted commons
+  first, best last via `sortForReveal`) -> summary with best pull. Hits
+  (ultra/secret) charge up ~0.55s face-down before flipping with a flash;
+  their name/badges are delayed until then so nothing is spoiled. "New!"
+  badges compare against the collection loaded on page mount.
+- **Rarity**: 6 buckets (common, uncommon, rare, holo, ultra, secret)
+  computed in SQL by `rarity_bucket()` (generated column
+  `cards.rarity_bucket`) and mirrored in JS by `rarityBucket()` in
+  `src/utils/rarity.js` — change both together. `rarityTier()` groups them
+  into 3 visual tiers for halos.
+- Animation checks: headless Chrome's GPU hides mobile jank (60 fps even
+  with 4x CPU throttle), so judge choreography frame by frame instead: CDP
+  `Animation.setPlaybackRate(0.1)` + scaling `setTimeout` by 10 in the page,
+  then screenshot every second (= 100ms of animation).
 - Touch screens keep `:hover` after a tap: wrap hover-only effects in
   `@media (hover: hover)` (see `.glow-button`).
 - **Design system ("Holo Collector")**: dark-first, night-blue background,
@@ -181,12 +198,26 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 
 ## TODO / known gaps
 
+- **Migration 0003 written, NOT yet applied** (as of 2026-09-24): the user
+  must run `supabase/migrations/0003_realistic_boosters.sql` in the SQL
+  editor, then `npm run populate:sets` to fill `logo_url` / `symbol_url`.
+  Until then the app works but draws uniformly and 2026 sets have no logo.
+  The SQL was verified locally with PGlite (Postgres 18 in WASM, npm
+  `@electric-sql/pglite`): idempotent, 10 cards/pack, no duplicates, no
+  set mixing, promo-only sets excluded, and over 3000 simulated packs per
+  set (151, Evolving Skies, Perfect Order, Base) ~1 ex/holo in 5 packs,
+  ~1 ultra+ in 5.5, ~1 secret in 50.
 - Redesign the remaining views (collection, profile) with the design
   system + AppHeader shell. Ideas: `HoloCard` grid in the collection with
   rarity/set filters, an "edit username" field on the profile.
   `CardTile.vue` is then probably dead code.
 - Node: this machine's nvm default was Node 6; the project needs Node 20+
   (`.nvmrc` = 22). `.env` must be recreated on each new machine.
+- This machine's network intercepts HTTPS with its own root CA (curl is fine,
+  Node fails with SELF_SIGNED_CERT_IN_CHAIN). Run Node scripts with
+  `NODE_USE_SYSTEM_CA=1` (uses the macOS keychain), e.g.
+  `NODE_USE_SYSTEM_CA=1 npm run populate:sets`. Never use
+  `NODE_TLS_REJECT_UNAUTHORIZED=0`: populate.mjs carries the service role key.
 - No manual browser click-through with a real (non-admin-created) account yet.
 - No automated E2E tests (Playwright etc.) — only Vitest unit tests on pure logic.
 - No password reset UX beyond Supabase's default flow; email confirmation is

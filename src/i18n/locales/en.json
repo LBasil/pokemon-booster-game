@@ -70,12 +70,12 @@
     "anySet": "Any set",
     "countLabel": "Number of boosters",
     "openButton": "Open {count} booster | Open {count} boosters",
-    "tapToReveal": "Tap the pile to flip the next card",
+    "tapToReveal": "Tap to flip the next card, or swipe it away",
     "boosterProgress": "Booster {current} of {total}",
     "loadError": "Could not load booster sets.",
     "openError": "Couldn't open the booster. Please try again.",
     "eyebrow": "Unlimited boosters",
-    "anySetDesc": "A mix of every set ever released",
+    "anySetDesc": "A pack from a random set, every time",
     "seriesTitle": "Sets",
     "searchLabel": "Search sets",
     "searchPlaceholder": "Search a set…",
@@ -91,16 +91,18 @@
     "tapToFinish": "Tap to see your haul",
     "skip": "Skip this booster",
     "skipToSummary": "Skip to summary",
-    "tier": {
-      "rare": "Rare",
-      "ultra": "Ultra rare"
-    },
     "newBadge": "New!",
     "doneTitle": "card pulled | cards pulled",
     "newCount": "{count} new | {count} new",
     "rareCount": "{count} rare | {count} rares",
     "bestPull": "Best pull",
-    "openAgain": "Open {count} more | Open {count} more"
+    "openAgain": "Open {count} more | Open {count} more",
+    "bucket": {
+      "rare": "Rare",
+      "holo": "Holo",
+      "ultra": "Ultra rare",
+      "secret": "Secret rare"
+    }
   },
   "collection": {
     "title": "My Collection",

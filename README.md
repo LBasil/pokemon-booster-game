@@ -10,8 +10,10 @@ collection. A Vue 3 single-page app backed by Supabase (Postgres + Auth).
 - **Unlimited boosters, any type**: pick a specific Pokémon set (searchable,
   grouped by year, each pack shows the set's logo and chase card) or "any
   set (mixed)", and how many boosters to open in one go. Tear each pack
-  open, flip the cards one by one (rarest last, with rarity and "New!"
-  badges), then get a summary with your best pull.
+  open, flip or swipe the cards one by one (rarest last, with rarity and
+  "New!" badges), then get a summary with your best pull. Packs follow
+  real pull rates: 10 cards, one guaranteed rare, a holo/ex about every 5
+  packs and a big hit (Illustration Rare, Secret…) now and then.
 - **Hub**: greeting, quick access to boosters, collection completion
   progress, profile summary and your latest pulled cards. Phone-friendly
   bottom tab bar on every signed-in page.
@@ -63,6 +65,10 @@ its **SQL editor** and run, in order:
    `collections`) and Row Level Security policies.
 2. `supabase/migrations/0002_functions.sql` — the RPCs used to draw random
    cards and to record a booster opening atomically.
+3. `supabase/migrations/0003_realistic_boosters.sql` — realistic packs
+   (`open_booster`: 10 cards with real-world pull rates), rarity buckets,
+   and set logo/symbol URL columns. After running it, (re-)run
+   `npm run populate:sets` so the logos are filled in.
 
 In **Authentication > Providers**, email/password is enabled by default. For
 easier local testing you can turn off "Confirm email" in **Authentication >

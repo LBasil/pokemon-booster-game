@@ -70,12 +70,12 @@
     "anySet": "Toutes séries",
     "countLabel": "Nombre de boosters",
     "openButton": "Ouvrir {count} booster | Ouvrir {count} boosters",
-    "tapToReveal": "Touche la pile pour retourner la carte suivante",
+    "tapToReveal": "Touche pour retourner la carte suivante, ou fais-la glisser",
     "boosterProgress": "Booster {current} sur {total}",
     "loadError": "Impossible de charger les types de boosters.",
     "openError": "Impossible d'ouvrir le booster. Réessaie.",
     "eyebrow": "Boosters illimités",
-    "anySetDesc": "Un mélange de toutes les séries",
+    "anySetDesc": "Un booster d'une série au hasard, à chaque fois",
     "seriesTitle": "Séries",
     "searchLabel": "Rechercher une série",
     "searchPlaceholder": "Rechercher une série…",
@@ -91,16 +91,18 @@
     "tapToFinish": "Touche pour voir ton butin",
     "skip": "Passer ce booster",
     "skipToSummary": "Passer au récap",
-    "tier": {
-      "rare": "Rare",
-      "ultra": "Ultra rare"
-    },
     "newBadge": "Nouvelle !",
     "doneTitle": "carte obtenue | cartes obtenues",
     "newCount": "{count} nouvelle | {count} nouvelles",
     "rareCount": "{count} rare | {count} rares",
     "bestPull": "Meilleure carte",
-    "openAgain": "Rouvrir {count} booster | Rouvrir {count} boosters"
+    "openAgain": "Rouvrir {count} booster | Rouvrir {count} boosters",
+    "bucket": {
+      "rare": "Rare",
+      "holo": "Holo",
+      "ultra": "Ultra rare",
+      "secret": "Secrète"
+    }
   },
   "collection": {
     "title": "Ma collection",

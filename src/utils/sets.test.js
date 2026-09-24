@@ -29,7 +29,12 @@ describe('groupSetsByYear', () => {
 })
 
 describe('setLogoUrl', () => {
-  it('points at the pokemontcg.io CDN', () => {
-    expect(setLogoUrl('base1')).toBe('https://images.pokemontcg.io/base1/logo.png')
+  it('uses the URL stored from the API (new sets live on another host)', () => {
+    const set = { id: 'me3', logo_url: 'https://images.scrydex.com/pokemon/me3-logo/logo' }
+    expect(setLogoUrl(set)).toBe('https://images.scrydex.com/pokemon/me3-logo/logo')
+  })
+
+  it('falls back to the historical CDN pattern for rows without one', () => {
+    expect(setLogoUrl({ id: 'base1', logo_url: null })).toBe('https://images.pokemontcg.io/base1/logo.png')
   })
 })

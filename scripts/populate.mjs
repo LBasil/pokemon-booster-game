@@ -75,6 +75,9 @@ async function populateSets() {
       release_date: set.releaseDate,
       printed_total: set.printedTotal,
       total: set.total,
+      // New sets' images live on images.scrydex.com, so store what the API gives
+      logo_url: set.images?.logo ?? null,
+      symbol_url: set.images?.symbol ?? null,
     }))
 
     const { error } = await supabase.from('sets').upsert(sets)

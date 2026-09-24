@@ -1,23 +1,90 @@
 <script setup>
+import { computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { rarityTier } from '@/utils/rarity'
 
-// Face-down pile of a pack's cards. Each tap flips the next card face-up;
-// the previous one flies off to the side. The parent owns revealedCount.
+// Face-down pile of a pack's cards. Each tap flips the next card face-up and
+// throws the previous one aside; on touch screens the face-up card can also
+// be swiped away (it flies off in the swipe's direction). Hits "charge up"
+// before flipping. The parent owns revealedCount and advances on `tap`.
 const props = defineProps({
   // [{ key, card, isNew }]
   cards: { type: Array, required: true },
   revealedCount: { type: Number, required: true },
 })
 
-defineEmits(['tap'])
+const emit = defineEmits(['tap'])
 
 const { t } = useI18n()
+
+const SWIPE_THRESHOLD = 70 // px before a drag counts as a throw
+const HIT_LOCK_MS = 1100 // taps are ignored while a hit charges and flips
 
 function stateOf(index) {
   if (index < props.revealedCount - 1) return 'gone'
   if (index === props.revealedCount - 1) return 'current'
   return 'waiting'
+}
+
+const current = computed(() => props.cards[props.revealedCount - 1] ?? null)
+
+// Which way each thrown card flew (-1 left, 1 right)
+const throwDir = reactive({})
+const drag = reactive({ active: false, startX: 0, dx: 0 })
+let suppressClick = false
+let lockedUntil = 0
+
+function advance(direction) {
+  if (Date.now() < lockedUntil) return
+  if (current.value) throwDir[current.value.key] = direction
+  const next = props.cards[props.revealedCount]
+  if (next && rarityTier(next.card) === 'ultra') lockedUntil = Date.now() + HIT_LOCK_MS
+  emit('tap')
+}
+
+function onPointerDown(event) {
+  if (!current.value || (event.pointerType === 'mouse' && event.button !== 0)) return
+  drag.active = true
+  drag.startX = event.clientX
+  drag.dx = 0
+}
+
+function onPointerMove(event) {
+  if (drag.active) drag.dx = event.clientX - drag.startX
+}
+
+function onPointerUp() {
+  if (!drag.active) return
+  drag.active = false
+  const dx = drag.dx
+  drag.dx = 0
+  if (Math.abs(dx) > 8) suppressClick = true // a drag, not a tap
+  if (Math.abs(dx) > SWIPE_THRESHOLD) advance(Math.sign(dx))
+}
+
+function onClick() {
+  if (suppressClick) {
+    suppressClick = false
+    return
+  }
+  advance(-1)
+}
+
+const label = computed(() =>
+  props.revealedCount < props.cards.length ? t('boosters.tapToReveal') : t('boosters.tapToContinue'),
+)
+
+function styleOf(item, index) {
+  const state = stateOf(index)
+  const style = {
+    '--depth': Math.min(Math.max(index - props.revealedCount, 0), 5),
+    '--dir': throwDir[item.key] ?? -1,
+    zIndex: state === 'waiting' ? props.cards.length - index : props.cards.length + 1,
+  }
+  if (state === 'current' && drag.dx) {
+    style.transform = `translateX(${drag.dx}px) rotate(${drag.dx / 14}deg)`
+  }
+  return style
 }
 </script>
 
@@ -25,19 +92,20 @@ function stateOf(index) {
   <button
     type="button"
     class="card-stack"
-    :aria-label="revealedCount < cards.length ? t('boosters.tapToReveal') : t('boosters.tapToContinue')"
-    @click="$emit('tap')"
+    :aria-label="label"
+    @click="onClick"
+    @pointerdown="onPointerDown"
+    @pointermove="onPointerMove"
+    @pointerup="onPointerUp"
+    @pointercancel="onPointerUp"
   >
     <span
       v-for="(item, index) in cards"
       :key="item.key"
       class="stack-card"
-      :class="`is-${stateOf(index)}`"
-      :data-tier="rarityTier(item.card.rarity)"
-      :style="{
-        '--depth': Math.min(Math.max(index - revealedCount, 0), 5),
-        zIndex: stateOf(index) === 'waiting' ? cards.length - index : cards.length + 1,
-      }"
+      :class="[`is-${stateOf(index)}`, { 'is-dragging': drag.active && stateOf(index) === 'current' }]"
+      :data-tier="rarityTier(item.card)"
+      :style="styleOf(item, index)"
     >
       <span class="stack-card-glow" aria-hidden="true"></span>
       <span class="stack-card-flip">
@@ -55,6 +123,7 @@ function stateOf(index) {
           <span class="face-shine" aria-hidden="true"></span>
         </span>
       </span>
+      <span class="stack-card-flash" aria-hidden="true"></span>
     </span>
   </button>
 </template>
@@ -71,6 +140,9 @@ function stateOf(index) {
   background: none;
   cursor: pointer;
   perspective: 1200px;
+  /* Vertical scrolling still works; horizontal drags throw the card */
+  touch-action: pan-y;
+  user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -83,19 +155,26 @@ function stateOf(index) {
   position: absolute;
   inset: 0;
   display: block;
+  will-change: transform;
   transition:
     transform 0.55s var(--pb-ease-out),
     opacity 0.45s ease;
   /* Cards still in the pile fan slightly so it reads as a stack */
   transform: translate(calc(var(--depth) * 3px), calc(var(--depth) * -3px));
-  animation: deal-in 0.6s var(--pb-ease-out) backwards;
-  animation-delay: calc(var(--depth) * 40ms);
 }
 
+.stack-card.is-dragging {
+  transition: none;
+}
+
+/* Thrown aside in the swipe direction (left by default), with a little arc */
 .stack-card.is-gone {
-  transform: translateX(-125%) translateY(4%) rotate(-16deg);
+  transform: translateX(calc(var(--dir) * 135%)) translateY(-8%) rotate(calc(var(--dir) * 22deg));
   opacity: 0;
   pointer-events: none;
+  transition:
+    transform 0.5s cubic-bezier(0.3, 0.6, 0.4, 1),
+    opacity 0.4s 0.1s ease;
 }
 
 .stack-card-flip {
@@ -104,12 +183,23 @@ function stateOf(index) {
   display: block;
   transform-style: preserve-3d;
   transform: rotateY(180deg);
-  transition: transform 0.6s var(--pb-ease-out);
 }
 
-.is-current .stack-card-flip,
 .is-gone .stack-card-flip {
   transform: rotateY(0);
+}
+
+/* Flip with a lift: the card rises toward you as it turns */
+.is-current .stack-card-flip {
+  transform: rotateY(0);
+  animation: flip-reveal 0.6s var(--pb-ease-out) backwards;
+}
+
+/* Hits charge up face-down (shake + glow), then flip with a flash */
+.is-current[data-tier='ultra'] .stack-card-flip {
+  animation:
+    flip-reveal 0.6s 0.55s var(--pb-ease-out) backwards,
+    charge 0.55s ease-in;
 }
 
 .face {
@@ -129,6 +219,7 @@ function stateOf(index) {
   height: 100%;
   object-fit: cover;
   user-select: none;
+  pointer-events: none;
 }
 
 /* Card back: our own design, not the official one */
@@ -184,21 +275,12 @@ function stateOf(index) {
   mix-blend-mode: color-dodge;
 }
 
-.is-current[data-tier='rare'] .face-shine,
-.is-current[data-tier='ultra'] .face-shine {
-  animation: foil-sweep 2.4s 0.4s ease-in-out infinite;
+.is-current[data-tier='rare'] .face-shine {
+  animation: foil-sweep 2.4s 0.5s ease-in-out infinite;
 }
 
-@keyframes foil-sweep {
-  0% {
-    opacity: 0.8;
-    background-position: 100% 0;
-  }
-  60%,
-  100% {
-    opacity: 0.8;
-    background-position: -100% 0;
-  }
+.is-current[data-tier='ultra'] .face-shine {
+  animation: foil-sweep 2.4s 1.1s ease-in-out infinite;
 }
 
 /* Halo behind rare pulls */
@@ -219,20 +301,86 @@ function stateOf(index) {
 .is-current[data-tier='ultra'] .stack-card-glow {
   inset: -9%;
   opacity: 0.9;
-  animation: ultra-pulse 1.8s ease-in-out infinite;
+  transition: opacity 0.4s;
+  animation: ultra-pulse 1.8s 1.1s ease-in-out infinite;
+}
+
+/* White burst as a hit turns over */
+.stack-card-flash {
+  position: absolute;
+  inset: -20%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 60%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.is-current[data-tier='ultra'] .stack-card-flash {
+  animation: flash 0.6s 0.7s ease-out;
+}
+
+@keyframes flip-reveal {
+  0% {
+    transform: rotateY(180deg);
+  }
+  45% {
+    transform: translateY(-5%) scale(1.08) rotateY(90deg);
+  }
+  100% {
+    transform: rotateY(0);
+  }
+}
+
+@keyframes charge {
+  0% {
+    transform: rotateY(180deg);
+  }
+  20% {
+    transform: rotateY(180deg) translateX(-1.5%) rotate(-1.5deg);
+  }
+  40% {
+    transform: rotateY(180deg) translateX(1.5%) rotate(1.5deg);
+  }
+  60% {
+    transform: rotateY(180deg) translateX(-2%) rotate(-2deg) scale(1.02);
+  }
+  80% {
+    transform: rotateY(180deg) translateX(2%) rotate(2deg) scale(1.04);
+  }
+  100% {
+    transform: rotateY(180deg) scale(1.05);
+  }
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes foil-sweep {
+  0% {
+    opacity: 0.8;
+    background-position: 100% 0;
+  }
+  60%,
+  100% {
+    opacity: 0.8;
+    background-position: -100% 0;
+  }
 }
 
 @keyframes ultra-pulse {
   50% {
-    transform: scale(1.06);
-    filter: blur(34px);
-  }
-}
-
-@keyframes deal-in {
-  from {
-    opacity: 0;
-    transform: translateY(40%) scale(0.9);
+    transform: scale(1.05);
   }
 }
 </style>

@@ -78,7 +78,7 @@ function onLogoError(setId) {
           <span class="set-option-plate">
             <img
               v-if="!brokenLogos.has(set.id)"
-              :src="setLogoUrl(set.id)"
+              :src="setLogoUrl(set)"
               alt=""
               loading="lazy"
               decoding="async"

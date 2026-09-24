@@ -1,9 +1,10 @@
-// Set artwork lives on the pokemontcg.io CDN at predictable URLs, so it
-// doesn't need to be stored in the sets table.
+// Set artwork URLs come from the pokemontcg.io API (stored by
+// scripts/populate.mjs, migration 0003). Rows populated before that fall back
+// to the CDN's historical pattern, which works for sets up to late 2025.
 const CDN = 'https://images.pokemontcg.io'
 
-export const setLogoUrl = (setId) => `${CDN}/${setId}/logo.png`
-export const setSymbolUrl = (setId) => `${CDN}/${setId}/symbol.png`
+export const setLogoUrl = (set) => set.logo_url || `${CDN}/${set.id}/logo.png`
+export const setSymbolUrl = (set) => set.symbol_url || `${CDN}/${set.id}/symbol.png`
 
 // Lowercase and strip accents so "pokemon" matches "Pokémon"
 const normalize = (text) =>
