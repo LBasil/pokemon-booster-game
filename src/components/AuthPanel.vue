@@ -29,7 +29,10 @@ async function submit() {
   submitting.value = true
 
   try {
-    if (mode.value === 'login') {
+    if (mode.value === 'forgot') {
+      await auth.requestPasswordReset(email.value)
+      successMessage.value = t('home.resetSent')
+    } else if (mode.value === 'login') {
       await auth.signIn({ email: email.value, password: password.value })
       router.push({ name: 'game' })
     } else {
@@ -54,12 +57,12 @@ async function submit() {
 
 <template>
   <section class="auth-panel pb-glass" :aria-label="mode === 'login' ? t('home.login') : t('home.signup')">
-    <div class="auth-tabs" :class="`is-${mode}`" role="tablist">
+    <div class="auth-tabs" :class="`is-${mode === 'signup' ? 'signup' : 'login'}`" role="tablist">
       <button
         type="button"
         role="tab"
-        :aria-selected="mode === 'login'"
-        :class="{ active: mode === 'login' }"
+        :aria-selected="mode !== 'signup'"
+        :class="{ active: mode !== 'signup' }"
         @click="switchMode('login')"
       >
         {{ t('home.login') }}
@@ -76,7 +79,7 @@ async function submit() {
     </div>
 
     <p class="auth-intro">
-      {{ mode === 'login' ? t('home.loginIntro') : t('home.signupIntro') }}
+      {{ mode === 'forgot' ? t('home.forgotIntro') : mode === 'login' ? t('home.loginIntro') : t('home.signupIntro') }}
     </p>
 
     <form class="d-flex flex-column gap-3" @submit.prevent="submit">
@@ -106,8 +109,13 @@ async function submit() {
         />
       </div>
 
-      <div>
-        <label class="form-label" for="password">{{ t('home.passwordLabel') }}</label>
+      <div v-if="mode !== 'forgot'">
+        <div class="password-label-row">
+          <label class="form-label" for="password">{{ t('home.passwordLabel') }}</label>
+          <button v-if="mode === 'login'" type="button" class="link-button" @click="switchMode('forgot')">
+            {{ t('home.forgotLink') }}
+          </button>
+        </div>
         <div class="password-field">
           <input
             id="password"
@@ -142,7 +150,10 @@ async function submit() {
 
       <button type="submit" class="btn btn-primary btn-lg glow-button mt-1" :disabled="submitting">
         <span v-if="submitting" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-        {{ mode === 'login' ? t('home.submitLogin') : t('home.submitSignup') }}
+        {{ mode === 'forgot' ? t('home.sendResetLink') : mode === 'login' ? t('home.submitLogin') : t('home.submitSignup') }}
+      </button>
+      <button v-if="mode === 'forgot'" type="button" class="link-button align-self-center" @click="switchMode('login')">
+        {{ t('home.backToLogin') }}
       </button>
     </form>
   </section>
@@ -208,6 +219,26 @@ async function submit() {
   margin: 1.25rem 0 1.25rem;
   color: var(--pb-text-muted);
   font-size: 0.95rem;
+}
+
+.password-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: rgb(var(--bs-link-color-rgb));
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.link-button:hover {
+  text-decoration: underline;
 }
 
 .password-field {

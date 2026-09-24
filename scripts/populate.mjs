@@ -1,7 +1,8 @@
 // One-off admin script to seed `sets` and `cards` from the pokemontcg.io API.
 // Never bundled into the client app — run manually with:
 //   npm run populate:sets
-//   npm run populate:cards
+//   npm run populate:cards   (also records today's prices in card_price_history)
+//   npm run populate:sync    (sets + cards: the weekly GitHub Action runs this)
 //
 // Requires scripts/.env.local (gitignored) with:
 //   SUPABASE_URL=...
@@ -94,6 +95,22 @@ async function populateSets() {
   console.log('Sets populated.')
 }
 
+// One Cardmarket price snapshot per card per day (card_price_history,
+// migration 0004): run weekly, it draws each card's price curve.
+const today = new Date().toISOString().slice(0, 10)
+let priceHistoryAvailable = true
+
+async function recordPrices(cards) {
+  if (!priceHistoryAvailable) return
+  const rows = cards.filter((card) => card.value > 0).map((card) => ({ card_id: card.id, recorded_on: today, value: card.value }))
+  if (!rows.length) return
+  const { error } = await supabase.from('card_price_history').upsert(rows, { onConflict: 'card_id,recorded_on' })
+  if (error) {
+    priceHistoryAvailable = false
+    console.warn('Skipping price history (run migration 0004 first?):', error.message)
+  }
+}
+
 async function populateCards(startPage = 1) {
   let page = startPage
 
@@ -122,6 +139,7 @@ async function populateCards(startPage = 1) {
       console.error('Error inserting cards:', error.message)
       return
     }
+    await recordPrices(cards)
 
     console.log(`Cards page ${page} done (${cards.length} cards)`)
 
@@ -140,7 +158,12 @@ if (target === 'sets') {
   await populateSets()
 } else if (target === 'cards') {
   await populateCards(startPage)
+} else if (target === 'sync') {
+  // Weekly refresh (see .github/workflows/sync-cards.yml): new sets, new
+  // cards, fresh prices and a price-history snapshot
+  await populateSets()
+  await populateCards(startPage)
 } else {
-  console.error('Usage: node scripts/populate.mjs <sets|cards> [startPage]')
+  console.error('Usage: node scripts/populate.mjs <sets|cards|sync> [startPage]')
   process.exit(1)
 }

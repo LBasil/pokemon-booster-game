@@ -1,0 +1,155 @@
+// Mocked Supabase (Auth + PostgREST) for the e2e build, which points at
+// https://e2e.supabase.test. Each test gets its own in-memory state and can
+// inspect `backend.calls` afterwards.
+import { CARDS, PACK, SETS, USER, byId, collectionEntry } from './data.js'
+
+const HOST = 'https://e2e.supabase.test'
+const STORAGE_KEY = 'sb-e2e-auth-token' // supabase-js: sb-<first host label>-auth-token
+
+const b64 = (value) => Buffer.from(JSON.stringify(value)).toString('base64url')
+
+export function makeSession(user = USER) {
+  const expiresAt = Math.floor(Date.now() / 1000) + 3600 * 24
+  return {
+    access_token: `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: user.id, exp: expiresAt, role: 'authenticated' })}.sig`,
+    refresh_token: 'e2e-refresh',
+    token_type: 'bearer',
+    expires_in: 3600 * 24,
+    expires_at: expiresAt,
+    user,
+  }
+}
+
+/** Starts the page signed in (session in localStorage, as supabase-js stores it). */
+export async function signIn(page) {
+  await page.addInitScript(([key, session]) => localStorage.setItem(key, session), [STORAGE_KEY, JSON.stringify(makeSession())])
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {{ collection?: object[], profile?: object, feed?: object[], leaderboard?: object[], takenUsernames?: string[] }} [options]
+ */
+export async function mockSupabase(page, options = {}) {
+  const state = {
+    collection: options.collection ?? [collectionEntry('sv3pt5-4', 2), collectionEntry('base1-4')],
+    profile: options.profile ?? { id: USER.id, username: 'Ash', is_public: true, showcase_card_id: null, created_at: USER.created_at },
+    wishlist: [],
+    openings: [],
+    feed: options.feed ?? [
+      { id: 1, username: 'Misty', card_id: 'sv3pt5-199', card_name: 'Charizard ex', image_small: byId['sv3pt5-199'].image_small, bucket: 'secret', set_id: 'sv3pt5', pulled_at: new Date().toISOString() },
+    ],
+    leaderboard: options.leaderboard ?? [
+      { rank: 1, username: 'Misty', score: 24.5, packs: 40, card_id: null, card_name: null, image_small: null },
+      { rank: 2, username: 'Ash', score: 18, packs: 25, card_id: null, card_name: null, image_small: null },
+    ],
+    taken: new Set((options.takenUsernames ?? ['brock']).map((name) => name.toLowerCase())),
+  }
+  const calls = []
+
+  // Card art and sprites: tiny transparent PNG, no real network
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64')
+  await page.route(/images\.e2e\.test|raw\.githubusercontent\.com|images\.pokemontcg\.io/, (route) =>
+    route.fulfill({ status: 200, contentType: 'image/png', body: png }),
+  )
+  await page.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.fulfill({ status: 200, body: '' }))
+
+  await page.route(`${HOST}/**`, async (route) => {
+    const req = route.request()
+    const url = new URL(req.url())
+    const path = url.pathname
+    const method = req.method()
+    const wantsObject = (req.headers().accept ?? '').includes('vnd.pgrst.object')
+    const json = (body, status = 200, headers = {}) =>
+      route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body), headers: { 'access-control-expose-headers': 'content-range', ...headers } })
+    const rows = (list) => (wantsObject ? json(list[0] ?? null) : json(list))
+    const count = (n) => route.fulfill({ status: 200, body: '', headers: { 'content-range': `*/${n}`, 'access-control-expose-headers': 'content-range' } })
+    calls.push({ method, path, search: url.search, body: req.postData() })
+
+    // ---- Auth ----
+    if (path === '/auth/v1/token') return json(makeSession())
+    if (path === '/auth/v1/recover') return json({})
+    if (path === '/auth/v1/logout') return route.fulfill({ status: 204, body: '' })
+    if (path === '/auth/v1/user') return json(USER)
+    if (path.startsWith('/auth/v1/')) return json({})
+
+    // ---- RPCs ----
+    if (path === '/rest/v1/rpc/open_my_booster') {
+      for (const c of PACK) {
+        const owned = state.collection.find((e) => e.card_id === c.id)
+        if (owned) owned.quantity++
+        else state.collection.unshift(collectionEntry(c.id, 1, new Date().toISOString()))
+      }
+      state.wishlist = state.wishlist.filter((w) => !PACK.some((c) => c.id === w.card_id))
+      return json(PACK)
+    }
+    if (path === '/rest/v1/rpc/leaderboard') return json(state.leaderboard)
+    if (path === '/rest/v1/rpc/public_collection') {
+      const { p_username: name } = JSON.parse(req.postData() || '{}')
+      return json(name?.toLowerCase() === 'misty' ? [collectionEntry('sv3pt5-199'), collectionEntry('base1-4')] : [])
+    }
+
+    // ---- Tables ----
+    const table = path.replace('/rest/v1/', '')
+    if (table === 'sets') return json(SETS)
+    if (table === 'cards') {
+      if (method === 'HEAD') return count(20670)
+      const setId = url.searchParams.get('set_id')?.replace('eq.', '')
+      if (url.searchParams.get('order')?.startsWith('national_pokedex_number')) return json([{ national_pokedex_number: 151 }])
+      if (url.searchParams.get('id')?.startsWith('in.')) {
+        const ids = url.searchParams.get('id').slice(4, -1).split(',').map((id) => id.replaceAll('"', ''))
+        return json(ids.map((id) => byId[id]).filter(Boolean))
+      }
+      const list = CARDS.filter((c) => !setId || c.set_id === setId)
+      return json(url.searchParams.get('limit') === '1' ? list.slice(-1) : list)
+    }
+    if (table === 'collections') {
+      if (method === 'HEAD') return count(state.collection.length)
+      return json(state.collection)
+    }
+    if (table === 'profiles') {
+      if (method === 'PATCH') {
+        const fields = JSON.parse(req.postData() || '{}')
+        if (fields.username && state.taken.has(fields.username.toLowerCase())) {
+          return json({ code: '23505', message: 'duplicate key value violates unique constraint' }, 409)
+        }
+        Object.assign(state.profile, fields)
+        return rows([state.profile])
+      }
+      const ilike = url.searchParams.get('username')
+      if (ilike) {
+        const name = decodeURIComponent(ilike.replace('ilike.', '')).replaceAll('\\', '').toLowerCase()
+        if (name === 'misty') return rows([{ id: 'misty-id', username: 'Misty', is_public: true, showcase_card_id: 'sv3pt5-199', created_at: '2026-08-01T00:00:00Z' }])
+        if (name === state.profile.username.toLowerCase()) return rows([state.profile])
+        return rows([])
+      }
+      return rows([state.profile])
+    }
+    if (table === 'wishlist') {
+      if (method === 'POST') {
+        const { card_id: id } = JSON.parse(req.postData() || '{}')
+        state.wishlist.unshift({ card_id: id, created_at: new Date().toISOString(), cards: byId[id] })
+        return route.fulfill({ status: 201, body: '' })
+      }
+      if (method === 'DELETE') {
+        const id = url.searchParams.get('card_id')?.replace('eq.', '')
+        state.wishlist = state.wishlist.filter((w) => w.card_id !== id)
+        return route.fulfill({ status: 204, body: '' })
+      }
+      return json(state.wishlist)
+    }
+    if (table === 'booster_openings') return json(state.openings)
+    if (table === 'card_price_history') {
+      return json([
+        { recorded_on: '2026-09-01', value: 150 },
+        { recorded_on: '2026-09-08', value: 165 },
+        { recorded_on: '2026-09-15', value: 172 },
+        { recorded_on: '2026-09-22', value: 180 },
+      ])
+    }
+    if (table === 'pull_feed') return json(state.feed)
+
+    return json({ message: `e2e mock: unhandled ${method} ${path}` }, 404)
+  })
+
+  return { state, calls }
+}

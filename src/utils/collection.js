@@ -28,13 +28,14 @@ const normalize = (text) =>
 
 /**
  * @param {object[]} entries
- * @param {{ query?: string, setId?: string, rarity?: string, duplicates?: boolean }} filters
+ * @param {{ query?: string, setId?: string, rarity?: string, duplicates?: boolean, dex?: number|null }} filters
  */
-export function filterEntries(entries, { query = '', setId = '', rarity = 'all', duplicates = false } = {}) {
+export function filterEntries(entries, { query = '', setId = '', rarity = 'all', duplicates = false, dex = null } = {}) {
   const needle = normalize(query)
   return entries.filter((entry) => {
     const card = entry.cards
     if (setId && card.set_id !== setId) return false
+    if (dex && card.national_pokedex_number !== dex) return false
     if (rarity !== 'all' && FILTER_OF_BUCKET[bucketOf(card)] !== rarity) return false
     if (duplicates && entry.quantity < 2) return false
     if (needle && !normalize(card.name).includes(needle)) return false
@@ -97,4 +98,37 @@ export function collectionStats(entries) {
     sets.add(entry.cards.set_id)
   }
   return { uniqueCards: entries.length, totalCards, setsStarted: sets.size, value }
+}
+
+/**
+ * Every card of a set in collector-number order, each with how many copies
+ * the player owns (0 = an empty slot in the binder).
+ * @param {object[]} setCards - rows from fetchSetCards()
+ * @param {object[]} entries - the player's collection entries
+ * @returns {{ card: object, quantity: number }[]}
+ */
+export function binderSlots(setCards, entries) {
+  const owned = new Map(entries.map((entry) => [entry.card_id, entry.quantity]))
+  return [...setCards]
+    .sort((a, b) => cardNumber(a.id).localeCompare(cardNumber(b.id), undefined, { numeric: true }))
+    .map((card) => ({ card, quantity: owned.get(card.id) ?? 0 }))
+}
+
+/**
+ * National Pokédex progress: for each number 1..size, the cards owned for
+ * that Pokémon (the first one's name labels the slot).
+ * @returns {{ number: number, owned: number, name: string|null }[]}
+ */
+export function pokedexSlots(entries, size) {
+  const byNumber = new Map()
+  for (const entry of entries) {
+    const number = entry.cards.national_pokedex_number
+    if (!number || number > size) continue
+    const slot = byNumber.get(number) ?? { owned: 0, name: null }
+    slot.owned++
+    // "Charizard ex" -> keep the shortest name seen, closest to the species name
+    if (!slot.name || entry.cards.name.length < slot.name.length) slot.name = entry.cards.name
+    byNumber.set(number, slot)
+  }
+  return Array.from({ length: size }, (_, i) => ({ number: i + 1, owned: 0, name: null, ...byNumber.get(i + 1) }))
 }

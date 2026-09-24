@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useCollectionStore } from '@/stores/collection'
@@ -7,18 +7,29 @@ import { completionPercent } from '@/utils/progress'
 import AppHeader from '@/components/AppHeader.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
 import HoloCard from '@/components/HoloCard.vue'
+import { fetchFeed } from '@/api/social'
+import { useProfileStore } from '@/stores/profile'
+import { timeAgo } from '@/utils/time'
 
 const { t, locale } = useI18n()
 const auth = useAuthStore()
+const profileStore = useProfileStore()
 const collectionStore = useCollectionStore()
 
-onMounted(() => {
+// A peek at the community's latest big pulls (full live feed on /community)
+const livePulls = ref([])
+
+onMounted(async () => {
+  profileStore.load()
+  fetchFeed(6)
+    .then((pulls) => (livePulls.value = pulls))
+    .catch(() => {})
   collectionStore.load()
 })
 
 const formatNumber = (value) => value.toLocaleString(locale.value)
 
-const initial = computed(() => auth.displayName.charAt(0).toUpperCase() || '?')
+const initial = computed(() => profileStore.displayName.charAt(0).toUpperCase() || '?')
 const memberSince = computed(() =>
   auth.user?.created_at
     ? new Date(auth.user.created_at).toLocaleDateString(locale.value, { month: 'long', year: 'numeric' })
@@ -44,7 +55,7 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
         <span class="pb-eyebrow">{{ t('game.eyebrow') }}</span>
         <i18n-t keypath="game.greeting" tag="h1" class="hub-title" scope="global">
           <template #name>
-            <span class="pb-holo-text">{{ auth.displayName }}</span>
+            <span class="pb-holo-text">{{ profileStore.displayName }}</span>
           </template>
         </i18n-t>
         <p class="hub-subtitle">{{ t('game.subtitle') }}</p>
@@ -104,7 +115,7 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
         <RouterLink :to="{ name: 'profile' }" class="hub-tile hub-profile">
           <div class="hub-avatar" aria-hidden="true">{{ initial }}</div>
           <div class="hub-profile-text">
-            <h2 class="hub-tile-title">{{ auth.displayName }}</h2>
+            <h2 class="hub-tile-title">{{ profileStore.displayName }}</h2>
             <p v-if="memberSince" class="hub-tile-desc mb-0">
               {{ t('game.memberSince', { date: memberSince }) }}
             </p>
@@ -115,6 +126,24 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
           <span class="hub-tile-arrow" aria-hidden="true">→</span>
         </RouterLink>
       </div>
+
+      <!-- Community teaser -->
+      <section v-if="livePulls.length" class="hub-live" aria-labelledby="hub-live-title">
+        <div class="hub-section-head">
+          <h2 id="hub-live-title" class="pb-section-title"><span class="hub-live-dot" aria-hidden="true"></span>{{ t('game.liveTitle') }}</h2>
+          <RouterLink :to="{ name: 'community' }" class="hub-see-all">{{ t('game.seeCommunity') }}</RouterLink>
+        </div>
+        <ul class="hub-live-row" role="list">
+          <li v-for="pull in livePulls" :key="pull.id" class="hub-live-item">
+            <img :src="pull.image_small" alt="" loading="lazy" />
+            <span class="hub-live-text">
+              <RouterLink :to="{ name: 'public-profile', params: { username: pull.username } }" class="hub-live-user">{{ pull.username }}</RouterLink>
+              <span class="hub-live-card">{{ pull.card_name }}</span>
+              <span class="hub-live-time">{{ timeAgo(pull.pulled_at, locale) }}</span>
+            </span>
+          </li>
+        </ul>
+      </section>
 
       <!-- Latest pulls -->
       <section class="hub-recent" aria-labelledby="hub-recent-title">
@@ -387,6 +416,71 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
 }
 
 /* ---------- Latest pulls ---------- */
+
+.hub-live {
+  animation: pb-rise 0.6s 0.15s var(--pb-ease-out) both;
+}
+
+.hub-live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  vertical-align: middle;
+  background: var(--pb-accent);
+}
+
+.hub-live-row {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0 calc(var(--bs-gutter-x) * -0.5);
+  padding: 0 calc(var(--bs-gutter-x) * 0.5) 0.5rem;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.hub-live-item {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 230px;
+  padding: 0.5rem;
+  border-radius: var(--pb-radius-md);
+  border: 1px solid var(--pb-border);
+  background: var(--pb-surface);
+}
+
+.hub-live-item img {
+  width: 38px;
+  aspect-ratio: 63 / 88;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+.hub-live-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.8rem;
+}
+
+.hub-live-user {
+  font-weight: 800;
+}
+
+.hub-live-card {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hub-live-time {
+  color: var(--pb-text-muted);
+}
 
 .hub-recent {
   animation: pb-rise 0.6s 0.2s var(--pb-ease-out) both;

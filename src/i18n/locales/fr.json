@@ -17,7 +17,9 @@
     "hub": "Accueil",
     "boosters": "Boosters",
     "collection": "Collection",
-    "profile": "Profil"
+    "profile": "Profil",
+    "history": "Historique",
+    "community": "Communauté"
   },
   "home": {
     "tagline": "Choisis une série — ou mélange-les toutes —, ouvre autant de paquets que tu veux, et regarde ta collection grandir à chaque tirage.",
@@ -43,7 +45,12 @@
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
     "passwordHint": "Au moins 6 caractères.",
-    "disclaimer": "Projet de fan, non affilié à Nintendo, Creatures, GAME FREAK ni The Pokémon Company. Données et images des cartes : pokemontcg.io."
+    "disclaimer": "Projet de fan, non affilié à Nintendo, Creatures, GAME FREAK ni The Pokémon Company. Données et images des cartes : pokemontcg.io.",
+    "forgotLink": "Mot de passe oublié ?",
+    "forgotIntro": "Indique ton email : on t'envoie un lien pour choisir un nouveau mot de passe.",
+    "sendResetLink": "Envoyer le lien",
+    "backToLogin": "Retour à la connexion",
+    "resetSent": "Si un compte existe pour cet email, un lien de réinitialisation arrive. Vérifie ta boîte (et les spams)."
   },
   "game": {
     "greeting": "Content de te revoir, {name} !",
@@ -62,7 +69,9 @@
     "seeAll": "Tout voir",
     "emptyTitle": "Ton classeur est vide",
     "emptyDesc": "Ouvre ton premier booster pour lancer ta collection.",
-    "loadError": "Impossible de charger ta collection. Essaie de rafraîchir la page."
+    "loadError": "Impossible de charger ta collection. Essaie de rafraîchir la page.",
+    "liveTitle": "En direct",
+    "seeCommunity": "Communauté"
   },
   "boosters": {
     "title": "Choisis ton booster",
@@ -102,7 +111,11 @@
       "holo": "Holo",
       "ultra": "Ultra rare",
       "secret": "Secrète"
-    }
+    },
+    "soundOn": "Activer le son",
+    "soundOff": "Couper le son",
+    "wantedBadge": "Recherchée !",
+    "openAll": "Tout ouvrir d'un coup | Ouvrir les {count} d'un coup"
   },
   "collection": {
     "title": "Ma collection",
@@ -169,7 +182,21 @@
       "Fairy": "Fée",
       "Dragon": "Dragon",
       "Colorless": "Incolore"
-    }
+    },
+    "tabPokedex": "Pokédex",
+    "tabWishlist": "Recherchées",
+    "dexFilter": "Pokédex n°{number}",
+    "openBinder": "Voir le classeur",
+    "priceHistory": "Évolution de la cote",
+    "since": "depuis le {date}",
+    "priceSummary": "La cote est passée de {from} à {to} en {weeks} semaines",
+    "notOwned": "Pas encore dans ton classeur",
+    "wishAdd": "Ajouter à ma liste",
+    "wishRemove": "Retirer de ma liste",
+    "share": "Partager",
+    "shareText": "{name} a tiré {card} sur PokéBooster !",
+    "shareDownloaded": "Image téléchargée — partage-la où tu veux.",
+    "shareError": "Impossible de créer l'image."
   },
   "profile": {
     "title": "Profil",
@@ -188,7 +215,8 @@
       "edit": "Modifier le pseudo",
       "hint": "Pas encore de pseudo — touche le crayon pour en choisir un.",
       "tooShort": "Au moins 2 caractères.",
-      "tooLong": "24 caractères maximum."
+      "tooLong": "24 caractères maximum.",
+      "taken": "Ce pseudo est déjà pris."
     },
     "save": "Enregistrer",
     "saveError": "Impossible d'enregistrer. Réessaie.",
@@ -275,11 +303,112 @@
       }
     },
     "accountTitle": "Compte",
-    "accountDesc": "Connecté avec Supabase. La langue et le thème sont dans la barre du haut."
+    "accountDesc": "Connecté avec Supabase. La langue et le thème sont dans la barre du haut.",
+    "join": "Créer mon compte",
+    "notFoundTitle": "Dresseur introuvable",
+    "notFound": "{name} n'existe pas ou garde son profil privé.",
+    "loadError": "Impossible de charger ce profil.",
+    "backToCommunity": "Retour à la communauté",
+    "showcaseEmptyPublic": "Aucune carte exposée pour l'instant.",
+    "topCards": "Plus belles cartes",
+    "sharingTitle": "Profil public",
+    "publicLabel": "Montrer mon profil aux autres",
+    "publicDesc": "Ton pseudo, ta vitrine, tes stats et tes plus belles cartes ; tes gros tirages apparaissent dans le fil en direct et tu peux figurer dans les classements.",
+    "copyLink": "Copier le lien de mon profil",
+    "viewPublic": "Le voir comme les autres",
+    "linkCopied": "Lien copié !",
+    "settingsTitle": "Réglages",
+    "soundLabel": "Effets sonores",
+    "soundDesc": "Déchirure, retournement des cartes et fanfare pour les gros tirages.",
+    "vibrationLabel": "Vibration",
+    "vibrationDesc": "Une petite vibration quand tu tires un hit (téléphones compatibles).",
+    "historyLink": "Mon historique de boosters",
+    "installLabel": "Installer l'application",
+    "installDesc": "Ajoute PokéBooster à ton écran d'accueil, comme une vraie app.",
+    "install": "Installer"
   },
   "notFound": {
     "title": "Ce booster est vide",
     "desc": "La page que tu cherches n'existe pas ou a été déplacée.",
     "backHome": "Retour en lieu sûr"
+  },
+  "binder": {
+    "back": "Toutes mes séries",
+    "progress": "{owned} / {total} cartes",
+    "openThisSet": "Ouvrir cette série",
+    "filter": "Filtrer le classeur",
+    "filters": {
+      "all": "Toutes",
+      "missing": "Manquantes",
+      "owned": "Possédées",
+      "wanted": "Recherchées"
+    },
+    "loadError": "Impossible de charger cette série.",
+    "empty": "Aucune carte avec ce filtre.",
+    "missingCard": "N° {number}, {name} — manquante",
+    "wanted": "Dans ta liste de souhaits"
+  },
+  "pokedex": {
+    "caught": "Pokémon capturés",
+    "filter": "Filtrer le Pokédex",
+    "filters": {
+      "all": "Tous",
+      "caught": "Capturés",
+      "missing": "Manquants"
+    },
+    "showCards": "{name} : voir ta carte | {name} : voir tes {count} cartes",
+    "unknown": "N°{number}, pas encore capturé"
+  },
+  "wishlist": {
+    "intro": "Les cartes que tu chasses. Quand tu en tires une, elle quitte la liste — et un badge « Recherchée ! » s'affiche.",
+    "empty": "Rien dans ta liste pour l'instant. Ouvre le classeur d'une série et touche une carte manquante pour l'ajouter.",
+    "browseSets": "Voir mes séries",
+    "remove": "Retirer {name} de ta liste"
+  },
+  "history": {
+    "eyebrow": "Tes ouvertures",
+    "title": "Historique des boosters",
+    "subtitle": "Tous les paquets que tu as ouverts, du plus récent au plus ancien.",
+    "empty": "Aucun booster ouvert pour l'instant.",
+    "loadError": "Impossible de charger ton historique.",
+    "hits": "{count} hit | {count} hits",
+    "more": "Charger plus"
+  },
+  "community": {
+    "eyebrow": "En direct",
+    "title": "Communauté",
+    "feedTitle": "Derniers gros tirages",
+    "pulled": "a tiré",
+    "publicNote": "Ton profil est public : tes ultra rares et secrètes apparaissent ici.",
+    "privateNote": "Ton profil est privé : tes tirages n'apparaissent pas ici.",
+    "manage": "Gérer",
+    "feedEmpty": "Aucun gros tirage pour l'instant. Sois le premier !",
+    "feedError": "Impossible de charger le fil.",
+    "boardsTitle": "Classements",
+    "boards": {
+      "hit_rate": "Plus chanceux",
+      "best_pull": "Meilleure carte",
+      "complete_sets": "Séries complètes"
+    },
+    "boardDesc": {
+      "hit_rate": "Ultra rares et secrètes pour 100 boosters (à partir de 20 boosters ouverts).",
+      "best_pull": "La carte la plus cotée de chaque collection.",
+      "complete_sets": "Séries collectionnées en entier."
+    },
+    "hitRateScore": "{rate} / 100 · {packs} boosters",
+    "completeScore": "{count} série | {count} séries",
+    "boardEmpty": "Personne dans ce classement pour l'instant.",
+    "boardError": "Impossible de charger le classement."
+  },
+  "reset": {
+    "title": "Nouveau mot de passe",
+    "intro": "Choisis un nouveau mot de passe pour {email}.",
+    "newPassword": "Nouveau mot de passe",
+    "confirm": "Confirme le mot de passe",
+    "mismatch": "Les deux mots de passe ne correspondent pas.",
+    "save": "Enregistrer mon mot de passe",
+    "done": "Mot de passe modifié ! Direction ton espace dresseur…",
+    "expired": "Ce lien a expiré ou a déjà servi. Redemande-en un depuis l'écran de connexion.",
+    "backHome": "Retour à la connexion"
   }
 }

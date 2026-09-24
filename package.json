@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "populate:sets": "node scripts/populate.mjs sets",
-    "populate:cards": "node scripts/populate.mjs cards"
+    "populate:cards": "node scripts/populate.mjs cards",
+    "populate:sync": "node scripts/populate.mjs sync",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
@@ -20,6 +22,7 @@
     "vue-router": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@vitejs/plugin-vue": "^6.0.9",
     "dotenv": "^16.4.5",
     "vite": "^8.3.0",

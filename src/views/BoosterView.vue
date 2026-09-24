@@ -1,11 +1,16 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import { fetchSetCover } from '@/api/sets'
-import { drawBooster } from '@/api/boosters'
-import { addCardsToCollection } from '@/api/collection'
+import { openBooster } from '@/api/boosters'
+import * as sfx from '@/lib/sfx'
+import { shareCard } from '@/lib/shareCard'
+import { useProfileStore } from '@/stores/profile'
 import { useCollectionStore } from '@/stores/collection'
 import { useSetsStore } from '@/stores/sets'
+import { useSettingsStore } from '@/stores/settings'
+import { useWishlistStore } from '@/stores/wishlist'
 import { groupCardsByQuantity } from '@/utils/cards'
 import { bestPull, rarityLabelKey, rarityRank, rarityTier, sortForReveal } from '@/utils/rarity'
 import { setLogoUrl, setSymbolUrl } from '@/utils/sets'
@@ -19,13 +24,16 @@ import SetPicker from '@/components/SetPicker.vue'
 const { t, locale } = useI18n()
 const collectionStore = useCollectionStore()
 const setsStore = useSetsStore()
+const settings = useSettingsStore()
+const wishlistStore = useWishlistStore()
 
 const COUNT_OPTIONS = [1, 3, 5, 10]
 
 // ---------- Set selection ----------
 
 const sets = computed(() => setsStore.sets)
-const selectedSetId = ref('')
+// ?set=<id> (e.g. from a binder's "open this set") preselects that set
+const selectedSetId = ref(typeof useRoute().query.set === 'string' ? useRoute().query.set : '')
 const count = ref(1)
 const setsLoading = computed(() => !setsStore.loaded && !setsStore.error)
 const loadError = computed(() => (setsStore.error ? t('boosters.loadError') : ''))
@@ -34,7 +42,7 @@ const selectedSet = computed(() => sets.value.find((set) => set.id === selectedS
 
 // Chase card per set, used as pack artwork (cached; failures just fall back)
 const covers = ref({})
-watch(selectedSetId, async (setId) => {
+async function loadCover(setId) {
   if (!setId || setId in covers.value) return
   covers.value = { ...covers.value, [setId]: null }
   try {
@@ -43,7 +51,8 @@ watch(selectedSetId, async (setId) => {
   } catch {
     // keep null: the pack renders without artwork
   }
-})
+}
+watch(selectedSetId, loadCover, { immediate: true })
 
 // Props for BoosterArt / BoosterPack; no set = the generic "any set" pack
 function packArt(set) {
@@ -80,12 +89,17 @@ watch(selectedSetId, () => {
 
 // Card ids the user owned before this visit, to flag new pulls (null = unknown)
 let ownedIds = null
+// Wishlisted card ids, to flag pulls the player was hunting
+let wishedIds = new Set()
 
 onMounted(() => {
   desktopQuery.addEventListener('change', onMediaChange)
 
   collectionStore.load().then(() => {
     if (!collectionStore.error) ownedIds = new Set(collectionStore.entries.map((entry) => entry.card_id))
+  })
+  wishlistStore.load().then(() => {
+    wishedIds = new Set(wishlistStore.ids)
   })
 
   setsStore.load()
@@ -123,24 +137,30 @@ async function startOpening() {
   await prepareBooster()
 }
 
-// Draws a pack and records it in the collection right away, so leaving
-// mid-reveal never loses cards. The pack becomes tappable once saved.
+// The server draws and saves the pack in one call, so leaving mid-reveal
+// never loses cards. Collection and wishlist caches are stale afterwards.
+async function drawPack() {
+  const cards = await openBooster(openedSetId.value || null)
+  collectionStore.invalidate()
+  wishlistStore.invalidate()
+  return sortForReveal(cards).map((card, index) => {
+    const isNew = ownedIds ? !ownedIds.has(card.id) : false
+    const isWanted = wishedIds.has(card.id)
+    ownedIds?.add(card.id)
+    wishedIds.delete(card.id)
+    return { key: `${boosterIndex.value}-${index}-${card.id}`, card, isNew, isWanted }
+  })
+}
+
 async function prepareBooster() {
   step.value = 'pack'
   packState.value = 'loading'
   revealedCount.value = 0
 
   try {
-    const cards = await drawBooster(openedSetId.value || null)
-    await addCardsToCollection(cards)
-    collectionStore.invalidate()
+    currentCards.value = await drawPack()
+    const cards = currentCards.value.map((item) => item.card)
     packSetId.value = cards[0]?.set_id ?? openedSetId.value
-
-    currentCards.value = sortForReveal(cards).map((card, index) => {
-      const isNew = ownedIds ? !ownedIds.has(card.id) : false
-      ownedIds?.add(card.id)
-      return { key: `${boosterIndex.value}-${index}-${card.id}`, card, isNew }
-    })
     preloadImages(cards)
     packState.value = 'ready'
     focusStage()
@@ -162,6 +182,7 @@ function preloadImages(cards) {
 function tearPack() {
   if (packState.value !== 'ready') return
   packState.value = 'tearing'
+  sfx.tear(settings.sound)
   tearTimer = setTimeout(() => {
     step.value = 'reveal'
     focusStage()
@@ -171,9 +192,46 @@ function tearPack() {
 async function onStackTap() {
   if (revealedCount.value < currentCards.value.length) {
     revealedCount.value++
+    playReveal(currentCards.value[revealedCount.value - 1].card)
     return
   }
   await finishBooster()
+}
+
+// Sound (and a buzz for hits) matching the card that just turned over
+function playReveal(card) {
+  const tier = rarityTier(card)
+  if (tier === 'ultra') {
+    sfx.hit(settings.sound, { secret: rarityLabelKey(card) === 'secret' })
+    setTimeout(() => sfx.buzz(settings.vibration), 650) // on the flash, after the charge-up
+  } else {
+    sfx.flip(settings.sound)
+    if (tier === 'rare') sfx.rare(settings.sound)
+  }
+}
+
+// "Open all at once": draws every remaining pack without the animations
+const openingAll = ref(false)
+const remainingBoosters = computed(() => totalToOpen.value - boosterIndex.value - 1)
+
+async function openAllNow() {
+  if (packState.value === 'loading' || openingAll.value) return
+  clearTimeout(tearTimer)
+  openingAll.value = true
+  pulled.value.push(...currentCards.value)
+  boosterIndex.value++
+  try {
+    while (boosterIndex.value < totalToOpen.value) {
+      pulled.value.push(...(await drawPack()))
+      boosterIndex.value++
+    }
+  } catch {
+    openError.value = t('boosters.openError')
+  } finally {
+    openingAll.value = false
+    phase.value = 'done'
+    window.scrollTo({ top: 0 })
+  }
 }
 
 async function finishBooster() {
@@ -229,11 +287,13 @@ function rarityChip(card) {
 
 const summary = computed(() => {
   const newIds = new Set(pulled.value.filter((item) => item.isNew).map((item) => item.card.id))
+  const wantedIds = new Set(pulled.value.filter((item) => item.isWanted).map((item) => item.card.id))
   const grouped = groupCardsByQuantity(pulled.value.map((item) => item.card)).map((entry) => ({
     ...entry,
     tier: rarityTier(entry.card),
     chip: rarityChip(entry.card),
     isNew: newIds.has(entry.card.id),
+    isWanted: wantedIds.has(entry.card.id),
   }))
   grouped.sort((a, b) => rarityRank(b.card) - rarityRank(a.card) || b.isNew - a.isNew)
 
@@ -247,6 +307,33 @@ const summary = computed(() => {
 })
 
 const formatNumber = (value) => value.toLocaleString(locale.value)
+
+// Share the session's best pull as an image
+const profileStore = useProfileStore()
+const sharing = ref(false)
+const shareNotice = ref('')
+async function shareBest() {
+  const card = summary.value.best
+  sharing.value = true
+  shareNotice.value = ''
+  try {
+    const bucket = rarityLabelKey(card)
+    const result = await shareCard({
+      card,
+      title: card.name,
+      subtitle: [bucket !== 'common' && bucket !== 'uncommon' ? t(`boosters.bucket.${bucket}`) : null, setName(card.set_id)]
+        .filter(Boolean)
+        .join(' · '),
+      brand: t('common.brand'),
+      text: t('collection.shareText', { card: card.name, name: profileStore.displayName }),
+    })
+    if (result === 'downloaded') shareNotice.value = t('collection.shareDownloaded')
+  } catch {
+    shareNotice.value = t('collection.shareError')
+  } finally {
+    sharing.value = false
+  }
+}
 </script>
 
 <template>
@@ -327,7 +414,23 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
       <!-- ============ Opening ============ -->
       <section v-else-if="phase === 'open'" class="open-layout">
         <div class="open-top">
-          <span class="pb-eyebrow">{{ stageLabel }}</span>
+          <div class="open-top-row">
+            <span class="pb-eyebrow">{{ stageLabel }}</span>
+            <button
+              type="button"
+              class="sound-toggle"
+              :aria-pressed="settings.sound"
+              :aria-label="settings.sound ? t('boosters.soundOff') : t('boosters.soundOn')"
+              :title="settings.sound ? t('boosters.soundOff') : t('boosters.soundOn')"
+              @click="settings.set('sound', !settings.sound)"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 9h4l5-4v14l-5-4H4z" />
+                <path v-if="settings.sound" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" />
+                <path v-else d="M17 9l5 6M22 9l-5 6" />
+              </svg>
+            </button>
+          </div>
           <p v-if="totalToOpen > 1" class="open-progress-label">
             {{ t('boosters.boosterProgress', { current: boosterIndex + 1, total: totalToOpen }) }}
           </p>
@@ -358,6 +461,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
                 {{ rarityChip(currentCard.card) }}
               </span>
               <span v-if="currentCard.isNew" class="new-chip">{{ t('boosters.newBadge') }}</span>
+              <span v-if="currentCard.isWanted" class="wanted-chip">{{ t('boosters.wantedBadge') }}</span>
             </div>
           </div>
           <p class="open-hint">{{ hint }}</p>
@@ -371,9 +475,21 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
           ></span>
         </div>
 
-        <button v-if="step === 'reveal'" type="button" class="btn btn-link open-skip" @click="finishBooster">
-          {{ isLastBooster ? t('boosters.skipToSummary') : t('boosters.skip') }}
-        </button>
+        <div class="open-actions">
+          <button v-if="step === 'reveal'" type="button" class="btn btn-link open-skip" @click="finishBooster">
+            {{ isLastBooster ? t('boosters.skipToSummary') : t('boosters.skip') }}
+          </button>
+          <button
+            v-if="remainingBoosters > 0"
+            type="button"
+            class="btn btn-outline-secondary open-all"
+            :disabled="packState === 'loading' || openingAll"
+            @click="openAllNow"
+          >
+            <span v-if="openingAll" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            {{ t('boosters.openAll', { count: remainingBoosters + 1 }, remainingBoosters + 1) }}
+          </button>
+        </div>
       </section>
 
       <!-- ============ Summary ============ -->
@@ -403,6 +519,10 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
               eager
             />
             <p class="done-best-name">{{ summary.best.name }}</p>
+            <button type="button" class="btn btn-outline-secondary btn-sm" :disabled="sharing" @click="shareBest">
+              {{ t('collection.share') }}
+            </button>
+            <p v-if="shareNotice" class="done-share-notice" role="status">{{ shareNotice }}</p>
           </figure>
 
           <ul class="done-grid" role="list">
@@ -415,6 +535,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
               <span class="done-card-badges">
                 <span v-if="entry.chip" class="tier-chip" :data-tier="entry.tier">{{ entry.chip }}</span>
                 <span v-if="entry.isNew" class="new-chip">{{ t('boosters.newBadge') }}</span>
+                <span v-if="entry.isWanted" class="wanted-chip">{{ t('boosters.wantedBadge') }}</span>
               </span>
             </li>
           </ul>
@@ -769,6 +890,41 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   transition-delay: 1s;
 }
 
+.open-top-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sound-toggle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-surface);
+  color: var(--pb-text);
+}
+
+.sound-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.open-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
 .open-skip {
   font-weight: 700;
 }
@@ -798,6 +954,19 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 .new-chip {
   color: var(--pb-accent-ink);
   background: var(--pb-accent);
+}
+
+.wanted-chip {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--pb-text);
+  border: 1px solid var(--pb-ring);
+  background: color-mix(in srgb, var(--pb-ring) 20%, transparent);
 }
 
 /* ---------- Summary ---------- */
@@ -845,6 +1014,13 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--pb-text-muted);
+}
+
+.done-share-notice {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--pb-text-muted);
+  text-align: center;
 }
 
 .done-best-name {
@@ -900,7 +1076,8 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 }
 
 .done-card-badges .tier-chip,
-.done-card-badges .new-chip {
+.done-card-badges .new-chip,
+.done-card-badges .wanted-chip {
   font-size: 0.62rem;
   padding: 0.15rem 0.5rem;
 }

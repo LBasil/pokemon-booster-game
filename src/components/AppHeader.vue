@@ -14,6 +14,7 @@ const auth = useAuthStore()
 const NAV = [
   { name: 'boosters', label: 'nav.boosters' },
   { name: 'collection', label: 'nav.collection' },
+  { name: 'community', label: 'nav.community' },
   { name: 'profile', label: 'nav.profile' },
 ]
 
@@ -22,6 +23,7 @@ const TABS = [
   { name: 'game', label: 'nav.hub', icon: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },
   { name: 'boosters', label: 'nav.boosters', icon: 'M7 3h10l1 3-1 15H7L6 6zM6 6h12M12 10l1.2 2.8L16 14l-2.8 1.2L12 18l-1.2-2.8L8 14l2.8-1.2z' },
   { name: 'collection', label: 'nav.collection', icon: 'M8 3h11v15H8zM5 6v15h11' },
+  { name: 'community', label: 'nav.community', icon: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 7.5M18 14a6 6 0 0 1 4 7' },
   { name: 'profile', label: 'nav.profile', icon: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0' },
 ]
 
@@ -154,7 +156,7 @@ async function logout() {
   bottom: calc(12px + env(safe-area-inset-bottom));
   z-index: 50;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   padding: 6px;
   border-radius: var(--pb-radius-lg);
   border: 1px solid var(--pb-border-strong);
@@ -171,8 +173,16 @@ async function logout() {
   padding: 6px 2px;
   border-radius: var(--pb-radius-md);
   color: var(--pb-text-muted);
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   font-weight: 700;
+  min-width: 0;
+}
+
+.app-tabbar span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-tabbar a.router-link-exact-active {

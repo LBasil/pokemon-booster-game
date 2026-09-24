@@ -1,18 +1,27 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { fetchPriceHistory } from '@/api/cards'
+import { shareCard } from '@/lib/shareCard'
+import { useProfileStore } from '@/stores/profile'
+import { useWishlistStore } from '@/stores/wishlist'
 import { cardNumber } from '@/utils/collection'
 import { rarityLabelKey, rarityTier } from '@/utils/rarity'
 import { setLogoUrl } from '@/utils/sets'
 import HoloCard from '@/components/HoloCard.vue'
+import PriceChart from '@/components/PriceChart.vue'
 
-// Full-size view of one owned card. Opens whenever `entry` is set; arrows
-// (keyboard, buttons or a horizontal swipe) move through the current list.
+// Full-size view of a card. Opens whenever `entry` is set; arrows (keyboard,
+// buttons or a horizontal swipe) move through the current list. An entry
+// with quantity 0 is a card the player doesn't own yet (binder, wishlist):
+// it gets a wishlist toggle instead of the ownership details.
 const props = defineProps({
   entry: { type: Object, default: null },
   set: { type: Object, default: null },
   hasPrev: { type: Boolean, default: false },
   hasNext: { type: Boolean, default: false },
+  // false on someone else's public profile: no wishlist, no sharing
+  interactive: { type: Boolean, default: true },
 })
 
 const emit = defineEmits(['close', 'prev', 'next'])
@@ -30,6 +39,59 @@ watch(
 )
 
 const card = computed(() => props.entry?.cards ?? null)
+const owned = computed(() => (props.entry?.quantity ?? 0) > 0)
+
+const wishlist = useWishlistStore()
+const profileStore = useProfileStore()
+const wishBusy = ref(false)
+async function toggleWish() {
+  wishBusy.value = true
+  try {
+    await wishlist.toggle(card.value)
+  } finally {
+    wishBusy.value = false
+  }
+}
+
+// Weekly price snapshots (migration 0004); the chart needs at least 2 weeks
+const priceHistory = ref([])
+watch(
+  () => card.value?.id,
+  async (id) => {
+    priceHistory.value = []
+    if (!id) return
+    try {
+      const points = await fetchPriceHistory(id)
+      if (card.value?.id === id) priceHistory.value = points
+    } catch {
+      // no history: the chart just doesn't show
+    }
+  },
+  { immediate: true },
+)
+
+const sharing = ref(false)
+const shareNotice = ref('')
+async function share() {
+  sharing.value = true
+  shareNotice.value = ''
+  try {
+    const result = await shareCard({
+      card: card.value,
+      title: card.value.name,
+      subtitle: [bucket.value !== 'common' && bucket.value !== 'uncommon' ? t(`boosters.bucket.${bucket.value}`) : null, props.set?.name]
+        .filter(Boolean)
+        .join(' · '),
+      brand: t('common.brand'),
+      text: t('collection.shareText', { card: card.value.name, name: profileStore.displayName }),
+    })
+    if (result === 'downloaded') shareNotice.value = t('collection.shareDownloaded')
+  } catch {
+    shareNotice.value = t('collection.shareError')
+  } finally {
+    sharing.value = false
+  }
+}
 const tier = computed(() => (card.value ? rarityTier(card.value) : 'common'))
 const bucket = computed(() => (card.value ? rarityLabelKey(card.value) : 'common'))
 
@@ -110,7 +172,30 @@ function onPointerUp(event) {
             {{ t(`boosters.bucket.${bucket}`) }}
           </span>
           <span v-else-if="card.rarity" class="tier-chip">{{ card.rarity }}</span>
-          <span class="qty-chip">{{ t('collection.ownedCopies', { count: entry.quantity }, entry.quantity) }}</span>
+          <span v-if="owned" class="qty-chip">{{ t('collection.ownedCopies', { count: entry.quantity }, entry.quantity) }}</span>
+          <span v-else class="qty-chip missing">{{ t('collection.notOwned') }}</span>
+        </div>
+
+        <div v-if="interactive" class="detail-actions">
+          <button
+            v-if="!owned"
+            type="button"
+            class="btn"
+            :class="wishlist.has(card.id) ? 'btn-outline-secondary' : 'btn-primary'"
+            :aria-pressed="wishlist.has(card.id)"
+            :disabled="wishBusy"
+            @click="toggleWish"
+          >
+            <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" :class="{ filled: wishlist.has(card.id) }" />
+            </svg>
+            {{ wishlist.has(card.id) ? t('collection.wishRemove') : t('collection.wishAdd') }}
+          </button>
+          <button v-else type="button" class="btn btn-outline-secondary" :disabled="sharing" @click="share">
+            <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 14v5h14v-5" /></svg>
+            {{ t('collection.share') }}
+          </button>
+          <p v-if="shareNotice" class="detail-notice" role="status">{{ shareNotice }}</p>
         </div>
 
         <dl class="detail-facts">
@@ -139,6 +224,8 @@ function onPointerUp(event) {
             <dd>{{ value }}</dd>
           </div>
         </dl>
+
+        <PriceChart v-if="priceHistory.length >= 2" :key="card.id" :points="priceHistory" />
 
         <div class="detail-nav">
           <button type="button" class="btn btn-outline-secondary" :disabled="!hasPrev" @click="emit('prev')">
@@ -310,6 +397,39 @@ function onPointerUp(event) {
 .qty-chip {
   background: var(--pb-selected);
   border-color: transparent;
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 0.35rem;
+  vertical-align: -3px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.btn-icon .filled {
+  fill: currentColor;
+}
+
+.detail-notice {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--pb-text-muted);
+}
+
+.qty-chip.missing {
+  color: var(--pb-text-muted);
 }
 
 .detail-facts {

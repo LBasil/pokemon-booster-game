@@ -28,10 +28,41 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/collection/set/:setId',
+      name: 'binder',
+      component: () => import('@/views/SetBinderView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/history',
+      name: 'history',
+      component: () => import('@/views/HistoryView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/profile',
       name: 'profile',
       component: () => import('@/views/ProfileView.vue'),
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/community',
+      name: 'community',
+      component: () => import('@/views/CommunityView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      // Public profile: shareable, readable even when signed out
+      path: '/u/:username',
+      name: 'public-profile',
+      component: () => import('@/views/ProfileView.vue'),
+      props: true,
+    },
+    {
+      // "Forgot password" email link lands here (recovery session in the URL)
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('@/views/ResetPasswordView.vue'),
     },
     {
       path: '/:pathMatch(.*)*',

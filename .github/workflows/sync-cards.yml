@@ -1,0 +1,35 @@
+# Weekly import from pokemontcg.io: new sets and cards, fresh Cardmarket
+# prices, and a price-history snapshot (the card detail's price chart).
+#
+# Needs three repository secrets (Settings > Secrets and variables > Actions):
+#   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, POKEMONTCG_API_KEY
+# The service role key only ever lives here and in scripts/.env.local.
+name: Sync card data
+
+on:
+  schedule:
+    - cron: '0 4 * * 1' # Mondays 04:00 UTC
+  workflow_dispatch:
+    inputs:
+      start_page:
+        description: 'Resume the cards import from this page'
+        required: false
+        default: '1'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Import sets, cards and prices
+        run: node scripts/populate.mjs sync ${{ github.event.inputs.start_page || '1' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          POKEMONTCG_API_KEY: ${{ secrets.POKEMONTCG_API_KEY }}

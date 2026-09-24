@@ -17,7 +17,9 @@
     "hub": "Home",
     "boosters": "Boosters",
     "collection": "Collection",
-    "profile": "Profile"
+    "profile": "Profile",
+    "history": "History",
+    "community": "Community"
   },
   "home": {
     "tagline": "Pick any set — or mix them all — open as many packs as you like, and watch your collection grow with every pull.",
@@ -43,7 +45,12 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "passwordHint": "At least 6 characters.",
-    "disclaimer": "Fan project, not affiliated with Nintendo, Creatures, GAME FREAK or The Pokémon Company. Card data and images: pokemontcg.io."
+    "disclaimer": "Fan project, not affiliated with Nintendo, Creatures, GAME FREAK or The Pokémon Company. Card data and images: pokemontcg.io.",
+    "forgotLink": "Forgot password?",
+    "forgotIntro": "Enter your email and we'll send you a link to choose a new password.",
+    "sendResetLink": "Send the link",
+    "backToLogin": "Back to log in",
+    "resetSent": "If an account exists for this email, a reset link is on its way. Check your inbox (and spam)."
   },
   "game": {
     "greeting": "Welcome back, {name}!",
@@ -62,7 +69,9 @@
     "seeAll": "See all",
     "emptyTitle": "Your binder is empty",
     "emptyDesc": "Open your first booster to start your collection.",
-    "loadError": "Couldn't load your collection. Try refreshing the page."
+    "loadError": "Couldn't load your collection. Try refreshing the page.",
+    "liveTitle": "Live",
+    "seeCommunity": "Community"
   },
   "boosters": {
     "title": "Pick your booster",
@@ -102,7 +111,11 @@
       "holo": "Holo",
       "ultra": "Ultra rare",
       "secret": "Secret rare"
-    }
+    },
+    "soundOn": "Turn sound on",
+    "soundOff": "Mute sound",
+    "wantedBadge": "Wanted!",
+    "openAll": "Open all at once | Open all {count} at once"
   },
   "collection": {
     "title": "My collection",
@@ -169,7 +182,21 @@
       "Fairy": "Fairy",
       "Dragon": "Dragon",
       "Colorless": "Colorless"
-    }
+    },
+    "tabPokedex": "Pokédex",
+    "tabWishlist": "Wishlist",
+    "dexFilter": "Pokédex #{number}",
+    "openBinder": "Open the binder",
+    "priceHistory": "Price history",
+    "since": "since {date}",
+    "priceSummary": "Price went from {from} to {to} over {weeks} weeks",
+    "notOwned": "Not in your binder yet",
+    "wishAdd": "Add to wishlist",
+    "wishRemove": "Remove from wishlist",
+    "share": "Share",
+    "shareText": "{name} pulled {card} on PokéBooster!",
+    "shareDownloaded": "Image downloaded — share it wherever you like.",
+    "shareError": "Couldn't create the image."
   },
   "profile": {
     "title": "Profile",
@@ -188,7 +215,8 @@
       "edit": "Edit username",
       "hint": "No username yet — tap the pencil to pick one.",
       "tooShort": "At least 2 characters.",
-      "tooLong": "24 characters max."
+      "tooLong": "24 characters max.",
+      "taken": "This username is already taken."
     },
     "save": "Save",
     "saveError": "Couldn't save. Please try again.",
@@ -275,11 +303,112 @@
       }
     },
     "accountTitle": "Account",
-    "accountDesc": "Signed in with Supabase. Language and theme are in the top bar."
+    "accountDesc": "Signed in with Supabase. Language and theme are in the top bar.",
+    "join": "Create my account",
+    "notFoundTitle": "Trainer not found",
+    "notFound": "{name} doesn't exist or keeps their profile private.",
+    "loadError": "Couldn't load this profile.",
+    "backToCommunity": "Back to the community",
+    "showcaseEmptyPublic": "No card on display yet.",
+    "topCards": "Best cards",
+    "sharingTitle": "Public profile",
+    "publicLabel": "Show my profile to others",
+    "publicDesc": "Your username, showcase, stats and best cards; your big pulls appear in the live feed and you can rank on the leaderboards.",
+    "copyLink": "Copy my profile link",
+    "viewPublic": "See it as others do",
+    "linkCopied": "Link copied!",
+    "settingsTitle": "Settings",
+    "soundLabel": "Sound effects",
+    "soundDesc": "Tearing, card flips and fanfares for big pulls.",
+    "vibrationLabel": "Vibration",
+    "vibrationDesc": "A little buzz when you pull a hit (phones that support it).",
+    "historyLink": "My booster history",
+    "installLabel": "Install the app",
+    "installDesc": "Add PokéBooster to your home screen, like a real app.",
+    "install": "Install"
   },
   "notFound": {
     "title": "This booster is empty",
     "desc": "The page you're looking for doesn't exist or has moved.",
     "backHome": "Back to safety"
+  },
+  "binder": {
+    "back": "All my sets",
+    "progress": "{owned} / {total} cards",
+    "openThisSet": "Open this set",
+    "filter": "Filter the binder",
+    "filters": {
+      "all": "All",
+      "missing": "Missing",
+      "owned": "Owned",
+      "wanted": "Wishlist"
+    },
+    "loadError": "Couldn't load this set.",
+    "empty": "No card here with this filter.",
+    "missingCard": "No. {number}, {name} — missing",
+    "wanted": "On your wishlist"
+  },
+  "pokedex": {
+    "caught": "Pokémon caught",
+    "filter": "Filter the Pokédex",
+    "filters": {
+      "all": "All",
+      "caught": "Caught",
+      "missing": "Missing"
+    },
+    "showCards": "{name}: show your card | {name}: show your {count} cards",
+    "unknown": "#{number}, not caught yet"
+  },
+  "wishlist": {
+    "intro": "Cards you're hunting. Pulling one takes it off the list — and you'll see a \"Wanted!\" badge when it happens.",
+    "empty": "Nothing on your list yet. Open a set's binder and tap a missing card to add it.",
+    "browseSets": "Browse my sets",
+    "remove": "Remove {name} from your wishlist"
+  },
+  "history": {
+    "eyebrow": "Your openings",
+    "title": "Booster history",
+    "subtitle": "Every pack you've opened, newest first.",
+    "empty": "No booster opened yet.",
+    "loadError": "Couldn't load your history.",
+    "hits": "{count} hit | {count} hits",
+    "more": "Load more"
+  },
+  "community": {
+    "eyebrow": "Live",
+    "title": "Community",
+    "feedTitle": "Latest big pulls",
+    "pulled": "pulled",
+    "publicNote": "Your profile is public: your ultra and secret pulls show up here.",
+    "privateNote": "Your profile is private: your pulls don't show up here.",
+    "manage": "Manage",
+    "feedEmpty": "No big pull yet. Be the first!",
+    "feedError": "Couldn't load the feed.",
+    "boardsTitle": "Leaderboards",
+    "boards": {
+      "hit_rate": "Luckiest",
+      "best_pull": "Best pull",
+      "complete_sets": "Master sets"
+    },
+    "boardDesc": {
+      "hit_rate": "Ultra and secret rares per 100 boosters (from 20 boosters opened).",
+      "best_pull": "The most valuable card in each collection.",
+      "complete_sets": "Sets collected in full."
+    },
+    "hitRateScore": "{rate} / 100 · {packs} boosters",
+    "completeScore": "{count} set | {count} sets",
+    "boardEmpty": "Nobody on this leaderboard yet.",
+    "boardError": "Couldn't load the leaderboard."
+  },
+  "reset": {
+    "title": "New password",
+    "intro": "Choose a new password for {email}.",
+    "newPassword": "New password",
+    "confirm": "Confirm the password",
+    "mismatch": "The two passwords don't match.",
+    "save": "Save my password",
+    "done": "Password updated! Taking you to your trainer space…",
+    "expired": "This link has expired or was already used. Ask for a new one from the log-in screen.",
+    "backHome": "Back to log in"
   }
 }

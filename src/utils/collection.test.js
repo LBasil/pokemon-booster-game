@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cardNumber, collectionStats, filterEntries, setProgress, sortEntries } from './collection'
+import { binderSlots, cardNumber, collectionStats, filterEntries, pokedexSlots, setProgress, sortEntries } from './collection'
 
 const entry = (id, name, rarity, { quantity = 1, acquired_at = '2026-09-01', value = 0 } = {}) => ({
   card_id: id,
@@ -81,5 +81,43 @@ describe('setProgress', () => {
 describe('collectionStats', () => {
   it('sums copies and market value', () => {
     expect(collectionStats(ENTRIES)).toEqual({ uniqueCards: 5, totalCards: 8, setsStarted: 2, value: 0.6 + 120 + 4 + 600 })
+  })
+})
+
+describe('binderSlots', () => {
+  it('lists the whole set in number order with owned quantities', () => {
+    const setCards = [{ id: 'base1-10' }, { id: 'base1-2' }, { id: 'base1-4' }]
+    const entries = [{ card_id: 'base1-4', quantity: 2, cards: {} }]
+    expect(binderSlots(setCards, entries).map((s) => [s.card.id, s.quantity])).toEqual([
+      ['base1-2', 0],
+      ['base1-4', 2],
+      ['base1-10', 0],
+    ])
+  })
+})
+
+describe('pokedexSlots', () => {
+  it('fills owned species and keeps the shortest name', () => {
+    const entries = [
+      { cards: { name: 'Charizard ex', national_pokedex_number: 6 } },
+      { cards: { name: 'Charizard', national_pokedex_number: 6 } },
+      { cards: { name: 'Pikachu', national_pokedex_number: 25 } },
+      { cards: { name: 'Professor Oak', national_pokedex_number: null } },
+    ]
+    const slots = pokedexSlots(entries, 30)
+    expect(slots).toHaveLength(30)
+    expect(slots[5]).toEqual({ number: 6, owned: 2, name: 'Charizard' })
+    expect(slots[24]).toMatchObject({ number: 25, owned: 1 })
+    expect(slots[0]).toEqual({ number: 1, owned: 0, name: null })
+  })
+})
+
+describe('filterEntries by Pokédex number', () => {
+  it('keeps only that species', () => {
+    const entries = [
+      { card_id: 'a', quantity: 1, cards: { name: 'A', national_pokedex_number: 6 } },
+      { card_id: 'b', quantity: 1, cards: { name: 'B', national_pokedex_number: 7 } },
+    ]
+    expect(filterEntries(entries, { dex: 6 }).map((e) => e.card_id)).toEqual(['a'])
   })
 })

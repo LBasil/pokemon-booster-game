@@ -52,13 +52,18 @@
   --pb-shadow-card: 0 18px 40px -14px rgba(0, 0, 0, 0.8);
   /* Selection ring (picked card, active option) */
   --pb-ring: #a78bfa;
-  /* One color per rarity bucket, for charts and legends */
-  --pb-bucket-common: #5b6385;
-  --pb-bucket-uncommon: #8b93b3;
-  --pb-bucket-rare: #6ee7f9;
-  --pb-bucket-holo: #a78bfa;
-  --pb-bucket-ultra: #f472b6;
-  --pb-bucket-secret: #fcd34d;
+  /* Rarity buckets are ordered, so charts use one violet ramp (dark to
+     bright on the dark theme), checked with the dataviz palette validator
+     (--ordinal: monotone, >= 2:1 vs surface). */
+  --pb-bucket-common: #6a4fa9;
+  --pb-bucket-uncommon: #8362cd;
+  --pb-bucket-rare: #9b79ee;
+  --pb-bucket-holo: #b394ff;
+  --pb-bucket-ultra: #cab3ff;
+  --pb-bucket-secret: #e2d3ff;
+  /* Single-series charts (price history) */
+  --pb-series: #a78bfa;
+  --pb-grid: rgba(255, 255, 255, 0.08);
 }
 
 [data-bs-theme='light'] {
@@ -88,13 +93,15 @@
   --pb-shadow-lg: 0 30px 60px -28px rgba(30, 35, 80, 0.35);
   --pb-shadow-card: 0 18px 40px -16px rgba(30, 35, 80, 0.45);
   --pb-ring: #6d28d9;
-  /* Deeper stops so chart segments stay visible on a light background */
-  --pb-bucket-common: #a3a9c2;
-  --pb-bucket-uncommon: #6b7392;
-  --pb-bucket-rare: #0e7490;
-  --pb-bucket-holo: #6d28d9;
-  --pb-bucket-ultra: #be185d;
-  --pb-bucket-secret: #b45309;
+  /* Same violet ramp, light to dark on the light theme */
+  --pb-bucket-common: #b6a8e6;
+  --pb-bucket-uncommon: #9e87e0;
+  --pb-bucket-rare: #8767d3;
+  --pb-bucket-holo: #7147c0;
+  --pb-bucket-ultra: #5a2ca4;
+  --pb-bucket-secret: #42167f;
+  --pb-series: #6d28d9;
+  --pb-grid: rgba(17, 22, 51, 0.1);
 }
 
 /* Map tokens onto Bootstrap so its components follow the design system */

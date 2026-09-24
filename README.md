@@ -1,53 +1,79 @@
 # Pokémon Booster Game
 
 Open Pokémon boosters — any set, as many as you want — and build your own
-collection. A Vue 3 single-page app backed by Supabase (Postgres + Auth).
+collection. A Vue 3 single-page app (installable as a PWA) backed by
+Supabase (Postgres + Auth + Realtime).
 
 ## Features
 
-- **Real authentication** via Supabase Auth (email/password) — no plaintext
-  passwords, no homemade session logic.
+- **Real authentication** via Supabase Auth (email/password), with email
+  confirmation and a "forgot password" flow — no plaintext passwords, no
+  homemade session logic.
 - **Unlimited boosters, any type**: pick a specific Pokémon set (searchable,
   grouped by year, each pack shows the set's logo and chase card) or "any
-  set (mixed)", and how many boosters to open in one go. Tear each pack
-  open, flip or swipe the cards one by one (rarest last, with rarity and
-  "New!" badges), then get a summary with your best pull. Packs follow
-  real pull rates: 10 cards, one guaranteed rare, a holo/ex about every 5
-  packs and a big hit (Illustration Rare, Secret…) now and then.
-- **Hub**: greeting, quick access to boosters, collection completion
-  progress, profile summary and your latest pulled cards. Phone-friendly
-  bottom tab bar on every signed-in page.
-- **Collection**: every card you've pulled with quantities, completion
-  stats and an estimated Cardmarket value; search, filter by set, rarity or
-  duplicates, and sort; per-set completion; a detailed view for each card.
-  Filters live in the URL, so they survive back/forward and can be shared.
-- **Profile**: trainer card with an editable username and a rank that
-  grows with the boosters you open, a showcase card of your choice, stats,
-  rarity breakdown and 13 achievements to unlock.
-- **Dark/light theme** (follows the OS preference until you pick one) and
+  set" (one random set per pack), and how many boosters to open. Tear each
+  pack open, flip or swipe the cards one by one (rarest last, with rarity,
+  "New!" and "Wanted!" badges; hits charge up and flash), or open them all
+  at once. Packs follow real pull rates: 10 cards, one guaranteed rare, a
+  holo/ex about every 5 packs, a big hit now and then. Every pack is drawn
+  and saved **server-side** in one call, so nobody can add cards to their
+  own collection from the browser console.
+- **Sound & haptics**: synthesized sound effects (tearing, flips, hit
+  fanfares — no audio files) and a vibration on hits, both switchable.
+- **Hub**: greeting, quick access to boosters, collection progress, profile
+  summary, latest pulls, and a peek at the community's live pulls.
+- **Collection**: every card you've pulled with completion stats and an
+  estimated Cardmarket value; search, filter by set, rarity or duplicates,
+  and sort — all kept in the URL. Tabs for:
+  - **Sets**: per-set completion, each opening a **binder** with every card
+    of the set in number order and the missing ones greyed out in their slot;
+  - **Pokédex**: national Pokédex progress (caught species in color, the
+    others as silhouettes);
+  - **Wishlist**: cards you're hunting (pulling one takes it off the list).
+- **Card detail**: full-size holo card, set and number, rarity, copies,
+  first pull date, illustrator, **price history chart** (weekly Cardmarket
+  snapshots), wishlist toggle for missing cards, and **sharing** a generated
+  image of the card.
+- **Booster history**: every pack you've opened, grouped by day.
+- **Profile**: trainer card with a unique username and a rank that grows
+  with the boosters you open, a showcase card, stats, rarity breakdown, 13
+  achievements, public/private switch, sound/vibration settings, and an
+  "install the app" button.
+- **Community**: public profiles at `/u/<username>` (readable signed out,
+  so the link can be shared), a **live feed** of the latest ultra/secret
+  pulls (Supabase Realtime), and luck-based **leaderboards** (hit rate, best
+  pull, complete sets).
+- **Installable PWA**: manifest, icons, and a service worker that keeps the
+  app and already-seen card art available offline.
+- **Dark/light theme** (follows the OS until you pick one) and
   **English/French** UI, both persisted locally.
-- **"Holo Collector" design**: a landing page with holographic, tilt-on-hover
-  showcase cards, built on shared design tokens (`--pb-*` CSS variables in
-  `src/assets/styles/global.css`) that the rest of the app reuses. Mobile-first.
+- **"Holo Collector" design** built on shared design tokens (`--pb-*` CSS
+  variables in `src/assets/styles/global.css`). Mobile-first.
 
 ## Tech stack
 
 Vite, Vue 3 (Composition API), Vue Router, Pinia, vue-i18n, Bootstrap 5,
-`@supabase/supabase-js`. Vitest for unit tests. Card data comes from the
-[pokemontcg.io](https://pokemontcg.io) API, seeded into Supabase ahead of
-time (see [Populating card data](#populating-card-data)).
+`@supabase/supabase-js`. Vitest for unit tests, Playwright for end-to-end
+tests. Card data comes from the [pokemontcg.io](https://pokemontcg.io) API,
+imported into Supabase by a script (see [Card data](#4-card-data)).
 
 ## Project structure
 
 ```
 src/
-  views/          one component per route (Home, GameHub, Boosters, Collection, Profile)
-  components/     shared UI (auth form, booster/card animations, theme & language toggles)
-  stores/         Pinia: auth session, theme, collection cache
+  views/          one component per route (Home, Hub, Boosters, Collection, SetBinder,
+                  History, Community, Profile — also public profiles —, ResetPassword, 404)
+  components/     shared UI (auth form, booster/card animations, card detail, charts…)
+  stores/         Pinia: auth, profile, collection, sets, wishlist, theme, settings
   api/            Supabase queries/RPC calls
+  lib/            Supabase client, sound effects, share image, PWA helpers
+  utils/          pure helpers (rarity, collection, profile, time…) + their unit tests
   i18n/locales/   en.json / fr.json — all UI strings
+public/           manifest, icons, service worker (sw.js)
+e2e/              Playwright tests + a mocked Supabase backend
 supabase/migrations/   SQL to run in the Supabase SQL editor (schema, RLS, RPCs)
-scripts/populate.mjs   admin script that seeds `sets` and `cards` from pokemontcg.io
+scripts/populate.mjs   admin script importing sets, cards and prices from pokemontcg.io
+.github/workflows/     CI (tests on every push) and the weekly card-data sync
 ```
 
 ## Setup
@@ -67,17 +93,23 @@ its **SQL editor** and run, in order:
 
 1. `supabase/migrations/0001_schema.sql` — tables (`sets`, `cards`,
    `collections`) and Row Level Security policies.
-2. `supabase/migrations/0002_functions.sql` — the RPCs used to draw random
-   cards and to record a booster opening atomically.
+2. `supabase/migrations/0002_functions.sql` — the original booster RPCs.
 3. `supabase/migrations/0003_realistic_boosters.sql` — realistic packs
-   (`open_booster`: 10 cards with real-world pull rates), rarity buckets,
-   and set logo/symbol URL columns. After running it, (re-)run
-   `npm run populate:sets` so the logos are filled in.
+   (`open_booster`), rarity buckets, set logo/symbol URL columns.
+4. `supabase/migrations/0004_collector_social.sql` — server-side pack
+   opening (`open_my_booster`), game modes, public profiles, opening
+   history, live pull feed (added to the Realtime publication), wishlist,
+   price history and the leaderboards. Deploy the matching client right
+   after: older clients can't save packs any more.
 
-In **Authentication > Providers**, email/password is enabled by default. For
-easier local testing you can turn off "Confirm email" in **Authentication >
-Settings** — otherwise new accounts need to click a confirmation link before
-they get a session.
+Then in **Authentication**:
+
+- **URL Configuration**: set the Site URL to your deployed app and add
+  `https://<your-app>/game` and `https://<your-app>/reset-password` (plus
+  `http://localhost:5173/...` for local dev) to the Redirect URLs, so the
+  confirmation and password-reset emails bring players back to the app.
+- Email confirmation is on by default; you can turn it off in
+  **Authentication > Settings** for easier local testing.
 
 ### 3. Configure the client app
 
@@ -89,25 +121,34 @@ cp .env.example .env
 ```
 
 The anon key is safe to expose in the client — it's designed to be public;
-access control is enforced entirely by the RLS policies from step 2.
+access control is enforced entirely by the RLS policies and RPCs.
 
-### 4. Populating card data
+### 4. Card data
 
-The app needs `sets` and `cards` populated before boosters can be opened.
-This runs as a one-off admin script (never shipped to the browser), using
-the Supabase **service role key** (bypasses RLS for bulk writes) and a free
-API key from [pokemontcg.io](https://pokemontcg.io/developers).
+The app needs `sets` and `cards` imported before boosters can be opened.
+This runs as an admin script (never shipped to the browser), using the
+Supabase **service role key** (bypasses RLS for bulk writes) and a free API
+key from [pokemontcg.io](https://pokemontcg.io/developers).
 
 ```bash
 cp scripts/.env.local.example scripts/.env.local
 # fill in SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, POKEMONTCG_API_KEY
 
 npm run populate:sets
-npm run populate:cards
+npm run populate:cards   # also records today's prices for the price charts
 ```
 
 `scripts/.env.local` is gitignored — the service role key must never be
-committed or used client-side.
+committed or used client-side. The pokemontcg.io API is flaky: the script
+retries, and `node scripts/populate.mjs cards <page>` resumes a partial run.
+Behind a network that intercepts HTTPS (Node fails with
+`SELF_SIGNED_CERT_IN_CHAIN`), prefix the command with `NODE_USE_SYSTEM_CA=1`.
+
+**Weekly sync.** `.github/workflows/sync-cards.yml` runs
+`npm run populate:sync` (sets + cards + price snapshot) every Monday. Add
+three repository secrets in **Settings > Secrets and variables > Actions**:
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `POKEMONTCG_API_KEY`. It can
+also be run by hand from the Actions tab.
 
 ### 5. Run it
 
@@ -115,38 +156,43 @@ committed or used client-side.
 npm run dev
 ```
 
+## Tests
+
+```bash
+npm test          # unit tests (Vitest) on the pure logic in src/utils
+npm run test:e2e  # end-to-end tests (Playwright), desktop + mobile
+```
+
+The e2e tests build the app against a fake Supabase host and mock the whole
+backend (`e2e/support/supabase.js`), so they need no account, secret or
+network. Playwright's browser: `npx playwright install chromium` once — or,
+if that download is blocked, `PW_CHANNEL=chrome npm run test:e2e` uses your
+installed Google Chrome. CI (`.github/workflows/ci.yml`) runs unit tests,
+the build and the e2e tests on every push.
+
+Before a release, go through the [manual test checklist](./docs/manual-testing.md)
+with a real account.
+
 ## Deploying (Vercel)
 
-Two things a static-file host doesn't give you for free:
-
-1. **Env vars.** `.env` is gitignored and never pushed, so Vite has nothing
-   to inline at build time unless you set them in the host itself. On
-   Vercel: **Project Settings > Environment Variables**, add
-   `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, then redeploy (Vite
-   bakes them in at build time, not runtime — a redeploy is required after
-   adding/changing them).
-2. **SPA routing.** Vue Router runs in `history` mode, so a direct hit or
-   refresh on `/boosters`, `/collection`, etc. must fall back to
-   `index.html` instead of 404ing. `vercel.json` in the repo root already
-   handles this with a catch-all rewrite.
+1. **Env vars.** Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in
+   **Project Settings > Environment Variables**, then redeploy (Vite bakes
+   them in at build time).
+2. **SPA routing & service worker.** `vercel.json` rewrites every path to
+   `index.html` (Vue Router history mode) and serves `sw.js` uncached so
+   updates reach players.
 
 ## Scripts
 
-| Command                | What it does                                   |
-| ----------------------- | ----------------------------------------------- |
-| `npm run dev`           | Start the Vite dev server                        |
-| `npm run build`         | Production build                                 |
-| `npm run preview`       | Preview the production build locally             |
-| `npm test`              | Run unit tests (Vitest)                          |
-| `npm run populate:sets` | Seed the `sets` table from pokemontcg.io         |
-| `npm run populate:cards`| Seed the `cards` table from pokemontcg.io        |
+| Command                  | What it does                                                    |
+| ------------------------ | --------------------------------------------------------------- |
+| `npm run dev`            | Start the Vite dev server                                       |
+| `npm run build`          | Production build                                                |
+| `npm run preview`        | Preview the production build locally                            |
+| `npm test`               | Unit tests (Vitest)                                             |
+| `npm run test:e2e`       | End-to-end tests (Playwright, mocked Supabase)                  |
+| `npm run populate:sets`  | Import the `sets` table from pokemontcg.io                      |
+| `npm run populate:cards` | Import the `cards` table (+ today's price snapshot)             |
+| `npm run populate:sync`  | Sets + cards + prices in one go (what the weekly Action runs)   |
 
-## Status
-
-Fully built and working end to end against a live Supabase project: auth,
-booster opening (any set or a specific one, unlimited count), atomic
-collection writes, RLS-isolated per-user collections. `sets` (176) and
-`cards` (20,670) are populated. Still worth a manual click-through with a
-real account through the actual UI (the automated check used an
-admin-created test account to bypass email confirmation) — see
-[CLAUDE.md](./CLAUDE.md) for the full project rules and current state.
+See [CLAUDE.md](./CLAUDE.md) for the full project rules and current state.

@@ -23,15 +23,21 @@ entire backend.
 src/
   main.js, App.vue          entry point, mounts pinia/router/i18n, applies saved theme
   router/index.js           routes + auth guard (requiresAuth meta -> redirect to "/")
-  stores/                   pinia: auth (session), theme (persisted), collection (cache), sets (shared set list)
+  stores/                   pinia: auth, profile, collection, sets, wishlist (per-player, reset on
+                            account switch), theme + settings (per-device, localStorage)
   lib/supabaseClient.js     the one Supabase client instance, reads VITE_ env vars
-  api/                      thin wrappers around supabase-js calls (sets, boosters, collection)
+  lib/                      also sfx.js (synthesized sounds), shareCard.js (share image), pwa.js
+  api/                      thin wrappers around supabase-js calls (one file per domain)
   views/                    one per route
   components/               shared UI (auth form, theme toggle, language switch, booster/card visuals)
   i18n/locales/{en,fr}.json full UI coverage — every user-facing string goes here, none hardcoded
   utils/                    pure, testable helpers (e.g. groupCardsByQuantity)
+public/sw.js, manifest      PWA service worker + manifest + icons
+e2e/                        Playwright tests; e2e/support/supabase.js mocks the whole backend
 supabase/migrations/        SQL run manually in the Supabase SQL editor (no CLI/MCP access to the DB)
-scripts/populate.mjs        admin-only Node script to seed sets/cards from pokemontcg.io — never bundled to the client
+scripts/populate.mjs        admin-only Node script: sets/cards/prices from pokemontcg.io — never bundled to the client
+.github/workflows/          ci.yml (unit + build + e2e) and sync-cards.yml (weekly populate:sync)
+docs/manual-testing.md      checklist for a real-account click-through
 ```
 
 ## Golden rules (do not violate these)
@@ -41,17 +47,19 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
    compare passwords in application code — the original project did this in
    plaintext and it was the single worst issue found in the audit.
 2. **RLS is the only access boundary.** Every table gets Row Level Security
-   enabled. `collections` rows are only ever readable/writable by
-   `auth.uid() = user_id`. If a query needs broader access, that's a sign it
-   belongs in `scripts/populate.mjs` with the service role key, not in the
-   client.
+   enabled. `collections` rows are only readable by `auth.uid() = user_id`
+   and, since 0004, **not writable by clients at all**. If a query needs
+   broader access, it's either an admin job for `scripts/populate.mjs`
+   (service role) or a narrow `SECURITY DEFINER` RPC that checks
+   `auth.uid()` itself (see rule 9).
 3. **No service role key in client code.** `VITE_*` env vars (client, safe to
    expose — access control is RLS, not secrecy of the anon key) are strictly
    separate from `scripts/.env.local` (service role key + pokemontcg.io key,
    gitignored, Node-only, never imported by anything under `src/`).
 4. **Mutations that touch `quantity` must be atomic.** Use a Postgres RPC with
-   `ON CONFLICT ... DO UPDATE` (see `add_cards_to_collection` in
-   `supabase/migrations/0002_functions.sql`). The original check-then-write
+   `ON CONFLICT ... DO UPDATE` (see `open_my_booster` in
+   `supabase/migrations/0004_collector_social.sql`; the 0002
+   `add_cards_to_collection` was dropped). The original check-then-write
    client logic was a race condition; don't reintroduce that pattern.
 5. **Every user-facing string goes through vue-i18n.** Add the key to both
    `src/i18n/locales/en.json` and `fr.json` in the same change — no bare
@@ -61,8 +69,9 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
    slot by slot (4 common, 3 uncommon, 2 reverse slots, 1 rare slot) with
    weighted rarity buckets. `p_set_id = null` ("any set") = one random real
    set per pack, never a mix. Never go back to a uniform random draw (it gave
-   ~4 rares and 1-2 hits per pack). `random_cards*` from 0002 only remain as
-   the client's fallback while 0003 isn't applied.
+   ~4 rares and 1-2 hits per pack). The client calls `open_my_booster`
+   (0004), which wraps `open_booster` and saves the pack; `random_cards*`
+   from 0002 are unused leftovers.
 7. **I have no direct access to the Supabase database** (no MCP/CLI
    connection). Any schema change ships as a new
    `supabase/migrations/000N_*.sql` file with a comment explaining what it
@@ -71,6 +80,12 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 8. **Keep `README.md` current.** Update it in the same change whenever setup
    steps, npm scripts, or the feature list change — it's the user-facing
    counterpart to this file.
+9. **Game state that others can see is written by the server only.**
+   Collections, booster openings and the pull feed feed public profiles and
+   leaderboards, so clients never insert/update them: they go through
+   `SECURITY DEFINER` RPCs that only ever touch `auth.uid()`'s rows (and are
+   rate limited, e.g. 60 packs/minute). Client writes are fine for purely
+   personal data (wishlist, own profile columns via column grants).
 
 ## Conventions
 
@@ -136,111 +151,95 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 - vue-i18n treats `@` as special: write `{'@'}` in locale strings (e.g. email
   placeholders) or the message fails to compile at runtime.
 - New pure logic (sampling, grouping, formatting) goes in `src/utils/` with a
-  co-located `*.test.js` — these are the only tests that don't need a live
-  Supabase project to run.
+  co-located `*.test.js` (Vitest only runs `src/**/*.test.js`).
+- **E2E**: `npm run test:e2e` (Playwright, desktop + Pixel 7) builds into
+  `dist-e2e/` against the fake host `https://e2e.supabase.test` and mocks
+  every Supabase call in `e2e/support/supabase.js` — **add new endpoints
+  there** when a feature calls something new. On this machine the browser
+  download is blocked: run with `PW_CHANNEL=chrome`. For animated elements
+  use `click({ force: true })`, and wait for the pack to be enabled (it's
+  disabled while the server draws).
+- **Profiles**: `public.profiles` (0004) holds the unique, case-insensitive
+  username (2-24 chars), `is_public` and `showcase_card_id`; a trigger
+  creates it at sign-up (from the sign-up username or the email). Auth
+  metadata is no longer read for the username — use `useProfileStore()`
+  (`displayName` falls back to auth until loaded). `ProfileView.vue` serves
+  both `/profile` (own, editable) and `/u/:username` (public, read-only,
+  works signed out, `props: true`).
+- **Game modes**: `collections.mode` / `booster_openings.mode` exist
+  ('unlimited' | 'challenge'); only 'unlimited' is live. The future limited
+  "challenge" mode gets its **own separate collection** (user decision) and
+  hosts the economy: currency, duplicate recycling/crafting, trades, daily
+  boosters + notifications. Client queries always filter `mode=unlimited`.
+- **Sounds/haptics**: `src/lib/sfx.js` synthesizes everything with Web Audio
+  (no audio assets); every call takes `settings.sound` / `settings.vibration`
+  from `useSettingsStore()`.
+- **PWA**: `public/sw.js` — bump `VERSION` when changing it. It never caches
+  Supabase; it caches only `no-cors` image loads (a cached opaque image
+  served to the CORS load of `shareCard` would taint its canvas).
+  Registered in production builds only (`src/lib/pwa.js`).
+- **Charts**: load the `dataviz` skill first. Rarity buckets are ordinal, so
+  charts use one violet ramp (`--pb-bucket-*`, validated with the skill's
+  `validate_palette.js --ordinal` in both themes); single series use
+  `--pb-series`, gridlines `--pb-grid`. See `PriceChart.vue`.
 
-## Current state (updated 2026-09-22)
+## Current state (updated 2026-09-24)
 
-- Full Vue rewrite in place: auth (login/signup via Supabase Auth), game hub,
-  booster opening (set selector + quantity, unlimited), collection view,
-  profile view, i18n (en/fr), persisted theme toggle.
-- **Supabase project is live and fully wired up.** Both migrations
-  (`0001_schema.sql`, `0002_functions.sql`) are applied. `sets` (176 rows)
-  and `cards` (20,670 rows) are populated via `scripts/populate.mjs`.
-  `.env` and `scripts/.env.local` are filled in locally (gitignored, not
-  committed).
-- End-to-end flow verified directly against the live backend (via a
-  throwaway admin-created test user, cleaned up after): signup ->
-  sign-in -> draw booster (any-set RPC) -> draw booster (by-set RPC) ->
-  atomic collection upsert (incl. duplicate increments) -> collection
-  fetch -> confirmed RLS blocks one user from reading another's
-  collection. Also verified in a headless browser: dark/light theme
-  toggle + persistence, language switching, signup form, and the
-  `requiresAuth` route guard redirect.
-- Landing/login page and game hub redesigned (2026-09-24) with the "Holo
-  Collector" design system. Hub = greeting, "open boosters" feature tile,
-  collection progress tile (`completionPercent` in `src/utils/progress.js`),
-  profile tile, and a "latest additions" row of `HoloCard`s. Booster
-  opening page redesigned too (see Conventions).
-- Collection redesigned (2026-09-24): header stats (unique/pool with
-  progress, cards pulled, sets started, estimated Cardmarket value), tabs
-  Cards / Sets (per-set completion, "Complete!" badge, click = filter that
-  set), search + set + rarity chips + duplicates + sort, all mirrored in
-  the URL (tab/set changes push a history entry, the rest replaces), and a
-  `CardDetail.vue` dialog (prev/next via arrows, buttons or swipe). Pure
-  logic in `src/utils/collection.js`. The grid renders 48 cards at a time
-  (IntersectionObserver), so no server pagination is needed yet.
-  `CardTile.vue` was removed.
-- Profile redesigned (2026-09-24): trainer card (initial avatar, editable
-  username, rank by boosters opened — Rookie -> Legend, see `RANKS` in
-  `src/utils/profile.js`), showcase card (user-picked via
-  `ShowcasePicker.vue`, else the best pull), stats, rarity breakdown bar,
-  13 achievements computed client-side from the collection
-  (`achievements()`), account + logout. Username and `showcase_card_id` are
-  saved with `auth.updateProfile()` -> `supabase.auth.updateUser({ data })`
-  (Auth user metadata, no migration). Boosters opened = cards pulled / 10
-  (every pack is exactly 10 cards). The 404 page is in the design system
-  too — every view is now redesigned.
-- WCAG contrast of the token pairs was checked numerically (text >= 16:1,
-  muted >= 6.6:1, primary button 12:1, holo title stops >= 4.6:1 in light).
-  Re-check if you change a color token.
-- The hub was verified in headless Chrome with a faked session in
-  localStorage + mocked PostgREST responses (no `.env` on that machine).
-  If you mock count queries, the response needs
-  `Access-Control-Expose-Headers: content-range` or counts read as 0.
-- `collection` store now has an `error` flag (load() no longer throws) and
-  `totalDrawn` / `recentEntries` getters. `auth.displayName` = username,
-  else the email's local part.
-- Username ("pseudo") is stored only in Supabase Auth user metadata
-  (`raw_user_meta_data.username`), set at signup: not unique, not editable
-  in the UI, only readable by its owner. A public `profiles` table would be
-  needed for leaderboards/trading/unique pseudos.
-- `npm test` (9 tests) and `npm run build` both pass. Zero npm audit
-  vulnerabilities.
-- **Not yet manually tested through the actual browser UI with a real
-  account** (the E2E check above used the admin API to bypass email
-  confirmation, which is still ON on the Supabase project — real signups
-  need to click the confirmation email). Worth a manual click-through pass
-  when convenient.
-- Legacy static files (`index.html`/`booster.html`/`game.html`,
-  `js/*.js`, `*.css`, `en.json`/`fr.json` at the repo root) were deleted —
-  fully superseded by `src/`. Recoverable from git history if ever needed.
-- Deployed to Vercel for manual testing. Needed two things not obvious from
-  a plain `vite build`: the `VITE_*` env vars set in the Vercel dashboard
-  (Vite inlines them at build time — a redeploy is required after
-  setting/changing them), and `vercel.json` (catch-all rewrite to
-  `index.html`, since Vue Router's `history` mode 404s on a direct hit to
-  `/boosters` etc. without it). Both are now in place.
-- `scripts/populate.mjs` has retry-with-backoff built in — the pokemontcg.io
-  free-tier API (especially under the old, publicly-leaked key still in git
-  history, now reused) returns frequent transient 500/502s. It also accepts
-  an optional resume page: `node scripts/populate.mjs cards <startPage>`.
+- Every view is redesigned in the "Holo Collector" design system: landing
+  (auth incl. forgot password), hub (with a live-pull teaser), boosters
+  (per-set generated packs, tear/flip/swipe, hit charge-up, sounds,
+  vibration, "open all at once", share best pull), collection (Cards /
+  Sets / Pokédex / Wishlist tabs, URL-synced filters, card detail with
+  price chart, wishlist toggle and share), set binder
+  (`/collection/set/:setId`), booster history (`/history`), community
+  (`/community`: live feed + leaderboards), profile + public profiles
+  (`/u/:username`), `/reset-password`, 404. PWA installable.
+- **Supabase**: migrations 0001-0003 applied (0003 on 2026-09-24, then
+  `populate:sets` re-run: 176 sets with logo/symbol URLs). `cards` has
+  20,670 rows. **Migration 0004 (`0004_collector_social.sql`) is written
+  but NOT applied yet** — the current client depends on it (it calls
+  `open_my_booster`, reads `profiles`, `wishlist`, `booster_openings`,
+  `pull_feed`, `card_price_history`, filters `collections.mode`). Apply it,
+  then deploy right away (it drops `add_cards_to_collection`, which older
+  deployed clients still call). 0004 was verified locally with PGlite
+  (35 checks as the anon/authenticated roles: RLS, column grants, unique
+  usernames, owned-only showcase, rate limit, backfill of existing users,
+  private profiles hidden everywhere, idempotent).
+- Also needed after 0004: in Supabase Auth > URL Configuration add
+  `<site>/game` and `<site>/reset-password` to the Redirect URLs; check
+  that `pull_feed` is in the `supabase_realtime` publication (the migration
+  adds it if the publication exists); add the three GitHub secrets for
+  `sync-cards.yml`.
+- `npm test`: 72 unit tests. `npm run test:e2e`: 32 tests (16 x desktop +
+  mobile), stable over 3 repeats. `npm run build` passes, 0 npm audit
+  vulnerabilities. Screens were also reviewed in headless Chrome with
+  realistic mocks (both themes, phone width) — not yet on a real phone.
+- `.env` is not on this machine (screens were tested with mocks);
+  `scripts/.env.local` is (service role + the old pokemontcg.io key).
+- Deployed to Vercel for manual testing (`VITE_*` env vars set there;
+  `vercel.json` has the SPA rewrite and serves `sw.js` uncached).
+- Legacy static files of the original prototype were deleted — recoverable
+  from git history if ever needed.
 
 ## TODO / known gaps
 
-- Migration 0003 is applied (user ran it in the SQL editor on 2026-09-24,
-  checked the new columns/function exist, then re-ran
-  `NODE_USE_SYSTEM_CA=1 npm run populate:sets`: 176 sets). The SQL was
-  verified locally beforehand with PGlite (Postgres 18 in WASM, npm
-  `@electric-sql/pglite`): idempotent, 10 cards/pack, no duplicates, no
-  set mixing, promo-only sets excluded, and over 3000 simulated packs per
-  set (151, Evolving Skies, Perfect Order, Base) ~1 ex/holo in 5 packs,
-  ~1 ultra+ in 5.5, ~1 secret in 50.
-- Node: this machine's nvm default was Node 6; the project needs Node 20+
-  (`.nvmrc` = 22). `.env` must be recreated on each new machine.
-- This machine's network intercepts HTTPS with its own root CA (curl is fine,
-  Node fails with SELF_SIGNED_CERT_IN_CHAIN). Run Node scripts with
-  `NODE_USE_SYSTEM_CA=1` (uses the macOS keychain), e.g.
-  `NODE_USE_SYSTEM_CA=1 npm run populate:sets`. Never use
-  `NODE_TLS_REJECT_UNAUTHORIZED=0`: populate.mjs carries the service role key.
-- No manual browser click-through with a real (non-admin-created) account yet.
-- No automated E2E tests (Playwright etc.) — only Vitest unit tests on pure logic.
-- No password reset UX beyond Supabase's default flow; email confirmation is
-  still ON for the project (not disabled per the user's preference) — real
-  signups require clicking the confirmation email.
-- The collection is fetched in one query (all owned entries); the grid only
-  renders progressively. Revisit with server-side paging if collections get
-  into the tens of thousands of distinct cards.
-- The pokemontcg.io API key in use is the one already exposed in this repo's
-  git history — works, but consider rotating to a fresh key if the repo is
-  ever made public.
+- Apply migration 0004 + the post-migration steps above, then go through
+  `docs/manual-testing.md` with a real account (never done so far — real
+  sign-ups need the confirmation email, which is ON).
+- Challenge ("non illimité") mode: separate collection, currency,
+  duplicate recycling/crafting, pity timer, god packs, missions, daily
+  boosters with notifications, **trades between players**. The schema
+  already carries `mode`; `open_my_booster(p_set_id, p_mode)` rejects
+  anything but 'unlimited' for now.
+- The hit-rate leaderboard only counts packs opened after 0004 (older
+  packs were never logged).
+- Price charts need at least two `populate:cards` runs on different days;
+  the weekly Action provides that once its secrets are set.
+- Machine notes: nvm default is Node 6 here — use `nvm use` (`.nvmrc` =
+  22). The network intercepts HTTPS: Node scripts need
+  `NODE_USE_SYSTEM_CA=1` (never `NODE_TLS_REJECT_UNAUTHORIZED=0`), and
+  Playwright can't download browsers (use `PW_CHANNEL=chrome`).
+- The pokemontcg.io API key in use is the one exposed in this repo's git
+  history — rotate it if the repo is ever made public.
+- The collection is fetched in one query; the grids render progressively.
+  Revisit with server-side paging past tens of thousands of distinct cards.

@@ -1,41 +1,91 @@
 <script setup>
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { fetchPublicCollection, fetchPublicProfile } from '@/api/profiles'
 import { useAuthStore } from '@/stores/auth'
 import { useCollectionStore } from '@/stores/collection'
+import { useProfileStore } from '@/stores/profile'
 import { useSetsStore } from '@/stores/sets'
-import { collectionStats } from '@/utils/collection'
+import { useSettingsStore } from '@/stores/settings'
+import { installPrompt, installed, promptInstall } from '@/lib/pwa'
+import { collectionStats, sortEntries } from '@/utils/collection'
 import { USERNAME_MAX, achievements, boostersOpened, rankFor, rarityBreakdown, validateUsername } from '@/utils/profile'
 import { BUCKETS, bestPull, rarityLabelKey, rarityTier } from '@/utils/rarity'
 import AppHeader from '@/components/AppHeader.vue'
+import BrandLogo from '@/components/BrandLogo.vue'
+import CardDetail from '@/components/CardDetail.vue'
 import HoloCard from '@/components/HoloCard.vue'
 import ShowcasePicker from '@/components/ShowcasePicker.vue'
+
+// One view for both /profile (your own, editable) and /u/:username (anyone's
+// public profile, read-only, visible even when signed out).
+const props = defineProps({
+  username: { type: String, default: null },
+})
 
 const { t, locale } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 const collectionStore = useCollectionStore()
+const profileStore = useProfileStore()
 const setsStore = useSetsStore()
+const settings = useSettingsStore()
+
+const isOwn = computed(() => !props.username)
+
+// ---------- Data: own stores, or a public profile fetched by username ----------
+
+const publicProfile = ref(null)
+const publicEntries = ref([])
+const publicState = ref('idle') // loading | ready | missing | error
+
+async function loadPublic(username) {
+  publicState.value = 'loading'
+  try {
+    publicProfile.value = await fetchPublicProfile(username)
+    if (!publicProfile.value) {
+      publicState.value = 'missing'
+      return
+    }
+    publicEntries.value = await fetchPublicCollection(publicProfile.value.username)
+    publicState.value = 'ready'
+  } catch {
+    publicState.value = 'error'
+  }
+}
+
+watch(
+  () => props.username,
+  (username) => {
+    if (username) loadPublic(username)
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
-  collectionStore.load()
   setsStore.load()
+  if (isOwn.value) {
+    collectionStore.load()
+    profileStore.load()
+  }
 })
 
-const entries = computed(() => collectionStore.entries)
-const firstLoad = computed(() => collectionStore.loading && !collectionStore.loaded)
-const metadata = computed(() => auth.user?.user_metadata ?? {})
+const profile = computed(() => (isOwn.value ? profileStore.profile : publicProfile.value))
+const entries = computed(() => (isOwn.value ? collectionStore.entries : publicEntries.value))
+const firstLoad = computed(() =>
+  isOwn.value ? collectionStore.loading && !collectionStore.loaded : publicState.value === 'loading',
+)
+const displayName = computed(() => (isOwn.value ? profileStore.displayName : (publicProfile.value?.username ?? props.username)))
 
 const formatNumber = (value) => value.toLocaleString(locale.value)
 const formatEuros = (value) =>
   new Intl.NumberFormat(locale.value, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value)
 
-const memberSince = computed(() =>
-  auth.user?.created_at
-    ? new Date(auth.user.created_at).toLocaleDateString(locale.value, { month: 'long', year: 'numeric' })
-    : '',
-)
+const memberSince = computed(() => {
+  const date = profile.value?.created_at ?? (isOwn.value ? auth.user?.created_at : null)
+  return date ? new Date(date).toLocaleDateString(locale.value, { month: 'long', year: 'numeric' }) : ''
+})
 
 // ---------- Stats & rank ----------
 
@@ -43,7 +93,7 @@ const stats = computed(() => collectionStats(entries.value))
 const boosters = computed(() => boostersOpened(stats.value.totalCards))
 const rank = computed(() => rankFor(boosters.value))
 
-// ---------- Username ----------
+// ---------- Username (unique, case-insensitive) ----------
 
 const editingName = ref(false)
 const nameDraft = ref('')
@@ -52,7 +102,7 @@ const savingName = ref(false)
 const nameInput = ref(null)
 
 function startEditName() {
-  nameDraft.value = metadata.value.username ?? ''
+  nameDraft.value = profile.value?.username ?? displayName.value
   nameError.value = ''
   editingName.value = true
   nextTick(() => nameInput.value?.focus())
@@ -66,10 +116,10 @@ async function saveName() {
   }
   savingName.value = true
   try {
-    await auth.updateProfile({ username: nameDraft.value.trim() })
+    await profileStore.update({ username: nameDraft.value.trim() })
     editingName.value = false
-  } catch {
-    nameError.value = t('profile.saveError')
+  } catch (err) {
+    nameError.value = err.code === 'taken' ? t('profile.username.taken') : t('profile.saveError')
   } finally {
     savingName.value = false
   }
@@ -80,8 +130,8 @@ async function saveName() {
 const pickerOpen = ref(false)
 const showcaseError = ref('')
 const chosenEntry = computed(() =>
-  metadata.value.showcase_card_id
-    ? (entries.value.find((entry) => entry.card_id === metadata.value.showcase_card_id) ?? null)
+  profile.value?.showcase_card_id
+    ? (entries.value.find((entry) => entry.card_id === profile.value.showcase_card_id) ?? null)
     : null,
 )
 // Falls back to the best pull when nothing is chosen (or the card is gone)
@@ -90,9 +140,40 @@ const showcaseCard = computed(() => chosenEntry.value?.cards ?? bestPull(entries
 async function setShowcase(cardId) {
   showcaseError.value = ''
   try {
-    await auth.updateProfile({ showcase_card_id: cardId })
+    await profileStore.update({ showcase_card_id: cardId })
   } catch {
     showcaseError.value = t('profile.saveError')
+  }
+}
+
+// ---------- Public profile: best cards ----------
+
+const topCards = computed(() => sortEntries(entries.value, 'rarity').slice(0, 8))
+const detailIndex = ref(-1)
+const detailEntry = computed(() => topCards.value[detailIndex.value] ?? null)
+
+// ---------- Sharing & privacy ----------
+
+const profileUrl = computed(() =>
+  profile.value ? `${window.location.origin}/u/${encodeURIComponent(profile.value.username)}` : '',
+)
+const linkNotice = ref('')
+async function copyLink() {
+  try {
+    await navigator.clipboard.writeText(profileUrl.value)
+    linkNotice.value = t('profile.linkCopied')
+  } catch {
+    linkNotice.value = profileUrl.value
+  }
+}
+
+const privacyBusy = ref(false)
+async function setPublic(isPublic) {
+  privacyBusy.value = true
+  try {
+    await profileStore.update({ is_public: isPublic })
+  } finally {
+    privacyBusy.value = false
   }
 }
 
@@ -135,15 +216,28 @@ async function logout() {
 
 <template>
   <div class="pb-page">
-    <AppHeader />
+    <AppHeader v-if="auth.isLoggedIn" />
+    <!-- Signed-out visitors (shared profile link): a minimal header -->
+    <header v-else class="container public-header">
+      <RouterLink :to="{ name: 'home' }"><BrandLogo /></RouterLink>
+      <RouterLink :to="{ name: 'home' }" class="btn btn-primary glow-button">{{ t('profile.join') }}</RouterLink>
+    </header>
 
     <main class="container profile">
-      <div class="profile-layout">
+      <div v-if="!isOwn && (publicState === 'missing' || publicState === 'error')" class="profile-missing">
+        <h1 class="profile-missing-title">{{ t('profile.notFoundTitle') }}</h1>
+        <p class="pb-muted">{{ publicState === 'error' ? t('profile.loadError') : t('profile.notFound', { name: username }) }}</p>
+        <RouterLink :to="{ name: auth.isLoggedIn ? 'community' : 'home' }" class="btn btn-outline-secondary">
+          {{ auth.isLoggedIn ? t('profile.backToCommunity') : t('notFound.backHome') }}
+        </RouterLink>
+      </div>
+
+      <div v-else class="profile-layout">
         <!-- ============ Trainer card + showcase ============ -->
         <aside class="profile-side">
           <section class="trainer-card" :aria-label="t('profile.trainerCard')">
             <div class="trainer-top">
-              <div class="trainer-avatar" aria-hidden="true">{{ auth.displayName.charAt(0).toUpperCase() || '?' }}</div>
+              <div class="trainer-avatar" aria-hidden="true">{{ displayName.charAt(0).toUpperCase() || '?' }}</div>
               <div class="trainer-id">
                 <span class="trainer-rank" :data-rank="rank.rank.id">
                   {{ t('profile.level', { level: rank.level }) }} · {{ t(`profile.ranks.${rank.rank.id}`) }}
@@ -172,12 +266,11 @@ async function logout() {
                 </form>
 
                 <div v-else class="trainer-name-row">
-                  <h1 class="trainer-name">{{ auth.displayName }}</h1>
-                  <button type="button" class="name-edit" :aria-label="t('profile.username.edit')" :title="t('profile.username.edit')" @click="startEditName">
+                  <h1 class="trainer-name">{{ displayName }}</h1>
+                  <button v-if="isOwn" type="button" class="name-edit" :aria-label="t('profile.username.edit')" :title="t('profile.username.edit')" @click="startEditName">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4" /></svg>
                   </button>
                 </div>
-                <p v-if="!metadata.username && !editingName" class="trainer-hint">{{ t('profile.username.hint') }}</p>
               </div>
             </div>
 
@@ -195,7 +288,7 @@ async function logout() {
             </div>
 
             <dl class="trainer-facts">
-              <div>
+              <div v-if="isOwn">
                 <dt>{{ t('profile.email') }}</dt>
                 <dd>{{ auth.user?.email }}</dd>
               </div>
@@ -209,7 +302,7 @@ async function logout() {
           <section class="showcase" :aria-label="t('profile.showcaseTitle')">
             <div class="section-head">
               <h2 class="pb-section-title">{{ t('profile.showcaseTitle') }}</h2>
-              <button v-if="entries.length" type="button" class="btn btn-link section-action" @click="pickerOpen = true">
+              <button v-if="isOwn && entries.length" type="button" class="btn btn-link section-action" @click="pickerOpen = true">
                 {{ t('profile.showcaseChange') }}
               </button>
             </div>
@@ -229,12 +322,12 @@ async function logout() {
                 <span v-if="rarityLabelKey(showcaseCard) !== 'common' && rarityLabelKey(showcaseCard) !== 'uncommon'">
                   · {{ t(`boosters.bucket.${rarityLabelKey(showcaseCard)}`) }}
                 </span>
-                <span class="showcase-mode">{{ chosenEntry ? t('profile.showcaseChosen') : t('profile.showcaseAutoShort') }}</span>
+                <span v-if="isOwn" class="showcase-mode">{{ chosenEntry ? t('profile.showcaseChosen') : t('profile.showcaseAutoShort') }}</span>
               </p>
             </template>
             <div v-else-if="!firstLoad" class="showcase-empty">
-              <p>{{ t('profile.showcaseEmpty') }}</p>
-              <RouterLink :to="{ name: 'boosters' }" class="btn btn-primary glow-button">{{ t('game.openCta') }}</RouterLink>
+              <p>{{ isOwn ? t('profile.showcaseEmpty') : t('profile.showcaseEmptyPublic') }}</p>
+              <RouterLink v-if="isOwn" :to="{ name: 'boosters' }" class="btn btn-primary glow-button">{{ t('game.openCta') }}</RouterLink>
             </div>
             <div v-if="showcaseError" class="alert alert-danger mt-2" role="alert">{{ showcaseError }}</div>
           </section>
@@ -308,23 +401,101 @@ async function logout() {
             </ul>
           </section>
 
-          <section class="panel account">
-            <div>
-              <h2 class="pb-section-title">{{ t('profile.accountTitle') }}</h2>
-              <p class="pb-muted mb-0">{{ t('profile.accountDesc') }}</p>
-            </div>
-            <button type="button" class="btn btn-outline-secondary" @click="logout">{{ t('common.logout') }}</button>
+          <section v-if="!isOwn && topCards.length" class="panel">
+            <h2 class="pb-section-title">{{ t('profile.topCards') }}</h2>
+            <ul class="top-grid" role="list">
+              <li v-for="(entry, index) in topCards" :key="entry.card_id">
+                <button type="button" class="top-card" :aria-label="entry.cards.name" @click="detailIndex = index">
+                  <HoloCard :src="entry.cards.image_small || entry.cards.image_url" alt="" :max-tilt="10" />
+                </button>
+              </li>
+            </ul>
           </section>
+
+          <template v-if="isOwn">
+            <section class="panel">
+              <h2 class="pb-section-title">{{ t('profile.sharingTitle') }}</h2>
+              <label class="switch-row form-switch">
+                <span>
+                  <span class="switch-title">{{ t('profile.publicLabel') }}</span>
+                  <span class="switch-desc">{{ t('profile.publicDesc') }}</span>
+                </span>
+                <input
+                  type="checkbox"
+                  class="form-check-input pb-switch"
+                  role="switch"
+                  :checked="profile?.is_public"
+                  :disabled="privacyBusy || !profile"
+                  @change="setPublic($event.target.checked)"
+                />
+              </label>
+              <div v-if="profile?.is_public" class="share-row">
+                <button type="button" class="btn btn-outline-secondary" @click="copyLink">{{ t('profile.copyLink') }}</button>
+                <RouterLink :to="{ name: 'public-profile', params: { username: profile.username } }" class="btn btn-link">
+                  {{ t('profile.viewPublic') }}
+                </RouterLink>
+                <p v-if="linkNotice" class="share-notice" role="status">{{ linkNotice }}</p>
+              </div>
+            </section>
+
+            <section class="panel">
+              <h2 class="pb-section-title">{{ t('profile.settingsTitle') }}</h2>
+              <label class="switch-row form-switch">
+                <span>
+                  <span class="switch-title">{{ t('profile.soundLabel') }}</span>
+                  <span class="switch-desc">{{ t('profile.soundDesc') }}</span>
+                </span>
+                <input type="checkbox" class="form-check-input pb-switch" role="switch" :checked="settings.sound" @change="settings.set('sound', $event.target.checked)" />
+              </label>
+              <label class="switch-row form-switch">
+                <span>
+                  <span class="switch-title">{{ t('profile.vibrationLabel') }}</span>
+                  <span class="switch-desc">{{ t('profile.vibrationDesc') }}</span>
+                </span>
+                <input type="checkbox" class="form-check-input pb-switch" role="switch" :checked="settings.vibration" @change="settings.set('vibration', $event.target.checked)" />
+              </label>
+              <div v-if="installPrompt && !installed" class="switch-row">
+                <span>
+                  <span class="switch-title">{{ t('profile.installLabel') }}</span>
+                  <span class="switch-desc">{{ t('profile.installDesc') }}</span>
+                </span>
+                <button type="button" class="btn btn-primary btn-sm" @click="promptInstall">{{ t('profile.install') }}</button>
+              </div>
+            </section>
+
+            <section class="panel account">
+              <div>
+                <h2 class="pb-section-title">{{ t('profile.accountTitle') }}</h2>
+                <p class="pb-muted mb-0">{{ t('profile.accountDesc') }}</p>
+              </div>
+              <div class="account-actions">
+                <RouterLink :to="{ name: 'history' }" class="btn btn-outline-secondary">{{ t('profile.historyLink') }}</RouterLink>
+                <button type="button" class="btn btn-outline-secondary" @click="logout">{{ t('common.logout') }}</button>
+              </div>
+            </section>
+          </template>
         </div>
       </div>
     </main>
 
     <ShowcasePicker
+      v-if="isOwn"
       :open="pickerOpen"
       :entries="entries"
-      :selected-id="metadata.showcase_card_id ?? null"
+      :selected-id="profile?.showcase_card_id ?? null"
       @select="setShowcase"
       @close="pickerOpen = false"
+    />
+
+    <CardDetail
+      :entry="detailEntry"
+      :set="detailEntry ? setsStore.byId[detailEntry.cards.set_id] : null"
+      :has-prev="detailIndex > 0"
+      :has-next="detailIndex < topCards.length - 1"
+      :interactive="false"
+      @prev="detailIndex--"
+      @next="detailIndex++"
+      @close="detailIndex = -1"
     />
   </div>
 </template>
@@ -514,12 +685,6 @@ async function logout() {
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-
-.trainer-hint {
-  margin: 0.25rem 0 0;
-  font-size: 0.8rem;
-  color: var(--pb-text-muted);
 }
 
 .name-form {
@@ -791,6 +956,129 @@ async function logout() {
   font-weight: 700;
   color: var(--pb-text-muted);
   white-space: nowrap;
+}
+
+/* ---------- Public profile ---------- */
+
+.public-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
+.public-header .btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 400px) {
+  .public-header :deep(.brand-name) {
+    display: none;
+  }
+}
+
+.profile-missing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.profile-missing-title {
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 800;
+}
+
+.top-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.top-card {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+/* ---------- Sharing & settings ---------- */
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--pb-border);
+  cursor: pointer;
+}
+
+.switch-row:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.switch-row > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.switch-title {
+  font-weight: 700;
+}
+
+.switch-desc {
+  font-size: 0.85rem;
+  color: var(--pb-text-muted);
+}
+
+.switch-row.form-switch {
+  padding-left: 0;
+}
+
+.pb-switch {
+  flex-shrink: 0;
+  margin-left: 0 !important;
+  width: 3rem !important;
+  height: 1.6rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.pb-switch:checked {
+  background-color: var(--pb-accent);
+  border-color: var(--pb-accent);
+}
+
+.share-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-top: 0.75rem;
+}
+
+.share-notice {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--pb-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 /* ---------- Account ---------- */

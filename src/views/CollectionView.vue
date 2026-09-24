@@ -12,16 +12,21 @@ import AppHeader from '@/components/AppHeader.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
 import CardDetail from '@/components/CardDetail.vue'
 import HoloCard from '@/components/HoloCard.vue'
+import PokedexGrid from '@/components/PokedexGrid.vue'
+import WishlistGrid from '@/components/WishlistGrid.vue'
+import { useWishlistStore } from '@/stores/wishlist'
 
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const collectionStore = useCollectionStore()
 const setsStore = useSetsStore()
+const wishlist = useWishlistStore()
 
 onMounted(() => {
   collectionStore.load()
   setsStore.load()
+  wishlist.load()
 })
 
 const entries = computed(() => collectionStore.entries)
@@ -39,8 +44,10 @@ const formatEuros = (value) =>
 
 // ---------- Filters (mirrored in the URL so back/forward and links work) ----------
 
+const VIEWS = ['cards', 'sets', 'pokedex', 'wishlist']
 const view = ref('cards')
 const query = ref('')
+const dex = ref(null) // national Pokédex number filter
 const setId = ref('')
 const rarity = ref('all')
 const duplicates = ref(false)
@@ -50,7 +57,8 @@ const sort = ref('recent')
 let syncingFromRoute = false
 function readQuery(q) {
   syncingFromRoute = true
-  view.value = q.view === 'sets' ? 'sets' : 'cards'
+  view.value = VIEWS.includes(q.view) ? q.view : 'cards'
+  dex.value = Number.parseInt(q.dex, 10) || null
   query.value = typeof q.q === 'string' ? q.q : ''
   setId.value = typeof q.set === 'string' ? q.set : ''
   rarity.value = RARITY_FILTERS.includes(q.rarity) ? q.rarity : 'all'
@@ -63,9 +71,9 @@ watch(() => route.query, readQuery)
 
 // State -> URL. Switching tab or set is a real step (back returns to it);
 // typing and filter tweaks just replace the current entry.
-watch([view, query, setId, rarity, duplicates, sort], ([newView, , newSet], [oldView, , oldSet]) => {
+watch([view, query, setId, rarity, duplicates, sort, dex], ([newView, , newSet, , , , newDex], [oldView, , oldSet, , , , oldDex]) => {
   if (syncingFromRoute) return
-  const navigate = newView !== oldView || newSet !== oldSet ? router.push : router.replace
+  const navigate = newView !== oldView || newSet !== oldSet || newDex !== oldDex ? router.push : router.replace
   navigate({
     query: {
       ...(view.value !== 'cards' && { view: view.value }),
@@ -74,17 +82,19 @@ watch([view, query, setId, rarity, duplicates, sort], ([newView, , newSet], [old
       ...(rarity.value !== 'all' && { rarity: rarity.value }),
       ...(duplicates.value && { dupes: '1' }),
       ...(sort.value !== 'recent' && { sort: sort.value }),
+      ...(dex.value && { dex: String(dex.value) }),
     },
   })
 })
 
-const isFiltered = computed(() => query.value || setId.value || rarity.value !== 'all' || duplicates.value)
+const isFiltered = computed(() => query.value || setId.value || rarity.value !== 'all' || duplicates.value || dex.value)
 
 function resetFilters() {
   query.value = ''
   setId.value = ''
   rarity.value = 'all'
   duplicates.value = false
+  dex.value = null
 }
 
 // Sets the user owns cards from, for the set filter
@@ -100,6 +110,7 @@ const results = computed(() =>
       setId: setId.value,
       rarity: rarity.value,
       duplicates: duplicates.value,
+      dex: dex.value,
     }),
     sort.value,
     setsStore.byId,
@@ -133,19 +144,32 @@ onBeforeUnmount(() => observer?.disconnect())
 
 const progress = computed(() => setProgress(entries.value, setsStore.sets))
 
-// A set tile shows that whole set, in collector number order
+// A set tile opens that set's binder
 function showSet(id) {
+  router.push({ name: 'binder', params: { setId: id } })
+}
+
+// A Pokédex slot shows every card of that Pokémon
+function showDex(number) {
   resetFilters()
-  setId.value = id
-  sort.value = 'set'
+  dex.value = number
   view.value = 'cards'
   window.scrollTo({ top: 0 })
 }
 
 // ---------- Card detail ----------
 
-const openIndex = ref(-1)
-const openEntry = computed(() => results.value[openIndex.value] ?? null)
+// The detail dialog browses either the filtered cards or the wishlist
+const detail = ref({ list: 'results', index: -1 })
+const detailList = computed(() => (detail.value.list === 'wishlist' ? wishlist.entries : results.value))
+const openEntry = computed(() => {
+  const item = detailList.value[detail.value.index]
+  if (!item) return null
+  if (detail.value.list === 'results') return item
+  return entries.value.find((e) => e.card_id === item.card_id) ?? { card_id: item.card_id, quantity: 0, acquired_at: null, cards: item.cards }
+})
+const openDetail = (list, index) => (detail.value = { list, index })
+const moveDetail = (step) => (detail.value = { ...detail.value, index: detail.value.index + step })
 
 function rarityChip(card) {
   const key = rarityLabelKey(card)
@@ -228,6 +252,13 @@ function rarityChip(card) {
             {{ t('collection.tabSets') }}
             <span class="coll-tab-count">{{ formatNumber(stats.setsStarted) }}</span>
           </button>
+          <button type="button" role="tab" :aria-selected="view === 'pokedex'" :class="{ active: view === 'pokedex' }" @click="view = 'pokedex'">
+            {{ t('collection.tabPokedex') }}
+          </button>
+          <button type="button" role="tab" :aria-selected="view === 'wishlist'" :class="{ active: view === 'wishlist' }" @click="view = 'wishlist'">
+            {{ t('collection.tabWishlist') }}
+            <span v-if="wishlist.entries.length" class="coll-tab-count">{{ formatNumber(wishlist.entries.length) }}</span>
+          </button>
         </div>
 
         <!-- ============ Cards ============ -->
@@ -277,6 +308,12 @@ function rarityChip(card) {
 
           <p class="coll-count" aria-live="polite">
             {{ t('collection.resultCount', { count: formatNumber(results.length) }, results.length) }}
+            <button v-if="dex" type="button" class="coll-active-filter" @click="dex = null">
+              {{ t('collection.dexFilter', { number: String(dex).padStart(4, '0') }) }} <span aria-hidden="true">×</span>
+            </button>
+            <RouterLink v-if="setId" :to="{ name: 'binder', params: { setId } }" class="coll-reset">
+              {{ t('collection.openBinder') }}
+            </RouterLink>
             <button v-if="isFiltered" type="button" class="btn btn-link coll-reset" @click="resetFilters">
               {{ t('collection.resetFilters') }}
             </button>
@@ -291,7 +328,7 @@ function rarityChip(card) {
                 class="coll-card"
                 :data-tier="rarityTier(entry.cards)"
                 :aria-label="t('collection.openCard', { name: entry.cards.name })"
-                @click="openIndex = index"
+                @click="openDetail('results', index)"
               >
                 <span class="coll-card-img">
                   <HoloCard :src="entry.cards.image_small || entry.cards.image_url" alt="" :max-tilt="10" />
@@ -308,6 +345,12 @@ function rarityChip(card) {
           </ul>
           <div v-if="visibleCount < results.length" ref="sentinel" class="coll-sentinel" aria-hidden="true"></div>
         </section>
+
+        <!-- ============ Pokédex ============ -->
+        <PokedexGrid v-else-if="view === 'pokedex'" :entries="entries" @select="showDex" />
+
+        <!-- ============ Wishlist ============ -->
+        <WishlistGrid v-else-if="view === 'wishlist'" @open="(index) => openDetail('wishlist', index)" />
 
         <!-- ============ Sets ============ -->
         <section v-else class="coll-sets">
@@ -338,11 +381,11 @@ function rarityChip(card) {
     <CardDetail
       :entry="openEntry"
       :set="openEntry ? setsStore.byId[openEntry.cards.set_id] : null"
-      :has-prev="openIndex > 0"
-      :has-next="openIndex < results.length - 1"
-      @prev="openIndex--"
-      @next="openIndex++"
-      @close="openIndex = -1"
+      :has-prev="detail.index > 0"
+      :has-next="detail.index < detailList.length - 1"
+      @prev="moveDetail(-1)"
+      @next="moveDetail(1)"
+      @close="detail = { list: 'results', index: -1 }"
     />
   </div>
 </template>
@@ -447,6 +490,9 @@ function rarityChip(card) {
 .coll-tabs {
   display: inline-flex;
   align-self: flex-start;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
   gap: 4px;
   padding: 4px;
   border-radius: var(--pb-radius-md);
@@ -455,6 +501,7 @@ function rarityChip(card) {
 }
 
 .coll-tabs button {
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -563,6 +610,19 @@ function rarityChip(card) {
   margin: 0;
   color: var(--pb-text-muted);
   font-weight: 600;
+}
+
+.coll-active-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  border: none;
+  background: var(--pb-text);
+  color: var(--pb-bg);
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .coll-reset {
