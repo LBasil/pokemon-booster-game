@@ -18,6 +18,9 @@
 
   --pb-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
+  /* Background of the current item in navs / tab bars (reads in both themes) */
+  --pb-selected: color-mix(in srgb, var(--pb-text) 10%, transparent);
+
   /* Holographic foil: decorative gradients (borders, glows, card shine) */
   --pb-holo: linear-gradient(115deg, #6ee7f9 0%, #a78bfa 35%, #f472b6 65%, #fcd34d 100%);
 
@@ -307,7 +310,7 @@ a {
 
 .form-control::placeholder {
   color: var(--pb-text-muted);
-  opacity: 0.8;
+  opacity: 1;
 }
 
 .form-control:focus,
@@ -335,6 +338,32 @@ a {
 }
 
 /* ---------- Shared app components ---------- */
+
+/* Signed-in page wrapper: leaves room for the phone tab bar in AppHeader */
+.pb-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 768px) {
+  .pb-page {
+    padding-bottom: 3rem;
+  }
+}
+
+.pb-section-title {
+  font-size: 1.15rem;
+  margin: 0;
+}
+
+/* Loading placeholder with a soft sweep */
+.pb-skeleton {
+  border-radius: var(--pb-radius-sm);
+  background: linear-gradient(90deg, var(--pb-surface) 25%, var(--pb-surface-hover) 50%, var(--pb-surface) 75%);
+  background-size: 200% 100%;
+  animation: pb-shimmer 1.6s linear infinite;
+}
 
 /* Nav cards used on the game hub */
 .game-card {

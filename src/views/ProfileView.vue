@@ -19,9 +19,6 @@ const username = computed(() => auth.user?.user_metadata?.username || null)
 const memberSince = computed(() =>
   auth.user?.created_at ? new Date(auth.user.created_at).toLocaleDateString() : '',
 )
-const totalCardsDrawn = computed(() =>
-  collectionStore.entries.reduce((sum, entry) => sum + entry.quantity, 0),
-)
 
 async function logout() {
   await auth.signOut()
@@ -49,7 +46,7 @@ async function logout() {
         <dd class="col-6">{{ collectionStore.stats.uniqueOwned }}</dd>
 
         <dt class="col-6">{{ t('profile.totalCards') }}</dt>
-        <dd class="col-6">{{ totalCardsDrawn }}</dd>
+        <dd class="col-6">{{ collectionStore.totalDrawn }}</dd>
       </dl>
 
       <button type="button" class="btn btn-outline-secondary w-100" @click="logout">

@@ -86,7 +86,15 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
   blocks: `.pb-glass`, `.pb-holo-text`, `.pb-eyebrow`, `.glow-button`,
   `HoloCard.vue` (tilt + foil shine, reuse it for rare cards),
   `BrandLogo.vue`, `ThemeToggle` (`:floating="false"` to place it inline),
-  `LanguageSwitcher` (EN/FR segmented). Legibility beats effects: anything
+  `LanguageSwitcher` (EN/FR segmented), `BoosterArt.vue` (CSS foil booster
+  pack, size via `--booster-w`), `.pb-skeleton` (loading placeholder),
+  `--pb-selected` (current item in navs).
+- **Signed-in page shell**: wrap the view in `<div class="pb-page">` and put
+  `<AppHeader />` first. AppHeader = brand (links to the hub) + nav pills
+  (desktop) + language/theme/logout, and a fixed bottom tab bar on phones
+  (< 768px); `.pb-page` reserves the space for that bar. Don't put a
+  `transform`/animation on a wrapper around AppHeader — it would break the
+  tab bar's `position: fixed`. Legibility beats effects: anything
   sitting over imagery must be near-opaque. Check both themes at phone width.
 - vue-i18n treats `@` as special: write `{'@'}` in locale strings (e.g. email
   placeholders) or the message fails to compile at runtime.
@@ -112,9 +120,26 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
   collection. Also verified in a headless browser: dark/light theme
   toggle + persistence, language switching, signup form, and the
   `requiresAuth` route guard redirect.
-- Landing/login page redesigned (2026-09-24) with the "Holo Collector"
-  design system; the other views pick up the tokens (colors, fonts,
-  buttons, inputs) but haven't had a dedicated redesign pass yet.
+- Landing/login page and game hub redesigned (2026-09-24) with the "Holo
+  Collector" design system. Hub = greeting, "open boosters" feature tile,
+  collection progress tile (`completionPercent` in `src/utils/progress.js`),
+  profile tile, and a "latest additions" row of `HoloCard`s. Booster,
+  collection and profile views still only inherit the tokens (next in line,
+  in that order) and still use the old floating `ThemeToggle`.
+- WCAG contrast of the token pairs was checked numerically (text >= 16:1,
+  muted >= 6.6:1, primary button 12:1, holo title stops >= 4.6:1 in light).
+  Re-check if you change a color token.
+- The hub was verified in headless Chrome with a faked session in
+  localStorage + mocked PostgREST responses (no `.env` on that machine).
+  If you mock count queries, the response needs
+  `Access-Control-Expose-Headers: content-range` or counts read as 0.
+- `collection` store now has an `error` flag (load() no longer throws) and
+  `totalDrawn` / `recentEntries` getters. `auth.displayName` = username,
+  else the email's local part.
+- Username ("pseudo") is stored only in Supabase Auth user metadata
+  (`raw_user_meta_data.username`), set at signup: not unique, not editable
+  in the UI, only readable by its owner. A public `profiles` table would be
+  needed for leaderboards/trading/unique pseudos.
 - `npm test` (9 tests) and `npm run build` both pass. Zero npm audit
   vulnerabilities.
 - **Not yet manually tested through the actual browser UI with a real
@@ -138,10 +163,10 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
 
 ## TODO / known gaps
 
-- Redesign the inner views (game hub, boosters, collection, profile) with the
-  design system — they only inherit the tokens so far. Good candidates:
-  a shared app header (BrandLogo + LanguageSwitcher + ThemeToggle, like the
-  landing), `HoloCard` for rare pulls in the reveal and the collection grid.
+- Redesign the remaining views (boosters, collection, profile) with the
+  design system + AppHeader shell. Ideas: `BoosterArt`/`HoloCard` in the
+  opening flow and for rare pulls, `HoloCard` grid in the collection,
+  an "edit username" field on the profile.
 - Node: this machine's nvm default was Node 6; the project needs Node 20+
   (`.nvmrc` = 22). `.env` must be recreated on each new machine.
 - No manual browser click-through with a real (non-admin-created) account yet.

@@ -8,7 +8,15 @@
     "confirm": "Confirm",
     "brand": "PokéBooster",
     "switchToDark": "Switch to dark theme",
-    "switchToLight": "Switch to light theme"
+    "switchToLight": "Switch to light theme",
+    "booster": "Booster"
+  },
+  "nav": {
+    "main": "Main navigation",
+    "hub": "Home",
+    "boosters": "Boosters",
+    "collection": "Collection",
+    "profile": "Profile"
   },
   "home": {
     "tagline": "Pick any set — or mix them all — open as many packs as you like, and watch your collection grow with every pull.",
@@ -37,14 +45,23 @@
     "disclaimer": "Fan project, not affiliated with Nintendo, Creatures, GAME FREAK or The Pokémon Company. Card data and images: pokemontcg.io."
   },
   "game": {
-    "title": "Pokémon Collection Game",
     "greeting": "Welcome back, {name}!",
-    "openBoosters": "Open Boosters",
-    "openBoostersDesc": "Tear open packs from any set, as many as you like.",
-    "viewCollection": "View Collection",
-    "viewCollectionDesc": "Browse every card you own.",
-    "profile": "Profile",
-    "profileDesc": "Your account and stats."
+    "openBoosters": "Open boosters",
+    "openBoostersDesc": "Pick a set — or mix them all — and rip open as many packs as you like.",
+    "viewCollection": "My collection",
+    "eyebrow": "Your trainer space",
+    "subtitle": "Ready for your next pull?",
+    "featureTag": "Unlimited",
+    "openCta": "Open a booster",
+    "progressLabel": "Collection completion",
+    "progress": "{percent}% of all unique cards collected",
+    "memberSince": "Member since {date}",
+    "totalDrawn": "{count} card pulled | {count} cards pulled",
+    "recentTitle": "Latest additions",
+    "seeAll": "See all",
+    "emptyTitle": "Your binder is empty",
+    "emptyDesc": "Open your first booster to start your collection.",
+    "loadError": "Couldn't load your collection. Try refreshing the page."
   },
   "boosters": {
     "title": "Open Your Pokémon Booster!",

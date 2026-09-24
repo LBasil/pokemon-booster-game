@@ -9,8 +9,9 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isLoggedIn: (state) => Boolean(state.session),
     user: (state) => state.session?.user ?? null,
+    // Username if set, else the part of the email before the "@"
     displayName: (state) =>
-      state.session?.user?.user_metadata?.username ?? state.session?.user?.email ?? '',
+      state.session?.user?.user_metadata?.username || state.session?.user?.email?.split('@')[0] || '',
   },
   actions: {
     async init() {

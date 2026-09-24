@@ -9,6 +9,9 @@ collection. A Vue 3 single-page app backed by Supabase (Postgres + Auth).
   passwords, no homemade session logic.
 - **Unlimited boosters, any type**: pick a specific Pokémon set or "any set
   (mixed)", and how many boosters to open in one go.
+- **Hub**: greeting, quick access to boosters, collection completion
+  progress, profile summary and your latest pulled cards. Phone-friendly
+  bottom tab bar on every signed-in page.
 - **Collection**: every card you've pulled, with quantities, and how many
   unique cards you own out of the total card pool.
 - **Profile**: account info and quick stats.
