@@ -2,11 +2,6 @@
 import { useI18n } from 'vue-i18n'
 import { useThemeStore } from '@/stores/theme'
 
-defineProps({
-  // Pinned to the top-right corner; pass false to place it inline (e.g. in a header)
-  floating: { type: Boolean, default: true },
-})
-
 const { t } = useI18n()
 const theme = useThemeStore()
 </script>
@@ -15,7 +10,6 @@ const theme = useThemeStore()
   <button
     type="button"
     class="theme-toggle"
-    :class="{ 'theme-toggle-floating': floating }"
     :aria-label="theme.isLight ? t('common.switchToDark') : t('common.switchToLight')"
     :title="theme.isLight ? t('common.switchToDark') : t('common.switchToLight')"
     @click="theme.toggle()"
@@ -63,12 +57,5 @@ const theme = useThemeStore()
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-
-.theme-toggle-floating {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 10;
 }
 </style>

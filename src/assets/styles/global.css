@@ -50,6 +50,15 @@
   --pb-grid-dot: rgba(255, 255, 255, 0.06);
   --pb-shadow-lg: 0 30px 60px -24px rgba(0, 0, 0, 0.75);
   --pb-shadow-card: 0 18px 40px -14px rgba(0, 0, 0, 0.8);
+  /* Selection ring (picked card, active option) */
+  --pb-ring: #a78bfa;
+  /* One color per rarity bucket, for charts and legends */
+  --pb-bucket-common: #5b6385;
+  --pb-bucket-uncommon: #8b93b3;
+  --pb-bucket-rare: #6ee7f9;
+  --pb-bucket-holo: #a78bfa;
+  --pb-bucket-ultra: #f472b6;
+  --pb-bucket-secret: #fcd34d;
 }
 
 [data-bs-theme='light'] {
@@ -78,6 +87,14 @@
   --pb-grid-dot: rgba(17, 22, 51, 0.07);
   --pb-shadow-lg: 0 30px 60px -28px rgba(30, 35, 80, 0.35);
   --pb-shadow-card: 0 18px 40px -16px rgba(30, 35, 80, 0.45);
+  --pb-ring: #6d28d9;
+  /* Deeper stops so chart segments stay visible on a light background */
+  --pb-bucket-common: #a3a9c2;
+  --pb-bucket-uncommon: #6b7392;
+  --pb-bucket-rare: #0e7490;
+  --pb-bucket-holo: #6d28d9;
+  --pb-bucket-ultra: #be185d;
+  --pb-bucket-secret: #b45309;
 }
 
 /* Map tokens onto Bootstrap so its components follow the design system */
@@ -199,15 +216,6 @@ a {
 @keyframes pb-shimmer {
   to {
     background-position: -200% 0;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }
 
@@ -367,42 +375,6 @@ a {
   background: linear-gradient(90deg, var(--pb-surface) 25%, var(--pb-surface-hover) 50%, var(--pb-surface) 75%);
   background-size: 200% 100%;
   animation: pb-shimmer 1.6s linear infinite;
-}
-
-/* Nav cards used on the game hub */
-.game-card {
-  background: var(--pb-surface);
-  border: 1px solid var(--pb-border);
-  border-radius: var(--pb-radius-lg);
-  box-shadow: var(--pb-shadow-card);
-  backdrop-filter: blur(14px);
-  transition:
-    transform 0.25s var(--pb-ease-out),
-    border-color 0.25s,
-    background-color 0.25s;
-}
-
-.game-card:hover {
-  transform: translateY(-4px);
-  background: var(--pb-surface-hover);
-  border-color: var(--pb-border-strong);
-}
-
-.game-card .card-title {
-  font-family: var(--pb-font-display);
-  font-size: 1.25rem;
-  color: var(--pb-text);
-}
-
-@media (max-width: 767px) {
-  .game-card .card-title {
-    font-size: 1.1rem;
-  }
-
-  .game-card {
-    margin: 0 auto;
-    width: 100%;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

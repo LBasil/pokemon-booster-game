@@ -173,15 +173,113 @@
   },
   "profile": {
     "title": "Profil",
+    "trainerCard": "Carte de dresseur",
+    "level": "Niv. {level}",
+    "ranks": {
+      "rookie": "Débutant",
+      "trainer": "Dresseur",
+      "collector": "Collectionneur",
+      "expert": "Expert",
+      "master": "Maître",
+      "legend": "Légende"
+    },
+    "username": {
+      "label": "Pseudo",
+      "edit": "Modifier le pseudo",
+      "hint": "Pas encore de pseudo — touche le crayon pour en choisir un.",
+      "tooShort": "Au moins 2 caractères.",
+      "tooLong": "24 caractères maximum."
+    },
+    "save": "Enregistrer",
+    "saveError": "Impossible d'enregistrer. Réessaie.",
+    "boostersOpened": "{count} booster ouvert | {count} boosters ouverts",
+    "nextRank": "Encore {count} pour {rank} | Encore {count} pour {rank}",
+    "maxRank": "Rang maximum atteint !",
+    "rankProgress": "Progression vers le rang suivant",
     "email": "Email",
-    "username": "Pseudo",
-    "notSet": "Non défini",
     "memberSince": "Membre depuis",
-    "cardsOwned": "Cartes uniques possédées",
-    "totalCards": "Total de cartes tirées"
+    "showcaseTitle": "Carte vitrine",
+    "showcaseChange": "Changer",
+    "showcaseChosen": "Choisie par toi",
+    "showcaseAutoShort": "Ta meilleure carte (automatique)",
+    "showcaseEmpty": "Ouvre un booster pour exposer ta première carte.",
+    "showcasePickerTitle": "Choisis ta carte vitrine",
+    "showcaseAuto": "Automatique",
+    "showcaseAutoDesc": "Toujours afficher ta meilleure carte",
+    "statsTitle": "Statistiques",
+    "statBoosters": "Boosters ouverts",
+    "rarityTitle": "Répartition par rareté",
+    "buckets": {
+      "common": "Commune",
+      "uncommon": "Peu commune",
+      "rare": "Rare",
+      "holo": "Holo",
+      "ultra": "Ultra rare",
+      "secret": "Secrète"
+    },
+    "achievementsTitle": "Succès",
+    "unlocked": "Débloqué",
+    "locked": "Verrouillé",
+    "achievements": {
+      "firstBooster": {
+        "title": "Premier paquet",
+        "desc": "Ouvre ton premier booster"
+      },
+      "tenBoosters": {
+        "title": "Échauffement",
+        "desc": "Ouvre 10 boosters"
+      },
+      "hundredBoosters": {
+        "title": "Déchireur fou",
+        "desc": "Ouvre 100 boosters"
+      },
+      "firstHolo": {
+        "title": "Ça brille !",
+        "desc": "Tire une holo ou mieux"
+      },
+      "firstUltra": {
+        "title": "Gros coup",
+        "desc": "Tire une ultra rare"
+      },
+      "firstSecret": {
+        "title": "Jackpot",
+        "desc": "Tire une carte secrète"
+      },
+      "hundredUnique": {
+        "title": "Classeur garni",
+        "desc": "Possède 100 cartes uniques"
+      },
+      "thousandCards": {
+        "title": "Montagne de cartes",
+        "desc": "Tire 1 000 cartes"
+      },
+      "tenSets": {
+        "title": "Globe-trotter",
+        "desc": "Entame 10 séries différentes"
+      },
+      "halfSet": {
+        "title": "À mi-chemin",
+        "desc": "Complète la moitié d'une série"
+      },
+      "completeSet": {
+        "title": "Série complète",
+        "desc": "Complète une série entière"
+      },
+      "vintage": {
+        "title": "Old school",
+        "desc": "Possède une carte d'avant 2003"
+      },
+      "bigValue": {
+        "title": "Coffre au trésor",
+        "desc": "Atteins 1 000 € de cote estimée"
+      }
+    },
+    "accountTitle": "Compte",
+    "accountDesc": "Connecté avec Supabase. La langue et le thème sont dans la barre du haut."
   },
   "notFound": {
-    "title": "Page introuvable",
-    "backHome": "Retour à l'accueil"
+    "title": "Ce booster est vide",
+    "desc": "La page que tu cherches n'existe pas ou a été déplacée.",
+    "backHome": "Retour en lieu sûr"
   }
 }

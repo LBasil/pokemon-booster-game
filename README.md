@@ -21,7 +21,9 @@ collection. A Vue 3 single-page app backed by Supabase (Postgres + Auth).
   stats and an estimated Cardmarket value; search, filter by set, rarity or
   duplicates, and sort; per-set completion; a detailed view for each card.
   Filters live in the URL, so they survive back/forward and can be shared.
-- **Profile**: account info and quick stats.
+- **Profile**: trainer card with an editable username and a rank that
+  grows with the boosters you open, a showcase card of your choice, stats,
+  rarity breakdown and 13 achievements to unlock.
 - **Dark/light theme** (follows the OS preference until you pick one) and
   **English/French** UI, both persisted locally.
 - **"Holo Collector" design**: a landing page with holographic, tilt-on-hover

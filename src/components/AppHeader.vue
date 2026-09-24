@@ -45,7 +45,7 @@ async function logout() {
 
     <div class="app-header-actions">
       <LanguageSwitcher />
-      <ThemeToggle :floating="false" />
+      <ThemeToggle />
       <button
         type="button"
         class="icon-button"

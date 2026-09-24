@@ -173,15 +173,113 @@
   },
   "profile": {
     "title": "Profile",
+    "trainerCard": "Trainer card",
+    "level": "Lv. {level}",
+    "ranks": {
+      "rookie": "Rookie",
+      "trainer": "Trainer",
+      "collector": "Collector",
+      "expert": "Expert",
+      "master": "Master",
+      "legend": "Legend"
+    },
+    "username": {
+      "label": "Username",
+      "edit": "Edit username",
+      "hint": "No username yet — tap the pencil to pick one.",
+      "tooShort": "At least 2 characters.",
+      "tooLong": "24 characters max."
+    },
+    "save": "Save",
+    "saveError": "Couldn't save. Please try again.",
+    "boostersOpened": "{count} booster opened | {count} boosters opened",
+    "nextRank": "{count} more to {rank} | {count} more to {rank}",
+    "maxRank": "Top rank reached!",
+    "rankProgress": "Progress to the next rank",
     "email": "Email",
-    "username": "Username",
-    "notSet": "Not set",
     "memberSince": "Member since",
-    "cardsOwned": "Unique cards owned",
-    "totalCards": "Total cards drawn"
+    "showcaseTitle": "Showcase card",
+    "showcaseChange": "Change",
+    "showcaseChosen": "Picked by you",
+    "showcaseAutoShort": "Your best pull (automatic)",
+    "showcaseEmpty": "Open a booster to put your first card on display.",
+    "showcasePickerTitle": "Pick your showcase card",
+    "showcaseAuto": "Automatic",
+    "showcaseAutoDesc": "Always show your best pull",
+    "statsTitle": "Stats",
+    "statBoosters": "Boosters opened",
+    "rarityTitle": "Rarity breakdown",
+    "buckets": {
+      "common": "Common",
+      "uncommon": "Uncommon",
+      "rare": "Rare",
+      "holo": "Holo",
+      "ultra": "Ultra rare",
+      "secret": "Secret rare"
+    },
+    "achievementsTitle": "Achievements",
+    "unlocked": "Unlocked",
+    "locked": "Locked",
+    "achievements": {
+      "firstBooster": {
+        "title": "First pack",
+        "desc": "Open your first booster"
+      },
+      "tenBoosters": {
+        "title": "Warming up",
+        "desc": "Open 10 boosters"
+      },
+      "hundredBoosters": {
+        "title": "Pack ripper",
+        "desc": "Open 100 boosters"
+      },
+      "firstHolo": {
+        "title": "Shiny!",
+        "desc": "Pull a holo or better"
+      },
+      "firstUltra": {
+        "title": "Big hit",
+        "desc": "Pull an ultra rare"
+      },
+      "firstSecret": {
+        "title": "Jackpot",
+        "desc": "Pull a secret rare"
+      },
+      "hundredUnique": {
+        "title": "Binder filler",
+        "desc": "Own 100 unique cards"
+      },
+      "thousandCards": {
+        "title": "Card mountain",
+        "desc": "Pull 1,000 cards"
+      },
+      "tenSets": {
+        "title": "Globetrotter",
+        "desc": "Start 10 different sets"
+      },
+      "halfSet": {
+        "title": "Halfway there",
+        "desc": "Collect half of a set"
+      },
+      "completeSet": {
+        "title": "Master set",
+        "desc": "Complete a whole set"
+      },
+      "vintage": {
+        "title": "Old school",
+        "desc": "Own a card from before 2003"
+      },
+      "bigValue": {
+        "title": "Treasure chest",
+        "desc": "Reach €1,000 in estimated value"
+      }
+    },
+    "accountTitle": "Account",
+    "accountDesc": "Signed in with Supabase. Language and theme are in the top bar."
   },
   "notFound": {
-    "title": "Page not found",
-    "backHome": "Back to home"
+    "title": "This booster is empty",
+    "desc": "The page you're looking for doesn't exist or has moved.",
+    "backHome": "Back to safety"
   }
 }

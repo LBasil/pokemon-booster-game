@@ -32,7 +32,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
       <BrandLogo />
       <div class="d-flex align-items-center gap-2">
         <LanguageSwitcher />
-        <ThemeToggle :floating="false" />
+        <ThemeToggle />
       </div>
     </header>
 

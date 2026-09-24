@@ -119,10 +119,13 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
   Never hardcode colors in components — use the tokens. Shared building
   blocks: `.pb-glass`, `.pb-holo-text`, `.pb-eyebrow`, `.glow-button`,
   `HoloCard.vue` (tilt + foil shine, reuse it for rare cards),
-  `BrandLogo.vue`, `ThemeToggle` (`:floating="false"` to place it inline),
+  `BrandLogo.vue`, `ThemeToggle`,
   `LanguageSwitcher` (EN/FR segmented), `BoosterArt.vue` (CSS foil booster
   pack, size via `--booster-w`), `.pb-skeleton` (loading placeholder),
-  `--pb-selected` (current item in navs).
+  `--pb-selected` (current item in navs), `--pb-ring` (selection ring),
+  `--pb-bucket-*` (one color per rarity bucket, darker in light theme).
+- Don't name classes after Bootstrap components (`.badge`, `.card`,
+  `.alert`...): Bootstrap's styles leak in (e.g. `.badge` centers text).
 - **Signed-in page shell**: wrap the view in `<div class="pb-page">` and put
   `<AppHeader />` first. AppHeader = brand (links to the hub) + nav pills
   (desktop) + language/theme/logout, and a fixed bottom tab bar on phones
@@ -167,8 +170,17 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
   `CardDetail.vue` dialog (prev/next via arrows, buttons or swipe). Pure
   logic in `src/utils/collection.js`. The grid renders 48 cards at a time
   (IntersectionObserver), so no server pagination is needed yet.
-  `CardTile.vue` was removed. Only the profile view is left on the old
-  look (still uses the floating `ThemeToggle`).
+  `CardTile.vue` was removed.
+- Profile redesigned (2026-09-24): trainer card (initial avatar, editable
+  username, rank by boosters opened — Rookie -> Legend, see `RANKS` in
+  `src/utils/profile.js`), showcase card (user-picked via
+  `ShowcasePicker.vue`, else the best pull), stats, rarity breakdown bar,
+  13 achievements computed client-side from the collection
+  (`achievements()`), account + logout. Username and `showcase_card_id` are
+  saved with `auth.updateProfile()` -> `supabase.auth.updateUser({ data })`
+  (Auth user metadata, no migration). Boosters opened = cards pulled / 10
+  (every pack is exactly 10 cards). The 404 page is in the design system
+  too — every view is now redesigned.
 - WCAG contrast of the token pairs was checked numerically (text >= 16:1,
   muted >= 6.6:1, primary button 12:1, holo title stops >= 4.6:1 in light).
   Re-check if you change a color token.
@@ -214,8 +226,6 @@ scripts/populate.mjs        admin-only Node script to seed sets/cards from pokem
   set mixing, promo-only sets excluded, and over 3000 simulated packs per
   set (151, Evolving Skies, Perfect Order, Base) ~1 ex/holo in 5 packs,
   ~1 ultra+ in 5.5, ~1 secret in 50.
-- Redesign the profile view with the design system + AppHeader shell.
-  Ideas: an "edit username" field (Supabase Auth metadata), stats, logout.
 - Node: this machine's nvm default was Node 6; the project needs Node 20+
   (`.nvmrc` = 22). `.env` must be recreated on each new machine.
 - This machine's network intercepts HTTPS with its own root CA (curl is fine,

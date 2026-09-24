@@ -42,6 +42,16 @@ export const useAuthStore = defineStore('auth', {
       return data
     },
 
+    // Profile fields live in Supabase Auth user metadata (only the owner can
+    // read them): `username`, and `showcase_card_id` for the profile's
+    // showcase card. Merged, so other metadata keys are kept.
+    async updateProfile(fields) {
+      const { data, error } = await supabase.auth.updateUser({ data: fields })
+      if (error) throw error
+      if (this.session) this.session = { ...this.session, user: data.user }
+      return data.user
+    },
+
     async signOut() {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
