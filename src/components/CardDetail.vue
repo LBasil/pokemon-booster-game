@@ -3,18 +3,22 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { fetchPriceHistory } from '@/api/cards'
 import { shareCard } from '@/lib/shareCard'
+import { useChallengeStore } from '@/stores/challenge'
 import { useProfileStore } from '@/stores/profile'
 import { useWishlistStore } from '@/stores/wishlist'
+import { craftPrice, recycleValue } from '@/utils/challenge'
 import { cardNumber } from '@/utils/collection'
 import { rarityLabelKey, rarityTier } from '@/utils/rarity'
 import { setLogoUrl } from '@/utils/sets'
+import CoinAmount from '@/components/CoinAmount.vue'
 import HoloCard from '@/components/HoloCard.vue'
 import PriceChart from '@/components/PriceChart.vue'
 
 // Full-size view of a card. Opens whenever `entry` is set; arrows (keyboard,
 // buttons or a horizontal swipe) move through the current list. An entry
 // with quantity 0 is a card the player doesn't own yet (binder, wishlist):
-// it gets a wishlist toggle instead of the ownership details.
+// it gets a wishlist toggle instead of the ownership details — or, in the
+// challenge mode, a craft button (and owned duplicates can be recycled).
 const props = defineProps({
   entry: { type: Object, default: null },
   set: { type: Object, default: null },
@@ -22,6 +26,7 @@ const props = defineProps({
   hasNext: { type: Boolean, default: false },
   // false on someone else's public profile: no wishlist, no sharing
   interactive: { type: Boolean, default: true },
+  mode: { type: String, default: 'unlimited' },
 })
 
 const emit = defineEmits(['close', 'prev', 'next'])
@@ -52,6 +57,45 @@ async function toggleWish() {
     wishBusy.value = false
   }
 }
+
+// ---------- Challenge: craft / recycle ----------
+
+const challenge = useChallengeStore()
+const isChallenge = computed(() => props.mode === 'challenge')
+const price = computed(() => (card.value ? craftPrice(card.value) : 0))
+const duplicates = computed(() => Math.max(0, (props.entry?.quantity ?? 0) - 1))
+const recycleGain = computed(() => (card.value ? duplicates.value * recycleValue(card.value) : 0))
+const coinBusy = ref(false)
+const coinNotice = ref('')
+
+async function coinAction(task) {
+  coinBusy.value = true
+  coinNotice.value = ''
+  try {
+    coinNotice.value = await task()
+  } catch (err) {
+    coinNotice.value = t(err.code ? `challenge.errors.${err.code}` : 'challenge.errors.generic')
+  } finally {
+    coinBusy.value = false
+  }
+}
+
+const craft = () =>
+  coinAction(async () => {
+    await challenge.craft(card.value)
+    return t('challenge.craftedNotice', { card: card.value.name })
+  })
+
+const recycle = () =>
+  coinAction(async () => {
+    const result = await challenge.recycle(card.value.id)
+    return t('challenge.recycledNotice', { cards: result.recycled, coins: result.gained.toLocaleString(locale.value) }, result.recycled)
+  })
+
+watch(
+  () => card.value?.id,
+  () => (coinNotice.value = ''),
+)
 
 // Weekly price snapshots (migration 0004); the chart needs at least 2 weeks
 const priceHistory = ref([])
@@ -176,7 +220,35 @@ function onPointerUp(event) {
           <span v-else class="qty-chip missing">{{ t('collection.notOwned') }}</span>
         </div>
 
-        <div v-if="interactive" class="detail-actions">
+        <div v-if="interactive && isChallenge" class="detail-actions">
+          <button
+            v-if="!owned"
+            type="button"
+            class="btn btn-primary"
+            :disabled="coinBusy || challenge.coins < price"
+            @click="craft"
+          >
+            {{ t('challenge.craft') }}
+            <span class="detail-price"><CoinAmount :amount="price" /></span>
+          </button>
+          <template v-else>
+            <button v-if="duplicates" type="button" class="btn btn-outline-secondary" :disabled="coinBusy" @click="recycle">
+              {{ t('challenge.recycleCard', { count: duplicates }, duplicates) }}
+              <span class="detail-price"><CoinAmount :amount="recycleGain" signed /></span>
+            </button>
+            <button type="button" class="btn btn-outline-secondary" :disabled="sharing" @click="share">
+              <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 14v5h14v-5" /></svg>
+              {{ t('collection.share') }}
+            </button>
+          </template>
+          <p v-if="!owned && challenge.coins < price && !coinNotice" class="detail-notice">
+            {{ t('challenge.craftTooExpensive') }}
+          </p>
+          <p v-if="coinNotice" class="detail-notice" role="status">{{ coinNotice }}</p>
+          <p v-if="shareNotice" class="detail-notice" role="status">{{ shareNotice }}</p>
+        </div>
+
+        <div v-else-if="interactive" class="detail-actions">
           <button
             v-if="!owned"
             type="button"
@@ -420,6 +492,15 @@ function onPointerUp(event) {
 
 .btn-icon .filled {
   fill: currentColor;
+}
+
+.detail-price {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  font-size: 0.85em;
 }
 
 .detail-notice {

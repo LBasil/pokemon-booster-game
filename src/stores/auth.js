@@ -1,12 +1,15 @@
 import { defineStore } from 'pinia'
 import { supabase } from '@/lib/supabaseClient'
-import { useCollectionStore } from '@/stores/collection'
+import { useChallengeStore } from '@/stores/challenge'
+import { useChallengeCollectionStore, useCollectionStore } from '@/stores/collection'
 import { useProfileStore } from '@/stores/profile'
 import { useWishlistStore } from '@/stores/wishlist'
 
 // Per-player caches must not survive a sign-out or an account switch
 function resetPlayerStores() {
   useCollectionStore().$reset()
+  useChallengeCollectionStore().$reset()
+  useChallengeStore().$reset()
   useProfileStore().$reset()
   useWishlistStore().$reset()
 }

@@ -9,5 +9,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <RouterView />
+  <!-- Keyed by route name: /boosters and /challenge/boosters share a component
+       but must not share an instance (state, mode-specific stores) -->
+  <RouterView v-slot="{ Component, route }">
+    <component :is="Component" :key="route.name" />
+  </RouterView>
 </template>

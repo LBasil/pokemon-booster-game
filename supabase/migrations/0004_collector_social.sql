@@ -39,8 +39,18 @@
 --    public_collection(username) and leaderboard(kind).
 --
 -- Safe to run twice.
+--
+-- Progress: the SQL editor only shows "running", so each step names itself
+-- in application_name (visible live from another tab, see
+-- docs/manual-testing.md > "Watching a migration run"), and any lock wait
+-- longer than 15s fails with "canceling statement due to lock timeout"
+-- instead of hanging. Both settings are LOCAL: they end with the migration.
+
+set local lock_timeout = '15s';
 
 -- ---------- 1. Game modes on collections ----------
+
+set local application_name = 'migration 0004: step 1/11 game modes on collections';
 
 alter table public.collections add column if not exists mode text not null default 'unlimited';
 
@@ -65,11 +75,15 @@ end $$;
 
 -- ---------- 2. Collections are written by the server only ----------
 
+set local application_name = 'migration 0004: step 2/11 collections are written by the server only';
+
 drop policy if exists "users insert into their own collection" on public.collections;
 drop policy if exists "users update their own collection" on public.collections;
 drop function if exists public.add_cards_to_collection(text[]);
 
 -- ---------- 3. Profiles ----------
+
+set local application_name = 'migration 0004: step 3/11 profiles';
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
@@ -148,6 +162,8 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+set local application_name = 'migration 0004: step 4/11 backfill existing users';
+
 -- Backfill existing users (username and showcase from their Auth metadata)
 do $$
 declare
@@ -195,6 +211,8 @@ create trigger profiles_before_update
 
 -- ---------- 4. Booster openings ----------
 
+set local application_name = 'migration 0004: step 5/11 booster openings';
+
 create table if not exists public.booster_openings (
   id bigint generated always as identity primary key,
   user_id uuid not null references auth.users (id) on delete cascade,
@@ -216,6 +234,8 @@ create policy "users read their own openings" on public.booster_openings
   for select using (auth.uid() = user_id);
 
 -- ---------- 5. Public pull feed ----------
+
+set local application_name = 'migration 0004: step 6/11 public pull feed';
 
 create table if not exists public.pull_feed (
   id bigint generated always as identity primary key,
@@ -250,6 +270,8 @@ end $$;
 
 -- ---------- 6. Wishlist ----------
 
+set local application_name = 'migration 0004: step 7/11 wishlist';
+
 create table if not exists public.wishlist (
   user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
   card_id text not null references public.cards (id) on delete cascade,
@@ -273,6 +295,8 @@ create policy "users remove from their own wishlist" on public.wishlist
 
 -- ---------- 7. Price history ----------
 
+set local application_name = 'migration 0004: step 8/11 price history';
+
 create table if not exists public.card_price_history (
   card_id text not null references public.cards (id) on delete cascade,
   recorded_on date not null default current_date,
@@ -287,6 +311,8 @@ create policy "price history is publicly readable" on public.card_price_history
   for select using (true);
 
 -- ---------- The one way to open a pack ----------
+
+set local application_name = 'migration 0004: step 9/11 the one way to open a pack';
 
 create or replace function public.open_my_booster(p_set_id text default null, p_mode text default 'unlimited')
 returns setof public.cards
@@ -359,6 +385,8 @@ end;
 $$;
 
 -- ---------- 8. Public read-only RPCs ----------
+
+set local application_name = 'migration 0004: step 10/11 public read-only rpcs';
 
 -- A public profile's collection, shaped like the client's fetchCollection()
 -- rows ({ card_id, quantity, acquired_at, cards }), or nothing if the
@@ -450,6 +478,8 @@ $$;
 
 -- ---------- Grants ----------
 
+set local application_name = 'migration 0004: step 11/11 grants';
+
 revoke execute on function public.unique_username(text) from public, anon, authenticated;
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
 revoke execute on function public.profiles_before_update() from public, anon, authenticated;
@@ -457,3 +487,5 @@ revoke execute on function public.open_my_booster(text, text) from public, anon;
 grant execute on function public.open_my_booster(text, text) to authenticated;
 grant execute on function public.public_collection(text) to anon, authenticated;
 grant execute on function public.leaderboard(text, int) to anon, authenticated;
+
+set local application_name = 'migration 0004: done, committing';

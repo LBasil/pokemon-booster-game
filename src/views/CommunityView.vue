@@ -120,6 +120,7 @@ function scoreLabel(row) {
                 </p>
                 <p class="feed-meta">
                   <span class="feed-chip" :data-bucket="pull.bucket">{{ t(`boosters.bucket.${pull.bucket}`) }}</span>
+                  <span v-if="pull.mode === 'challenge'" class="feed-mode">{{ t('nav.challenge') }}</span>
                   <span>{{ setsStore.byId[pull.set_id]?.name ?? pull.set_id }}</span>
                   <span aria-hidden="true">·</span>
                   <time :datetime="pull.pulled_at">{{ timeAgo(pull.pulled_at, locale, now) }}</time>
@@ -300,6 +301,17 @@ function scoreLabel(row) {
   text-transform: uppercase;
   color: #0a0d1a;
   background: var(--pb-holo);
+}
+
+/* Pulled in the challenge mode */
+.feed-mode {
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--pb-border-strong);
+  color: var(--pb-coin);
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 /* ---------- Leaderboards ---------- */

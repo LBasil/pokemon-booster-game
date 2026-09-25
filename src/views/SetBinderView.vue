@@ -3,21 +3,33 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { fetchSetCards } from '@/api/cards'
-import { useCollectionStore } from '@/stores/collection'
+import { modeRoutes } from '@/router/modes'
+import { useChallengeStore } from '@/stores/challenge'
+import { useModeCollectionStore } from '@/stores/collection'
 import { useSetsStore } from '@/stores/sets'
 import { useWishlistStore } from '@/stores/wishlist'
+import { craftPrice } from '@/utils/challenge'
 import { binderSlots, cardNumber } from '@/utils/collection'
 import { rarityTier } from '@/utils/rarity'
 import { setLogoUrl } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
 import CardDetail from '@/components/CardDetail.vue'
+import CoinAmount from '@/components/CoinAmount.vue'
 import HoloCard from '@/components/HoloCard.vue'
 
 // A set as a physical binder: every card in collector-number order, owned
-// ones in full color, missing ones greyed out in their slot.
+// ones in full color, missing ones greyed out in their slot. In the
+// challenge mode, missing cards show their craft price.
+const props = defineProps({
+  mode: { type: String, default: 'unlimited' },
+})
+const isChallenge = props.mode === 'challenge'
+const routes = modeRoutes(props.mode)
+
 const { t, locale } = useI18n()
 const route = useRoute()
-const collectionStore = useCollectionStore()
+const collectionStore = useModeCollectionStore(props.mode)
+const challenge = useChallengeStore()
 const setsStore = useSetsStore()
 const wishlist = useWishlistStore()
 
@@ -43,7 +55,8 @@ async function load() {
 onMounted(() => {
   collectionStore.load()
   setsStore.load()
-  wishlist.load()
+  if (isChallenge) challenge.load()
+  else wishlist.load()
 })
 watch(setId, load, { immediate: true })
 
@@ -52,7 +65,7 @@ const ownedCount = computed(() => slots.value.filter((slot) => slot.quantity > 0
 const percent = computed(() => (slots.value.length ? (ownedCount.value / slots.value.length) * 100 : 0))
 const formatPercent = (value) => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1 }).format(value)
 
-const FILTERS = ['all', 'missing', 'owned', 'wanted']
+const FILTERS = isChallenge ? ['all', 'missing', 'owned'] : ['all', 'missing', 'owned', 'wanted']
 const filter = ref('all')
 const visible = computed(() =>
   slots.value.filter((slot) => {
@@ -78,7 +91,7 @@ const openEntry = computed(() => {
     <AppHeader />
 
     <main class="container binder">
-      <RouterLink :to="{ name: 'collection', query: { view: 'sets' } }" class="binder-back">
+      <RouterLink :to="{ name: routes.collection, query: { view: 'sets' } }" class="binder-back">
         <span aria-hidden="true">←</span> {{ t('binder.back') }}
       </RouterLink>
 
@@ -92,7 +105,7 @@ const openEntry = computed(() => {
           </p>
           <div class="binder-progress" aria-hidden="true"><span :style="{ width: `${Math.max(percent, 1)}%` }"></span></div>
         </div>
-        <RouterLink :to="{ name: 'boosters', query: { set: setId } }" class="btn btn-primary glow-button binder-open">
+        <RouterLink :to="{ name: routes.boosters, query: { set: setId } }" class="btn btn-primary glow-button binder-open">
           {{ t('binder.openThisSet') }}
         </RouterLink>
       </header>
@@ -133,11 +146,14 @@ const openEntry = computed(() => {
               <HoloCard v-if="slot.quantity" :src="slot.card.image_small || slot.card.image_url" alt="" :max-tilt="8" />
               <img v-else :src="slot.card.image_small || slot.card.image_url" alt="" loading="lazy" />
               <span v-if="slot.quantity > 1" class="binder-qty">x{{ slot.quantity }}</span>
-              <span v-if="wishlist.has(slot.card.id)" class="binder-wish" :title="t('binder.wanted')">
+              <span v-if="!isChallenge && wishlist.has(slot.card.id)" class="binder-wish" :title="t('binder.wanted')">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg>
               </span>
             </span>
-            <span class="binder-number">{{ cardNumber(slot.card.id) }}</span>
+            <span class="binder-number">
+              {{ cardNumber(slot.card.id) }}
+              <CoinAmount v-if="isChallenge && !slot.quantity" class="binder-price" :amount="craftPrice(slot.card)" />
+            </span>
           </button>
         </li>
       </ul>
@@ -148,6 +164,7 @@ const openEntry = computed(() => {
       :set="set"
       :has-prev="openIndex > 0"
       :has-next="openIndex < visible.length - 1"
+      :mode="mode"
       @prev="openIndex--"
       @next="openIndex++"
       @close="openIndex = -1"
@@ -343,6 +360,11 @@ const openEntry = computed(() => {
   width: 15px;
   height: 15px;
   fill: currentColor;
+}
+
+.binder-price {
+  margin-left: 0.35rem;
+  color: var(--pb-coin);
 }
 
 .binder-number {

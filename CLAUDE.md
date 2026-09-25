@@ -23,8 +23,9 @@ entire backend.
 src/
   main.js, App.vue          entry point, mounts pinia/router/i18n, applies saved theme
   router/index.js           routes + auth guard (requiresAuth meta -> redirect to "/")
-  stores/                   pinia: auth, profile, collection, sets, wishlist (per-player, reset on
-                            account switch), theme + settings (per-device, localStorage)
+  stores/                   pinia: auth, profile, collection (one store per mode), challenge, sets,
+                            wishlist (per-player, reset on account switch), theme + settings
+                            (per-device, localStorage)
   lib/supabaseClient.js     the one Supabase client instance, reads VITE_ env vars
   lib/                      also sfx.js (synthesized sounds), shareCard.js (share image), pwa.js
   api/                      thin wrappers around supabase-js calls (one file per domain)
@@ -76,7 +77,11 @@ docs/manual-testing.md      checklist for a real-account click-through
    connection). Any schema change ships as a new
    `supabase/migrations/000N_*.sql` file with a comment explaining what it
    does — I hand it to the user to run in the SQL editor, I never claim to
-   have run it myself.
+   have run it myself. The editor only shows "running": start migrations
+   with `set local lock_timeout = '15s';` and put a `set local
+   application_name = 'migration 000N: step i/n ...';` before each section,
+   so the user can follow them live (query in `docs/manual-testing.md` >
+   "Watching a migration run").
 8. **Keep `README.md` current.** Update it in the same change whenever setup
    steps, npm scripts, or the feature list change — it's the user-facing
    counterpart to this file.
@@ -166,11 +171,23 @@ docs/manual-testing.md      checklist for a real-account click-through
   (`displayName` falls back to auth until loaded). `ProfileView.vue` serves
   both `/profile` (own, editable) and `/u/:username` (public, read-only,
   works signed out, `props: true`).
-- **Game modes**: `collections.mode` / `booster_openings.mode` exist
-  ('unlimited' | 'challenge'); only 'unlimited' is live. The future limited
-  "challenge" mode gets its **own separate collection** (user decision) and
-  hosts the economy: currency, duplicate recycling/crafting, trades, daily
-  boosters + notifications. Client queries always filter `mode=unlimited`.
+- **Game modes**: `collections.mode` / `booster_openings.mode`
+  ('unlimited' | 'challenge'). The **challenge mode** (migration 0005) has
+  its **own separate collection** (user decision) and a coin economy:
+  `challenge_wallets` + `challenge_ledger` (read-only for clients), RPCs
+  `challenge_state`, `claim_daily_reward`, `claim_mission`,
+  `open_challenge_booster` (returns jsonb: cards, coins, pity, god_pack),
+  `recycle_duplicates`, `craft_card`. Each RPC locks the player's wallet row
+  first (per-player mutex). Economy numbers live in SQL and are mirrored in
+  `src/utils/challenge.js` — change both together. Game day = UTC.
+  Client: `/challenge` (ChallengeView) + BoosterView / CollectionView /
+  SetBinderView reused with a `mode` prop (`/challenge/boosters`,
+  `/challenge/collection[/set/:setId]`, route `meta.mode`), links via
+  `modeRoutes(mode)` (`src/router/modes.js`), collection store via
+  `useModeCollectionStore(mode)`. `App.vue` keys `RouterView` by route name
+  so both modes never share a view instance. The wishlist, showcase, public
+  collection and leaderboards stay unlimited-only; the pull feed has both
+  (`pull_feed.mode`). Coins render with `CoinAmount.vue` (`--pb-coin`).
 - **Sounds/haptics**: `src/lib/sfx.js` synthesizes everything with Web Audio
   (no audio assets); every call takes `settings.sound` / `settings.vibration`
   from `useSettingsStore()`.
@@ -183,7 +200,7 @@ docs/manual-testing.md      checklist for a real-account click-through
   `validate_palette.js --ordinal` in both themes); single series use
   `--pb-series`, gridlines `--pb-grid`. See `PriceChart.vue`.
 
-## Current state (updated 2026-09-24)
+## Current state (updated 2026-09-25)
 
 - Every view is redesigned in the "Holo Collector" design system: landing
   (auth incl. forgot password), hub (with a live-pull teaser), boosters
@@ -194,6 +211,10 @@ docs/manual-testing.md      checklist for a real-account click-through
   (`/collection/set/:setId`), booster history (`/history`), community
   (`/community`: live feed + leaderboards), profile + public profiles
   (`/u/:username`), `/reset-password`, 404. PWA installable.
+- **Challenge mode** built 2026-09-25: migration
+  `0005_challenge_mode.sql` **written but NOT applied** (needs 0004 first);
+  verified with PGlite (65 checks: RLS, grants, start bonus, daily streak,
+  missions, pity, god pack, recycle, craft, rate limit, feed, wishlist).
 - **Supabase**: migrations 0001-0003 applied (0003 on 2026-09-24, then
   `populate:sets` re-run: 176 sets with logo/symbol URLs). `cards` has
   20,670 rows. **Migration 0004 (`0004_collector_social.sql`) is written
@@ -210,7 +231,7 @@ docs/manual-testing.md      checklist for a real-account click-through
   that `pull_feed` is in the `supabase_realtime` publication (the migration
   adds it if the publication exists); add the three GitHub secrets for
   `sync-cards.yml`.
-- `npm test`: 72 unit tests. `npm run test:e2e`: 32 tests (16 x desktop +
+- `npm test`: 79 unit tests. `npm run test:e2e`: 46 tests (23 x desktop +
   mobile), stable over 3 repeats. `npm run build` passes, 0 npm audit
   vulnerabilities. Screens were also reviewed in headless Chrome with
   realistic mocks (both themes, phone width) — not yet on a real phone.
@@ -223,14 +244,12 @@ docs/manual-testing.md      checklist for a real-account click-through
 
 ## TODO / known gaps
 
-- Apply migration 0004 + the post-migration steps above, then go through
+- Apply migrations 0004 then 0005 + the post-migration steps above, then go through
   `docs/manual-testing.md` with a real account (never done so far — real
   sign-ups need the confirmation email, which is ON).
-- Challenge ("non illimité") mode: separate collection, currency,
-  duplicate recycling/crafting, pity timer, god packs, missions, daily
-  boosters with notifications, **trades between players**. The schema
-  already carries `mode`; `open_my_booster(p_set_id, p_mode)` rejects
-  anything but 'unlimited' for now.
+- Challenge mode, still to do: **trades between players**, notifications
+  (daily reward / missions ready — needs Web Push), a challenge
+  leaderboard, challenge booster history (`/history` is unlimited-only).
 - The hit-rate leaderboard only counts packs opened after 0004 (older
   packs were never logged).
 - Price charts need at least two `populate:cards` runs on different days;

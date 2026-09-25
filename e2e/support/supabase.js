@@ -25,9 +25,19 @@ export async function signIn(page) {
   await page.addInitScript(([key, session]) => localStorage.setItem(key, session), [STORAGE_KEY, JSON.stringify(makeSession())])
 }
 
+// Challenge economy, same numbers as migration 0005
+const RECYCLE = { common: 1, uncommon: 2, rare: 5, holo: 15, ultra: 60, secret: 200 }
+const CRAFT = { common: 20, uncommon: 40, rare: 100, holo: 300, ultra: 1500, secret: 5000 }
+const MISSIONS = [
+  { mission: 'open_packs', target: 3, reward: 75 },
+  { mission: 'pull_holo', target: 1, reward: 100 },
+  { mission: 'recycle', target: 5, reward: 50 },
+]
+
 /**
  * @param {import('@playwright/test').Page} page
- * @param {{ collection?: object[], profile?: object, feed?: object[], leaderboard?: object[], takenUsernames?: string[] }} [options]
+ * @param {{ collection?: object[], challengeCollection?: object[], challenge?: object, godPack?: boolean,
+ *   profile?: object, feed?: object[], leaderboard?: object[], takenUsernames?: string[] }} [options]
  */
 export async function mockSupabase(page, options = {}) {
   const state = {
@@ -43,6 +53,29 @@ export async function mockSupabase(page, options = {}) {
       { rank: 2, username: 'Ash', score: 18, packs: 25, card_id: null, card_name: null, image_small: null },
     ],
     taken: new Set((options.takenUsernames ?? ['brock']).map((name) => name.toLowerCase())),
+    challengeCollection: options.challengeCollection ?? [],
+    challenge: {
+      coins: 1000,
+      packs_since_hit: 0,
+      daily_streak: 0,
+      daily_available: true,
+      daily_reward: 200,
+      progress: { open_packs: 0, pull_holo: 0, recycle: 0 },
+      claimed: [],
+      ...options.challenge,
+    },
+  }
+  const challengeState = () => {
+    const c = state.challenge
+    return {
+      coins: c.coins,
+      packs_since_hit: c.packs_since_hit,
+      daily_streak: c.daily_streak,
+      daily_available: c.daily_available,
+      daily_reward: c.daily_reward,
+      today: new Date().toISOString().slice(0, 10),
+      missions: MISSIONS.map((m) => ({ ...m, progress: Math.min(c.progress[m.mission], m.target), claimed: c.claimed.includes(m.mission) })),
+    }
   }
   const calls = []
 
@@ -82,6 +115,62 @@ export async function mockSupabase(page, options = {}) {
       state.wishlist = state.wishlist.filter((w) => !PACK.some((c) => c.id === w.card_id))
       return json(PACK)
     }
+    // ---- Challenge RPCs (migration 0005) ----
+    const args = JSON.parse(req.postData() || '{}')
+    const raise = (message) => json({ code: 'P0001', message, details: null, hint: null }, 400)
+    const c = state.challenge
+    if (path === '/rest/v1/rpc/challenge_state') return json(challengeState())
+    if (path === '/rest/v1/rpc/claim_daily_reward') {
+      if (!c.daily_available) return raise('already_claimed')
+      const reward = c.daily_reward
+      Object.assign(c, { coins: c.coins + reward, daily_available: false, daily_streak: c.daily_streak + 1, daily_reward: reward + 50 })
+      return json({ ...challengeState(), reward })
+    }
+    if (path === '/rest/v1/rpc/claim_mission') {
+      const m = MISSIONS.find((x) => x.mission === args.p_mission)
+      if (c.claimed.includes(m.mission)) return raise('already_claimed')
+      if (c.progress[m.mission] < m.target) return raise('mission_incomplete')
+      c.claimed.push(m.mission)
+      c.coins += m.reward
+      return json({ ...challengeState(), reward: m.reward })
+    }
+    if (path === '/rest/v1/rpc/open_challenge_booster') {
+      if (c.coins < 100) return raise('not_enough_coins')
+      c.coins -= 100
+      c.progress.open_packs++
+      c.progress.pull_holo++
+      for (const card of PACK) {
+        const owned = state.challengeCollection.find((e) => e.card_id === card.id)
+        if (owned) owned.quantity++
+        else state.challengeCollection.unshift(collectionEntry(card.id, 1, new Date().toISOString()))
+      }
+      return json({ cards: PACK, coins: c.coins, packs_since_hit: 0, god_pack: Boolean(options.godPack), pity: false })
+    }
+    if (path === '/rest/v1/rpc/recycle_duplicates') {
+      let recycled = 0
+      let gained = 0
+      for (const entry of state.challengeCollection) {
+        if (entry.quantity > 1 && (!args.p_card_id || entry.card_id === args.p_card_id)) {
+          recycled += entry.quantity - 1
+          gained += (entry.quantity - 1) * RECYCLE[entry.cards.rarity_bucket]
+          entry.quantity = 1
+        }
+      }
+      c.coins += gained
+      c.progress.recycle += recycled
+      return json({ recycled, gained, coins: c.coins })
+    }
+    if (path === '/rest/v1/rpc/craft_card') {
+      const card = byId[args.p_card_id]
+      const price = CRAFT[card.rarity_bucket]
+      if (c.coins < price) return raise('not_enough_coins')
+      c.coins -= price
+      const owned = state.challengeCollection.find((e) => e.card_id === card.id)
+      if (owned) owned.quantity++
+      else state.challengeCollection.unshift(collectionEntry(card.id, 1, new Date().toISOString()))
+      return json({ card_id: card.id, quantity: owned?.quantity ?? 1, price, coins: c.coins })
+    }
+
     if (path === '/rest/v1/rpc/leaderboard') return json(state.leaderboard)
     if (path === '/rest/v1/rpc/public_collection') {
       const { p_username: name } = JSON.parse(req.postData() || '{}')
@@ -103,8 +192,9 @@ export async function mockSupabase(page, options = {}) {
       return json(url.searchParams.get('limit') === '1' ? list.slice(-1) : list)
     }
     if (table === 'collections') {
-      if (method === 'HEAD') return count(state.collection.length)
-      return json(state.collection)
+      const list = url.searchParams.get('mode') === 'eq.challenge' ? state.challengeCollection : state.collection
+      if (method === 'HEAD') return count(list.length)
+      return json(list)
     }
     if (table === 'profiles') {
       if (method === 'PATCH') {

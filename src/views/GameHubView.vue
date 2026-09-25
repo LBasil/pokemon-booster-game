@@ -6,8 +6,10 @@ import { useCollectionStore } from '@/stores/collection'
 import { completionPercent } from '@/utils/progress'
 import AppHeader from '@/components/AppHeader.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
+import CoinAmount from '@/components/CoinAmount.vue'
 import HoloCard from '@/components/HoloCard.vue'
 import { fetchFeed } from '@/api/social'
+import { useChallengeStore } from '@/stores/challenge'
 import { useProfileStore } from '@/stores/profile'
 import { timeAgo } from '@/utils/time'
 
@@ -15,6 +17,8 @@ const { t, locale } = useI18n()
 const auth = useAuthStore()
 const profileStore = useProfileStore()
 const collectionStore = useCollectionStore()
+// Only shown once the challenge was visited (loading it creates the wallet)
+const challenge = useChallengeStore()
 
 // A peek at the community's latest big pulls (full live feed on /community)
 const livePulls = ref([])
@@ -122,6 +126,22 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
             <p v-if="!firstLoad" class="hub-tile-desc mb-0">
               {{ t('game.totalDrawn', { count: formatNumber(collectionStore.totalDrawn) }, collectionStore.totalDrawn) }}
             </p>
+          </div>
+          <span class="hub-tile-arrow" aria-hidden="true">→</span>
+        </RouterLink>
+
+        <!-- Challenge mode -->
+        <RouterLink :to="{ name: 'challenge' }" class="hub-tile hub-challenge">
+          <div class="hub-challenge-text">
+            <span class="hub-tag">{{ t('game.challengeTag') }}</span>
+            <h2 class="hub-tile-title mt-2">{{ t('game.challengeTitle') }}</h2>
+            <p class="hub-tile-desc mb-0">{{ t('game.challengeDesc') }}</p>
+          </div>
+          <div v-if="challenge.loaded" class="hub-challenge-side">
+            <CoinAmount class="hub-challenge-coins" :amount="challenge.coins" />
+            <span v-if="challenge.pendingRewards" class="hub-challenge-pending">
+              {{ t('game.challengePending', { count: challenge.pendingRewards }, challenge.pendingRewards) }}
+            </span>
           </div>
           <span class="hub-tile-arrow" aria-hidden="true">→</span>
         </RouterLink>
@@ -415,6 +435,46 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
   border: 3px solid transparent;
 }
 
+/* Challenge tile */
+.hub-challenge {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background:
+    radial-gradient(70% 140% at 100% 50%, color-mix(in srgb, var(--pb-accent) 14%, transparent), transparent 70%),
+    var(--pb-surface);
+}
+
+.hub-challenge-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.hub-challenge-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.hub-challenge-coins {
+  color: var(--pb-coin);
+  font-family: var(--pb-font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.hub-challenge-pending {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--pb-accent);
+  color: var(--pb-accent-ink);
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 /* ---------- Latest pulls ---------- */
 
 .hub-live {
@@ -579,6 +639,10 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
 
   .hub-feature {
     grid-row: span 2;
+  }
+
+  .hub-challenge {
+    grid-column: 1 / -1;
   }
 }
 

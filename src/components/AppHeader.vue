@@ -1,31 +1,73 @@
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import BrandLogo from '@/components/BrandLogo.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 
-// Shared top bar for every signed-in view
+// Shared top bar for every signed-in view. Inside the challenge mode
+// (route meta.mode), Boosters / Collection lead to the challenge versions.
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 
-const NAV = [
-  { name: 'boosters', label: 'nav.boosters' },
-  { name: 'collection', label: 'nav.collection' },
-  { name: 'community', label: 'nav.community' },
-  { name: 'profile', label: 'nav.profile' },
-]
+const inChallenge = computed(() => route.meta.mode === 'challenge')
 
-// Phone tab bar: same destinations plus the hub, each with an icon (SVG paths)
-const TABS = [
-  { name: 'game', label: 'nav.hub', icon: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },
-  { name: 'boosters', label: 'nav.boosters', icon: 'M7 3h10l1 3-1 15H7L6 6zM6 6h12M12 10l1.2 2.8L16 14l-2.8 1.2L12 18l-1.2-2.8L8 14l2.8-1.2z' },
-  { name: 'collection', label: 'nav.collection', icon: 'M8 3h11v15H8zM5 6v15h11' },
-  { name: 'community', label: 'nav.community', icon: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 7.5M18 14a6 6 0 0 1 4 7' },
-  { name: 'profile', label: 'nav.profile', icon: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0' },
-]
+const ICONS = {
+  hub: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  boosters: 'M7 3h10l1 3-1 15H7L6 6zM6 6h12M12 10l1.2 2.8L16 14l-2.8 1.2L12 18l-1.2-2.8L8 14l2.8-1.2z',
+  collection: 'M8 3h11v15H8zM5 6v15h11',
+  community: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 7.5M18 14a6 6 0 0 1 4 7',
+  profile: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0',
+  challenge: 'M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6',
+}
+
+const NAV = computed(() =>
+  inChallenge.value
+    ? [
+        { name: 'challenge', label: 'nav.challenge' },
+        { name: 'challenge-boosters', label: 'nav.boosters' },
+        { name: 'challenge-collection', label: 'nav.collection' },
+        { name: 'community', label: 'nav.community' },
+        { name: 'profile', label: 'nav.profile' },
+      ]
+    : [
+        { name: 'boosters', label: 'nav.boosters' },
+        { name: 'collection', label: 'nav.collection' },
+        { name: 'challenge', label: 'nav.challenge' },
+        { name: 'community', label: 'nav.community' },
+        { name: 'profile', label: 'nav.profile' },
+      ],
+)
+
+// Phone tab bar: 5 destinations with icons. The challenge swaps in its own
+// hub, boosters and collection (Community stays one tap away on the hubs).
+const TABS = computed(() =>
+  inChallenge.value
+    ? [
+        { name: 'game', label: 'nav.hub', icon: ICONS.hub },
+        { name: 'challenge', label: 'nav.challenge', icon: ICONS.challenge },
+        { name: 'challenge-boosters', label: 'nav.boosters', icon: ICONS.boosters },
+        { name: 'challenge-collection', label: 'nav.collection', icon: ICONS.collection },
+        { name: 'profile', label: 'nav.profile', icon: ICONS.profile },
+      ]
+    : [
+        { name: 'game', label: 'nav.hub', icon: ICONS.hub },
+        { name: 'boosters', label: 'nav.boosters', icon: ICONS.boosters },
+        { name: 'collection', label: 'nav.collection', icon: ICONS.collection },
+        { name: 'community', label: 'nav.community', icon: ICONS.community },
+        { name: 'profile', label: 'nav.profile', icon: ICONS.profile },
+      ],
+)
+
+// The binder lives under its collection
+const isActive = (name) =>
+  route.name === name ||
+  (name === 'collection' && route.name === 'binder') ||
+  (name === 'challenge-collection' && route.name === 'challenge-binder')
 
 async function logout() {
   await auth.signOut()
@@ -38,9 +80,16 @@ async function logout() {
     <RouterLink :to="{ name: 'game' }" class="app-header-brand" :aria-label="t('nav.hub')">
       <BrandLogo />
     </RouterLink>
+    <RouterLink v-if="inChallenge" :to="{ name: 'challenge' }" class="mode-badge">{{ t('nav.challengeMode') }}</RouterLink>
 
     <nav class="app-header-nav" :aria-label="t('nav.main')">
-      <RouterLink v-for="item in NAV" :key="item.name" :to="{ name: item.name }">
+      <RouterLink
+        v-for="item in NAV"
+        :key="item.name"
+        :to="{ name: item.name }"
+        :class="{ active: isActive(item.name) }"
+        :aria-current="isActive(item.name) ? 'page' : undefined"
+      >
         {{ t(item.label) }}
       </RouterLink>
     </nav>
@@ -62,7 +111,13 @@ async function logout() {
     </div>
 
     <nav class="app-tabbar" :aria-label="t('nav.main')">
-      <RouterLink v-for="tab in TABS" :key="tab.name" :to="{ name: tab.name }">
+      <RouterLink
+        v-for="tab in TABS"
+        :key="tab.name"
+        :to="{ name: tab.name }"
+        :class="{ active: isActive(tab.name) }"
+        :aria-current="isActive(tab.name) ? 'page' : undefined"
+      >
         <svg viewBox="0 0 24 24" aria-hidden="true"><path :d="tab.icon" /></svg>
         <span>{{ t(tab.label) }}</span>
       </RouterLink>
@@ -109,7 +164,7 @@ async function logout() {
   color: var(--pb-text);
 }
 
-.app-header-nav a.router-link-active {
+.app-header-nav a.active {
   color: var(--pb-text);
   background: var(--pb-selected);
 }
@@ -146,6 +201,22 @@ async function logout() {
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* "Challenge" pill next to the brand while in that mode */
+.mode-badge {
+  flex-shrink: 0;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-surface);
+  color: var(--pb-coin);
+  font-family: var(--pb-font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 /* Fixed bottom tab bar on phones; pages add .pb-page to leave room for it */
@@ -185,7 +256,7 @@ async function logout() {
   white-space: nowrap;
 }
 
-.app-tabbar a.router-link-exact-active {
+.app-tabbar a.active {
   color: var(--pb-text);
   background: var(--pb-selected);
 }
@@ -200,8 +271,15 @@ async function logout() {
   stroke-linejoin: round;
 }
 
-.app-tabbar a.router-link-exact-active svg {
+.app-tabbar a.active svg {
   stroke: var(--pb-text);
+}
+
+/* Phones: the tab bar already shows the mode (its Challenge tab is active) */
+@media (max-width: 575.98px) {
+  .mode-badge {
+    display: none;
+  }
 }
 
 /* Brand name is dropped on small phones so the controls fit */

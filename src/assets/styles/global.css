@@ -64,6 +64,10 @@
   /* Single-series charts (price history) */
   --pb-series: #a78bfa;
   --pb-grid: rgba(255, 255, 255, 0.08);
+
+  /* Challenge mode coins (icon fill + amounts) */
+  --pb-coin: #ffd23f;
+  --pb-coin-edge: #b8860b;
 }
 
 [data-bs-theme='light'] {
@@ -102,6 +106,9 @@
   --pb-bucket-secret: #42167f;
   --pb-series: #6d28d9;
   --pb-grid: rgba(17, 22, 51, 0.1);
+
+  --pb-coin: #a16207;
+  --pb-coin-edge: #854d0e;
 }
 
 /* Map tokens onto Bootstrap so its components follow the design system */

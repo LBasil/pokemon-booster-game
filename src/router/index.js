@@ -52,6 +52,34 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      // Challenge mode: its own collection and coin economy (migration 0005)
+      path: '/challenge',
+      name: 'challenge',
+      component: () => import('@/views/ChallengeView.vue'),
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
+      path: '/challenge/boosters',
+      name: 'challenge-boosters',
+      component: () => import('@/views/BoosterView.vue'),
+      props: { mode: 'challenge' },
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
+      path: '/challenge/collection',
+      name: 'challenge-collection',
+      component: () => import('@/views/CollectionView.vue'),
+      props: { mode: 'challenge' },
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
+      path: '/challenge/collection/set/:setId',
+      name: 'challenge-binder',
+      component: () => import('@/views/SetBinderView.vue'),
+      props: { mode: 'challenge' },
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
       // Public profile: shareable, readable even when signed out
       path: '/u/:username',
       name: 'public-profile',

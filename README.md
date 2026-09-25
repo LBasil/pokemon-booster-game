@@ -18,6 +18,13 @@ Supabase (Postgres + Auth + Realtime).
   holo/ex about every 5 packs, a big hit now and then. Every pack is drawn
   and saved **server-side** in one call, so nobody can add cards to their
   own collection from the browser console.
+- **Challenge mode** (`/challenge`): a second, separate collection built
+  with coins. Start with 1,000 coins, pay 100 per booster, earn more with a
+  daily reward that grows over a 7-day streak and three daily missions,
+  recycle duplicates into coins and craft the cards you're missing. A pity
+  timer guarantees an ultra rare at the latest every 10th booster, and 1
+  booster in 500 is a "god pack" (holos and better only). Every coin moves
+  server-side, and the unlimited collection is never touched.
 - **Sound & haptics**: synthesized sound effects (tearing, flips, hit
   fanfares — no audio files) and a vibration on hits, both switchable.
 - **Hub**: greeting, quick access to boosters, collection progress, profile
@@ -101,6 +108,10 @@ its **SQL editor** and run, in order:
    history, live pull feed (added to the Realtime publication), wishlist,
    price history and the leaderboards. Deploy the matching client right
    after: older clients can't save packs any more.
+5. `supabase/migrations/0005_challenge_mode.sql` — the challenge mode:
+   wallets, coin ledger, daily reward, missions, paid boosters with pity
+   timer and god packs, recycling and crafting. Run it after 0004; the
+   current client needs it.
 
 Then in **Authentication**:
 

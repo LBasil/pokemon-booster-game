@@ -19,7 +19,9 @@
     "collection": "Collection",
     "profile": "Profil",
     "history": "Historique",
-    "community": "Communauté"
+    "community": "Communauté",
+    "challenge": "Défi",
+    "challengeMode": "Mode Défi"
   },
   "home": {
     "tagline": "Choisis une série — ou mélange-les toutes —, ouvre autant de paquets que tu veux, et regarde ta collection grandir à chaque tirage.",
@@ -71,7 +73,11 @@
     "emptyDesc": "Ouvre ton premier booster pour lancer ta collection.",
     "loadError": "Impossible de charger ta collection. Essaie de rafraîchir la page.",
     "liveTitle": "En direct",
-    "seeCommunity": "Communauté"
+    "seeCommunity": "Communauté",
+    "challengeTag": "Mode Défi",
+    "challengeTitle": "Relève le défi",
+    "challengeDesc": "Une collection à part, bâtie avec des pièces : récompenses quotidiennes, missions, recyclage et fabrication.",
+    "challengePending": "{count} récompense à récupérer | {count} récompenses à récupérer"
   },
   "boosters": {
     "title": "Choisis ton booster",
@@ -410,5 +416,82 @@
     "done": "Mot de passe modifié ! Direction ton espace dresseur…",
     "expired": "Ce lien a expiré ou a déjà servi. Redemande-en un depuis l'écran de connexion.",
     "backHome": "Retour à la connexion"
+  },
+  "challenge": {
+    "coins": "{count} pièce | {count} pièces",
+    "eyebrow": "Mode Défi",
+    "title": "Chaque booster compte",
+    "subtitle": "Une deuxième collection, à bâtir de zéro avec des pièces : gagne-les chaque jour, dépense-les en boosters, recycle tes doublons et fabrique les cartes qui te manquent.",
+    "loadError": "Impossible de charger le défi. Essaie de rafraîchir la page.",
+    "inHours": "{hours} h {minutes} min",
+    "inMinutes": "{minutes} min",
+    "errors": {
+      "not_enough_coins": "Pas assez de pièces pour ça.",
+      "already_claimed": "Déjà récupéré aujourd'hui.",
+      "mission_incomplete": "Cette mission n'est pas encore terminée.",
+      "generic": "Un problème est survenu. Réessaie."
+    },
+    "rewardNotice": "+{count} pièces !",
+    "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
+    "walletTitle": "Tes pièces",
+    "affordable": "De quoi ouvrir {count} booster | De quoi ouvrir {count} boosters",
+    "pity": "Hit garanti dans ton prochain booster | Hit garanti d'ici {count} boosters",
+    "pityLabel": "Compteur de pitié",
+    "openCta": "Ouvrir des boosters",
+    "dailyTitle": "Récompense du jour",
+    "dailyDesc": "Reviens chaque jour : la récompense grimpe pendant 7 jours d'affilée. Un jour manqué et la série repart à zéro.",
+    "day": "Jour {day}",
+    "claim": "Récupérer",
+    "claimed": "Récupéré",
+    "dailyClaimed": "Récupéré ! Prochaine récompense dans {time}",
+    "missionsTitle": "Missions du jour",
+    "resetIn": "Nouvelles dans {time}",
+    "missions": {
+      "open_packs": "Ouvrir {count} booster | Ouvrir {count} boosters",
+      "pull_holo": "Obtenir une holo ou mieux | Obtenir {count} holos ou mieux",
+      "recycle": "Recycler {count} doublon | Recycler {count} doublons"
+    },
+    "collectionTitle": "Collection Défi",
+    "seeCollection": "Tout voir",
+    "recycleable": "{count} doublon à recycler | {count} doublons à recycler",
+    "noDuplicates": "Aucun doublon à recycler.",
+    "recycleAll": "Recycler les doublons",
+    "recycleConfirm": "Oui, recycler",
+    "rulesTitle": "Comment marche le défi",
+    "rules": {
+      "start": "Tu commences avec {coins} pièces et un classeur vide — ta collection illimitée n'est pas touchée.",
+      "pack": "Un booster coûte {coins} pièces, quelle que soit la série.",
+      "daily": "La récompense du jour et les missions se renouvellent chaque jour à minuit UTC.",
+      "pity": "Compteur de pitié : au plus tard ton {count}e booster d'affilée sans ultra rare en contient une.",
+      "godPack": "God pack : 1 booster sur {odds} ne contient que des holos et mieux.",
+      "recycle": "Recycler garde un exemplaire de chaque carte et transforme les autres en pièces. Fabriquer crée n'importe quelle carte, pour bien plus cher.",
+      "separate": "Les belles cartes du défi apparaissent aussi dans le fil en direct, avec la mention « Défi ».",
+      "tableCaption": "Pièces par carte, selon la rareté",
+      "rarity": "Rareté",
+      "recycleCol": "Recyclage",
+      "craftCol": "Fabrication"
+    },
+    "buckets": {
+      "common": "Commune",
+      "uncommon": "Peu commune",
+      "rare": "Rare",
+      "holo": "Holo",
+      "ultra": "Ultra rare",
+      "secret": "Secrète"
+    },
+    "backToUnlimited": "Retour au mode illimité",
+    "backToHub": "Accueil du défi",
+    "boostersEyebrow": "Boosters du défi",
+    "collectionEyebrow": "Collection Défi",
+    "balance": "Solde :",
+    "notEnoughHint": "Pas assez de pièces.",
+    "earnCoins": "Gagner des pièces",
+    "godPack": "God pack !",
+    "pityPack": "Compteur de pitié : hit garanti",
+    "godPackCount": "{count} god pack | {count} god packs",
+    "craft": "Fabriquer",
+    "craftTooExpensive": "Pas encore assez de pièces pour fabriquer cette carte.",
+    "craftedNotice": "{card} fabriquée et ajoutée à ta collection !",
+    "recycleCard": "Recycler {count} doublon | Recycler {count} doublons"
   }
 }

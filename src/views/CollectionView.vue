@@ -2,7 +2,9 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { useCollectionStore } from '@/stores/collection'
+import { modeRoutes } from '@/router/modes'
+import { useChallengeStore } from '@/stores/challenge'
+import { useModeCollectionStore } from '@/stores/collection'
 import { useSetsStore } from '@/stores/sets'
 import { RARITY_FILTERS, SORTS, collectionStats, filterEntries, setProgress, sortEntries } from '@/utils/collection'
 import { completionPercent } from '@/utils/progress'
@@ -11,23 +13,43 @@ import { setLogoUrl } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
 import CardDetail from '@/components/CardDetail.vue'
+import CoinAmount from '@/components/CoinAmount.vue'
 import HoloCard from '@/components/HoloCard.vue'
 import PokedexGrid from '@/components/PokedexGrid.vue'
+import RecycleDuplicates from '@/components/RecycleDuplicates.vue'
 import WishlistGrid from '@/components/WishlistGrid.vue'
 import { useWishlistStore } from '@/stores/wishlist'
+
+// Serves both modes: /collection and /challenge/collection (the separate
+// challenge collection, with coins, recycling and crafting; no wishlist).
+const props = defineProps({
+  mode: { type: String, default: 'unlimited' },
+})
+const isChallenge = props.mode === 'challenge'
+const routes = modeRoutes(props.mode)
 
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const collectionStore = useCollectionStore()
+const collectionStore = useModeCollectionStore(props.mode)
 const setsStore = useSetsStore()
 const wishlist = useWishlistStore()
+const challenge = useChallengeStore()
 
 onMounted(() => {
   collectionStore.load()
   setsStore.load()
-  wishlist.load()
+  if (isChallenge) challenge.load()
+  else wishlist.load()
 })
+
+const recycleNotice = ref('')
+function onRecycled(result) {
+  recycleNotice.value = t('challenge.recycledNotice', { cards: result.recycled, coins: result.gained.toLocaleString(locale.value) }, result.recycled)
+}
+function onRecycleError(err) {
+  recycleNotice.value = t(err.code ? `challenge.errors.${err.code}` : 'challenge.errors.generic')
+}
 
 const entries = computed(() => collectionStore.entries)
 const firstLoad = computed(() => collectionStore.loading && !collectionStore.loaded)
@@ -44,7 +66,7 @@ const formatEuros = (value) =>
 
 // ---------- Filters (mirrored in the URL so back/forward and links work) ----------
 
-const VIEWS = ['cards', 'sets', 'pokedex', 'wishlist']
+const VIEWS = isChallenge ? ['cards', 'sets', 'pokedex'] : ['cards', 'sets', 'pokedex', 'wishlist']
 const view = ref('cards')
 const query = ref('')
 const dex = ref(null) // national Pokédex number filter
@@ -146,7 +168,7 @@ const progress = computed(() => setProgress(entries.value, setsStore.sets))
 
 // A set tile opens that set's binder
 function showSet(id) {
-  router.push({ name: 'binder', params: { setId: id } })
+  router.push({ name: routes.binder, params: { setId: id } })
 }
 
 // A Pokédex slot shows every card of that Pokémon
@@ -184,8 +206,16 @@ function rarityChip(card) {
     <main class="container collection">
       <!-- ============ Header ============ -->
       <header class="coll-head">
-        <span class="pb-eyebrow">{{ t('collection.eyebrow') }}</span>
+        <span class="pb-eyebrow">{{ isChallenge ? t('challenge.collectionEyebrow') : t('collection.eyebrow') }}</span>
         <h1 class="coll-title">{{ t('collection.title') }}</h1>
+
+        <div v-if="isChallenge && entries.length" class="coll-challenge">
+          <p class="coll-balance">
+            {{ t('challenge.balance') }} <strong><CoinAmount :amount="challenge.coins" /></strong>
+          </p>
+          <RecycleDuplicates class="coll-recycle" @recycled="onRecycled" @error="onRecycleError" />
+          <p v-if="recycleNotice" class="coll-recycle-notice" role="status">{{ recycleNotice }}</p>
+        </div>
 
         <dl v-if="!firstLoad && entries.length" class="coll-stats">
           <div class="coll-stat coll-stat-main">
@@ -235,7 +265,7 @@ function rarityChip(card) {
         <div>
           <h2 class="coll-empty-title">{{ t('collection.emptyTitle') }}</h2>
           <p class="pb-muted">{{ t('collection.empty') }}</p>
-          <RouterLink :to="{ name: 'boosters' }" class="btn btn-primary btn-lg glow-button">
+          <RouterLink :to="{ name: routes.boosters }" class="btn btn-primary btn-lg glow-button">
             {{ t('collection.goOpen') }}
           </RouterLink>
         </div>
@@ -255,7 +285,7 @@ function rarityChip(card) {
           <button type="button" role="tab" :aria-selected="view === 'pokedex'" :class="{ active: view === 'pokedex' }" @click="view = 'pokedex'">
             {{ t('collection.tabPokedex') }}
           </button>
-          <button type="button" role="tab" :aria-selected="view === 'wishlist'" :class="{ active: view === 'wishlist' }" @click="view = 'wishlist'">
+          <button v-if="!isChallenge" type="button" role="tab" :aria-selected="view === 'wishlist'" :class="{ active: view === 'wishlist' }" @click="view = 'wishlist'">
             {{ t('collection.tabWishlist') }}
             <span v-if="wishlist.entries.length" class="coll-tab-count">{{ formatNumber(wishlist.entries.length) }}</span>
           </button>
@@ -311,7 +341,7 @@ function rarityChip(card) {
             <button v-if="dex" type="button" class="coll-active-filter" @click="dex = null">
               {{ t('collection.dexFilter', { number: String(dex).padStart(4, '0') }) }} <span aria-hidden="true">×</span>
             </button>
-            <RouterLink v-if="setId" :to="{ name: 'binder', params: { setId } }" class="coll-reset">
+            <RouterLink v-if="setId" :to="{ name: routes.binder, params: { setId } }" class="coll-reset">
               {{ t('collection.openBinder') }}
             </RouterLink>
             <button v-if="isFiltered" type="button" class="btn btn-link coll-reset" @click="resetFilters">
@@ -350,7 +380,7 @@ function rarityChip(card) {
         <PokedexGrid v-else-if="view === 'pokedex'" :entries="entries" @select="showDex" />
 
         <!-- ============ Wishlist ============ -->
-        <WishlistGrid v-else-if="view === 'wishlist'" @open="(index) => openDetail('wishlist', index)" />
+        <WishlistGrid v-else-if="view === 'wishlist' && !isChallenge" @open="(index) => openDetail('wishlist', index)" />
 
         <!-- ============ Sets ============ -->
         <section v-else class="coll-sets">
@@ -383,6 +413,7 @@ function rarityChip(card) {
       :set="openEntry ? setsStore.byId[openEntry.cards.set_id] : null"
       :has-prev="detail.index > 0"
       :has-next="detail.index < detailList.length - 1"
+      :mode="mode"
       @prev="moveDetail(-1)"
       @next="moveDetail(1)"
       @close="detail = { list: 'results', index: -1 }"
@@ -399,6 +430,39 @@ function rarityChip(card) {
 }
 
 /* ---------- Header ---------- */
+
+.coll-challenge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  margin: -0.5rem 0 1.5rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--pb-radius-md);
+  border: 1px solid var(--pb-border);
+  background: var(--pb-surface);
+}
+
+.coll-balance {
+  margin: 0;
+  font-weight: 600;
+}
+
+.coll-balance strong {
+  color: var(--pb-coin);
+}
+
+.coll-recycle {
+  flex: 1;
+}
+
+.coll-recycle-notice {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--pb-text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
 
 .coll-head {
   animation: pb-rise 0.6s var(--pb-ease-out) both;

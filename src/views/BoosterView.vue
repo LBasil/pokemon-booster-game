@@ -6,23 +6,36 @@ import { fetchSetCover } from '@/api/sets'
 import { openBooster } from '@/api/boosters'
 import * as sfx from '@/lib/sfx'
 import { shareCard } from '@/lib/shareCard'
+import { modeRoutes } from '@/router/modes'
+import { useChallengeStore } from '@/stores/challenge'
 import { useProfileStore } from '@/stores/profile'
-import { useCollectionStore } from '@/stores/collection'
+import { useModeCollectionStore } from '@/stores/collection'
 import { useSetsStore } from '@/stores/sets'
 import { useSettingsStore } from '@/stores/settings'
 import { useWishlistStore } from '@/stores/wishlist'
 import { groupCardsByQuantity } from '@/utils/cards'
+import { PACK_PRICE, packsUntilPity } from '@/utils/challenge'
 import { bestPull, rarityLabelKey, rarityRank, rarityTier, sortForReveal } from '@/utils/rarity'
 import { setLogoUrl, setSymbolUrl } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
 import BoosterPack, { TEAR_MS } from '@/components/BoosterPack.vue'
 import CardStack from '@/components/CardStack.vue'
+import CoinAmount from '@/components/CoinAmount.vue'
 import HoloCard from '@/components/HoloCard.vue'
 import SetPicker from '@/components/SetPicker.vue'
 
+// Serves both modes: /boosters (unlimited) and /challenge/boosters, where
+// every pack costs coins and draws into the separate challenge collection.
+const props = defineProps({
+  mode: { type: String, default: 'unlimited' },
+})
+const isChallenge = props.mode === 'challenge'
+const routes = modeRoutes(props.mode)
+
 const { t, locale } = useI18n()
-const collectionStore = useCollectionStore()
+const collectionStore = useModeCollectionStore(props.mode)
+const challenge = useChallengeStore()
 const setsStore = useSetsStore()
 const settings = useSettingsStore()
 const wishlistStore = useWishlistStore()
@@ -98,9 +111,14 @@ onMounted(() => {
   collectionStore.load().then(() => {
     if (!collectionStore.error) ownedIds = new Set(collectionStore.entries.map((entry) => entry.card_id))
   })
-  wishlistStore.load().then(() => {
-    wishedIds = new Set(wishlistStore.ids)
-  })
+  // The wishlist tracks the unlimited collection only
+  if (!isChallenge) {
+    wishlistStore.load().then(() => {
+      wishedIds = new Set(wishlistStore.ids)
+    })
+  } else {
+    challenge.load({ force: true })
+  }
 
   setsStore.load()
 })
@@ -124,13 +142,27 @@ const openError = ref('')
 const openedSetId = ref('')
 const packSetId = ref('') // set the current pack came from (differs for "any set")
 const stage = ref(null)
+const currentPack = ref({ godPack: false, pity: false }) // challenge pack flags
+const godPacks = ref(0)
 let tearTimer = null
 
+// ---------- Challenge: coins ----------
+
+const canAfford = (n) => !isChallenge || challenge.coins >= n * PACK_PRICE
+const cost = computed(() => count.value * PACK_PRICE)
+const pityLeft = computed(() => packsUntilPity(challenge.packsSinceHit))
+
+function openErrorFor(err) {
+  return err?.code === 'not_enough_coins' ? t('challenge.errors.not_enough_coins') : t('boosters.openError')
+}
+
 async function startOpening() {
+  if (!canAfford(count.value)) return
   totalToOpen.value = count.value
   openedSetId.value = selectedSetId.value
   boosterIndex.value = 0
   pulled.value = []
+  godPacks.value = 0
   openError.value = ''
   phase.value = 'open'
   window.scrollTo({ top: 0 })
@@ -140,9 +172,17 @@ async function startOpening() {
 // The server draws and saves the pack in one call, so leaving mid-reveal
 // never loses cards. Collection and wishlist caches are stale afterwards.
 async function drawPack() {
-  const cards = await openBooster(openedSetId.value || null)
+  let cards
+  if (isChallenge) {
+    const result = await challenge.openBooster(openedSetId.value || null)
+    cards = result.cards
+    currentPack.value = { godPack: result.god_pack, pity: result.pity }
+    if (result.god_pack) godPacks.value++
+  } else {
+    cards = await openBooster(openedSetId.value || null)
+    wishlistStore.invalidate()
+  }
   collectionStore.invalidate()
-  wishlistStore.invalidate()
   return sortForReveal(cards).map((card, index) => {
     const isNew = ownedIds ? !ownedIds.has(card.id) : false
     const isWanted = wishedIds.has(card.id)
@@ -164,8 +204,8 @@ async function prepareBooster() {
     preloadImages(cards)
     packState.value = 'ready'
     focusStage()
-  } catch {
-    openError.value = t('boosters.openError')
+  } catch (err) {
+    openError.value = openErrorFor(err)
     phase.value = pulled.value.length ? 'done' : 'select'
   }
 }
@@ -225,8 +265,8 @@ async function openAllNow() {
       pulled.value.push(...(await drawPack()))
       boosterIndex.value++
     }
-  } catch {
-    openError.value = t('boosters.openError')
+  } catch (err) {
+    openError.value = openErrorFor(err)
   } finally {
     openingAll.value = false
     phase.value = 'done'
@@ -275,6 +315,14 @@ const stageLabel = computed(() => {
   if (openedSetId.value || step.value !== 'reveal') return openedSetName.value
   const from = setName(packSetId.value)
   return from ? `${t('boosters.anySet')} · ${from}` : openedSetName.value
+})
+
+// Challenge packs announce a god pack or the pity timer once torn open
+const packBanner = computed(() => {
+  if (!isChallenge || step.value !== 'reveal') return ''
+  if (currentPack.value.godPack) return t('challenge.godPack')
+  if (currentPack.value.pity) return t('challenge.pityPack')
+  return ''
 })
 
 // Chip label for anything rarer than an uncommon
@@ -344,8 +392,19 @@ async function shareBest() {
       <!-- ============ Choose a booster ============ -->
       <section v-if="phase === 'select'" class="select-layout">
         <div class="select-main">
-          <span class="pb-eyebrow">{{ t('boosters.eyebrow') }}</span>
+          <span class="pb-eyebrow">{{ isChallenge ? t('challenge.boostersEyebrow') : t('boosters.eyebrow') }}</span>
           <h1 class="boosters-title">{{ t('boosters.title') }}</h1>
+
+          <div v-if="isChallenge" class="wallet-line">
+            <p class="wallet-balance">
+              {{ t('challenge.balance') }} <strong><CoinAmount :amount="challenge.coins" /></strong>
+            </p>
+            <p v-if="challenge.loaded && !canAfford(count)" class="wallet-empty">
+              {{ t('challenge.notEnoughHint') }}
+              <RouterLink :to="{ name: 'challenge' }">{{ t('challenge.earnCoins') }}</RouterLink>
+            </p>
+            <p v-else class="wallet-pity">{{ t('challenge.pity', { count: pityLeft }, pityLeft) }}</p>
+          </div>
 
           <div class="preview-stage" :style="{ '--stack': Math.min(count, 3) }" aria-hidden="true">
             <BoosterArt v-if="count > 2" class="preview-pack preview-pack-2" v-bind="pack" />
@@ -378,6 +437,7 @@ async function shareBest() {
                 role="radio"
                 :aria-checked="count === n"
                 :class="{ active: count === n }"
+                :disabled="isChallenge && challenge.loaded && !canAfford(n)"
                 @click="count = n"
               >
                 {{ n }}
@@ -385,12 +445,20 @@ async function shareBest() {
             </div>
           </div>
 
+
           <div v-if="loadError" class="alert alert-danger" role="alert">{{ loadError }}</div>
           <div v-if="openError" class="alert alert-danger" role="alert">{{ openError }}</div>
 
-          <button type="button" class="btn btn-primary btn-lg glow-button open-button" @click="startOpening">
+          <button
+            type="button"
+            class="btn btn-primary btn-lg glow-button open-button"
+            :disabled="isChallenge && (!challenge.loaded || !canAfford(count))"
+            @click="startOpening"
+          >
             {{ t('boosters.openButton', { count }, count) }}
+            <span v-if="isChallenge" class="open-price"><CoinAmount :amount="cost" /></span>
           </button>
+
         </div>
 
         <aside v-if="isDesktop" class="select-side">
@@ -434,6 +502,7 @@ async function shareBest() {
           <p v-if="totalToOpen > 1" class="open-progress-label">
             {{ t('boosters.boosterProgress', { current: boosterIndex + 1, total: totalToOpen }) }}
           </p>
+          <p v-if="packBanner" class="pack-banner" :class="{ god: currentPack.godPack }" role="status">{{ packBanner }}</p>
         </div>
 
         <div ref="stage" class="open-stage">
@@ -504,6 +573,13 @@ async function shareBest() {
             <span>{{ t('boosters.newCount', { count: summary.newCount }, summary.newCount) }}</span>
             <span aria-hidden="true">·</span>
             <span>{{ t('boosters.rareCount', { count: summary.rareCount }, summary.rareCount) }}</span>
+            <template v-if="godPacks">
+              <span aria-hidden="true">·</span>
+              <span class="done-god">{{ t('challenge.godPackCount', { count: godPacks }, godPacks) }}</span>
+            </template>
+          </p>
+          <p v-if="isChallenge" class="done-wallet">
+            {{ t('challenge.balance') }} <strong><CoinAmount :amount="challenge.coins" /></strong>
           </p>
           <div v-if="openError" class="alert alert-danger" role="alert">{{ openError }}</div>
         </div>
@@ -542,14 +618,23 @@ async function shareBest() {
         </div>
 
         <div class="done-actions">
-          <button type="button" class="btn btn-primary btn-lg glow-button" @click="startOpening">
+          <button
+            type="button"
+            class="btn btn-primary btn-lg glow-button"
+            :disabled="!canAfford(totalToOpen)"
+            @click="startOpening"
+          >
             {{ t('boosters.openAgain', { count: totalToOpen }, totalToOpen) }}
+            <span v-if="isChallenge" class="open-price"><CoinAmount :amount="totalToOpen * PACK_PRICE" /></span>
           </button>
           <button type="button" class="btn btn-outline-secondary btn-lg" @click="backToSelect">
             {{ t('boosters.changeSet') }}
           </button>
-          <RouterLink :to="{ name: 'collection' }" class="btn btn-link">
+          <RouterLink :to="{ name: routes.collection }" class="btn btn-link">
             {{ t('game.viewCollection') }}
+          </RouterLink>
+          <RouterLink v-if="isChallenge" :to="{ name: 'challenge' }" class="btn btn-link">
+            {{ t('challenge.backToHub') }}
           </RouterLink>
         </div>
       </section>
@@ -686,6 +771,79 @@ async function shareBest() {
 .open-button {
   width: 100%;
   max-width: 360px;
+}
+
+/* Challenge: balance, pity timer and prices */
+.wallet-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  margin: -0.75rem 0 1rem;
+}
+
+.wallet-balance,
+.done-wallet {
+  margin: 0;
+  font-weight: 600;
+}
+
+.wallet-balance strong,
+.done-wallet strong {
+  color: var(--pb-coin);
+}
+
+.wallet-pity {
+  margin: 0;
+  color: var(--pb-text-muted);
+  font-size: 0.9rem;
+}
+
+.open-price {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pb-accent-ink) 12%, transparent);
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+
+.wallet-empty {
+  margin: 0;
+  color: var(--pb-text-muted);
+  font-size: 0.92rem;
+}
+
+.wallet-empty a {
+  font-weight: 700;
+}
+
+.count-options button:disabled {
+  opacity: 0.35;
+}
+
+.pack-banner {
+  display: inline-block;
+  margin: 0.5rem 0 0;
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--pb-ring);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  animation: pb-rise 0.4s var(--pb-ease-out) both;
+}
+
+.pack-banner.god {
+  border-color: transparent;
+  background: var(--pb-holo);
+  color: #0a0d1a;
+}
+
+.done-god {
+  font-weight: 800;
 }
 
 /* Phones: keep the main action reachable above the tab bar */
