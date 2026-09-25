@@ -372,7 +372,8 @@ a {
   padding-bottom: calc(96px + env(safe-area-inset-bottom));
 }
 
-@media (min-width: 768px) {
+/* The phone tab bar (AppHeader) shows below 992px */
+@media (min-width: 992px) {
   .pb-page {
     padding-bottom: 3rem;
   }

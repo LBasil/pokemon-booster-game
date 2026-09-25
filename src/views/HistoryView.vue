@@ -3,13 +3,20 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { fetchCardsByIds } from '@/api/cards'
 import { fetchOpenings } from '@/api/history'
+import { modeRoutes } from '@/router/modes'
 import { useSetsStore } from '@/stores/sets'
 import { rarityLabelKey, rarityTier, sortForReveal } from '@/utils/rarity'
 import { setLogoUrl } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
 
 // Past boosters, newest first, 20 at a time. Each row expands to show its
-// 10 cards (fetched once, then cached).
+// 10 cards (fetched once, then cached). Serves /history and
+// /challenge/history (challenge packs, god packs flagged).
+const props = defineProps({
+  mode: { type: String, default: 'unlimited' },
+})
+const routes = modeRoutes(props.mode)
+
 const { t, locale } = useI18n()
 const setsStore = useSetsStore()
 
@@ -26,7 +33,7 @@ async function loadMore() {
   loading.value = true
   loadError.value = false
   try {
-    const page = await fetchOpenings({ before: openings.value.at(-1)?.opened_at, limit: PAGE })
+    const page = await fetchOpenings({ mode: props.mode, before: openings.value.at(-1)?.opened_at, limit: PAGE })
     openings.value.push(...page)
     if (page.length < PAGE) done.value = true
     // Best cards up front, so the collapsed rows can show them
@@ -88,7 +95,7 @@ function chip(card) {
 
     <main class="container history">
       <header>
-        <span class="pb-eyebrow">{{ t('history.eyebrow') }}</span>
+        <span class="pb-eyebrow">{{ mode === 'challenge' ? t('challenge.historyEyebrow') : t('history.eyebrow') }}</span>
         <h1 class="history-title">{{ t('history.title') }}</h1>
         <p class="pb-muted">{{ t('history.subtitle') }}</p>
       </header>
@@ -101,7 +108,7 @@ function chip(card) {
 
       <div v-else-if="!openings.length" class="history-empty">
         <p>{{ t('history.empty') }}</p>
-        <RouterLink :to="{ name: 'boosters' }" class="btn btn-primary glow-button">{{ t('game.openCta') }}</RouterLink>
+        <RouterLink :to="{ name: routes.boosters }" class="btn btn-primary glow-button">{{ t('game.openCta') }}</RouterLink>
       </div>
 
       <section v-for="group in groups" :key="group.day" class="history-day">
@@ -117,6 +124,7 @@ function chip(card) {
                 <span class="history-meta">
                   {{ time(opening.opened_at) }}
                   <template v-if="opening.hits"> · {{ t('history.hits', { count: opening.hits }, opening.hits) }}</template>
+                  <span v-if="opening.god_pack" class="history-god">{{ t('challenge.godPack') }}</span>
                 </span>
               </span>
               <span v-if="cardsById[opening.best_card_id]" class="history-best" :data-tier="rarityTier(cardsById[opening.best_card_id])">
@@ -231,6 +239,18 @@ function chip(card) {
 .history-meta {
   font-size: 0.8rem;
   color: var(--pb-text-muted);
+}
+
+.history-god {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: var(--pb-holo);
+  color: #0a0d1a;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .history-best img {

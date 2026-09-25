@@ -3,6 +3,7 @@ import {
   claimDailyReward,
   claimMission,
   craftCard,
+  fetchChallengeBadge,
   fetchChallengeState,
   openChallengeBooster,
   recycleDuplicates,
@@ -12,12 +13,16 @@ import { affordablePacks } from '@/utils/challenge'
 
 // The signed-in player's challenge wallet: coins, daily reward
 // and today's missions. Every change comes back from the server.
+// `badge` = what's waiting (rewards + incoming trades) for the navigation.
+const BADGE_TTL = 60_000
 export const useChallengeStore = defineStore('challenge', {
   state: () => ({
     state: null, // challenge_state() payload
     loading: false,
     loaded: false,
     error: null,
+    badge: { rewards: 0, trades: 0 },
+    badgeAt: 0,
   }),
   getters: {
     coins: (s) => s.state?.coins ?? 0,
@@ -29,6 +34,17 @@ export const useChallengeStore = defineStore('challenge', {
       (s.state?.missions ?? []).filter((m) => !m.claimed && m.progress >= m.target).length,
   },
   actions: {
+    /** Refreshes the navigation badge (at most once a minute unless forced). */
+    async loadBadge({ force = false } = {}) {
+      if (!force && Date.now() - this.badgeAt < BADGE_TTL) return
+      this.badgeAt = Date.now()
+      try {
+        this.badge = await fetchChallengeBadge()
+      } catch {
+        // before migration 0007, or offline: no badge
+      }
+    },
+
     async load({ force = false } = {}) {
       if ((this.loaded && !force) || this.loading) return
       this.loading = true
@@ -36,6 +52,7 @@ export const useChallengeStore = defineStore('challenge', {
       try {
         this.state = await fetchChallengeState()
         this.loaded = true
+        this.loadBadge({ force: true })
       } catch (err) {
         this.error = err
       } finally {
@@ -47,6 +64,7 @@ export const useChallengeStore = defineStore('challenge', {
     async claimDaily() {
       const next = await claimDailyReward()
       this.state = next
+      this.loadBadge({ force: true })
       return next.reward
     },
 
@@ -54,6 +72,7 @@ export const useChallengeStore = defineStore('challenge', {
     async claimMission(mission) {
       const next = await claimMission(mission)
       this.state = next
+      this.loadBadge({ force: true })
       return next.reward
     },
 
@@ -65,6 +84,7 @@ export const useChallengeStore = defineStore('challenge', {
       }
       // Mission progress changed server side
       this.loaded = false
+      this.badgeAt = 0
       useChallengeCollectionStore().invalidate()
       return result
     },
@@ -74,6 +94,7 @@ export const useChallengeStore = defineStore('challenge', {
       const result = await recycleDuplicates(cardId)
       if (this.state) this.state = { ...this.state, coins: result.coins }
       this.loaded = false
+      this.badgeAt = 0
       if (result.recycled) await useChallengeCollectionStore().load({ force: true })
       return result
     },

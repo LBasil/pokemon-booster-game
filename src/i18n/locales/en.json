@@ -21,7 +21,9 @@
     "history": "History",
     "community": "Community",
     "challenge": "Challenge",
-    "challengeMode": "Challenge"
+    "challengeMode": "Challenge",
+    "trades": "Trades",
+    "pending": "waiting | waiting"
   },
   "home": {
     "tagline": "Pick any set — or mix them all — open as many packs as you like, and watch your collection grow with every pull.",
@@ -394,17 +396,22 @@
     "boards": {
       "hit_rate": "Luckiest",
       "best_pull": "Best pull",
-      "complete_sets": "Master sets"
+      "complete_sets": "Master sets",
+      "challenge_unique": "Challenge: cards",
+      "challenge_value": "Challenge: value"
     },
     "boardDesc": {
       "hit_rate": "Ultra and secret rares per 100 boosters (from 20 boosters opened).",
       "best_pull": "The most valuable card in each collection.",
-      "complete_sets": "Sets collected in full."
+      "complete_sets": "Sets collected in full.",
+      "challenge_unique": "Different cards in the challenge collection (ties: fewer boosters wins).",
+      "challenge_value": "Market value of the challenge collection (one copy of each card)."
     },
     "hitRateScore": "{rate} / 100 · {packs} boosters",
     "completeScore": "{count} set | {count} sets",
     "boardEmpty": "Nobody on this leaderboard yet.",
-    "boardError": "Couldn't load the leaderboard."
+    "boardError": "Couldn't load the leaderboard.",
+    "uniqueScore": "{count} card | {count} cards"
   },
   "reset": {
     "title": "New password",
@@ -429,7 +436,15 @@
       "not_enough_coins": "Not enough coins for that.",
       "already_claimed": "Already claimed today.",
       "mission_incomplete": "This mission isn't finished yet.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "trainer_not_found": "No public trainer with that name.",
+      "cannot_trade_with_yourself": "You can't trade with yourself.",
+      "invalid_trade": "Pick 1 to 5 of your cards, and at most 5 of theirs.",
+      "cards_not_owned": "One of these cards is no longer in its owner's collection.",
+      "too_many_trades": "You already have 10 offers waiting. Cancel one or wait for answers.",
+      "trade_not_found": "This offer no longer exists.",
+      "trade_closed": "This offer has already been answered.",
+      "trade_expired": "This offer has expired."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -489,6 +504,57 @@
     "craft": "Craft",
     "craftTooExpensive": "Not enough coins to craft this card yet.",
     "craftedNotice": "{card} crafted and added to your collection!",
-    "recycleCard": "Recycle {count} duplicate | Recycle {count} duplicates"
+    "recycleCard": "Recycle {count} duplicate | Recycle {count} duplicates",
+    "historyEyebrow": "Challenge boosters",
+    "historyLink": "Booster history",
+    "tradesDesc": "Swap cards with other trainers: up to 5 of yours for up to 5 of theirs, or give them away.",
+    "tradesCta": "Open trades",
+    "tradesWaiting": "{count} offer waiting | {count} offers waiting"
+  },
+  "trades": {
+    "title": "Trades",
+    "subtitle": "Trade cards from your challenge collection with other trainers — up to {max} cards on each side. Offers expire after 7 days.",
+    "loadError": "Couldn't load your trades.",
+    "received": "Offers for you",
+    "sent": "Waiting for an answer",
+    "history": "Past trades",
+    "empty": "No trade yet. Find a trainer below to make your first offer.",
+    "youGet": "You get",
+    "youGive": "You give",
+    "youAsk": "You ask {name} for",
+    "gift": "Nothing — a gift",
+    "accept": "Accept",
+    "decline": "Decline",
+    "cancel": "Cancel offer",
+    "waiting": "Waiting for their answer…",
+    "to": "To",
+    "from": "From",
+    "newTitle": "New offer",
+    "partnerLabel": "Trainer",
+    "partnerPlaceholder": "Their username",
+    "find": "Find",
+    "partnerEmpty": "{name} isn't a public trainer with a challenge collection.",
+    "search": "Search a card…",
+    "searchMine": "Search your cards",
+    "searchTheirs": "Search their cards",
+    "noCards": "Your challenge collection is empty: open some boosters first.",
+    "pickHint": "Pick at least one of your cards.",
+    "send": "Send to {name}",
+    "sentNotice": "Offer sent to {name}!",
+    "proposeTo": "Propose a trade to {name}",
+    "result": {
+      "accepted": "Trade done! The cards are in your collection.",
+      "declined": "Offer declined.",
+      "failed": "The trade couldn't happen: a card is no longer there.",
+      "cancelled": "Offer cancelled."
+    },
+    "status": {
+      "accepted": "Done",
+      "declined": "Declined",
+      "cancelled": "Cancelled",
+      "failed": "Failed",
+      "expired": "Expired",
+      "pending": "Pending"
+    }
   }
 }

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { useChallengeStore } from '@/stores/challenge'
 import { useChallengeCollectionStore, useCollectionStore } from '@/stores/collection'
 import { useProfileStore } from '@/stores/profile'
+import { useTradesStore } from '@/stores/trades'
 import { useWishlistStore } from '@/stores/wishlist'
 
 // Per-player caches must not survive a sign-out or an account switch
@@ -10,6 +11,7 @@ function resetPlayerStores() {
   useCollectionStore().$reset()
   useChallengeCollectionStore().$reset()
   useChallengeStore().$reset()
+  useTradesStore().$reset()
   useProfileStore().$reset()
   useWishlistStore().$reset()
 }

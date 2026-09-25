@@ -23,9 +23,9 @@ entire backend.
 src/
   main.js, App.vue          entry point, mounts pinia/router/i18n, applies saved theme
   router/index.js           routes + auth guard (requiresAuth meta -> redirect to "/")
-  stores/                   pinia: auth, profile, collection (one store per mode), challenge, sets,
-                            wishlist (per-player, reset on account switch), theme + settings
-                            (per-device, localStorage)
+  stores/                   pinia: auth, profile, collection (one store per mode), challenge,
+                            trades, sets, wishlist (per-player, reset on account switch),
+                            theme + settings (per-device, localStorage)
   lib/supabaseClient.js     the one Supabase client instance, reads VITE_ env vars
   lib/                      also sfx.js (synthesized sounds), shareCard.js (share image), pwa.js
   api/                      thin wrappers around supabase-js calls (one file per domain)
@@ -149,7 +149,7 @@ docs/manual-testing.md      checklist for a real-account click-through
 - **Signed-in page shell**: wrap the view in `<div class="pb-page">` and put
   `<AppHeader />` first. AppHeader = brand (links to the hub) + nav pills
   (desktop) + language/theme/logout, and a fixed bottom tab bar on phones
-  (< 768px); `.pb-page` reserves the space for that bar. Don't put a
+  and tablets (< 992px); `.pb-page` reserves the space for that bar. Don't put a
   `transform`/animation on a wrapper around AppHeader — it would break the
   tab bar's `position: fixed`. Legibility beats effects: anything
   sitting over imagery must be near-opaque. Check both themes at phone width.
@@ -217,11 +217,26 @@ docs/manual-testing.md      checklist for a real-account click-through
   missions, pity, god pack, recycle, craft, rate limit, feed, wishlist).
   **The pity timer was then removed (user decision: nothing costs real
   money, keep real-life pull rates; god packs stay)**:
-  `0006_challenge_no_pity.sql` **written but NOT applied** — verified with
+  `0006_challenge_no_pity.sql` **applied 2026-09-25** — verified with
   PGlite on a 0005 database (28 checks: columns dropped, god pack kept and
   still drawn, 17-18% hit rate over 1,000 packs, 27+ pack dry streaks
   possible). Never reintroduce a pity timer or anything that bends the
   rates in either mode.
+- **Challenge trades, history, leaderboards, badge** built 2026-09-25:
+  `0007_challenge_trades.sql` **written but NOT applied** (run after
+  0006). Trades: `trade_offers` (read-only for clients), 1-5 of your cards
+  for 0-5 of theirs (0 = gift), public profiles only, 10 pending max,
+  7-day expiry, accept swaps atomically under both wallet locks (ordered)
+  or ends 'failed'. RPCs `propose_trade`, `respond_trade`, `cancel_trade`,
+  `my_trades`, `challenge_collection_of`; `challenge_badge()` (rewards +
+  incoming offers, never creates a wallet) drives the nav badges
+  (`useChallengeStore().loadBadge`, 60s throttle); `leaderboard()` gains
+  `challenge_unique` / `challenge_value`. Client: `/challenge/trades`
+  (TradesView, `?to=<username>` prefill, "Propose a trade" on public
+  profiles), `/challenge/history` (HistoryView `mode` prop, god packs
+  flagged). Verified with PGlite (49 checks). The desktop nav now starts
+  at 992px (6 links in the challenge); the tab bar covers phones and
+  tablets.
 - **Supabase**: migrations 0001-0003 applied (0003 on 2026-09-24, then
   `populate:sets` re-run: 176 sets with logo/symbol URLs). `cards` has
   20,670 rows. **Migration 0004 (`0004_collector_social.sql`) applied
@@ -232,13 +247,8 @@ docs/manual-testing.md      checklist for a real-account click-through
   (35 checks as the anon/authenticated roles: RLS, column grants, unique
   usernames, owned-only showcase, rate limit, backfill of existing users,
   private profiles hidden everywhere, idempotent).
-- Also needed after 0004: in Supabase Auth > URL Configuration add
-  `<site>/game` and `<site>/reset-password` to the Redirect URLs; check
-  that `pull_feed` is in the `supabase_realtime` publication (the migration
-  adds it if the publication exists); add the three GitHub secrets for
-  `sync-cards.yml`.
-- `npm test`: 79 unit tests. `npm run test:e2e`: 46 tests (23 x desktop +
-  mobile), stable over 3 repeats. `npm run build` passes, 0 npm audit
+- `npm test`: 81 unit tests. `npm run test:e2e`: 58 tests (29 x desktop +
+  mobile). `npm run build` passes, 0 npm audit
   vulnerabilities. Screens were also reviewed in headless Chrome with
   realistic mocks (both themes, phone width) — not yet on a real phone.
 - `.env` is not on this machine (screens were tested with mocks);
@@ -248,23 +258,54 @@ docs/manual-testing.md      checklist for a real-account click-through
 - Legacy static files of the original prototype were deleted — recoverable
   from git history if ever needed.
 
-## TODO / known gaps
+## TODO
 
-- Do the post-migration steps above (redirect URLs, realtime, GitHub secrets), then go through
-  `docs/manual-testing.md` with a real account (never done so far — real
-  sign-ups need the confirmation email, which is ON).
-- Challenge mode, still to do: **trades between players**, notifications
-  (daily reward / missions ready — needs Web Push), a challenge
-  leaderboard, challenge booster history (`/history` is unlimited-only).
+- **Apply `0007_challenge_trades.sql`** in the SQL editor (user), then
+  deploy right away: the current client calls the 0007 RPCs (badge,
+  trades, challenge leaderboards). 0001-0006 are applied.
+- Post-migration dashboard steps (user): Supabase Auth > URL Configuration
+  redirect URLs (`<site>/game`, `<site>/reset-password`); check that
+  `pull_feed` is in the `supabase_realtime` publication; the three GitHub
+  secrets for `sync-cards.yml`.
+- Go through `docs/manual-testing.md` with real accounts (never done so
+  far — real sign-ups need the confirmation email, which is ON; trades
+  need two accounts).
+- Push notifications when the app is closed (daily reward ready, trade
+  offer received): needs Web Push — VAPID keys, a subscriptions table, and
+  a Supabase Edge Function + scheduled job to send them, which I can't
+  deploy without CLI access. In-app badges cover the app-open case.
+- Live trade updates: subscribe to `trade_offers` changes (Realtime) so an
+  incoming offer or an answer shows up without a reload.
+- Counter-offers: answer a trade with a modified offer instead of only
+  accept/decline.
+- Show the challenge collection on public profiles (a tab next to the
+  unlimited one), so partners can browse before offering.
+- Challenge achievements and stats on the profile (packs bought, coins
+  earned, trades done, god packs pulled).
+- Weekly missions (bigger goals, bigger rewards) on top of the daily ones.
+
+## Known gaps
+
 - The hit-rate leaderboard only counts packs opened after 0004 (older
   packs were never logged).
 - Price charts need at least two `populate:cards` runs on different days;
   the weekly Action provides that once its secrets are set.
-- Machine notes: nvm default is Node 6 here — use `nvm use` (`.nvmrc` =
-  22). The network intercepts HTTPS: Node scripts need
-  `NODE_USE_SYSTEM_CA=1` (never `NODE_TLS_REJECT_UNAUTHORIZED=0`), and
-  Playwright can't download browsers (use `PW_CHANNEL=chrome`).
 - The pokemontcg.io API key in use is the one exposed in this repo's git
   history — rotate it if the repo is ever made public.
 - The collection is fetched in one query; the grids render progressively.
   Revisit with server-side paging past tens of thousands of distinct cards.
+  Trade pickers show 60 matches at most (search narrows them).
+
+## Machine notes
+
+- nvm default is Node 6 here — use `nvm use` (`.nvmrc` = 22).
+- The network intercepts HTTPS: Node scripts need `NODE_USE_SYSTEM_CA=1`
+  (never `NODE_TLS_REJECT_UNAUTHORIZED=0`), and Playwright can't download
+  browsers (use `PW_CHANNEL=chrome`).
+- PGlite (`@electric-sql/pglite`, installed in a scratch dir, not the
+  repo) is how migrations get checked locally: stub `auth.users`,
+  `auth.uid()` from `request.jwt.claim.sub`, and the anon/authenticated
+  roles, then run 0001..000N.
+- To check what's applied on the real project: REST calls with the
+  service role key from `scripts/.env.local` (a missing table answers 404,
+  an existing RPC called without a user answers `not_authenticated`).

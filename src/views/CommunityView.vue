@@ -73,7 +73,8 @@ const formatEuros = (value) =>
 
 function scoreLabel(row) {
   if (board.value === 'hit_rate') return t('community.hitRateScore', { rate: formatNumber(row.score, 1), packs: formatNumber(row.packs) })
-  if (board.value === 'best_pull') return formatEuros(row.score)
+  if (board.value === 'best_pull' || board.value === 'challenge_value') return formatEuros(row.score)
+  if (board.value === 'challenge_unique') return t('community.uniqueScore', { count: formatNumber(row.score) }, Number(row.score))
   return t('community.completeScore', { count: formatNumber(row.score) }, Number(row.score))
 }
 </script>

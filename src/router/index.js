@@ -80,6 +80,19 @@ const router = createRouter({
       meta: { requiresAuth: true, mode: 'challenge' },
     },
     {
+      path: '/challenge/history',
+      name: 'challenge-history',
+      component: () => import('@/views/HistoryView.vue'),
+      props: { mode: 'challenge' },
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
+      path: '/challenge/trades',
+      name: 'challenge-trades',
+      component: () => import('@/views/TradesView.vue'),
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
       // Public profile: shareable, readable even when signed out
       path: '/u/:username',
       name: 'public-profile',

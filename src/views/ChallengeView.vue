@@ -253,6 +253,21 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 
             <RecycleDuplicates class="ch-recycle" @recycled="onRecycled" @error="onRecycleError" />
           </section>
+
+          <!-- ============ Trades ============ -->
+          <section class="ch-tile ch-trades" aria-labelledby="ch-trades-title">
+            <div class="ch-tile-head">
+              <h2 id="ch-trades-title" class="ch-tile-title">{{ t('trades.title') }}</h2>
+              <span v-if="challenge.badge.trades" class="ch-trades-count">
+                {{ t('challenge.tradesWaiting', { count: challenge.badge.trades }, challenge.badge.trades) }}
+              </span>
+            </div>
+            <p class="ch-muted">{{ t('challenge.tradesDesc') }}</p>
+            <div class="ch-trades-actions">
+              <RouterLink :to="{ name: 'challenge-trades' }" class="btn btn-outline-secondary">{{ t('challenge.tradesCta') }}</RouterLink>
+              <RouterLink :to="{ name: 'challenge-history' }" class="ch-link">{{ t('challenge.historyLink') }}</RouterLink>
+            </div>
+          </section>
         </div>
 
         <!-- ============ Rules ============ -->
@@ -644,6 +659,31 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   margin-top: 1.25rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--pb-border);
+}
+
+/* Trades */
+.ch-trades {
+  display: flex;
+  flex-direction: column;
+}
+
+.ch-trades-count {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--pb-accent);
+  color: var(--pb-accent-ink);
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.ch-trades-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin-top: auto;
+  padding-top: 1.25rem;
 }
 
 /* Rules */

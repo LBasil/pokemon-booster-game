@@ -65,10 +65,9 @@ watch(
 
 onMounted(() => {
   setsStore.load()
-  if (isOwn.value) {
-    collectionStore.load()
-    profileStore.load()
-  }
+  if (isOwn.value) collectionStore.load()
+  // Own username: also hides the trade button on your own public page
+  if (auth.isLoggedIn) profileStore.load()
 })
 
 const profile = computed(() => (isOwn.value ? profileStore.profile : publicProfile.value))
@@ -297,6 +296,15 @@ async function logout() {
                 <dd>{{ memberSince }}</dd>
               </div>
             </dl>
+
+            <!-- Someone else's public profile: start a challenge trade with them -->
+            <RouterLink
+              v-if="!isOwn && auth.isLoggedIn && profile && profile.username.toLowerCase() !== profileStore.profile?.username?.toLowerCase()"
+              :to="{ name: 'challenge-trades', query: { to: profile.username } }"
+              class="btn btn-outline-secondary btn-sm trade-link"
+            >
+              {{ t('trades.proposeTo', { name: profile.username }) }}
+            </RouterLink>
           </section>
 
           <section class="showcase" :aria-label="t('profile.showcaseTitle')">
@@ -1057,6 +1065,11 @@ async function logout() {
 .pb-switch:checked {
   background-color: var(--pb-accent);
   border-color: var(--pb-accent);
+}
+
+.trade-link {
+  align-self: flex-start;
+  margin-top: 1rem;
 }
 
 .share-row {

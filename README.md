@@ -23,8 +23,12 @@ Supabase (Postgres + Auth + Realtime).
   daily reward that grows over a 7-day streak and three daily missions,
   recycle duplicates into coins and craft the cards you're missing. Packs
   keep the real pull rates (no pity timer), except that 1 booster in 500 is
-  a "god pack" (holos and better only). Every coin moves
-  server-side, and the unlimited collection is never touched.
+  a "god pack" (holos and better only). **Trade cards** with other
+  trainers (up to 5 for 5, or as a gift; "Propose a trade" on any public
+  profile), follow your challenge booster history, and climb the two
+  challenge leaderboards. Badges in the navigation show rewards to claim
+  and offers to answer. Every coin and card moves server-side, and the
+  unlimited collection is never touched.
 - **Sound & haptics**: synthesized sound effects (tearing, flips, hit
   fanfares — no audio files) and a vibration on hits, both switchable.
 - **Hub**: greeting, quick access to boosters, collection progress, profile
@@ -113,7 +117,10 @@ its **SQL editor** and run, in order:
    packs, recycling and crafting. Run it after 0004.
 6. `supabase/migrations/0006_challenge_no_pity.sql` — removes the
    challenge's pity timer (real pull rates only, god packs stay). Run it
-   after 0005; the current client needs it.
+   after 0005.
+7. `supabase/migrations/0007_challenge_trades.sql` — trades between
+   players, challenge leaderboards and the navigation badge. Run it after
+   0006; the current client needs it.
 
 Then in **Authentication**:
 

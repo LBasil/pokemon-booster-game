@@ -21,7 +21,9 @@
     "history": "Historique",
     "community": "Communauté",
     "challenge": "Défi",
-    "challengeMode": "Mode Défi"
+    "challengeMode": "Mode Défi",
+    "trades": "Échanges",
+    "pending": "en attente | en attente"
   },
   "home": {
     "tagline": "Choisis une série — ou mélange-les toutes —, ouvre autant de paquets que tu veux, et regarde ta collection grandir à chaque tirage.",
@@ -394,17 +396,22 @@
     "boards": {
       "hit_rate": "Plus chanceux",
       "best_pull": "Meilleure carte",
-      "complete_sets": "Séries complètes"
+      "complete_sets": "Séries complètes",
+      "challenge_unique": "Défi : cartes",
+      "challenge_value": "Défi : valeur"
     },
     "boardDesc": {
       "hit_rate": "Ultra rares et secrètes pour 100 boosters (à partir de 20 boosters ouverts).",
       "best_pull": "La carte la plus cotée de chaque collection.",
-      "complete_sets": "Séries collectionnées en entier."
+      "complete_sets": "Séries collectionnées en entier.",
+      "challenge_unique": "Cartes différentes dans la collection Défi (à égalité : le moins de boosters gagne).",
+      "challenge_value": "Valeur marchande de la collection Défi (un exemplaire de chaque carte)."
     },
     "hitRateScore": "{rate} / 100 · {packs} boosters",
     "completeScore": "{count} série | {count} séries",
     "boardEmpty": "Personne dans ce classement pour l'instant.",
-    "boardError": "Impossible de charger le classement."
+    "boardError": "Impossible de charger le classement.",
+    "uniqueScore": "{count} carte | {count} cartes"
   },
   "reset": {
     "title": "Nouveau mot de passe",
@@ -429,7 +436,15 @@
       "not_enough_coins": "Pas assez de pièces pour ça.",
       "already_claimed": "Déjà récupéré aujourd'hui.",
       "mission_incomplete": "Cette mission n'est pas encore terminée.",
-      "generic": "Un problème est survenu. Réessaie."
+      "generic": "Un problème est survenu. Réessaie.",
+      "trainer_not_found": "Aucun dresseur public à ce nom.",
+      "cannot_trade_with_yourself": "Tu ne peux pas échanger avec toi-même.",
+      "invalid_trade": "Choisis de 1 à 5 de tes cartes, et 5 des siennes au maximum.",
+      "cards_not_owned": "Une de ces cartes n'est plus dans la collection de son propriétaire.",
+      "too_many_trades": "Tu as déjà 10 offres en attente. Annule-en une ou attends les réponses.",
+      "trade_not_found": "Cette offre n'existe plus.",
+      "trade_closed": "Cette offre a déjà reçu une réponse.",
+      "trade_expired": "Cette offre a expiré."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -489,6 +504,57 @@
     "craft": "Fabriquer",
     "craftTooExpensive": "Pas encore assez de pièces pour fabriquer cette carte.",
     "craftedNotice": "{card} fabriquée et ajoutée à ta collection !",
-    "recycleCard": "Recycler {count} doublon | Recycler {count} doublons"
+    "recycleCard": "Recycler {count} doublon | Recycler {count} doublons",
+    "historyEyebrow": "Boosters du défi",
+    "historyLink": "Historique des boosters",
+    "tradesDesc": "Échange des cartes avec d'autres dresseurs : jusqu'à 5 des tiennes contre jusqu'à 5 des leurs, ou offre-les.",
+    "tradesCta": "Voir les échanges",
+    "tradesWaiting": "{count} offre en attente | {count} offres en attente"
+  },
+  "trades": {
+    "title": "Échanges",
+    "subtitle": "Échange des cartes de ta collection Défi avec d'autres dresseurs — jusqu'à {max} cartes de chaque côté. Les offres expirent au bout de 7 jours.",
+    "loadError": "Impossible de charger tes échanges.",
+    "received": "Offres pour toi",
+    "sent": "En attente de réponse",
+    "history": "Échanges passés",
+    "empty": "Aucun échange pour l'instant. Trouve un dresseur ci-dessous pour faire ta première offre.",
+    "youGet": "Tu reçois",
+    "youGive": "Tu donnes",
+    "youAsk": "Tu demandes à {name}",
+    "gift": "Rien — un cadeau",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "cancel": "Annuler l'offre",
+    "waiting": "En attente de sa réponse…",
+    "to": "À",
+    "from": "De",
+    "newTitle": "Nouvelle offre",
+    "partnerLabel": "Dresseur",
+    "partnerPlaceholder": "Son nom d'utilisateur",
+    "find": "Chercher",
+    "partnerEmpty": "{name} n'est pas un dresseur public avec une collection Défi.",
+    "search": "Rechercher une carte…",
+    "searchMine": "Rechercher dans tes cartes",
+    "searchTheirs": "Rechercher dans ses cartes",
+    "noCards": "Ta collection Défi est vide : ouvre d'abord des boosters.",
+    "pickHint": "Choisis au moins une de tes cartes.",
+    "send": "Envoyer à {name}",
+    "sentNotice": "Offre envoyée à {name} !",
+    "proposeTo": "Proposer un échange à {name}",
+    "result": {
+      "accepted": "Échange fait ! Les cartes sont dans ta collection.",
+      "declined": "Offre refusée.",
+      "failed": "L'échange n'a pas pu se faire : une carte n'est plus là.",
+      "cancelled": "Offre annulée."
+    },
+    "status": {
+      "accepted": "Fait",
+      "declined": "Refusé",
+      "cancelled": "Annulé",
+      "failed": "Échoué",
+      "expired": "Expiré",
+      "pending": "En attente"
+    }
   }
 }

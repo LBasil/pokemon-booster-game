@@ -37,6 +37,7 @@ const MISSIONS = [
 /**
  * @param {import('@playwright/test').Page} page
  * @param {{ collection?: object[], challengeCollection?: object[], challenge?: object, godPack?: boolean,
+ *   trades?: object[], partners?: Record<string, object[]>, badge?: { rewards: number, trades: number },
  *   profile?: object, feed?: object[], leaderboard?: object[], takenUsernames?: string[] }} [options]
  */
 export async function mockSupabase(page, options = {}) {
@@ -63,6 +64,11 @@ export async function mockSupabase(page, options = {}) {
       claimed: [],
       ...options.challenge,
     },
+    // Trades (migration 0007): my_trades() rows, and challenge collections by lowercased username
+    trades: options.trades ?? [],
+    partners: options.partners ?? { misty: [collectionEntry('base1-4'), collectionEntry('sv3pt5-150')] },
+    badge: options.badge ?? { rewards: 0, trades: 0 },
+    nextTradeId: 100,
   }
   const challengeState = () => {
     const c = state.challenge
@@ -169,6 +175,49 @@ export async function mockSupabase(page, options = {}) {
       return json({ card_id: card.id, quantity: owned?.quantity ?? 1, price, coins: c.coins })
     }
 
+    if (path === '/rest/v1/rpc/challenge_badge') return json(state.badge)
+    if (path === '/rest/v1/rpc/my_trades') return json(state.trades)
+    if (path === '/rest/v1/rpc/challenge_collection_of') {
+      return json(state.partners[args.p_username.trim().toLowerCase()] ?? [])
+    }
+    if (path === '/rest/v1/rpc/propose_trade') {
+      const partner = state.partners[args.p_username.trim().toLowerCase()]
+      if (!partner) return raise('trainer_not_found')
+      const id = state.nextTradeId++
+      state.trades.unshift({
+        id,
+        direction: 'sent',
+        partner: args.p_username.trim(),
+        offer: args.p_offer.map((cardId) => byId[cardId]),
+        request: args.p_request.map((cardId) => byId[cardId]),
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        resolved_at: null,
+      })
+      return json(id)
+    }
+    if (path === '/rest/v1/rpc/respond_trade') {
+      const trade = state.trades.find((x) => x.id === args.p_trade_id)
+      if (!trade || trade.status !== 'pending') return raise('trade_closed')
+      trade.status = args.p_accept ? 'accepted' : 'declined'
+      trade.resolved_at = new Date().toISOString()
+      if (args.p_accept) {
+        for (const card of trade.offer) {
+          const owned = state.challengeCollection.find((e) => e.card_id === card.id)
+          if (owned) owned.quantity++
+          else state.challengeCollection.unshift(collectionEntry(card.id, 1, new Date().toISOString()))
+        }
+        state.challengeCollection = state.challengeCollection.filter((e) => !trade.request.some((card) => card.id === e.card_id))
+      }
+      state.badge.trades = state.trades.filter((x) => x.direction === 'received' && x.status === 'pending').length
+      return json({ status: trade.status })
+    }
+    if (path === '/rest/v1/rpc/cancel_trade') {
+      const trade = state.trades.find((x) => x.id === args.p_trade_id)
+      Object.assign(trade, { status: 'cancelled', resolved_at: new Date().toISOString() })
+      return json(null)
+    }
+
     if (path === '/rest/v1/rpc/leaderboard') return json(state.leaderboard)
     if (path === '/rest/v1/rpc/public_collection') {
       const { p_username: name } = JSON.parse(req.postData() || '{}')
@@ -225,7 +274,10 @@ export async function mockSupabase(page, options = {}) {
       }
       return json(state.wishlist)
     }
-    if (table === 'booster_openings') return json(state.openings)
+    if (table === 'booster_openings') {
+      const mode = url.searchParams.get('mode')?.replace('eq.', '') ?? 'unlimited'
+      return json(state.openings.filter((o) => (o.mode ?? 'unlimited') === mode))
+    }
     if (table === 'card_price_history') {
       return json([
         { recorded_on: '2026-09-01', value: 150 },

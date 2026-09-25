@@ -1,8 +1,9 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useChallengeStore } from '@/stores/challenge'
 import BrandLogo from '@/components/BrandLogo.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
@@ -15,6 +16,22 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const inChallenge = computed(() => route.meta.mode === 'challenge')
+
+// Rewards to claim + trade offers to answer, shown on the Challenge links
+const challenge = useChallengeStore()
+onMounted(() => {
+  if (auth.isLoggedIn) challenge.loadBadge()
+})
+const badges = computed(() => ({
+  challenge: challenge.badge.rewards + (inChallenge.value ? 0 : challenge.badge.trades),
+  'challenge-trades': challenge.badge.trades,
+}))
+// The tab bar has no Trades tab: everything shows on Challenge, or on Home
+// (which holds the challenge tile) outside the challenge
+const tabBadge = (name) => {
+  const total = challenge.badge.rewards + challenge.badge.trades
+  return name === 'challenge' || (name === 'game' && !inChallenge.value) ? total : 0
+}
 
 const ICONS = {
   hub: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
@@ -31,6 +48,7 @@ const NAV = computed(() =>
         { name: 'challenge', label: 'nav.challenge' },
         { name: 'challenge-boosters', label: 'nav.boosters' },
         { name: 'challenge-collection', label: 'nav.collection' },
+        { name: 'challenge-trades', label: 'nav.trades' },
         { name: 'community', label: 'nav.community' },
         { name: 'profile', label: 'nav.profile' },
       ]
@@ -76,7 +94,7 @@ async function logout() {
 </script>
 
 <template>
-  <header class="app-header container">
+  <header class="app-header container" :class="{ 'is-challenge': inChallenge }">
     <RouterLink :to="{ name: 'game' }" class="app-header-brand" :aria-label="t('nav.hub')">
       <BrandLogo />
     </RouterLink>
@@ -91,6 +109,9 @@ async function logout() {
         :aria-current="isActive(item.name) ? 'page' : undefined"
       >
         {{ t(item.label) }}
+        <span v-if="badges[item.name]" class="nav-badge">
+          {{ badges[item.name] }}<span class="visually-hidden"> {{ t('nav.pending', badges[item.name]) }}</span>
+        </span>
       </RouterLink>
     </nav>
 
@@ -120,6 +141,9 @@ async function logout() {
       >
         <svg viewBox="0 0 24 24" aria-hidden="true"><path :d="tab.icon" /></svg>
         <span>{{ t(tab.label) }}</span>
+        <span v-if="tabBadge(tab.name)" class="tab-badge">
+          {{ tabBadge(tab.name) }}<span class="visually-hidden"> {{ t('nav.pending', tabBadge(tab.name)) }}</span>
+        </span>
       </RouterLink>
     </nav>
   </header>
@@ -150,6 +174,9 @@ async function logout() {
 }
 
 .app-header-nav a {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
   padding: 0.45rem 1rem;
   border-radius: 999px;
   color: var(--pb-text-muted);
@@ -201,6 +228,48 @@ async function logout() {
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* Count of rewards / trade offers waiting */
+.nav-badge,
+.tab-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--pb-accent);
+  color: var(--pb-accent-ink);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.nav-badge {
+  margin-left: 0.35rem;
+}
+
+/* Small desktops: the challenge's 6 links need the brand's room */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .is-challenge .app-header-brand :deep(.brand-name),
+  .is-challenge .mode-badge {
+    display: none;
+  }
+
+  .is-challenge .app-header-nav a {
+    padding: 0.45rem 0.8rem;
+  }
+}
+
+.app-tabbar a {
+  position: relative;
+}
+
+.tab-badge {
+  position: absolute;
+  top: 2px;
+  left: calc(50% + 6px);
 }
 
 /* "Challenge" pill next to the brand while in that mode */
@@ -289,7 +358,8 @@ async function logout() {
   }
 }
 
-@media (min-width: 768px) {
+/* Desktop nav from 992px (6 links in the challenge); tab bar below */
+@media (min-width: 992px) {
   .app-header-nav {
     display: flex;
   }

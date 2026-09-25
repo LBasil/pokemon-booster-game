@@ -71,6 +71,22 @@ address** for the sign-up part.
       crafted when you have enough coins.
 - [ ] A challenge hit shows up in the Community feed with the "Challenge"
       mark.
+- [ ] Challenge packs keep the real rates: no "guaranteed hit" anywhere.
+- [ ] Challenge → "Booster history" lists challenge packs only.
+- [ ] Community → "Challenge: cards" / "Challenge: value" boards list
+      public players with a challenge collection.
+
+## Trades (after migration 0007, two accounts A and B)
+
+- [ ] On B's public profile, A taps "Propose a trade" → the trades page
+      opens with B loaded; pick 1 card of each side and send.
+- [ ] B sees a badge on Challenge (tab bar on a phone), then the offer
+      under "Offers for you"; Accept → both challenge collections have
+      swapped the cards, the offer shows "Done" for both.
+- [ ] A sends another offer and cancels it; B no longer sees it.
+- [ ] A offers a card, then recycles/trades it away before B answers →
+      B's Accept ends as "Failed" and nothing moves.
+- [ ] Offering to a private profile or an unknown name → friendly error.
 
 ## App & themes
 
