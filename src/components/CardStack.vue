@@ -7,10 +7,13 @@ import { rarityTier } from '@/utils/rarity'
 // throws the previous one aside; on touch screens the face-up card can also
 // be swiped away (it flies off in the swipe's direction). Hits "charge up"
 // before flipping. The parent owns revealedCount and advances on `tap`.
+// `lite` (phones): no 3D flip, blur or blend layers, and only the few cards
+// around the current one are rendered — the front just pops in over the back.
 const props = defineProps({
   // [{ key, card, isNew }]
   cards: { type: Array, required: true },
   revealedCount: { type: Number, required: true },
+  lite: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['tap'])
@@ -19,6 +22,9 @@ const { t } = useI18n()
 
 const SWIPE_THRESHOLD = 70 // px before a drag counts as a throw
 const HIT_LOCK_MS = 1100 // taps are ignored while a hit charges and flips
+
+// Lite: the thrown card still flying, the current one and a thin pile behind
+const rendered = (index) => !props.lite || (index >= props.revealedCount - 2 && index <= props.revealedCount + 2)
 
 function stateOf(index) {
   if (index < props.revealedCount - 1) return 'gone'
@@ -92,6 +98,7 @@ function styleOf(item, index) {
   <button
     type="button"
     class="card-stack"
+    :class="{ 'is-lite': lite }"
     :aria-label="label"
     @click="onClick"
     @pointerdown="onPointerDown"
@@ -99,9 +106,9 @@ function styleOf(item, index) {
     @pointerup="onPointerUp"
     @pointercancel="onPointerUp"
   >
+    <template v-for="(item, index) in cards" :key="item.key">
     <span
-      v-for="(item, index) in cards"
-      :key="item.key"
+      v-if="rendered(index)"
       class="stack-card"
       :class="[`is-${stateOf(index)}`, { 'is-dragging': drag.active && stateOf(index) === 'current' }]"
       :data-tier="rarityTier(item.card)"
@@ -125,6 +132,7 @@ function styleOf(item, index) {
       </span>
       <span class="stack-card-flash" aria-hidden="true"></span>
     </span>
+    </template>
   </button>
 </template>
 
@@ -317,6 +325,123 @@ function styleOf(item, index) {
 
 .is-current[data-tier='ultra'] .stack-card-flash {
   animation: flash 0.6s 0.7s ease-out;
+}
+
+/* ---------- Lite: flat cards, the front pops in over the back ---------- */
+
+.is-lite {
+  perspective: none;
+}
+
+.is-lite .stack-card {
+  will-change: auto;
+  transition:
+    transform 0.3s var(--pb-ease-out),
+    opacity 0.25s ease;
+}
+
+.is-lite .stack-card.is-gone {
+  transform: translateX(calc(var(--dir) * 115%)) rotate(calc(var(--dir) * 10deg));
+  transition:
+    transform 0.3s ease-in,
+    opacity 0.25s ease;
+}
+
+.is-lite .stack-card-flip,
+.is-lite .is-current .stack-card-flip,
+.is-lite .is-gone .stack-card-flip {
+  transform: none;
+  transform-style: flat;
+  animation: none;
+}
+
+.is-lite .face {
+  backface-visibility: visible;
+  -webkit-backface-visibility: visible;
+}
+
+.is-lite .face-back {
+  transform: none;
+}
+
+.is-lite .face-back svg {
+  filter: none;
+}
+
+.is-lite .is-waiting .face-front,
+.is-lite .is-gone .face-back,
+.is-lite .stack-card-glow,
+.is-lite .face-shine {
+  display: none;
+}
+
+.is-lite .is-current .face-front {
+  background: var(--pb-surface);
+  animation: lite-reveal 0.3s var(--pb-ease-out) backwards;
+}
+
+/* Face up = no back behind it (a slow image would show it through); hits keep
+   it for their charge-up only */
+.is-lite .is-current .face-back {
+  visibility: hidden;
+}
+
+.is-lite .is-current[data-tier='ultra'] .face-back {
+  animation: lite-back-hold 0.55s step-end;
+}
+
+@keyframes lite-back-hold {
+  0% {
+    visibility: visible;
+  }
+}
+
+/* Hits: the back shakes (2D only), then the front pops in on the flash */
+.is-lite .is-current[data-tier='ultra'] .stack-card-flip {
+  animation: lite-charge 0.55s ease-in;
+}
+
+.is-lite .is-current[data-tier='ultra'] .face-front {
+  animation: lite-reveal 0.35s 0.55s var(--pb-ease-out) backwards;
+}
+
+/* Static rings instead of the blurred halos */
+.is-lite .is-current[data-tier='rare'] .face-front {
+  box-shadow:
+    0 0 0 3px var(--pb-bucket-holo),
+    var(--pb-shadow-card);
+}
+
+.is-lite .is-current[data-tier='ultra'] .face-front {
+  box-shadow:
+    0 0 0 3px var(--pb-accent),
+    0 0 22px var(--pb-accent),
+    var(--pb-shadow-card);
+}
+
+@keyframes lite-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+
+@keyframes lite-charge {
+  20% {
+    transform: translateX(-1.5%) rotate(-1.5deg);
+  }
+  40% {
+    transform: translateX(1.5%) rotate(1.5deg);
+  }
+  60% {
+    transform: translateX(-2%) rotate(-2deg) scale(1.02);
+  }
+  80% {
+    transform: translateX(2%) rotate(2deg) scale(1.04);
+  }
+  100% {
+    transform: scale(1.05);
+  }
 }
 
 @keyframes flip-reveal {

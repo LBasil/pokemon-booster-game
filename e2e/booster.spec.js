@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { SETS, collectionEntry } from './support/data.js'
 import { mockSupabase, signIn } from './support/supabase.js'
 
 test.beforeEach(async ({ page }) => {
@@ -54,4 +55,24 @@ test('a wishlisted card gets the "Wanted!" badge when pulled', async ({ page }) 
   await pack.click({ force: true })
   await revealAll(page)
   await expect(page.locator('.done-grid .wanted-chip')).toHaveCount(1)
+})
+
+test('a subset is opened through its parent set, which says so', async ({ page }) => {
+  const classic = { id: 'sv3pt5c', name: '151 Classic', release_date: '2023-09-22', total: 30, parent_set_id: 'sv3pt5', subset_rate: 0.33 }
+  await mockSupabase(page, { sets: [...SETS, classic] })
+  await page.goto('/boosters?set=sv3pt5c') // e.g. from the subset's binder
+  await expect(page.locator('.preview-name')).toHaveText('151')
+  await expect(page.locator('.preview-subset')).toHaveText('Also holds the 151 Classic: about 1 pack in 3 has one of its cards.')
+  await expect(page.locator('.set-option-name', { hasText: '151 Classic' })).toHaveCount(0)
+  await expect(page.locator('.set-option', { hasText: '151' }).first()).toContainText('+30 bonus cards')
+})
+
+test('the history shows the exact number of boosters opened', async ({ page }) => {
+  // 50 unlimited cards = 5 packs, 2 of them logged by the server
+  const stats = { packs: 2, hit_packs: 1, today: 2, best_day: 2, best_streak: 1, top_set_id: 'sv3pt5', top_set_packs: 2, first_at: '2026-09-25T10:00:00Z' }
+  await mockSupabase(page, { collection: [collectionEntry('sv3pt5-4', 50)], stats: { unlimited: stats } })
+  await page.goto('/history')
+  await expect(page.locator('.total-main dd')).toHaveText('5')
+  await expect(page.locator('.history-totals')).toContainText('50 %')
+  await expect(page.locator('.totals-note')).toContainText('3 older boosters')
 })

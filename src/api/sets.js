@@ -6,7 +6,9 @@ const MISSING_COLUMN = '42703'
 export async function fetchSets() {
   const query = (columns) => supabase.from('sets').select(columns).order('release_date', { ascending: false })
 
-  let { data, error } = await query('id, name, release_date, printed_total, total, logo_url, symbol_url')
+  // Each fallback drops what a missing migration (0010, then 0003) didn't add
+  let { data, error } = await query('id, name, release_date, printed_total, total, logo_url, symbol_url, parent_set_id, subset_rate')
+  if (error?.code === MISSING_COLUMN) ({ data, error } = await query('id, name, release_date, printed_total, total, logo_url, symbol_url'))
   if (error?.code === MISSING_COLUMN) ({ data, error } = await query('id, name, release_date, printed_total, total'))
 
   if (error) throw error

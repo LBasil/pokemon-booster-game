@@ -1,10 +1,11 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { groupSetsByYear, setLogoUrl } from '@/utils/sets'
+import { boosterSets, groupSetsByYear, setLogoUrl, subsetsOf } from '@/utils/sets'
 
 // Searchable grid of sets grouped by year, plus the "any set" option.
-// v-model is the selected set id ('' = any set).
+// v-model is the selected set id ('' = any set). Subsets aren't listed: they
+// come inside their parent's packs, whose option says so.
 const props = defineProps({
   sets: { type: Array, required: true },
   loading: { type: Boolean, default: false },
@@ -14,7 +15,8 @@ const selected = defineModel({ type: String, default: '' })
 
 const { t } = useI18n()
 const query = ref('')
-const groups = computed(() => groupSetsByYear(props.sets, query.value))
+const groups = computed(() => groupSetsByYear(boosterSets(props.sets), query.value))
+const bonusCards = (set) => subsetsOf(set.id, props.sets).reduce((sum, subset) => sum + (subset.total ?? 0), 0)
 
 // Logos missing on the CDN fall back to the set name
 const brokenLogos = ref(new Set())
@@ -87,7 +89,9 @@ function onLogoError(setId) {
           </span>
           <span class="set-option-text">
             <span class="set-option-name">{{ set.name }}</span>
-            <span v-if="set.total" class="set-option-meta">{{ t('boosters.cardCount', { count: set.total }) }}</span>
+            <span v-if="set.total" class="set-option-meta">
+              {{ t('boosters.cardCount', { count: set.total }) }}<template v-if="bonusCards(set)"> · {{ t('boosters.bonusCards', { count: bonusCards(set) }) }}</template>
+            </span>
           </span>
         </button>
       </section>

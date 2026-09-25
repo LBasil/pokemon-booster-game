@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useCollectionStore } from '@/stores/collection'
 import { useProfileStore } from '@/stores/profile'
 import { useSetsStore } from '@/stores/sets'
-import { useSettingsStore } from '@/stores/settings'
+import { ANIMATION_MODES, useSettingsStore } from '@/stores/settings'
 import { installPrompt, installed, promptInstall } from '@/lib/pwa'
 import { collectionStats, sortEntries } from '@/utils/collection'
 import { nextUp } from '@/utils/achievements'
@@ -487,6 +487,25 @@ async function logout() {
                 </span>
                 <input type="checkbox" class="form-check-input pb-switch" role="switch" :checked="settings.effects" @change="settings.set('effects', $event.target.checked)" />
               </label>
+              <div class="switch-row switch-row-wrap">
+                <span>
+                  <span id="animations-label" class="switch-title">{{ t('profile.animationsLabel') }}</span>
+                  <span class="switch-desc">{{ t('profile.animationsDesc') }}</span>
+                </span>
+                <div class="achv-modes anim-modes" role="radiogroup" aria-labelledby="animations-label">
+                  <button
+                    v-for="option in ANIMATION_MODES"
+                    :key="option"
+                    type="button"
+                    role="radio"
+                    :aria-checked="settings.animations === option"
+                    :class="{ active: settings.animations === option }"
+                    @click="settings.set('animations', option)"
+                  >
+                    {{ t(`profile.animations.${option}`) }}
+                  </button>
+                </div>
+              </div>
               <div v-if="installPrompt && !installed" class="switch-row">
                 <span>
                   <span class="switch-title">{{ t('profile.installLabel') }}</span>
@@ -937,6 +956,16 @@ async function logout() {
 .achv-modes button.active {
   background: var(--pb-text);
   color: var(--pb-bg);
+}
+
+.switch-row-wrap {
+  flex-wrap: wrap;
+  cursor: default;
+}
+
+.anim-modes {
+  flex-shrink: 0;
+  margin-bottom: 0;
 }
 
 .achv-subtitle {

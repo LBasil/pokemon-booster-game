@@ -39,7 +39,8 @@ const MISSIONS = [
  * @param {{ collection?: object[], challengeCollection?: object[], challenge?: object, godPack?: boolean,
  *   trades?: object[], partners?: Record<string, object[]>, badge?: { rewards: number, trades: number },
  *   profile?: object, feed?: object[], leaderboard?: object[], takenUsernames?: string[],
- *   achievementRates?: object[] | 'missing' }} [options] - rates rows may carry a `mode` (default unlimited)
+ *   achievementRates?: object[] | 'missing', sets?: object[], stats?: Record<string, object> }} [options] - rates rows may carry a `mode` (default unlimited);
+ *   sets replaces SETS; stats = player_achievements().stats per mode (migration 0010)
  */
 export async function mockSupabase(page, options = {}) {
   const state = {
@@ -75,6 +76,8 @@ export async function mockSupabase(page, options = {}) {
     achievementRates: options.achievementRates ?? [],
     recorded: { unlimited: new Set(), challenge: new Set() },
     packs: { unlimited: 0, challenge: 0 },
+    stats: options.stats ?? {},
+    sets: options.sets ?? SETS,
   }
   const challengeState = () => {
     const c = state.challenge
@@ -244,7 +247,7 @@ export async function mockSupabase(page, options = {}) {
     if (path === '/rest/v1/rpc/player_achievements') {
       if (state.achievementRates === 'missing') return missingFunction()
       const name = args.p_username?.toLowerCase()
-      if (!name) return json({ unlocked: [...state.recorded[args.p_mode]], packs: state.packs[args.p_mode] })
+      if (!name) return json({ unlocked: [...state.recorded[args.p_mode]], packs: state.packs[args.p_mode], stats: state.stats[args.p_mode] })
       return json(name === 'misty' ? { unlocked: [], packs: 4 } : null)
     }
     if (path === '/rest/v1/rpc/public_collection') {
@@ -254,7 +257,7 @@ export async function mockSupabase(page, options = {}) {
 
     // ---- Tables ----
     const table = path.replace('/rest/v1/', '')
-    if (table === 'sets') return json(SETS)
+    if (table === 'sets') return json(state.sets)
     if (table === 'cards') {
       if (method === 'HEAD') return count(20670)
       const setId = url.searchParams.get('set_id')?.replace('eq.', '')

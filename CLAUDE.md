@@ -73,7 +73,14 @@ docs/manual-testing.md      checklist for a real-account click-through
    set per pack, never a mix. Never go back to a uniform random draw (it gave
    ~4 rares and 1-2 hits per pack). The client calls `open_my_booster`
    (0004), which wraps `open_booster` and saves the pack; `random_cards*`
-   from 0002 are unused leftovers.
+   from 0002 are unused leftovers. **Subsets are never opened on their own**
+   (0010): Trainer/Galarian Gallery, Shiny Vault, Classic Collection have
+   `sets.parent_set_id` + `subset_rate`; `open_booster(subset)` opens the
+   parent pack, "any set" skips them, and a parent pack's slot 8 becomes a
+   subset card with that chance (slots 9/10 untouched). Opened alone they
+   gave 10-holo packs (no commons -> every slot fell back to "any card").
+   The client hides them from the picker (`boosterSets`) and maps
+   `?set=<subset>` to the parent (`packSetId`).
 7. **I have no direct access to the Supabase database** (no MCP/CLI
    connection). Any schema change ships as a new
    `supabase/migrations/000N_*.sql` file with a comment explaining what it
@@ -125,6 +132,14 @@ docs/manual-testing.md      checklist for a real-account click-through
   `cards.rarity_bucket`) and mirrored in JS by `rarityBucket()` in
   `src/utils/rarity.js` — change both together. `rarityTier()` groups them
   into 3 visual tiers for halos.
+- **Lite animations** (`settings.animations`: auto | full | light,
+  `settings.liteAnimations`; auto = light on `(pointer: coarse)`): the full
+  tear/flip stuttered on phones (3D flip + preserve-3d, 10 will-change
+  layers, blur halos, blend-mode sheen). Lite = one copy of the pack that
+  squeezes/pops in `TEAR_MS_LITE`, flat cards whose front pops over the
+  back, only ~5 cards in the DOM, static rings instead of blurred halos.
+  Both live in `BoosterPack.vue` / `CardStack.vue` (`lite` prop). The
+  Pixel 7 e2e project runs the lite path.
 - Animation checks: headless Chrome's GPU hides mobile jank (60 fps even
   with 4x CPU throttle), so judge choreography frame by frame instead: CDP
   `Animation.setPlaybackRate(0.1)` + scaling `setTimeout` by 10 in the page,
@@ -225,7 +240,13 @@ docs/manual-testing.md      checklist for a real-account click-through
   trades) and packs opened per mode (challenge: the server count is the
   truth; unlimited: max with cards / 10, old packs were never logged).
   Adding a definition unlocks it retroactively; public profiles get
-  them too. Add a
+  them too. Since 0010 `player_achievements` also returns `stats` (exact
+  pack counts from `booster_openings`: hit packs, best day, streaks, sets,
+  top set; challenge: trades, gifts, coins earned, missions, crafts,
+  recycling, best daily streak) — read as `s.server.*` by the luck /
+  streak / economy definitions. `modes: [...]` restricts a definition to
+  a mode (economy + god pack = challenge only); `achievementProgress`
+  drops empty categories. Add a
   definition + its EN/FR title/description (`achievements.items.<id>.title`,
   `achievements.desc.<family>`); `achievements.test.js` fails on any
   missing translation. `hidden` ones show "???" until unlocked. UI:
@@ -299,7 +320,19 @@ docs/manual-testing.md      checklist for a real-account click-through
   flagged). Verified with PGlite (49 checks). The desktop nav now starts
   at 992px (6 links in the challenge); the tab bar covers phones and
   tablets.
-- **Supabase**: **migrations 0001-0008 are applied**, 0009 is not yet (0007 + 0008
+- **Subsets + pack stats + lite animations** built 2026-09-25:
+  `0010_subsets_and_pack_stats.sql` **written but NOT applied** (run after
+  0009). Verified with PGlite on 0001-0010 (35 checks: links TG/Classic
+  only, not real sets or empty ones, idempotent, 3000 packs: subset ~25% and
+  only in slot 8, slot 10 odds unchanged, no repeats, subset id opens the
+  parent, any set never a subset, stats incl. streak/best day/top set,
+  challenge trades/gifts/coins/missions/crafts/recycling/daily streak,
+  private profile null, anon reads public stats, link_subsets service-role
+  only). History page shows the exact pack count (unlimited: cards / 10,
+  exact since packs are always 10 cards and that collection never
+  shrinks; challenge: server count). ~55 new achievements (luck, economy,
+  subsets, streaks). `npm test`: 112, e2e: 102.
+- **Supabase**: **migrations 0001-0008 are applied**, 0009 and 0010 are not yet (0007 + 0008
   checked 2026-09-25 through the REST API: tables and RPCs answer).
   Migrations 0001-0003 applied (0003 on 2026-09-24, then
   `populate:sets` re-run: 176 sets with logo/symbol URLs). `cards` has
@@ -337,8 +370,8 @@ docs/manual-testing.md      checklist for a real-account click-through
 
 ## TODO
 
-- **Apply `0009_achievements_by_mode.sql`** in the SQL editor (user),
-  then **deploy** the current client (it uses the 0007-0009 RPCs; without
+- **Apply `0009_achievements_by_mode.sql` then `0010_subsets_and_pack_stats.sql`**
+  in the SQL editor (user), then **deploy** the current client (it uses the 0007-0009 RPCs; without
   0009 the challenge achievements just lack rates and persistence).
 - Post-migration dashboard steps (user): Supabase Auth > URL Configuration
   redirect URLs (`<site>/game`, `<site>/reset-password`); check that

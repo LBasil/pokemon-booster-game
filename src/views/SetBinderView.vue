@@ -11,7 +11,7 @@ import { useWishlistStore } from '@/stores/wishlist'
 import { craftPrice } from '@/utils/challenge'
 import { binderSlots, cardNumber } from '@/utils/collection'
 import { rarityTier } from '@/utils/rarity'
-import { setLogoUrl } from '@/utils/sets'
+import { packSetId, setLogoUrl } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
 import CardDetail from '@/components/CardDetail.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
@@ -35,6 +35,8 @@ const wishlist = useWishlistStore()
 
 const setId = computed(() => route.params.setId)
 const set = computed(() => setsStore.byId[setId.value] ?? null)
+// A subset's cards come inside its parent's packs
+const parentSet = computed(() => setsStore.byId[set.value?.parent_set_id] ?? null)
 
 const setCards = ref([])
 const loading = ref(true)
@@ -105,8 +107,8 @@ const openEntry = computed(() => {
           </p>
           <div class="binder-progress" aria-hidden="true"><span :style="{ width: `${Math.max(percent, 1)}%` }"></span></div>
         </div>
-        <RouterLink :to="{ name: routes.boosters, query: { set: setId } }" class="btn btn-primary glow-button binder-open">
-          {{ t('binder.openThisSet') }}
+        <RouterLink :to="{ name: routes.boosters, query: { set: packSetId(setId, setsStore.byId) } }" class="btn btn-primary glow-button binder-open">
+          {{ parentSet ? t('binder.openParent', { name: parentSet.name }) : t('binder.openThisSet') }}
         </RouterLink>
       </header>
 

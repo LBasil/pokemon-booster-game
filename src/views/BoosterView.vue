@@ -17,10 +17,10 @@ import { useWishlistStore } from '@/stores/wishlist'
 import { groupCardsByQuantity } from '@/utils/cards'
 import { PACK_PRICE } from '@/utils/challenge'
 import { bestPull, rarityLabelKey, rarityRank, rarityTier, sortForReveal } from '@/utils/rarity'
-import { setLogoUrl, setSymbolUrl } from '@/utils/sets'
+import { packSetId as parentPackOf, setLogoUrl, setSymbolUrl, subsetsOf } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
-import BoosterPack, { TEAR_MS } from '@/components/BoosterPack.vue'
+import BoosterPack, { TEAR_MS, TEAR_MS_LITE } from '@/components/BoosterPack.vue'
 import CardStack from '@/components/CardStack.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
 import HoloCard from '@/components/HoloCard.vue'
@@ -55,6 +55,26 @@ const setsLoading = computed(() => !setsStore.loaded && !setsStore.error)
 const loadError = computed(() => (setsStore.error ? t('boosters.loadError') : ''))
 
 const selectedSet = computed(() => sets.value.find((set) => set.id === selectedSetId.value) ?? null)
+
+// A subset (e.g. a binder's "open this set" on a Trainer Gallery) opens its
+// parent's booster, which is where its cards come from
+watch(
+  () => setsStore.byId,
+  (byId) => {
+    if (selectedSetId.value) selectedSetId.value = parentPackOf(selectedSetId.value, byId)
+  },
+  { immediate: true },
+)
+
+// Bonus subsets found in the selected set's packs, with their odds
+const selectedSubsets = computed(() =>
+  selectedSet.value
+    ? subsetsOf(selectedSet.value.id, sets.value).map((set) => ({
+        name: set.name,
+        every: set.subset_rate > 0 ? Math.round(1 / set.subset_rate) : null,
+      }))
+    : [],
+)
 
 // Chase card per set, used as pack artwork (cached; failures just fall back)
 const covers = ref({})
@@ -227,10 +247,13 @@ function tearPack() {
   if (packState.value !== 'ready') return
   packState.value = 'tearing'
   sfx.tear(settings.sound)
-  tearTimer = setTimeout(() => {
-    step.value = 'reveal'
-    focusStage()
-  }, TEAR_MS)
+  tearTimer = setTimeout(
+    () => {
+      step.value = 'reveal'
+      focusStage()
+    },
+    settings.liteAnimations ? TEAR_MS_LITE : TEAR_MS,
+  )
 }
 
 async function onStackTap() {
@@ -427,6 +450,9 @@ async function shareBest() {
               </template>
               <template v-else>{{ t('boosters.anySetDesc') }}</template>
             </p>
+            <p v-for="subset in selectedSubsets" :key="subset.name" class="preview-subset">
+              {{ subset.every ? t('boosters.subsetOdds', { name: subset.name, every: subset.every }) : t('boosters.subsetIncluded', { name: subset.name }) }}
+            </p>
             <button v-if="!isDesktop" type="button" class="btn btn-outline-secondary" @click="openPicker">
               {{ t('boosters.changeSet') }}
             </button>
@@ -515,10 +541,11 @@ async function shareBest() {
             v-if="step === 'pack'"
             :key="`pack-${boosterIndex}`"
             :state="packState"
+            :lite="settings.liteAnimations"
             v-bind="openedPackArt"
             @open="tearPack"
           />
-          <CardStack v-else :cards="currentCards" :revealed-count="revealedCount" @tap="onStackTap" />
+          <CardStack v-else :cards="currentCards" :revealed-count="revealedCount" :lite="settings.liteAnimations" @tap="onStackTap" />
         </div>
 
         <div class="open-caption" aria-live="polite">
@@ -730,6 +757,13 @@ async function shareBest() {
 
 .preview-meta {
   margin: 0 0 0.5rem;
+  color: var(--pb-text-muted);
+}
+
+.preview-subset {
+  margin: -0.25rem 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
   color: var(--pb-text-muted);
 }
 

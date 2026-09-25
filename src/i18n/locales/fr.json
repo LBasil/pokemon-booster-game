@@ -127,7 +127,10 @@
     "soundOn": "Activer le son",
     "soundOff": "Couper le son",
     "wantedBadge": "Recherchée !",
-    "openAll": "Tout ouvrir d'un coup | Ouvrir les {count} d'un coup"
+    "openAll": "Tout ouvrir d'un coup | Ouvrir les {count} d'un coup",
+    "subsetOdds": "Contient aussi la série {name} : environ 1 booster sur {every} en a une carte.",
+    "subsetIncluded": "Contient aussi la série {name}.",
+    "bonusCards": "+{count} cartes bonus"
   },
   "collection": {
     "title": "Ma collection",
@@ -285,7 +288,14 @@
     "historyLink": "Mon historique de boosters",
     "installLabel": "Installer l'application",
     "installDesc": "Ajoute PokéBooster à ton écran d'accueil, comme une vraie app.",
-    "install": "Installer"
+    "install": "Installer",
+    "animationsLabel": "Animations des boosters",
+    "animationsDesc": "Légères = sans retournement 3D ni halos, fluides sur téléphone. Auto choisit Légères sur écran tactile.",
+    "animations": {
+      "auto": "Auto",
+      "full": "Complètes",
+      "light": "Légères"
+    }
   },
   "notFound": {
     "title": "Ce booster est vide",
@@ -306,7 +316,8 @@
     "loadError": "Impossible de charger cette série.",
     "empty": "Aucune carte avec ce filtre.",
     "missingCard": "N° {number}, {name} — manquante",
-    "wanted": "Dans ta liste de souhaits"
+    "wanted": "Dans ta liste de souhaits",
+    "openParent": "Ouvrir des boosters {name}"
   },
   "pokedex": {
     "caught": "Pokémon capturés",
@@ -333,7 +344,17 @@
     "loadError": "Impossible de charger ton historique.",
     "hits": "{count} hit | {count} hits",
     "more": "Charger plus",
-    "backToProfile": "Profil"
+    "backToProfile": "Profil",
+    "totalsTitle": "Tes totaux",
+    "totalPacks": "Boosters ouverts",
+    "today": "Aujourd'hui",
+    "bestDay": "Record en un jour",
+    "hitPacks": "Avec un hit",
+    "bestStreak": "Plus longue série",
+    "days": "{count} jour | {count} jours",
+    "topSet": "Série la plus ouverte",
+    "unloggedNote": "Le détail porte sur les {logged} boosters enregistrés depuis le {date} ; {count} booster plus ancien a été ouvert avant le début de l'enregistrement. | Le détail porte sur les {logged} boosters enregistrés depuis le {date} ; {count} boosters plus anciens ont été ouverts avant le début de l'enregistrement.",
+    "since": "Depuis le {date}. Les jours sont comptés en UTC, comme pour le défi."
   },
   "community": {
     "eyebrow": "En direct",
@@ -573,7 +594,9 @@
       "history": "Histoire",
       "artists": "Illustrateurs",
       "fun": "Curiosités",
-      "dedication": "Assiduité"
+      "dedication": "Assiduité",
+      "luck": "Chance",
+      "economy": "Pièces & échanges"
     },
     "regions": {
       "kanto": "Kanto",
@@ -1083,6 +1106,171 @@
       },
       "featherweight": {
         "title": "Poids plume"
+      },
+      "bigDay10": {
+        "title": "Ouverture compulsive"
+      },
+      "bigDay25": {
+        "title": "Marathon de boosters"
+      },
+      "bigDay50": {
+        "title": "Frénésie"
+      },
+      "bigDay100": {
+        "title": "Cent en un jour"
+      },
+      "setsOpened5": {
+        "title": "Lèche-vitrine"
+      },
+      "setsOpened25": {
+        "title": "Touche-à-tout"
+      },
+      "setsOpened75": {
+        "title": "Tout vu, tout ouvert"
+      },
+      "loyal25": {
+        "title": "Habitué"
+      },
+      "loyal100": {
+        "title": "Fidèle à la série"
+      },
+      "loyal250": {
+        "title": "Une série pour les gouverner tous"
+      },
+      "hitPacks1": {
+        "title": "Premier hit"
+      },
+      "hitPacks10": {
+        "title": "En veine"
+      },
+      "hitPacks50": {
+        "title": "Né sous une bonne étoile"
+      },
+      "hitPacks150": {
+        "title": "La chance, ça se travaille"
+      },
+      "secretPulls1": {
+        "title": "Pull secret"
+      },
+      "secretPulls5": {
+        "title": "Gardien des secrets"
+      },
+      "secretPulls20": {
+        "title": "Société secrète"
+      },
+      "doubleHit": {
+        "title": "Doublé !"
+      },
+      "tripleHit": {
+        "title": "Jackpot"
+      },
+      "godPack": {
+        "title": "Intervention divine"
+      },
+      "subsetCards1": {
+        "title": "Bonus caché"
+      },
+      "subsetCards10": {
+        "title": "Chasseur de bonus"
+      },
+      "subsetCards50": {
+        "title": "Spécialiste des sous-séries"
+      },
+      "gallery": {
+        "title": "Visite de la galerie"
+      },
+      "vault": {
+        "title": "Casseur de coffre"
+      },
+      "classic": {
+        "title": "Un grand classique"
+      },
+      "packStreak3": {
+        "title": "Ça devient une habitude"
+      },
+      "packStreak7": {
+        "title": "Une semaine de boosters"
+      },
+      "packStreak14": {
+        "title": "Deux semaines sans faiblir"
+      },
+      "packStreak30": {
+        "title": "Un mois de boosters"
+      },
+      "packDays10": {
+        "title": "Régulier"
+      },
+      "packDays50": {
+        "title": "Assidu"
+      },
+      "packDays100": {
+        "title": "Centurion"
+      },
+      "packDays365": {
+        "title": "Une année de boosters"
+      },
+      "coinsEarned1000": {
+        "title": "Argent de poche"
+      },
+      "coinsEarned5000": {
+        "title": "Livret d'épargne"
+      },
+      "coinsEarned25000": {
+        "title": "Picsou"
+      },
+      "coinsEarned100000": {
+        "title": "Magnat"
+      },
+      "missions5": {
+        "title": "En mission"
+      },
+      "missions25": {
+        "title": "Spécialiste des missions"
+      },
+      "missions100": {
+        "title": "Mission accomplie"
+      },
+      "dailyStreak3": {
+        "title": "Le retour"
+      },
+      "dailyStreak7": {
+        "title": "Visiteur de la semaine"
+      },
+      "dailyStreak30": {
+        "title": "Jamais un jour sans"
+      },
+      "trades1": {
+        "title": "Premier marché"
+      },
+      "trades10": {
+        "title": "Négociant"
+      },
+      "trades25": {
+        "title": "Pilier du marché"
+      },
+      "gifts1": {
+        "title": "Généreux"
+      },
+      "gifts5": {
+        "title": "Père Noël"
+      },
+      "crafted1": {
+        "title": "Artisan"
+      },
+      "crafted10": {
+        "title": "Atelier"
+      },
+      "crafted50": {
+        "title": "Forge à cartes"
+      },
+      "recycled25": {
+        "title": "Classeur rangé"
+      },
+      "recycled250": {
+        "title": "Centre de tri"
+      },
+      "recycled1000": {
+        "title": "Zéro déchet"
       }
     },
     "desc": {
@@ -1157,7 +1345,28 @@
         "kantoFossils": "Possède Amonita, Kabuto et Ptéra",
         "ghostLine": "Possède Fantominus, Spectrum et Ectoplasma",
         "magikarpLine": "Possède Magicarpe et Léviator"
-      }
+      },
+      "bigDay": "Ouvre {count} boosters en une seule journée",
+      "setsOpened": "Ouvre des boosters de {count} séries différentes",
+      "loyal": "Ouvre {count} boosters de la même série",
+      "hitPacks": "Ouvre un booster avec une ultra rare ou mieux | Ouvre {count} boosters avec une ultra rare ou mieux",
+      "secretPulls": "Tire une rare secrète (doublons compris) | Tire {count} rares secrètes (doublons compris)",
+      "doubleHit": "Obtiens {count} ultra rares ou mieux dans le même booster",
+      "tripleHit": "Obtiens {count} ultra rares ou mieux dans le même booster",
+      "godPack": "Ouvre un god pack",
+      "subsetCards": "Possède une carte d'une sous-série cachée dans d'autres boosters (Trainer Gallery, Shiny Vault…) | Possède {count} cartes différentes de sous-séries cachées dans d'autres boosters",
+      "gallery": "Possède une carte Trainer Gallery ou Galarian Gallery",
+      "vault": "Possède une carte Shiny Vault",
+      "classic": "Possède une carte Classic Collection",
+      "packStreak": "Ouvre des boosters {count} jours de suite",
+      "packDays": "Ouvre des boosters sur {count} jours différents",
+      "coinsEarned": "Gagne {count} pièces (bonus de départ non compris)",
+      "missions": "Termine {count} missions du jour",
+      "dailyStreak": "Récupère la récompense du jour {count} jours de suite",
+      "trades": "Termine un échange | Termine {count} échanges",
+      "gifts": "Offre des cartes à un autre joueur | Offre des cartes à d’autres joueurs {count} fois",
+      "crafted": "Fabrique une carte | Fabrique {count} cartes",
+      "recycled": "Recycle {count} doublons"
     }
   }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { boostersOpened, rankFor, rarityBreakdown, validateUsername } from './profile'
+import { boostersOpened, packSummary, rankFor, rarityBreakdown, validateUsername } from './profile'
 
 const entry = (id, rarity, quantity = 1, value = 0) => ({
   card_id: id,
@@ -43,5 +43,19 @@ describe('validateUsername', () => {
     expect(validateUsername(' a ')).toBe('tooShort')
     expect(validateUsername('x'.repeat(25))).toBe('tooLong')
     expect(validateUsername('  Sacha  ')).toBeNull()
+  })
+})
+
+describe('packSummary', () => {
+  it('unlimited: cards / 10 is exact, older unlogged packs included', () => {
+    expect(packSummary({ mode: 'unlimited', totalCards: 250, server: { packs: 20, stats: { packs: 20 } } })).toMatchObject({ total: 25, logged: 20, unlogged: 5 })
+  })
+
+  it('challenge: only the server count is right', () => {
+    expect(packSummary({ mode: 'challenge', totalCards: 40, server: { packs: 12 } })).toMatchObject({ total: 12, logged: 12, unlogged: 0, stats: null })
+  })
+
+  it('works without the server (migration missing)', () => {
+    expect(packSummary({ mode: 'unlimited', totalCards: 31, server: null })).toMatchObject({ total: 3, logged: 0, stats: null })
   })
 })

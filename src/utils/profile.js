@@ -5,6 +5,23 @@ import { rarityBucket } from '@/utils/rarity'
 export const CARDS_PER_BOOSTER = 10
 export const boostersOpened = (totalCards) => Math.floor(totalCards / CARDS_PER_BOOSTER)
 
+/**
+ * Exact number of boosters opened in a mode, and how many of them the
+ * server's detailed stats cover (booster_openings only exists since
+ * migration 0004).
+ *   unlimited: the collection only ever grows by whole 10-card packs, so
+ *              cards / 10 is exact, older unlogged packs included
+ *   challenge: recycling, crafting and trades move cards, so only the
+ *              server's count is right (every challenge pack is logged)
+ * @param {{ mode: string, totalCards: number, server?: { packs?: number, stats?: object } | null }} input
+ * @returns {{ total: number, logged: number, unlogged: number, stats: object | null }}
+ */
+export function packSummary({ mode, totalCards, server }) {
+  const logged = server?.stats?.packs ?? server?.packs ?? 0
+  const total = mode === 'challenge' ? logged : Math.max(boostersOpened(totalCards), logged)
+  return { total, logged, unlogged: total - logged, stats: server?.stats ?? null }
+}
+
 // Trainer ranks by boosters opened
 export const RANKS = [
   { id: 'rookie', min: 0 },

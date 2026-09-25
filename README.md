@@ -48,14 +48,24 @@ Supabase (Postgres + Auth + Realtime).
   first pull date, illustrator, **price history chart** (weekly Cardmarket
   snapshots), wishlist toggle for missing cards, and **sharing** a generated
   image of the card.
-- **Booster history**: every pack you've opened, grouped by day.
+- **Booster history**: every pack you've opened, grouped by day, under
+  your totals: the **exact number of boosters opened**, today, best day,
+  packs with a hit (and the rate), longest daily streak, most opened set.
+- **Subsets inside their parent's packs**: Trainer Gallery, Galarian
+  Gallery, Shiny Vault and Classic Collection were never sold as boosters,
+  so they aren't in the set list: their cards turn up in the parent set's
+  packs (about 1 pack in 3-4), like in real life.
 - **Profile**: trainer card with a unique username and a rank that grows
   with the boosters you open, a showcase card, stats, rarity breakdown,
-  public/private switch, sound / vibration / visual effects settings, and an
+  public/private switch, sound / vibration / visual effects settings, a
+  **booster animations** setting (Auto / Full / Light — Light, the default on
+  touch screens, drops the 3D flip and the glow layers that stuttered on
+  phones), and an
   "install the app" button.
-- **Achievements**: 185 of them in 14 categories (boosters, pulls, sets,
+- **Achievements**: ~240 of them in 16 categories (boosters, luck, pulls, sets,
   Pokédex regions, famous teams, types, mechanics, treasure, illustrators,
-  a few secret ones…), **in each game mode** — the challenge ones are the
+  subsets, daily streaks, a challenge-only "coins & trades" one, a few
+  secret ones…), **in each game mode** — the challenge ones are the
   ones that count (every pack costs coins), and stay unlocked even after
   recycling or trading. At `/challenge/achievements` and `/achievements`
   (and `/u/<username>/achievements?mode=…`), with an Unlimited | Challenge
@@ -148,6 +158,13 @@ its **SQL editor** and run, in order:
    game mode (rates, recorded unlocks, packs opened per mode). Run it after
    0008; until then the challenge achievements work without percentages,
    and unlocks aren't kept if the challenge collection shrinks.
+10. `supabase/migrations/0010_subsets_and_pack_stats.sql` — subsets
+   (Trainer Gallery, Shiny Vault, Classic Collection…) come inside their
+   parent set's packs instead of being opened on their own (they gave packs
+   of 10 holos), and the server returns exact pack stats (history totals,
+   luck / streak / economy achievements). Run it after 0009; until then
+   those totals and achievements stay empty. New subsets get linked by
+   `npm run populate:sync` (`link_subsets()`).
 
 Then in **Authentication**:
 

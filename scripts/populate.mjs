@@ -151,6 +151,14 @@ async function populateCards(startPage = 1) {
   console.log('Cards populated.')
 }
 
+// Subsets (Trainer Gallery, Shiny Vault...) come inside their parent set's
+// packs (migration 0010): link the new ones once their cards are in
+async function linkSubsets() {
+  const { data, error } = await supabase.rpc('link_subsets')
+  if (error) console.warn('Skipping subset linking (run migration 0010 first?):', error.message)
+  else console.log(`Subsets linked: ${data}`)
+}
+
 const target = process.argv[2]
 const startPage = Number(process.argv[3]) || 1
 
@@ -158,11 +166,13 @@ if (target === 'sets') {
   await populateSets()
 } else if (target === 'cards') {
   await populateCards(startPage)
+  await linkSubsets()
 } else if (target === 'sync') {
   // Weekly refresh (see .github/workflows/sync-cards.yml): new sets, new
-  // cards, fresh prices and a price-history snapshot
+  // cards, fresh prices, a price-history snapshot and new subsets linked
   await populateSets()
   await populateCards(startPage)
+  await linkSubsets()
 } else {
   console.error('Usage: node scripts/populate.mjs <sets|cards|sync> [startPage]')
   process.exit(1)

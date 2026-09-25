@@ -1,5 +1,6 @@
 import { rarityBucket } from '@/utils/rarity'
 import { CARDS_PER_BOOSTER } from '@/utils/profile'
+import { subsetKind } from '@/utils/sets'
 
 // Achievements are computed from the (unlimited) collection alone, so they
 // work on public profiles too, and a newly added achievement unlocks at once
@@ -8,10 +9,16 @@ import { CARDS_PER_BOOSTER } from '@/utils/profile'
 // Each definition: { id, category, metric(stats) -> number, target,
 // title?/desc? i18n keys under achievements.* (default items.<id>.title and
 // desc.<family>), params? for those messages, hidden? (shown as "???" until
-// unlocked) }. Messages get { count: target } unless params says otherwise.
+// unlocked), modes? (only in those game modes) }. Messages get { count:
+// target } unless params says otherwise.
+//
+// Pack-based achievements (luck, streaks, best day...) read the server's
+// stats (player_achievements().stats, migration 0010): they stay locked
+// until it's applied, and only count packs logged since 0004.
 
 export const CATEGORIES = [
   'packs',
+  'luck',
   'collection',
   'pulls',
   'sets',
@@ -25,7 +32,13 @@ export const CATEGORIES = [
   'artists',
   'fun',
   'dedication',
+  'economy',
 ]
+
+// Server pack stats (0010), all 0 when unknown
+const PACK_STATS = ['packs', 'hit_packs', 'hits', 'secrets', 'max_hits', 'god_packs', 'sets', 'days', 'best_day', 'best_streak', 'top_set_packs']
+const CHALLENGE_STATS = ['trades', 'gifts', 'coins_earned', 'missions', 'crafted', 'recycled', 'best_daily_streak']
+const serverStats = (stats) => Object.fromEntries([...PACK_STATS, ...CHALLENGE_STATS].map((key) => [key, Number(stats?.[key]) || 0]))
 
 export const TYPES = ['Grass', 'Fire', 'Water', 'Lightning', 'Psychic', 'Fighting', 'Darkness', 'Metal', 'Dragon', 'Fairy', 'Colorless']
 
@@ -107,10 +120,13 @@ const max = (map) => Math.max(0, ...map.values())
  *   only grows, and its oldest packs were never logged: cards / 10 is the
  *   better count there. The challenge one shrinks (recycling, trades) and
  *   grows without packs (crafting): the server's count is the truth.
+ *   `stats` = the server's pack stats (migration 0010), see PACK_STATS.
  */
-export function collectorStats(entries, sets, { mode = 'unlimited', packs = null } = {}) {
+export function collectorStats(entries, sets, { mode = 'unlimited', packs = null, stats = null } = {}) {
   const setsById = new Map(sets.map((set) => [set.id, set]))
   const s = {
+    server: serverStats(stats),
+    subsets: new Map(), // unique cards per subset kind (gallery, vault, classic)
     unique: entries.length,
     total: 0,
     value: 0,
@@ -140,6 +156,8 @@ export function collectorStats(entries, sets, { mode = 'unlimited', packs = null
     s.buckets[card.rarity_bucket ?? rarityBucket(card.rarity)]++
     s.maxQuantity = Math.max(s.maxQuantity, entry.quantity)
     inc(s.perSet, card.set_id)
+    const kind = subsetKind(setsById.get(card.set_id))
+    if (kind) inc(s.subsets, kind)
     if (card.supertype) inc(s.supertypes, card.supertype)
     for (const subtype of card.subtypes ?? []) inc(s.subtypes, subtype)
     if (card.artist) inc(s.artists, card.artist)
@@ -205,6 +223,16 @@ const superOf = (name) => (s) => s.supertypes.get(name) ?? 0
 
 // Packs
 tiers('packs', 'boosters', (s) => s.boosters, [1, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000])
+tiers('packs', 'bigDay', (s) => s.server.best_day, [10, 25, 50, 100])
+tiers('packs', 'setsOpened', (s) => s.server.sets, [5, 25, 75])
+tiers('packs', 'loyal', (s) => s.server.top_set_packs, [25, 100, 250])
+
+// Luck (packs, not unique cards: duplicates count here)
+tiers('luck', 'hitPacks', (s) => s.server.hit_packs, [1, 10, 50, 150])
+tiers('luck', 'secretPulls', (s) => s.server.secrets, [1, 5, 20])
+one('luck', 'doubleHit', (s) => s.server.max_hits, 2)
+one('luck', 'tripleHit', (s) => s.server.max_hits, 3, { hidden: true })
+one('luck', 'godPack', (s) => s.server.god_packs, 1, { hidden: true, modes: ['challenge'] })
 
 // Collection
 tiers('collection', 'unique', (s) => s.unique, [10, 50, 100, 250, 500, 1000, 2500, 5000, 10000])
@@ -221,6 +249,12 @@ tiers('sets', 'setsStarted', (s) => s.perSet.size, [5, 10, 25, 50, 100])
 one('sets', 'setHalf', (s) => Math.floor(s.bestSetPercent), 50, { percent: true })
 one('sets', 'setThreeQuarters', (s) => Math.floor(s.bestSetPercent), 75, { percent: true })
 tiers('sets', 'setsComplete', (s) => s.setsComplete, [1, 3, 10, 25])
+// Subsets hidden inside other sets' packs
+const subsetCards = (s) => [...s.subsets.values()].reduce((sum, n) => sum + n, 0)
+tiers('sets', 'subsetCards', subsetCards, [1, 10, 50])
+one('sets', 'gallery', (s) => s.subsets.get('gallery') ?? 0)
+one('sets', 'vault', (s) => s.subsets.get('vault') ?? 0)
+one('sets', 'classic', (s) => s.subsets.get('classic') ?? 0)
 
 // Pokédex
 tiers('pokedex', 'dex', (s) => s.dex.size, [10, 50, 151, 251, 386, 500, 750, 1025])
@@ -306,8 +340,23 @@ one('fun', 'featherweight', (s) => (s.minHp <= 30 ? 1 : 0), 1, { hidden: true })
 
 // Dedication (days with new cards: acquired_at is each card's first pull)
 tiers('dedication', 'days', (s) => s.days.size, [3, 7, 30, 100])
+tiers('dedication', 'packStreak', (s) => s.server.best_streak, [3, 7, 14, 30])
+tiers('dedication', 'packDays', (s) => s.server.days, [10, 50, 100, 365])
+
+// Economy: the challenge's coins, missions and trades
+const challengeOnly = { modes: ['challenge'] }
+tiers('economy', 'coinsEarned', (s) => s.server.coins_earned, [1000, 5000, 25000, 100000], challengeOnly)
+tiers('economy', 'missions', (s) => s.server.missions, [5, 25, 100], challengeOnly)
+tiers('economy', 'dailyStreak', (s) => s.server.best_daily_streak, [3, 7, 30], challengeOnly)
+tiers('economy', 'trades', (s) => s.server.trades, [1, 10, 25], challengeOnly)
+tiers('economy', 'gifts', (s) => s.server.gifts, [1, 5], challengeOnly)
+tiers('economy', 'crafted', (s) => s.server.crafted, [1, 10, 50], challengeOnly)
+tiers('economy', 'recycled', (s) => s.server.recycled, [25, 250, 1000], challengeOnly)
 
 export { DEFINITIONS }
+
+/** The definitions of one game mode. */
+export const definitionsFor = (mode) => DEFINITIONS.filter((definition) => !definition.modes || definition.modes.includes(mode))
 
 /**
  * @param {object[]} entries
@@ -321,7 +370,8 @@ export { DEFINITIONS }
 export function achievements(entries, sets, server = {}) {
   const stats = collectorStats(entries, sets, server)
   const kept = new Set(server.unlocked ?? [])
-  return DEFINITIONS.map(({ metric, ...definition }) => {
+  const mode = server.mode ?? 'unlimited'
+  return definitionsFor(mode).map(({ metric, modes: _modes, ...definition }) => {
     const value = kept.has(definition.id) ? Math.max(metric(stats), definition.target) : metric(stats)
     const current = Math.min(value, definition.target)
     return {
@@ -352,7 +402,10 @@ export function achievementProgress(list) {
   const count = (items) => ({ unlocked: items.filter((item) => item.unlocked).length, total: items.length })
   return {
     ...count(list),
-    categories: CATEGORIES.map((category) => ({ category, ...count(list.filter((item) => item.category === category)) })),
+    // Categories of another mode only (e.g. economy in unlimited) are left out
+    categories: CATEGORIES.map((category) => ({ category, ...count(list.filter((item) => item.category === category)) })).filter(
+      (summary) => summary.total > 0,
+    ),
   }
 }
 
@@ -401,7 +454,7 @@ export function rateOf(item, rates, mine = false) {
 }
 
 // Most exciting first when rates don't say which is rarer
-const TOAST_PRIORITY = ['pulls', 'fun', 'teams', 'treasure', 'sets', 'pokedex', 'mechanics', 'types', 'history', 'artists', 'trainers', 'collection', 'packs', 'dedication']
+const TOAST_PRIORITY = ['luck', 'pulls', 'fun', 'teams', 'treasure', 'sets', 'pokedex', 'mechanics', 'types', 'history', 'artists', 'economy', 'trainers', 'collection', 'packs', 'dedication']
 
 /**
  * Order for a batch of unlock toasts: rarest first, then TOAST_PRIORITY, then

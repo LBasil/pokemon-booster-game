@@ -6,7 +6,10 @@ import BoosterArt from '@/components/BoosterArt.vue'
 // clipped along a zigzag tear line: the strip peels off left to right and
 // flies away, a card rises out of the opening, then the pack drops away.
 // The parent waits TEAR_MS before swapping in the card pile.
+// `lite` (phones): one copy of the art, no clip-path, blur or sheen — the
+// pack squeezes, pops and fades in TEAR_MS_LITE.
 defineProps({
+  lite: { type: Boolean, default: false },
   // loading: cards still being drawn | ready: waiting for a tap | tearing
   state: { type: String, default: 'ready' },
   logo: { type: String, default: null },
@@ -34,20 +37,28 @@ const bodyClip = `polygon(${tearLine.join(', ')}, 100% 100%, 0 100%)`
 
 <script>
 export const TEAR_MS = 1300
+export const TEAR_MS_LITE = 550
 </script>
 
 <template>
   <button
     type="button"
     class="booster-pack"
-    :class="`is-${state}`"
+    :class="[`is-${state}`, { 'is-lite': lite }]"
     :disabled="state !== 'ready'"
     :aria-label="t('boosters.tapToOpen')"
     @click="$emit('open')"
   >
     <!-- Floating lives on a wrapper that is paused (not removed) when tearing,
          so the pack doesn't jump back to its resting position -->
-    <span class="pack-float">
+    <span v-if="lite" class="pack-float">
+      <span class="pack-shake">
+        <span class="pack-part pack-whole">
+          <BoosterArt :logo="logo" :artwork="artwork" :symbol="symbol" :name="name" />
+        </span>
+      </span>
+    </span>
+    <span v-else class="pack-float">
       <span class="pack-glow" aria-hidden="true"></span>
       <span class="pack-shake">
         <span class="pack-peek" aria-hidden="true">
@@ -205,6 +216,35 @@ export const TEAR_MS = 1300
 .is-tearing :deep(.booster-sheen) {
   animation: none;
   opacity: 0;
+}
+
+/* ---------- Lite (550ms): squeeze, pop, fade — transforms and opacity only ---------- */
+
+.is-lite .pack-part {
+  will-change: auto;
+}
+
+.is-lite :deep(.booster-sheen) {
+  display: none;
+}
+
+.is-lite.is-tearing .pack-shake {
+  animation: pack-grip 0.25s ease-out;
+}
+
+.is-lite.is-tearing .pack-whole {
+  animation: lite-open 0.35s 0.2s ease-in forwards;
+}
+
+@keyframes lite-open {
+  40% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.14) translateY(-4%);
+    opacity: 0;
+  }
 }
 
 @keyframes pulse {

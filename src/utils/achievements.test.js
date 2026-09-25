@@ -45,7 +45,7 @@ describe('definitions', () => {
     ['fr', fr],
   ])('are all translated in %s', (_, messages) => {
     const lookup = (path) => path.split('.').reduce((node, key) => node?.[key], messages.achievements)
-    for (const item of achievements([], sets)) {
+    for (const item of [...achievements([], sets), ...achievements([], sets, { mode: 'challenge' })]) {
       expect(typeof lookup(item.title) === 'string' || typeof lookup(`${item.title}.title`) === 'string', item.id).toBe(true)
       expect(typeof lookup(`desc.${item.desc}`), item.id).toBe('string')
     }
@@ -114,7 +114,8 @@ describe('achievementProgress', () => {
     const list = achievements([entry('base1-4', { national_pokedex_number: 6 })], sets)
     const progress = achievementProgress(list)
     expect(progress.total).toBe(list.length)
-    expect(progress.categories.map((c) => c.category)).toEqual(CATEGORIES)
+    // economy is challenge-only
+    expect(progress.categories.map((c) => c.category)).toEqual(CATEGORIES.filter((c) => c !== 'economy'))
     expect(progress.categories.reduce((sum, c) => sum + c.total, 0)).toBe(list.length)
     expect(progress.unlocked).toBe(list.filter((a) => a.unlocked).length)
   })
@@ -225,6 +226,50 @@ describe('achievements per mode', () => {
     expect(a.boosters10).toMatchObject({ unlocked: true, current: 10, ratio: 1 })
     expect(a.secret1.unlocked).toBe(true)
     expect(a.boosters25.unlocked).toBe(false)
+  })
+})
+
+describe('pack stats and subsets (migration 0010)', () => {
+  const subsetSets = [...sets, { id: 'swsh9', total: 186 }, { id: 'swsh9tg', total: 30, parent_set_id: 'swsh9' }, { id: 'cel25c', total: 25, parent_set_id: 'cel25' }]
+  const stats = { packs: 40, hit_packs: 10, secrets: 1, max_hits: 2, god_packs: 1, sets: 5, days: 10, best_day: 25, best_streak: 7, top_set_packs: 25 }
+
+  it('reads the server stats, all locked without them', () => {
+    const a = byId(achievements([], sets, { mode: 'challenge', packs: 40, stats }))
+    expect(a.hitPacks10.unlocked).toBe(true)
+    expect(a.hitPacks50).toMatchObject({ unlocked: false, current: 10 })
+    expect(a.doubleHit.unlocked).toBe(true)
+    expect(a.tripleHit.unlocked).toBe(false)
+    expect(a.godPack.unlocked).toBe(true)
+    expect(a.bigDay25.unlocked).toBe(true)
+    expect(a.packStreak7.unlocked).toBe(true)
+    expect(a.setsOpened5.unlocked).toBe(true)
+    expect(a.loyal25.unlocked).toBe(true)
+    expect(a.packDays10.unlocked).toBe(true)
+    const none = byId(achievements([], sets, { mode: 'challenge' }))
+    expect(['hitPacks1', 'doubleHit', 'bigDay10', 'packStreak3'].every((id) => !none[id].unlocked)).toBe(true)
+  })
+
+  it('keeps challenge-only achievements out of the unlimited mode', () => {
+    const unlimited = byId(achievements([], sets, { mode: 'unlimited', stats }))
+    const challenge = byId(achievements([], sets, { mode: 'challenge', stats: { ...stats, trades: 1, coins_earned: 1200 } }))
+    expect(unlimited.godPack).toBeUndefined()
+    expect(unlimited.trades1).toBeUndefined()
+    expect(challenge.trades1.unlocked).toBe(true)
+    expect(challenge.coinsEarned1000.unlocked).toBe(true)
+    expect(challenge.coinsEarned5000.unlocked).toBe(false)
+    expect(unlimited.hitPacks10.unlocked).toBe(true) // luck exists in both
+  })
+
+  it('counts cards from subsets by kind', () => {
+    const entries = [entry('swsh9tg-TG01'), entry('swsh9tg-TG02'), entry('cel25c-4_A'), entry('swsh9-1')]
+    const s = collectorStats(entries, subsetSets)
+    expect(Object.fromEntries(s.subsets)).toEqual({ gallery: 2, classic: 1 })
+    const a = byId(achievements(entries, subsetSets))
+    expect(a.subsetCards1.unlocked).toBe(true)
+    expect(a.subsetCards10.current).toBe(3)
+    expect(a.gallery.unlocked).toBe(true)
+    expect(a.classic.unlocked).toBe(true)
+    expect(a.vault.unlocked).toBe(false)
   })
 })
 

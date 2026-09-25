@@ -2,9 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { fetchCardsByIds } from '@/api/cards'
+import { fetchPlayerAchievements } from '@/api/achievements'
 import { fetchOpenings } from '@/api/history'
 import { modeRoutes } from '@/router/modes'
+import { useModeCollectionStore } from '@/stores/collection'
 import { useSetsStore } from '@/stores/sets'
+import { collectionStats } from '@/utils/collection'
+import { packSummary } from '@/utils/profile'
 import { rarityLabelKey, rarityTier, sortForReveal } from '@/utils/rarity'
 import { setLogoUrl } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
@@ -63,8 +67,41 @@ async function toggle(opening) {
   expanded.value = next
 }
 
+// ---------- Totals: exact pack count + the server's stats (migration 0010) ----------
+
+const collectionStore = useModeCollectionStore(props.mode)
+const server = ref(null)
+const serverLoaded = ref(false)
+
+async function loadTotals() {
+  try {
+    server.value = await fetchPlayerAchievements(props.mode)
+  } catch {
+    server.value = null
+  } finally {
+    serverLoaded.value = true
+  }
+}
+
+const summary = computed(() =>
+  packSummary({ mode: props.mode, totalCards: collectionStats(collectionStore.entries).totalCards, server: server.value }),
+)
+// The unlimited count needs the collection; the challenge one only the server
+const totalsReady = computed(() => serverLoaded.value && (props.mode === 'challenge' || collectionStore.loaded))
+const hitRate = computed(() => {
+  const stats = summary.value.stats
+  return stats?.packs ? Math.round((stats.hit_packs / stats.packs) * 100) : null
+})
+const since = computed(() => {
+  const at = summary.value.stats?.first_at
+  return at ? new Date(at).toLocaleDateString(locale.value, { day: 'numeric', month: 'long', year: 'numeric' }) : ''
+})
+const formatNumber = (value) => value.toLocaleString(locale.value)
+
 onMounted(() => {
   setsStore.load()
+  collectionStore.load()
+  loadTotals()
   loadMore()
 })
 
@@ -102,6 +139,50 @@ function chip(card) {
         <h1 class="history-title">{{ mode === 'challenge' ? t('challenge.historyTitle') : t('history.title') }}</h1>
         <p class="pb-muted">{{ t('history.subtitle') }}</p>
       </header>
+
+      <section class="history-totals" :aria-label="t('history.totalsTitle')">
+        <div v-if="!totalsReady" class="pb-skeleton" style="height: 96px"></div>
+        <template v-else>
+          <dl class="totals-grid">
+            <div class="total total-main">
+              <dt>{{ t('history.totalPacks') }}</dt>
+              <dd>{{ formatNumber(summary.total) }}</dd>
+            </div>
+            <template v-if="summary.stats">
+              <div class="total">
+                <dt>{{ t('history.today') }}</dt>
+                <dd>{{ formatNumber(summary.stats.today) }}</dd>
+              </div>
+              <div class="total">
+                <dt>{{ t('history.bestDay') }}</dt>
+                <dd>{{ formatNumber(summary.stats.best_day) }}</dd>
+              </div>
+              <div class="total">
+                <dt>{{ t('history.hitPacks') }}</dt>
+                <dd>
+                  {{ formatNumber(summary.stats.hit_packs) }}
+                  <small v-if="hitRate !== null">({{ hitRate }} %)</small>
+                </dd>
+              </div>
+              <div class="total">
+                <dt>{{ t('history.bestStreak') }}</dt>
+                <dd>{{ t('history.days', { count: summary.stats.best_streak }, summary.stats.best_streak) }}</dd>
+              </div>
+              <div v-if="summary.stats.top_set_id" class="total">
+                <dt>{{ t('history.topSet') }}</dt>
+                <dd class="total-set">
+                  {{ setsStore.byId[summary.stats.top_set_id]?.name ?? summary.stats.top_set_id }}
+                  <small>× {{ formatNumber(summary.stats.top_set_packs) }}</small>
+                </dd>
+              </div>
+            </template>
+          </dl>
+          <p v-if="summary.stats && summary.unlogged > 0" class="totals-note">
+            {{ t('history.unloggedNote', { count: summary.unlogged, logged: summary.logged, date: since }, summary.unlogged) }}
+          </p>
+          <p v-else-if="summary.stats && since" class="totals-note">{{ t('history.since', { date: since }) }}</p>
+        </template>
+      </section>
 
       <div v-if="loadError && !openings.length" class="alert alert-danger" role="alert">{{ t('history.loadError') }}</div>
 
@@ -179,6 +260,57 @@ function chip(card) {
   margin: 1rem 0 0.5rem;
   font-size: clamp(1.8rem, 5vw, 2.6rem);
   font-weight: 800;
+}
+
+.totals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.total {
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--pb-radius-md);
+  border: 1px solid var(--pb-border);
+  background: var(--pb-surface);
+}
+
+.total dt {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pb-text-muted);
+}
+
+.total dd {
+  margin: 0.2rem 0 0;
+  font-family: var(--pb-font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.total dd small {
+  font-family: var(--pb-font-body);
+  font-size: 0.8rem;
+  color: var(--pb-text-muted);
+}
+
+.total-main dd {
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.total-set {
+  font-size: 1rem !important;
+  overflow-wrap: anywhere;
+}
+
+.totals-note {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  color: var(--pb-text-muted);
 }
 
 .history-day-title {

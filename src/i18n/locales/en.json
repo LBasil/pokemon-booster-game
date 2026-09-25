@@ -127,7 +127,10 @@
     "soundOn": "Turn sound on",
     "soundOff": "Mute sound",
     "wantedBadge": "Wanted!",
-    "openAll": "Open all at once | Open all {count} at once"
+    "openAll": "Open all at once | Open all {count} at once",
+    "subsetOdds": "Also holds the {name}: about 1 pack in {every} has one of its cards.",
+    "subsetIncluded": "Also holds the {name}.",
+    "bonusCards": "+{count} bonus cards"
   },
   "collection": {
     "title": "My collection",
@@ -285,7 +288,14 @@
     "historyLink": "My booster history",
     "installLabel": "Install the app",
     "installDesc": "Add PokéBooster to your home screen, like a real app.",
-    "install": "Install"
+    "install": "Install",
+    "animationsLabel": "Booster animations",
+    "animationsDesc": "Light = no 3D flip or glow layers, smooth on phones. Auto picks light on touch screens.",
+    "animations": {
+      "auto": "Auto",
+      "full": "Full",
+      "light": "Light"
+    }
   },
   "notFound": {
     "title": "This booster is empty",
@@ -306,7 +316,8 @@
     "loadError": "Couldn't load this set.",
     "empty": "No card here with this filter.",
     "missingCard": "No. {number}, {name} — missing",
-    "wanted": "On your wishlist"
+    "wanted": "On your wishlist",
+    "openParent": "Open {name} boosters"
   },
   "pokedex": {
     "caught": "Pokémon caught",
@@ -333,7 +344,17 @@
     "loadError": "Couldn't load your history.",
     "hits": "{count} hit | {count} hits",
     "more": "Load more",
-    "backToProfile": "Profile"
+    "backToProfile": "Profile",
+    "totalsTitle": "Your totals",
+    "totalPacks": "Boosters opened",
+    "today": "Today",
+    "bestDay": "Best day",
+    "hitPacks": "With a hit",
+    "bestStreak": "Longest streak",
+    "days": "{count} day | {count} days",
+    "topSet": "Most opened set",
+    "unloggedNote": "Details cover the {logged} boosters logged since {date}; {count} older booster was opened before logging started. | Details cover the {logged} boosters logged since {date}; {count} older boosters were opened before logging started.",
+    "since": "Since {date}. Days are counted in UTC, like the challenge."
   },
   "community": {
     "eyebrow": "Live",
@@ -573,7 +594,9 @@
       "history": "History",
       "artists": "Illustrators",
       "fun": "Oddities",
-      "dedication": "Dedication"
+      "dedication": "Dedication",
+      "luck": "Luck",
+      "economy": "Coins & trades"
     },
     "regions": {
       "kanto": "Kanto",
@@ -1083,6 +1106,171 @@
       },
       "featherweight": {
         "title": "Featherweight"
+      },
+      "bigDay10": {
+        "title": "Binge opener"
+      },
+      "bigDay25": {
+        "title": "Pack marathon"
+      },
+      "bigDay50": {
+        "title": "Tearing spree"
+      },
+      "bigDay100": {
+        "title": "Hundred in a day"
+      },
+      "setsOpened5": {
+        "title": "Window shopper"
+      },
+      "setsOpened25": {
+        "title": "Set hopper"
+      },
+      "setsOpened75": {
+        "title": "Seen it all"
+      },
+      "loyal25": {
+        "title": "Regular customer"
+      },
+      "loyal100": {
+        "title": "Loyal to the set"
+      },
+      "loyal250": {
+        "title": "One set to rule them all"
+      },
+      "hitPacks1": {
+        "title": "First hit"
+      },
+      "hitPacks10": {
+        "title": "Lucky streak"
+      },
+      "hitPacks50": {
+        "title": "Born lucky"
+      },
+      "hitPacks150": {
+        "title": "Luck is a skill"
+      },
+      "secretPulls1": {
+        "title": "Secret pull"
+      },
+      "secretPulls5": {
+        "title": "Secret keeper"
+      },
+      "secretPulls20": {
+        "title": "Secret society"
+      },
+      "doubleHit": {
+        "title": "Double hit!"
+      },
+      "tripleHit": {
+        "title": "Jackpot"
+      },
+      "godPack": {
+        "title": "Divine intervention"
+      },
+      "subsetCards1": {
+        "title": "Hidden bonus"
+      },
+      "subsetCards10": {
+        "title": "Bonus hunter"
+      },
+      "subsetCards50": {
+        "title": "Subset specialist"
+      },
+      "gallery": {
+        "title": "Gallery visit"
+      },
+      "vault": {
+        "title": "Vault breaker"
+      },
+      "classic": {
+        "title": "A true classic"
+      },
+      "packStreak3": {
+        "title": "Habit forming"
+      },
+      "packStreak7": {
+        "title": "Week of packs"
+      },
+      "packStreak14": {
+        "title": "Two weeks strong"
+      },
+      "packStreak30": {
+        "title": "A month of packs"
+      },
+      "packDays10": {
+        "title": "Regular"
+      },
+      "packDays50": {
+        "title": "Committed"
+      },
+      "packDays100": {
+        "title": "Centurion"
+      },
+      "packDays365": {
+        "title": "A year of boosters"
+      },
+      "coinsEarned1000": {
+        "title": "Pocket money"
+      },
+      "coinsEarned5000": {
+        "title": "Savings account"
+      },
+      "coinsEarned25000": {
+        "title": "Coin hoarder"
+      },
+      "coinsEarned100000": {
+        "title": "Tycoon"
+      },
+      "missions5": {
+        "title": "On a mission"
+      },
+      "missions25": {
+        "title": "Mission specialist"
+      },
+      "missions100": {
+        "title": "Mission accomplished"
+      },
+      "dailyStreak3": {
+        "title": "Coming back"
+      },
+      "dailyStreak7": {
+        "title": "Weekly visitor"
+      },
+      "dailyStreak30": {
+        "title": "Never miss a day"
+      },
+      "trades1": {
+        "title": "First deal"
+      },
+      "trades10": {
+        "title": "Trader"
+      },
+      "trades25": {
+        "title": "Market maker"
+      },
+      "gifts1": {
+        "title": "Generous"
+      },
+      "gifts5": {
+        "title": "Santa Claus"
+      },
+      "crafted1": {
+        "title": "Crafter"
+      },
+      "crafted10": {
+        "title": "Workshop"
+      },
+      "crafted50": {
+        "title": "Card forge"
+      },
+      "recycled25": {
+        "title": "Tidy binder"
+      },
+      "recycled250": {
+        "title": "Recycling plant"
+      },
+      "recycled1000": {
+        "title": "Zero waste"
       }
     },
     "desc": {
@@ -1157,7 +1345,28 @@
         "kantoFossils": "Own Omanyte, Kabuto and Aerodactyl",
         "ghostLine": "Own Gastly, Haunter and Gengar",
         "magikarpLine": "Own Magikarp and Gyarados"
-      }
+      },
+      "bigDay": "Open {count} boosters in a single day",
+      "setsOpened": "Open boosters from {count} different sets",
+      "loyal": "Open {count} boosters of the same set",
+      "hitPacks": "Open a booster with an ultra rare or better | Open {count} boosters with an ultra rare or better",
+      "secretPulls": "Pull a secret rare (duplicates count) | Pull {count} secret rares (duplicates count)",
+      "doubleHit": "Get {count} ultra rares or better in the same booster",
+      "tripleHit": "Get {count} ultra rares or better in the same booster",
+      "godPack": "Open a god pack",
+      "subsetCards": "Own a card from a subset hidden in other packs (Trainer Gallery, Shiny Vault…) | Own {count} different cards from subsets hidden in other packs",
+      "gallery": "Own a Trainer Gallery or Galarian Gallery card",
+      "vault": "Own a Shiny Vault card",
+      "classic": "Own a Classic Collection card",
+      "packStreak": "Open boosters {count} days in a row",
+      "packDays": "Open boosters on {count} different days",
+      "coinsEarned": "Earn {count} coins (the starting bonus excluded)",
+      "missions": "Complete {count} daily missions",
+      "dailyStreak": "Claim the daily reward {count} days in a row",
+      "trades": "Complete a trade | Complete {count} trades",
+      "gifts": "Give cards to another player | Give cards to other players {count} times",
+      "crafted": "Craft a card | Craft {count} cards",
+      "recycled": "Recycle {count} duplicates"
     }
   }
 }
