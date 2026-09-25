@@ -1,13 +1,12 @@
 // Challenge mode economy. Mirrors supabase/migrations/0005_challenge_mode.sql
-// (challenge_recycle_value, challenge_craft_price, challenge_daily_reward,
-// open_challenge_booster) — change both together. The server stays the
-// authority: these values only drive labels and previews.
+// (challenge_recycle_value, challenge_craft_price, challenge_daily_reward)
+// and 0006_challenge_no_pity.sql (open_challenge_booster) — change both
+// together. Packs use the real pull rates (no pity timer). The server stays
+// the authority: these values only drive labels and previews.
 import { rarityLabelKey } from '@/utils/rarity'
 
 export const START_COINS = 1000
 export const PACK_PRICE = 100
-// A hit (ultra or better) is guaranteed at the latest in this pack
-export const PITY_AFTER = 10
 export const GOD_PACK_ODDS = 500
 
 export const RECYCLE_VALUE = { common: 1, uncommon: 2, rare: 5, holo: 15, ultra: 60, secret: 200 }
@@ -39,9 +38,6 @@ export function recyclePreview(entries) {
   }
   return { cards, coins }
 }
-
-/** Packs left before the pity timer forces a hit (1 = the next one). */
-export const packsUntilPity = (packsSinceHit) => Math.max(1, PITY_AFTER - (packsSinceHit ?? 0))
 
 /** Milliseconds until missions and the daily reward reset (00:00 UTC). */
 export function msUntilReset(now = new Date()) {

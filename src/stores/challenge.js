@@ -10,7 +10,7 @@ import {
 import { useChallengeCollectionStore } from '@/stores/collection'
 import { affordablePacks } from '@/utils/challenge'
 
-// The signed-in player's challenge wallet: coins, pity counter, daily reward
+// The signed-in player's challenge wallet: coins, daily reward
 // and today's missions. Every change comes back from the server.
 export const useChallengeStore = defineStore('challenge', {
   state: () => ({
@@ -21,7 +21,6 @@ export const useChallengeStore = defineStore('challenge', {
   }),
   getters: {
     coins: (s) => s.state?.coins ?? 0,
-    packsSinceHit: (s) => s.state?.packs_since_hit ?? 0,
     missions: (s) => s.state?.missions ?? [],
     affordable: (s) => affordablePacks(s.state?.coins),
     // Missions done but not yet claimed + the daily reward: drives the hub badge
@@ -62,7 +61,7 @@ export const useChallengeStore = defineStore('challenge', {
     async openBooster(setId) {
       const result = await openChallengeBooster(setId)
       if (this.state) {
-        this.state = { ...this.state, coins: result.coins, packs_since_hit: result.packs_since_hit }
+        this.state = { ...this.state, coins: result.coins }
       }
       // Mission progress changed server side
       this.loaded = false

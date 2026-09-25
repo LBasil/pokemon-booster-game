@@ -24,7 +24,7 @@ export const claimMission = (mission) => call('claim_mission', { p_mission: miss
 
 /**
  * Buys and opens one challenge pack.
- * @returns {Promise<{ cards: object[], coins: number, packs_since_hit: number, god_pack: boolean, pity: boolean }>}
+ * @returns {Promise<{ cards: object[], coins: number, god_pack: boolean }>}
  */
 export const openChallengeBooster = (setId) => call('open_challenge_booster', { p_set_id: setId })
 

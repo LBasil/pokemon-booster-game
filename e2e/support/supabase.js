@@ -25,7 +25,7 @@ export async function signIn(page) {
   await page.addInitScript(([key, session]) => localStorage.setItem(key, session), [STORAGE_KEY, JSON.stringify(makeSession())])
 }
 
-// Challenge economy, same numbers as migration 0005
+// Challenge economy, same numbers as migrations 0005/0006
 const RECYCLE = { common: 1, uncommon: 2, rare: 5, holo: 15, ultra: 60, secret: 200 }
 const CRAFT = { common: 20, uncommon: 40, rare: 100, holo: 300, ultra: 1500, secret: 5000 }
 const MISSIONS = [
@@ -56,7 +56,6 @@ export async function mockSupabase(page, options = {}) {
     challengeCollection: options.challengeCollection ?? [],
     challenge: {
       coins: 1000,
-      packs_since_hit: 0,
       daily_streak: 0,
       daily_available: true,
       daily_reward: 200,
@@ -69,7 +68,6 @@ export async function mockSupabase(page, options = {}) {
     const c = state.challenge
     return {
       coins: c.coins,
-      packs_since_hit: c.packs_since_hit,
       daily_streak: c.daily_streak,
       daily_available: c.daily_available,
       daily_reward: c.daily_reward,
@@ -144,7 +142,7 @@ export async function mockSupabase(page, options = {}) {
         if (owned) owned.quantity++
         else state.challengeCollection.unshift(collectionEntry(card.id, 1, new Date().toISOString()))
       }
-      return json({ cards: PACK, coins: c.coins, packs_since_hit: 0, god_pack: Boolean(options.godPack), pity: false })
+      return json({ cards: PACK, coins: c.coins, god_pack: Boolean(options.godPack) })
     }
     if (path === '/rest/v1/rpc/recycle_duplicates') {
       let recycled = 0

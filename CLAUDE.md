@@ -172,11 +172,11 @@ docs/manual-testing.md      checklist for a real-account click-through
   both `/profile` (own, editable) and `/u/:username` (public, read-only,
   works signed out, `props: true`).
 - **Game modes**: `collections.mode` / `booster_openings.mode`
-  ('unlimited' | 'challenge'). The **challenge mode** (migration 0005) has
+  ('unlimited' | 'challenge'). The **challenge mode** (migrations 0005 + 0006) has
   its **own separate collection** (user decision) and a coin economy:
   `challenge_wallets` + `challenge_ledger` (read-only for clients), RPCs
   `challenge_state`, `claim_daily_reward`, `claim_mission`,
-  `open_challenge_booster` (returns jsonb: cards, coins, pity, god_pack),
+  `open_challenge_booster` (returns jsonb: cards, coins, god_pack),
   `recycle_duplicates`, `craft_card`. Each RPC locks the player's wallet row
   first (per-player mutex). Economy numbers live in SQL and are mirrored in
   `src/utils/challenge.js` — change both together. Game day = UTC.
@@ -212,17 +212,23 @@ docs/manual-testing.md      checklist for a real-account click-through
   (`/community`: live feed + leaderboards), profile + public profiles
   (`/u/:username`), `/reset-password`, 404. PWA installable.
 - **Challenge mode** built 2026-09-25: migration
-  `0005_challenge_mode.sql` **written but NOT applied** (needs 0004 first);
+  `0005_challenge_mode.sql` **applied 2026-09-25** (after 0004);
   verified with PGlite (65 checks: RLS, grants, start bonus, daily streak,
   missions, pity, god pack, recycle, craft, rate limit, feed, wishlist).
+  **The pity timer was then removed (user decision: nothing costs real
+  money, keep real-life pull rates; god packs stay)**:
+  `0006_challenge_no_pity.sql` **written but NOT applied** — verified with
+  PGlite on a 0005 database (28 checks: columns dropped, god pack kept and
+  still drawn, 17-18% hit rate over 1,000 packs, 27+ pack dry streaks
+  possible). Never reintroduce a pity timer or anything that bends the
+  rates in either mode.
 - **Supabase**: migrations 0001-0003 applied (0003 on 2026-09-24, then
   `populate:sets` re-run: 176 sets with logo/symbol URLs). `cards` has
-  20,670 rows. **Migration 0004 (`0004_collector_social.sql`) is written
-  but NOT applied yet** — the current client depends on it (it calls
+  20,670 rows. **Migration 0004 (`0004_collector_social.sql`) applied
+  2026-09-25** (checked through the REST API with the service role key:
+  tables and RPCs answer) — the current client depends on it (it calls
   `open_my_booster`, reads `profiles`, `wishlist`, `booster_openings`,
-  `pull_feed`, `card_price_history`, filters `collections.mode`). Apply it,
-  then deploy right away (it drops `add_cards_to_collection`, which older
-  deployed clients still call). 0004 was verified locally with PGlite
+  `pull_feed`, `card_price_history`, filters `collections.mode`). 0004 was verified locally with PGlite
   (35 checks as the anon/authenticated roles: RLS, column grants, unique
   usernames, owned-only showcase, rate limit, backfill of existing users,
   private profiles hidden everywhere, idempotent).
@@ -244,7 +250,7 @@ docs/manual-testing.md      checklist for a real-account click-through
 
 ## TODO / known gaps
 
-- Apply migrations 0004 then 0005 + the post-migration steps above, then go through
+- Do the post-migration steps above (redirect URLs, realtime, GitHub secrets), then go through
   `docs/manual-testing.md` with a real account (never done so far — real
   sign-ups need the confirmation email, which is ON).
 - Challenge mode, still to do: **trades between players**, notifications

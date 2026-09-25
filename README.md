@@ -21,9 +21,9 @@ Supabase (Postgres + Auth + Realtime).
 - **Challenge mode** (`/challenge`): a second, separate collection built
   with coins. Start with 1,000 coins, pay 100 per booster, earn more with a
   daily reward that grows over a 7-day streak and three daily missions,
-  recycle duplicates into coins and craft the cards you're missing. A pity
-  timer guarantees an ultra rare at the latest every 10th booster, and 1
-  booster in 500 is a "god pack" (holos and better only). Every coin moves
+  recycle duplicates into coins and craft the cards you're missing. Packs
+  keep the real pull rates (no pity timer), except that 1 booster in 500 is
+  a "god pack" (holos and better only). Every coin moves
   server-side, and the unlimited collection is never touched.
 - **Sound & haptics**: synthesized sound effects (tearing, flips, hit
   fanfares — no audio files) and a vibration on hits, both switchable.
@@ -109,9 +109,11 @@ its **SQL editor** and run, in order:
    price history and the leaderboards. Deploy the matching client right
    after: older clients can't save packs any more.
 5. `supabase/migrations/0005_challenge_mode.sql` — the challenge mode:
-   wallets, coin ledger, daily reward, missions, paid boosters with pity
-   timer and god packs, recycling and crafting. Run it after 0004; the
-   current client needs it.
+   wallets, coin ledger, daily reward, missions, paid boosters with god
+   packs, recycling and crafting. Run it after 0004.
+6. `supabase/migrations/0006_challenge_no_pity.sql` — removes the
+   challenge's pity timer (real pull rates only, god packs stay). Run it
+   after 0005; the current client needs it.
 
 Then in **Authentication**:
 

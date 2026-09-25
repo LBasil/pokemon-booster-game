@@ -14,7 +14,7 @@ import { useSetsStore } from '@/stores/sets'
 import { useSettingsStore } from '@/stores/settings'
 import { useWishlistStore } from '@/stores/wishlist'
 import { groupCardsByQuantity } from '@/utils/cards'
-import { PACK_PRICE, packsUntilPity } from '@/utils/challenge'
+import { PACK_PRICE } from '@/utils/challenge'
 import { bestPull, rarityLabelKey, rarityRank, rarityTier, sortForReveal } from '@/utils/rarity'
 import { setLogoUrl, setSymbolUrl } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
@@ -142,7 +142,7 @@ const openError = ref('')
 const openedSetId = ref('')
 const packSetId = ref('') // set the current pack came from (differs for "any set")
 const stage = ref(null)
-const currentPack = ref({ godPack: false, pity: false }) // challenge pack flags
+const currentPack = ref({ godPack: false }) // challenge pack flags
 const godPacks = ref(0)
 let tearTimer = null
 
@@ -150,7 +150,6 @@ let tearTimer = null
 
 const canAfford = (n) => !isChallenge || challenge.coins >= n * PACK_PRICE
 const cost = computed(() => count.value * PACK_PRICE)
-const pityLeft = computed(() => packsUntilPity(challenge.packsSinceHit))
 
 function openErrorFor(err) {
   return err?.code === 'not_enough_coins' ? t('challenge.errors.not_enough_coins') : t('boosters.openError')
@@ -176,7 +175,7 @@ async function drawPack() {
   if (isChallenge) {
     const result = await challenge.openBooster(openedSetId.value || null)
     cards = result.cards
-    currentPack.value = { godPack: result.god_pack, pity: result.pity }
+    currentPack.value = { godPack: result.god_pack }
     if (result.god_pack) godPacks.value++
   } else {
     cards = await openBooster(openedSetId.value || null)
@@ -317,13 +316,10 @@ const stageLabel = computed(() => {
   return from ? `${t('boosters.anySet')} · ${from}` : openedSetName.value
 })
 
-// Challenge packs announce a god pack or the pity timer once torn open
-const packBanner = computed(() => {
-  if (!isChallenge || step.value !== 'reveal') return ''
-  if (currentPack.value.godPack) return t('challenge.godPack')
-  if (currentPack.value.pity) return t('challenge.pityPack')
-  return ''
-})
+// A challenge god pack is announced once torn open
+const packBanner = computed(() =>
+  isChallenge && step.value === 'reveal' && currentPack.value.godPack ? t('challenge.godPack') : '',
+)
 
 // Chip label for anything rarer than an uncommon
 function rarityChip(card) {
@@ -403,7 +399,6 @@ async function shareBest() {
               {{ t('challenge.notEnoughHint') }}
               <RouterLink :to="{ name: 'challenge' }">{{ t('challenge.earnCoins') }}</RouterLink>
             </p>
-            <p v-else class="wallet-pity">{{ t('challenge.pity', { count: pityLeft }, pityLeft) }}</p>
           </div>
 
           <div class="preview-stage" :style="{ '--stack': Math.min(count, 3) }" aria-hidden="true">
@@ -773,7 +768,7 @@ async function shareBest() {
   max-width: 360px;
 }
 
-/* Challenge: balance, pity timer and prices */
+/* Challenge: balance and prices */
 .wallet-line {
   display: flex;
   flex-direction: column;
@@ -791,12 +786,6 @@ async function shareBest() {
 .wallet-balance strong,
 .done-wallet strong {
   color: var(--pb-coin);
-}
-
-.wallet-pity {
-  margin: 0;
-  color: var(--pb-text-muted);
-  font-size: 0.9rem;
 }
 
 .open-price {

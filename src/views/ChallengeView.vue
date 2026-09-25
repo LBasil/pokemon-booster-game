@@ -8,13 +8,11 @@ import {
   CRAFT_PRICE,
   GOD_PACK_ODDS,
   PACK_PRICE,
-  PITY_AFTER,
   RECYCLE_VALUE,
   START_COINS,
   countdownParts,
   dailyReward,
   msUntilReset,
-  packsUntilPity,
 } from '@/utils/challenge'
 import { completionPercent } from '@/utils/progress'
 import AppHeader from '@/components/AppHeader.vue'
@@ -120,8 +118,6 @@ function onRecycleError(err) {
 }
 
 const formatNumber = (value) => value.toLocaleString(locale.value)
-const pityLeft = computed(() => packsUntilPity(state.value?.packs_since_hit))
-const pityPercent = computed(() => ((state.value?.packs_since_hit ?? 0) / (PITY_AFTER - 1)) * 100)
 </script>
 
 <template>
@@ -154,22 +150,6 @@ const pityPercent = computed(() => ((state.value?.packs_since_hit ?? 0) / (PITY_
               <h2 id="ch-wallet-title" class="ch-label">{{ t('challenge.walletTitle') }}</h2>
               <p class="ch-coins"><CoinAmount :amount="challenge.coins" /></p>
               <p class="ch-muted">{{ t('challenge.affordable', { count: challenge.affordable }, challenge.affordable) }}</p>
-
-              <div class="ch-pity">
-                <p class="ch-pity-label">
-                  {{ t('challenge.pity', { count: pityLeft }, pityLeft) }}
-                </p>
-                <div
-                  class="ch-bar"
-                  role="progressbar"
-                  :aria-label="t('challenge.pityLabel')"
-                  aria-valuemin="0"
-                  :aria-valuemax="PITY_AFTER - 1"
-                  :aria-valuenow="state.packs_since_hit"
-                >
-                  <span :style="{ width: `${pityPercent}%` }"></span>
-                </div>
-              </div>
 
               <RouterLink :to="{ name: 'challenge-boosters' }" class="btn btn-primary btn-lg glow-button ch-cta">
                 {{ t('challenge.openCta') }}
@@ -282,7 +262,7 @@ const pityPercent = computed(() => ((state.value?.packs_since_hit ?? 0) / (PITY_
             <li>{{ t('challenge.rules.start', { coins: formatNumber(START_COINS) }) }}</li>
             <li>{{ t('challenge.rules.pack', { coins: formatNumber(PACK_PRICE) }) }}</li>
             <li>{{ t('challenge.rules.daily') }}</li>
-            <li>{{ t('challenge.rules.pity', { count: PITY_AFTER }) }}</li>
+            <li>{{ t('challenge.rules.rates') }}</li>
             <li>{{ t('challenge.rules.godPack', { odds: formatNumber(GOD_PACK_ODDS) }) }}</li>
             <li>{{ t('challenge.rules.recycle') }}</li>
             <li>{{ t('challenge.rules.separate') }}</li>
@@ -467,19 +447,9 @@ const pityPercent = computed(() => ((state.value?.packs_since_hit ?? 0) / (PITY_
   line-height: 1.1;
 }
 
-.ch-pity {
-  margin: 1.25rem 0 1.5rem;
-  max-width: 24rem;
-}
-
-.ch-pity-label {
-  margin: 0 0 0.4rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
 .ch-cta {
   display: inline-flex;
+  margin-top: 1.5rem;
   align-items: center;
   gap: 0.75rem;
 }

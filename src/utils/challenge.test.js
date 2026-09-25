@@ -6,7 +6,6 @@ import {
   craftPrice,
   dailyReward,
   msUntilReset,
-  packsUntilPity,
   recyclePreview,
   recycleValue,
 } from './challenge'
@@ -45,12 +44,6 @@ describe('challenge economy', () => {
     ]
     expect(recyclePreview(entries)).toEqual({ cards: 3, coins: 2 + 60 })
     expect(recyclePreview([])).toEqual({ cards: 0, coins: 0 })
-  })
-
-  it('counts down the pity timer', () => {
-    expect(packsUntilPity(0)).toBe(10)
-    expect(packsUntilPity(9)).toBe(1)
-    expect(packsUntilPity(12)).toBe(1)
   })
 
   it('resets at 00:00 UTC', () => {
