@@ -21,6 +21,37 @@ test('every challenge page says so and leads back to unlimited mode in one tap',
   await expect(page.locator('.mode-strip')).toHaveCount(0)
 })
 
+test('community and profile keep the mode the player came from', async ({ page }, info) => {
+  await mockSupabase(page)
+  const bar = info.project.name === 'mobile' ? page.locator('.app-tabbar') : page.locator('.app-header-nav')
+  await page.goto('/challenge')
+  await bar.getByRole('link', { name: 'Profile' }).click()
+  await expect(page).toHaveURL(/\/profile$/)
+  await expect(page.locator('.mode-strip')).toContainText('Challenge mode')
+  await expect(bar.getByRole('link', { name: 'Profile' })).toHaveAttribute('aria-current', 'page')
+  await expect(page.getByRole('link', { name: 'My booster history' })).toHaveAttribute('href', '/challenge/history')
+  // Still there after a reload, and on the community page
+  await page.reload()
+  await expect(page.locator('.mode-strip')).toBeVisible()
+  await page.goto('/community')
+  await expect(page.locator('.mode-strip')).toBeVisible()
+  await expect(page.getByRole('tab', { selected: true })).toHaveText('Challenge: cards')
+
+  await page.locator('.mode-strip').getByRole('link', { name: /Leave/ }).click()
+  await expect(page).toHaveURL(/\/game$/)
+  await page.goto('/community')
+  await expect(page.locator('.mode-strip')).toHaveCount(0)
+})
+
+test('logging out takes a labeled button on the profile, never a stray header icon', async ({ page }) => {
+  await mockSupabase(page)
+  await page.goto('/game')
+  await expect(page.locator('.app-header').getByRole('button', { name: 'Log out' })).toHaveCount(0)
+  await page.goto('/profile')
+  await page.getByRole('button', { name: 'Log out' }).click()
+  await expect(page).toHaveURL(/\/$/)
+})
+
 test('the mode switch moves between the two hubs', async ({ page }) => {
   await mockSupabase(page)
   await page.goto('/game')

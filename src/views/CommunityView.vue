@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { routeMode } from '@/router/modes'
 import { LEADERBOARDS, fetchFeed, fetchLeaderboard, subscribeToFeed } from '@/api/social'
 import { useProfileStore } from '@/stores/profile'
 import { useSetsStore } from '@/stores/sets'
@@ -9,6 +11,7 @@ import AppHeader from '@/components/AppHeader.vue'
 
 // Live feed of hits (Supabase Realtime) + luck-based leaderboards.
 const { t, locale } = useI18n()
+const route = useRoute()
 const profileStore = useProfileStore()
 const setsStore = useSetsStore()
 
@@ -50,7 +53,8 @@ onBeforeUnmount(() => {
 
 // ---------- Leaderboards ----------
 
-const board = ref(LEADERBOARDS[0])
+// Coming from the challenge: open on its leaderboard
+const board = ref(routeMode(route) === 'challenge' ? 'challenge_unique' : LEADERBOARDS[0])
 const rows = ref([])
 const boardState = ref('loading')
 

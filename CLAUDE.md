@@ -190,7 +190,10 @@ docs/manual-testing.md      checklist for a real-account click-through
   (`pull_feed.mode`). Coins render with `CoinAmount.vue` (`--pb-coin`).
 - **Never let a player lose track of the mode** (user priority): every
   challenge page shows AppHeader's `.mode-strip` ("Challenge mode", coins,
-  "Leave" → `/game`, phones included); both hubs start with `ModeSwitch`
+  "Leave" → `/game`, phones included); Community and profiles
+  (route `meta.sharedMode`) keep the mode the player came from
+  (`routeMode(route)` in `src/router/modes.js`, remembered per tab in
+  sessionStorage) instead of dropping them out of it; both hubs start with `ModeSwitch`
   (Unlimited | Challenge); challenge pages use explicit titles
   ("Challenge collection"); the empty challenge collection says the
   unlimited cards are safe. Every badge must come with its reason on the
@@ -262,7 +265,7 @@ docs/manual-testing.md      checklist for a real-account click-through
   (35 checks as the anon/authenticated roles: RLS, column grants, unique
   usernames, owned-only showcase, rate limit, backfill of existing users,
   private profiles hidden everywhere, idempotent).
-- `npm test`: 81 unit tests. `npm run test:e2e`: 72 tests (36 x desktop +
+- `npm test`: 81 unit tests. `npm run test:e2e`: 76 tests (38 x desktop +
   mobile). `npm run build` passes, 0 npm audit
   vulnerabilities. Screens were also reviewed in headless Chrome with
   realistic mocks (both themes, phone width) — not yet on a real phone.

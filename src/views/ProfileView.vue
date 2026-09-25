@@ -1,8 +1,9 @@
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { fetchPublicCollection, fetchPublicProfile } from '@/api/profiles'
+import { modeRoutes, routeMode } from '@/router/modes'
 import { useAuthStore } from '@/stores/auth'
 import { useCollectionStore } from '@/stores/collection'
 import { useProfileStore } from '@/stores/profile'
@@ -26,6 +27,7 @@ const props = defineProps({
 
 const { t, locale } = useI18n()
 const router = useRouter()
+const route = useRoute()
 const auth = useAuthStore()
 const collectionStore = useCollectionStore()
 const profileStore = useProfileStore()
@@ -206,6 +208,9 @@ const badges = computed(() => achievements(entries.value, setsStore.sets))
 const unlockedCount = computed(() => badges.value.filter((badge) => badge.unlocked).length)
 
 // ---------- Account ----------
+
+// Coming from the challenge, the history link stays in it
+const historyRoute = computed(() => modeRoutes(routeMode(route)).history)
 
 async function logout() {
   await auth.signOut()
@@ -477,7 +482,7 @@ async function logout() {
                 <p class="pb-muted mb-0">{{ t('profile.accountDesc') }}</p>
               </div>
               <div class="account-actions">
-                <RouterLink :to="{ name: 'history' }" class="btn btn-outline-secondary">{{ t('profile.historyLink') }}</RouterLink>
+                <RouterLink :to="{ name: historyRoute }" class="btn btn-outline-secondary">{{ t('profile.historyLink') }}</RouterLink>
                 <button type="button" class="btn btn-outline-secondary" @click="logout">{{ t('common.logout') }}</button>
               </div>
             </section>

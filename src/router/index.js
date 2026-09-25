@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { trackMode } from './modes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,13 +44,13 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: () => import('@/views/ProfileView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, sharedMode: true },
     },
     {
       path: '/community',
       name: 'community',
       component: () => import('@/views/CommunityView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, sharedMode: true },
     },
     {
       // Challenge mode: its own collection and coin economy (migration 0005)
@@ -98,6 +99,7 @@ const router = createRouter({
       name: 'public-profile',
       component: () => import('@/views/ProfileView.vue'),
       props: true,
+      meta: { sharedMode: true },
     },
     {
       // "Forgot password" email link lands here (recovery session in the URL)
@@ -125,5 +127,7 @@ router.beforeEach(async (to) => {
   }
   return true
 })
+
+router.afterEach(trackMode)
 
 export default router

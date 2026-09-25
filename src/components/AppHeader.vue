@@ -1,7 +1,8 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
+import { routeMode } from '@/router/modes'
 import { useAuthStore } from '@/stores/auth'
 import { useChallengeStore } from '@/stores/challenge'
 import BrandLogo from '@/components/BrandLogo.vue'
@@ -10,13 +11,14 @@ import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 
 // Shared top bar for every signed-in view. Inside the challenge mode
-// (route meta.mode), Boosters / Collection lead to the challenge versions.
+// (route meta.mode, kept on Community / Profile), Boosters / Collection lead
+// to the challenge versions. Logging out lives on the Profile page, not here:
+// an unlabeled icon one tap away got hit by mistake.
 const { t } = useI18n()
 const route = useRoute()
-const router = useRouter()
 const auth = useAuthStore()
 
-const inChallenge = computed(() => route.meta.mode === 'challenge')
+const inChallenge = computed(() => auth.isLoggedIn && routeMode(route) === 'challenge')
 
 // Rewards to claim + trade offers to answer, shown on the Challenge links
 const challenge = useChallengeStore()
@@ -95,11 +97,6 @@ const isActive = (name, inTabBar = false) =>
   route.name === name ||
   PARENTS[route.name] === name ||
   (inTabBar && name === 'challenge' && route.name === 'challenge-trades')
-
-async function logout() {
-  await auth.signOut()
-  router.push({ name: 'home' })
-}
 </script>
 
 <template>
@@ -126,17 +123,6 @@ async function logout() {
     <div class="app-header-actions">
       <LanguageSwitcher />
       <ThemeToggle />
-      <button
-        type="button"
-        class="icon-button"
-        :aria-label="t('common.logout')"
-        :title="t('common.logout')"
-        @click="logout"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H3" />
-        </svg>
-      </button>
     </div>
 
     <nav class="app-tabbar" :aria-label="t('nav.main')">
@@ -222,33 +208,6 @@ async function logout() {
   align-items: center;
   gap: 0.5rem;
   margin-left: auto;
-}
-
-.icon-button {
-  display: inline-grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 1px solid var(--pb-border-strong);
-  background: var(--pb-surface);
-  color: var(--pb-text);
-  backdrop-filter: blur(12px);
-  transition: background-color 0.2s;
-}
-
-.icon-button:hover {
-  background: var(--pb-surface-hover);
-}
-
-.icon-button svg {
-  width: 19px;
-  height: 19px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
 /* Count of rewards / trade offers waiting */
