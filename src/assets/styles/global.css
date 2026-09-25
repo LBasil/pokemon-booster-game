@@ -65,6 +65,9 @@
   --pb-series: #a78bfa;
   --pb-grid: rgba(255, 255, 255, 0.08);
 
+  /* Scrollbar thumb: the foil, vertical */
+  --pb-scroll-thumb: linear-gradient(180deg, #6ee7f9, #a78bfa, #f472b6, #fcd34d);
+
   /* Challenge mode coins (icon fill + amounts) */
   --pb-coin: #ffd23f;
   --pb-coin-edge: #b8860b;
@@ -106,6 +109,7 @@
   --pb-bucket-secret: #42167f;
   --pb-series: #6d28d9;
   --pb-grid: rgba(17, 22, 51, 0.1);
+  --pb-scroll-thumb: linear-gradient(180deg, #0e7490, #6d28d9, #be185d, #b45309);
 
   --pb-coin: #a16207;
   --pb-coin-edge: #854d0e;
@@ -188,6 +192,48 @@ a {
 :focus-visible {
   outline: 2px solid var(--pb-focus);
   outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--pb-ring) 40%, transparent);
+  color: var(--pb-text);
+}
+
+/* Native controls in the design system's colors */
+:root {
+  accent-color: var(--pb-ring);
+  caret-color: var(--pb-focus);
+}
+
+/* Foil scrollbars: a thin holo thumb on a transparent track (Chrome, Safari,
+   Edge). Firefox only takes flat colors. */
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background: var(--pb-scroll-thumb) padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    border-width: 2px;
+  }
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  :root {
+    scrollbar-width: thin;
+    scrollbar-color: var(--pb-ring) transparent;
+  }
 }
 
 /* ---------- Utilities ---------- */

@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import PointerFx from '@/components/PointerFx.vue'
 
 const auth = useAuthStore()
 onMounted(() => {
@@ -14,4 +15,5 @@ onMounted(() => {
   <RouterView v-slot="{ Component, route }">
     <component :is="Component" :key="route.name" />
   </RouterView>
+  <PointerFx />
 </template>

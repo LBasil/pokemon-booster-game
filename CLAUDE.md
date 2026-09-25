@@ -144,6 +144,11 @@ docs/manual-testing.md      checklist for a real-account click-through
   pack, size via `--booster-w`), `.pb-skeleton` (loading placeholder),
   `--pb-selected` (current item in navs), `--pb-ring` (selection ring),
   `--pb-bucket-*` (one color per rarity bucket, darker in light theme).
+  Site-wide touches: foil scrollbars (`--pb-scroll-thumb`), `::selection`,
+  `accent-color`/`caret-color` in `global.css`; `PointerFx.vue` (mounted
+  in `App.vue`) = aurora glow behind the content + holo ring trailing the
+  (kept) native cursor, mouse only, and a spark burst on click/tap. All
+  off under `prefers-reduced-motion` (so also in e2e, which forces it).
 - Don't name classes after Bootstrap components (`.badge`, `.card`,
   `.alert`...): Bootstrap's styles leak in (e.g. `.badge` centers text).
 - **Signed-in page shell**: wrap the view in `<div class="pb-page">` and put
