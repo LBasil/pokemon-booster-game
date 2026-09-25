@@ -55,7 +55,11 @@ Supabase (Postgres + Auth + Realtime).
   "install the app" button.
 - **Achievements**: 185 of them in 14 categories (boosters, pulls, sets,
   Pokédex regions, famous teams, types, mechanics, treasure, illustrators,
-  a few secret ones…) at `/achievements` (and `/u/<username>/achievements`),
+  a few secret ones…), **in each game mode** — the challenge ones are the
+  ones that count (every pack costs coins), and stay unlocked even after
+  recycling or trading. At `/challenge/achievements` and `/achievements`
+  (and `/u/<username>/achievements?mode=…`), with an Unlimited | Challenge
+  switch,
   with search, category/status filters and progress bars per category and
   overall. Computed from the collection, so new ones unlock retroactively.
   A Steam-style **"Achievement unlocked" pop-up** (with a chime) shows at the
@@ -140,6 +144,10 @@ its **SQL editor** and run, in order:
    under each achievement: clients report their unlocks, anyone reads the
    anonymous counts. Run it after 0007; until then the achievements work
    without percentages.
+9. `supabase/migrations/0009_achievements_by_mode.sql` — achievements per
+   game mode (rates, recorded unlocks, packs opened per mode). Run it after
+   0008; until then the challenge achievements work without percentages,
+   and unlocks aren't kept if the challenge collection shrinks.
 
 Then in **Authentication**:
 

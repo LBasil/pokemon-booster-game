@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import en from '@/i18n/locales/en.json'
 import fr from '@/i18n/locales/fr.json'
-import { CATEGORIES, DEFINITIONS, achievementProgress, achievements, collectorStats, filterAchievements, MAX_TOASTS, newlyUnlocked, rateOf, sortForToasts, toastBatch } from './achievements'
+import { CATEGORIES, DEFINITIONS, achievementProgress, achievements, collectorStats, filterAchievements, MAX_TOASTS, newlyUnlocked, nextUp, rateOf, sortForToasts, toastBatch } from './achievements'
 
 const card = (id, fields = {}) => ({
   id,
@@ -194,10 +194,49 @@ describe('sortForToasts', () => {
     { id: 'ditto', category: 'fun', unlocked: true },
   ]
   it('puts the most exciting categories first without rates', () => {
-    expect(sortForToasts(items, null).map((i) => i.id)).toEqual(['ditto', 'secret1', 'unique10', 'boosters1'])
+    expect(sortForToasts(items, null).map((i) => i.id)).toEqual(['secret1', 'ditto', 'unique10', 'boosters1'])
+    const tiers = [{ id: 'holo1', category: 'pulls' }, { id: 'secret1', category: 'pulls' }]
+    expect(sortForToasts(tiers, null).map((i) => i.id)).toEqual(['secret1', 'holo1'])
   })
   it('puts the rarest first with rates', () => {
     const rates = { players: 100, holders: { boosters1: 2, unique10: 50, secret1: 30, ditto: 40 } }
     expect(sortForToasts(items, rates).map((i) => i.id)).toEqual(['boosters1', 'secret1', 'ditto', 'unique10'])
+  })
+})
+
+describe('achievements per mode', () => {
+  const entries = Array.from({ length: 3 }, (_, i) => entry(`xy1-${i}`, {}, 10)) // 30 cards
+  const byIdOf = (list) => Object.fromEntries(list.map((a) => [a.id, a]))
+
+  it('unlimited: cards / 10, or more when the server logged more packs', () => {
+    expect(collectorStats(entries, sets).boosters).toBe(3)
+    expect(collectorStats(entries, sets, { mode: 'unlimited', packs: 1 }).boosters).toBe(3) // old packs unlogged
+    expect(collectorStats(entries, sets, { mode: 'unlimited', packs: 5 }).boosters).toBe(5)
+  })
+
+  it('challenge: the server count wins (recycling, crafting)', () => {
+    const s = collectorStats(entries, sets, { mode: 'challenge', packs: 12 })
+    expect([s.boosters, s.pulled, s.total]).toEqual([12, 120, 30])
+    expect(collectorStats(entries, sets, { mode: 'challenge' }).boosters).toBe(3) // unknown: fallback
+  })
+
+  it('keeps achievements the server already recorded', () => {
+    const a = byIdOf(achievements([], sets, { mode: 'challenge', packs: 0, unlocked: ['boosters10', 'secret1'] }))
+    expect(a.boosters10).toMatchObject({ unlocked: true, current: 10, ratio: 1 })
+    expect(a.secret1.unlocked).toBe(true)
+    expect(a.boosters25.unlocked).toBe(false)
+  })
+})
+
+describe('nextUp', () => {
+  it('lists the locked ones closest to unlocking, secrets excluded', () => {
+    const list = [
+      { id: 'a', unlocked: true, ratio: 1, target: 1 },
+      { id: 'b', unlocked: false, ratio: 0.5, target: 10 },
+      { id: 'c', unlocked: false, ratio: 0.9, target: 10, hidden: true },
+      { id: 'd', unlocked: false, ratio: 0.5, target: 2 },
+      { id: 'e', unlocked: false, ratio: 0.1, target: 2 },
+    ]
+    expect(nextUp(list, 2).map((i) => i.id)).toEqual(['d', 'b'])
   })
 })

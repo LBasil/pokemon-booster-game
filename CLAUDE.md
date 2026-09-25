@@ -217,24 +217,37 @@ docs/manual-testing.md      checklist for a real-account click-through
   challenge hub — and unmounted the component that was supposed to
   trigger the reload (Vue drops `emit` from unmounted components).
 - **Achievements** (`src/utils/achievements.js`): ~185 definitions in 14
-  categories, all computed client side from the unlimited collection +
-  sets in one pass (`collectorStats`) — nothing stored, so adding one
-  unlocks it retroactively and public profiles get them too. Add a
+  categories, **per game mode** (user decision: separate, the challenge
+  put first — it's the one that counts). Computed client side from that
+  mode's collection + sets in one pass (`collectorStats`), plus the
+  server's `player_achievements(mode, username?)` (0009): ids already
+  recorded stay unlocked (the challenge collection shrinks: recycling,
+  trades) and packs opened per mode (challenge: the server count is the
+  truth; unlimited: max with cards / 10, old packs were never logged).
+  Adding a definition unlocks it retroactively; public profiles get
+  them too. Add a
   definition + its EN/FR title/description (`achievements.items.<id>.title`,
   `achievements.desc.<family>`); `achievements.test.js` fails on any
   missing translation. `hidden` ones show "???" until unlocked. UI:
-  `AchievementTile.vue`, summary on the profile ("Next up"), full page
-  `AchievementsView` (`/achievements`, `/u/:username/achievements`;
-  search + category/status filters synced to `?cat=&status=&q=`).
+  `AchievementTile.vue`; `useModeAchievements(mode, username?)`
+  (composable: own or public, per mode) feeds the profile summary
+  (Challenge | Unlimited tabs, "Next up"), the challenge hub tile and
+  `AchievementsView` (`/challenge/achievements` + `/achievements`, `mode`
+  prop; `/u/:username/achievements?mode=`; Challenge | Unlimited switch
+  keeping the filters; search + category/status filters synced to
+  `?cat=&status=&q=`).
   **Unlock toasts** (`useAchievementsStore().check()`, `AchievementToasts`
-  in App.vue): compares with the ids already seen on this device
-  (localStorage per account; the first check is a silent baseline) —
-  called on BoosterView mount + at the summary (never mid-reveal: no
-  spoilers), and on own profile / achievements page. Max 3 toasts, rarest
-  first, the last one "+N more". **Rates** ("12% of players", migration
-  0008): the client reports unlocked ids (`record_achievements`, retried
-  until the server confirms) and reads `achievement_rates()`; a missing
-  0008 just hides the rates. Deliberate, documented exception to rule 9:
+  in App.vue): `check(mode)` compares with the ids already seen on this
+  device (localStorage per account and mode; the first check is a silent
+  baseline) — called on BoosterView mount + at the summary in both modes
+  (never mid-reveal: no spoilers), and wherever `useModeAchievements`
+  shows the player's own (profile, achievements page, challenge hub). Max 3 toasts, rarest
+  first, the last one "+N more". **Rates** ("12% of players", migrations
+  0008 + 0009, per mode): the client reports unlocked ids
+  (`record_achievements(ids, mode)`, retried until the server confirms)
+  and reads `achievement_rates(mode)`; `src/api/achievements.js` falls
+  back to the 0008 signatures and hides what a missing migration can't
+  give. Deliberate, documented exception to rule 9:
   the ids are client-claimed (the server can't recheck ~185 JS
   definitions), acceptable because it only nudges an anonymous
   percentage that nothing ranks or rewards on.
@@ -273,8 +286,7 @@ docs/manual-testing.md      checklist for a real-account click-through
   possible). Never reintroduce a pity timer or anything that bends the
   rates in either mode.
 - **Challenge trades, history, leaderboards, badge** built 2026-09-25:
-  `0007_challenge_trades.sql` **written but NOT applied** (run after
-  0006). Trades: `trade_offers` (read-only for clients), 1-5 of your cards
+  `0007_challenge_trades.sql` **applied 2026-09-25** (after 0006). Trades: `trade_offers` (read-only for clients), 1-5 of your cards
   for 0-5 of theirs (0 = gift), public profiles only, 10 pending max,
   7-day expiry, accept swaps atomically under both wallet locks (ordered)
   or ends 'failed'. RPCs `propose_trade`, `respond_trade`, `cancel_trade`,
@@ -287,7 +299,9 @@ docs/manual-testing.md      checklist for a real-account click-through
   flagged). Verified with PGlite (49 checks). The desktop nav now starts
   at 992px (6 links in the challenge); the tab bar covers phones and
   tablets.
-- **Supabase**: migrations 0001-0003 applied (0003 on 2026-09-24, then
+- **Supabase**: **migrations 0001-0008 are applied**, 0009 is not yet (0007 + 0008
+  checked 2026-09-25 through the REST API: tables and RPCs answer).
+  Migrations 0001-0003 applied (0003 on 2026-09-24, then
   `populate:sets` re-run: 176 sets with logo/symbol URLs). `cards` has
   20,670 rows. **Migration 0004 (`0004_collector_social.sql`) applied
   2026-09-25** (checked through the REST API with the service role key:
@@ -298,12 +312,19 @@ docs/manual-testing.md      checklist for a real-account click-through
   usernames, owned-only showcase, rate limit, backfill of existing users,
   private profiles hidden everywhere, idempotent).
 - **Achievement rates** built 2026-09-25: `0008_achievement_rates.sql`
-  **written but NOT applied** (run after 0007). Verified with PGlite
+  **applied 2026-09-25** (after 0007). Verified with PGlite
   (15 checks: no client access to `achievement_unlocks`, anon can't
   record, malformed/duplicate ids skipped, 500 ids max, only players with
   unlimited cards count, anon reads rates, cascade on user delete, runs
   twice). The client works without it (no percentages).
-- `npm test`: 99 unit tests. `npm run test:e2e`: 88 tests (44 x desktop +
+- **Achievements per mode** built 2026-09-25:
+  `0009_achievements_by_mode.sql` **written but NOT applied** (run after
+  0008). Verified with PGlite on a 0008 database with data (20 checks:
+  old rows become unlimited, key widened, old signatures dropped, a 0008
+  client still records unlimited, per-mode rates/players, invalid mode
+  refused, `player_achievements` own / public / private / unknown, packs
+  from `booster_openings`, runs twice).
+- `npm test`: 103 unit tests. `npm run test:e2e`: 98 tests (49 x desktop +
   mobile). `npm run build` passes, 0 npm audit
   vulnerabilities. Screens were also reviewed in headless Chrome with
   realistic mocks (both themes, phone width) — not yet on a real phone.
@@ -316,11 +337,9 @@ docs/manual-testing.md      checklist for a real-account click-through
 
 ## TODO
 
-- **Apply `0007_challenge_trades.sql`** in the SQL editor (user), then
-  deploy right away: the current client calls the 0007 RPCs (badge,
-  trades, challenge leaderboards). 0001-0006 are applied. Then
-  `0008_achievement_rates.sql` (optional for the client: without it,
-  achievements just show no percentages).
+- **Apply `0009_achievements_by_mode.sql`** in the SQL editor (user),
+  then **deploy** the current client (it uses the 0007-0009 RPCs; without
+  0009 the challenge achievements just lack rates and persistence).
 - Post-migration dashboard steps (user): Supabase Auth > URL Configuration
   redirect URLs (`<site>/game`, `<site>/reset-password`); check that
   `pull_feed` is in the `supabase_realtime` publication; the three GitHub
@@ -338,8 +357,9 @@ docs/manual-testing.md      checklist for a real-account click-through
   accept/decline.
 - Show the challenge collection on public profiles (a tab next to the
   unlimited one), so partners can browse before offering.
-- Challenge achievements and stats on the profile (packs bought, coins
-  earned, trades done, god packs pulled).
+- Challenge-only achievement categories (trades done, god packs, coins
+  earned, daily streaks): need server counts, e.g. more fields in
+  `player_achievements`.
 - Weekly missions (bigger goals, bigger rewards) on top of the daily ones.
 
 ## Known gaps

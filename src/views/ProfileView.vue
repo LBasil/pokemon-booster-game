@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchPublicCollection, fetchPublicProfile } from '@/api/profiles'
 import { modeRoutes, routeMode } from '@/router/modes'
-import { useAchievementsStore } from '@/stores/achievements'
 import { useAuthStore } from '@/stores/auth'
 import { useCollectionStore } from '@/stores/collection'
 import { useProfileStore } from '@/stores/profile'
@@ -12,7 +11,8 @@ import { useSetsStore } from '@/stores/sets'
 import { useSettingsStore } from '@/stores/settings'
 import { installPrompt, installed, promptInstall } from '@/lib/pwa'
 import { collectionStats, sortEntries } from '@/utils/collection'
-import { achievementProgress, achievements, rateOf } from '@/utils/achievements'
+import { nextUp } from '@/utils/achievements'
+import { useModeAchievements } from '@/composables/useModeAchievements'
 import { USERNAME_MAX, boostersOpened, rankFor, rarityBreakdown, validateUsername } from '@/utils/profile'
 import { BUCKETS, bestPull, rarityLabelKey, rarityTier } from '@/utils/rarity'
 import AchievementTile from '@/components/AchievementTile.vue'
@@ -36,7 +36,6 @@ const collectionStore = useCollectionStore()
 const profileStore = useProfileStore()
 const setsStore = useSetsStore()
 const settings = useSettingsStore()
-const achievementsStore = useAchievementsStore()
 
 const isOwn = computed(() => !props.username)
 
@@ -71,9 +70,7 @@ watch(
 
 onMounted(() => {
   setsStore.load()
-  achievementsStore.loadRates()
-  // Own profile: loads the collection, toasts anything unlocked since the last check
-  if (isOwn.value) achievementsStore.check()
+  if (isOwn.value) collectionStore.load()
   // Own username: also hides the trade button on your own public page
   if (auth.isLoggedIn) profileStore.load()
 })
@@ -194,18 +191,17 @@ const breakdown = computed(() => {
 
 // ---------- Achievements (summary; the full list is AchievementsView) ----------
 
-const badges = computed(() => achievements(entries.value, setsStore.sets))
-const badgeProgress = computed(() => achievementProgress(badges.value))
+// Défi | Illimité tabs, starting in the mode the player came from
+const ACHIEVEMENT_MODES = ['challenge', 'unlimited'] // the challenge first: it's the one that counts
+const achievementMode = ref(routeMode(route))
+const modeAchievements = useModeAchievements(achievementMode, () => props.username)
+const badgeProgress = modeAchievements.progress
 const badgePercent = computed(() => Math.round((badgeProgress.value.unlocked / badgeProgress.value.total) * 100))
-// Closest to unlocking first (secret ones stay out of it)
-const almostThere = computed(() =>
-  badges.value
-    .filter((badge) => !badge.unlocked && !badge.hidden)
-    .sort((a, b) => b.ratio - a.ratio || a.target - b.target)
-    .slice(0, 4),
-)
+const almostThere = computed(() => nextUp(modeAchievements.list.value))
 const achievementsRoute = computed(() =>
-  isOwn.value ? { name: 'achievements' } : { name: 'public-achievements', params: { username: profile.value?.username ?? props.username } },
+  isOwn.value
+    ? { name: modeRoutes(achievementMode.value).achievements }
+    : { name: 'public-achievements', params: { username: profile.value?.username ?? props.username }, query: { mode: achievementMode.value } },
 )
 
 // ---------- Account ----------
@@ -397,6 +393,19 @@ async function logout() {
               <h2 class="pb-section-title">{{ t('profile.achievementsTitle') }}</h2>
               <span class="section-count">{{ badgeProgress.unlocked }} / {{ badgeProgress.total }}</span>
             </div>
+            <div class="achv-modes" role="tablist" :aria-label="t('nav.modeSwitch')">
+              <button
+                v-for="item in ACHIEVEMENT_MODES"
+                :key="item"
+                type="button"
+                role="tab"
+                :aria-selected="achievementMode === item"
+                :class="{ active: achievementMode === item }"
+                @click="achievementMode = item"
+              >
+                {{ t(item === 'challenge' ? 'nav.modeChallenge' : 'nav.modeUnlimited') }}
+              </button>
+            </div>
             <div
               class="bar"
               role="progressbar"
@@ -410,7 +419,7 @@ async function logout() {
             <template v-if="almostThere.length">
               <h3 class="achv-subtitle">{{ t('achievements.ui.almostThere') }}</h3>
               <ul class="achv-grid" role="list">
-                <AchievementTile v-for="badge in almostThere" :key="badge.id" :item="badge" :rate="rateOf(badge, achievementsStore.rates, isOwn)" />
+                <AchievementTile v-for="badge in almostThere" :key="badge.id" :item="badge" :rate="modeAchievements.rate(badge)" />
               </ul>
             </template>
             <RouterLink :to="achievementsRoute" class="btn btn-outline-secondary achv-all">
@@ -896,6 +905,38 @@ async function logout() {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.achv-modes {
+  display: flex;
+  width: fit-content;
+  gap: 4px;
+  margin-bottom: 1rem;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-input-bg);
+}
+
+.achv-modes button {
+  padding: 0.35rem 0.9rem;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--pb-text-muted);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+@media (hover: hover) {
+  .achv-modes button:hover {
+    color: var(--pb-text);
+  }
+}
+
+.achv-modes button.active {
+  background: var(--pb-text);
+  color: var(--pb-bg);
 }
 
 .achv-subtitle {

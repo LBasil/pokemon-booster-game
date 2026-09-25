@@ -3,13 +3,21 @@ import { ref } from 'vue'
 // Route names per game mode: views shared by both modes (boosters,
 // collection, binder) link within the mode they're showing.
 export const MODE_ROUTES = {
-  unlimited: { hub: 'game', boosters: 'boosters', collection: 'collection', binder: 'binder', history: 'history' },
+  unlimited: {
+    hub: 'game',
+    boosters: 'boosters',
+    collection: 'collection',
+    binder: 'binder',
+    history: 'history',
+    achievements: 'achievements',
+  },
   challenge: {
     hub: 'challenge',
     boosters: 'challenge-boosters',
     collection: 'challenge-collection',
     binder: 'challenge-binder',
     history: 'challenge-history',
+    achievements: 'challenge-achievements',
   },
 }
 

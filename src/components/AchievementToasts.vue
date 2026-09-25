@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import { useAchievementText } from '@/composables/useAchievementText'
 import { useAchievementsStore } from '@/stores/achievements'
+import { modeRoutes } from '@/router/modes'
 import { rateOf } from '@/utils/achievements'
 
 // "Achievement unlocked" pop-ups, Steam style: bottom right on desktop, at
@@ -10,6 +11,12 @@ import { rateOf } from '@/utils/achievements'
 const { t } = useI18n()
 const store = useAchievementsStore()
 const text = useAchievementText()
+
+// The challenge says so: its achievements are the ones that count
+const eyebrow = (toast) => {
+  if (toast.item?.hidden) return t('achievements.ui.secretUnlocked')
+  return toast.mode === 'challenge' ? t('achievements.ui.challengeUnlocked') : t('achievements.ui.unlockedToast')
+}
 </script>
 
 <template>
@@ -17,7 +24,7 @@ const text = useAchievementText()
     <TransitionGroup name="ach-toast">
       <div v-for="toast in store.toasts" :key="toast.key" class="ach-toast" role="status">
         <RouterLink
-          :to="toast.item ? { name: 'achievements', query: { cat: toast.item.category } } : { name: 'achievements', query: { status: 'unlocked' } }"
+          :to="{ name: modeRoutes(toast.mode).achievements, query: toast.item ? { cat: toast.item.category } : { status: 'unlocked' } }"
           class="ach-toast-link"
           @click="store.dismiss(toast.key)"
         >
@@ -25,15 +32,15 @@ const text = useAchievementText()
             <svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4" /></svg>
           </span>
           <span v-if="toast.item" class="ach-toast-body">
-            <span class="ach-toast-eyebrow">{{ toast.item.hidden ? t('achievements.ui.secretUnlocked') : t('achievements.ui.unlockedToast') }}</span>
+            <span class="ach-toast-eyebrow">{{ eyebrow(toast) }}</span>
             <span class="ach-toast-title">{{ text.title(toast.item) }}</span>
             <span class="ach-toast-desc">{{ text.desc(toast.item) }}</span>
-            <span v-if="rateOf(toast.item, store.rates, true) !== null" class="ach-toast-rate">
-              {{ text.rate(rateOf(toast.item, store.rates, true)) }}
+            <span v-if="rateOf(toast.item, store.rates[toast.mode], true) !== null" class="ach-toast-rate">
+              {{ text.rate(rateOf(toast.item, store.rates[toast.mode], true)) }}
             </span>
           </span>
           <span v-else class="ach-toast-body">
-            <span class="ach-toast-eyebrow">{{ t('achievements.ui.unlockedToast') }}</span>
+            <span class="ach-toast-eyebrow">{{ eyebrow(toast) }}</span>
             <span class="ach-toast-title">{{ t('achievements.ui.moreUnlocked', { count: toast.more }, toast.more) }}</span>
             <span class="ach-toast-desc">{{ t('achievements.ui.seeAll') }}</span>
           </span>

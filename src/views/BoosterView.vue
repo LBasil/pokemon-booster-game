@@ -36,7 +36,7 @@ const routes = modeRoutes(props.mode)
 
 const { t, locale } = useI18n()
 const collectionStore = useModeCollectionStore(props.mode)
-// Achievements count the unlimited collection only
+// Achievements of this mode (its own collection)
 const achievements = useAchievementsStore()
 const challenge = useChallengeStore()
 const setsStore = useSetsStore()
@@ -114,7 +114,7 @@ onMounted(() => {
   collectionStore.load().then(() => {
     if (!collectionStore.error) ownedIds = new Set(collectionStore.entries.map((entry) => entry.card_id))
     // Baseline for the unlock toasts at the end of the opening
-    if (!isChallenge) achievements.check()
+    achievements.check(props.mode)
   })
   // The wishlist tracks the unlimited collection only
   if (!isChallenge) {
@@ -301,9 +301,7 @@ function backToSelect() {
 
 // Unlock toasts once every card is face up (never mid-reveal: no spoilers)
 watch(phase, (value) => {
-  if (value !== 'done' || isChallenge) return
-  achievements.loadRates()
-  achievements.check()
+  if (value === 'done') achievements.check(props.mode)
 })
 
 const currentCard = computed(() =>

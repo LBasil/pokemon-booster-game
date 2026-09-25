@@ -50,7 +50,7 @@ const router = createRouter({
       path: '/achievements',
       name: 'achievements',
       component: () => import('@/views/AchievementsView.vue'),
-      meta: { requiresAuth: true, sharedMode: true },
+      meta: { requiresAuth: true },
     },
     {
       path: '/community',
@@ -90,6 +90,13 @@ const router = createRouter({
       path: '/challenge/history',
       name: 'challenge-history',
       component: () => import('@/views/HistoryView.vue'),
+      props: { mode: 'challenge' },
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
+      path: '/challenge/achievements',
+      name: 'challenge-achievements',
+      component: () => import('@/views/AchievementsView.vue'),
       props: { mode: 'challenge' },
       meta: { requiresAuth: true, mode: 'challenge' },
     },

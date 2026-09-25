@@ -39,7 +39,7 @@ const MISSIONS = [
  * @param {{ collection?: object[], challengeCollection?: object[], challenge?: object, godPack?: boolean,
  *   trades?: object[], partners?: Record<string, object[]>, badge?: { rewards: number, trades: number },
  *   profile?: object, feed?: object[], leaderboard?: object[], takenUsernames?: string[],
- *   achievementRates?: object[] | 'missing' }} [options]
+ *   achievementRates?: object[] | 'missing' }} [options] - rates rows may carry a `mode` (default unlimited)
  */
 export async function mockSupabase(page, options = {}) {
   const state = {
@@ -70,9 +70,11 @@ export async function mockSupabase(page, options = {}) {
     partners: options.partners ?? { misty: [collectionEntry('base1-4'), collectionEntry('sv3pt5-150')] },
     badge: options.badge ?? { rewards: 0, trades: 0 },
     nextTradeId: 100,
-    // Achievement rates (migration 0008): achievement_rates() rows, or 'missing' = not applied
+    // Achievements (migrations 0008 + 0009): achievement_rates() rows (with an
+    // optional mode), or 'missing' = not applied; recorded ids and packs per mode
     achievementRates: options.achievementRates ?? [],
-    recordedAchievements: new Set(),
+    recorded: { unlimited: new Set(), challenge: new Set() },
+    packs: { unlimited: 0, challenge: 0 },
   }
   const challengeState = () => {
     const c = state.challenge
@@ -121,6 +123,7 @@ export async function mockSupabase(page, options = {}) {
         else state.collection.unshift(collectionEntry(c.id, 1, new Date().toISOString()))
       }
       state.wishlist = state.wishlist.filter((w) => !PACK.some((c) => c.id === w.card_id))
+      state.packs.unlimited++
       return json(PACK)
     }
     // ---- Challenge RPCs (migration 0005) ----
@@ -147,6 +150,7 @@ export async function mockSupabase(page, options = {}) {
       c.coins -= 100
       c.progress.open_packs++
       c.progress.pull_holo++
+      state.packs.challenge++
       for (const card of PACK) {
         const owned = state.challengeCollection.find((e) => e.card_id === card.id)
         if (owned) owned.quantity++
@@ -226,13 +230,22 @@ export async function mockSupabase(page, options = {}) {
     // ---- Achievements (migration 0008) ----
     const missingFunction = () => json({ code: 'PGRST202', message: 'Could not find the function', details: null, hint: null }, 404)
     if (path === '/rest/v1/rpc/achievement_rates') {
-      return state.achievementRates === 'missing' ? missingFunction() : json(state.achievementRates)
+      if (state.achievementRates === 'missing') return missingFunction()
+      const mode = args.p_mode ?? 'unlimited'
+      return json(state.achievementRates.filter((row) => (row.mode ?? 'unlimited') === mode).map(({ mode: _mode, ...row }) => row))
     }
     if (path === '/rest/v1/rpc/record_achievements') {
       if (state.achievementRates === 'missing') return missingFunction()
-      const before = state.recordedAchievements.size
-      for (const id of JSON.parse(req.postData() || '{}').p_ids ?? []) state.recordedAchievements.add(id)
-      return json(state.recordedAchievements.size - before)
+      const recorded = state.recorded[args.p_mode ?? 'unlimited']
+      const before = recorded.size
+      for (const id of args.p_ids ?? []) recorded.add(id)
+      return json(recorded.size - before)
+    }
+    if (path === '/rest/v1/rpc/player_achievements') {
+      if (state.achievementRates === 'missing') return missingFunction()
+      const name = args.p_username?.toLowerCase()
+      if (!name) return json({ unlocked: [...state.recorded[args.p_mode]], packs: state.packs[args.p_mode] })
+      return json(name === 'misty' ? { unlocked: [], packs: 4 } : null)
     }
     if (path === '/rest/v1/rpc/public_collection') {
       const { p_username: name } = JSON.parse(req.postData() || '{}')

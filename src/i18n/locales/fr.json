@@ -550,7 +550,14 @@
       "rateUnder1": "Moins de 1 % des joueurs",
       "rateNote": "Rareté : la part des joueurs qui possèdent chaque succès.",
       "rateNobody": "Personne ne l’a encore",
-      "moreUnlocked": "+{count} autre succès | +{count} autres succès"
+      "moreUnlocked": "+{count} autre succès | +{count} autres succès",
+      "titleUnlimited": "Succès du mode Illimité",
+      "titleChallenge": "Succès du Défi",
+      "challengeHint": "Ici, chaque booster coûte des pièces : ce sont les succès qui comptent. Une fois débloqués, ils le restent, même si tu recycles ou échanges les cartes.",
+      "unlimitedHint": "En Illimité, les boosters sont gratuits : tout le monde y arrive avec le temps. Pour des succès qui montrent vraiment la chance, va voir le Défi.",
+      "challengeUnlocked": "Succès Défi débloqué !",
+      "hubTitle": "Succès du Défi",
+      "hubCta": "Voir les succès"
     },
     "categories": {
       "packs": "Boosters",

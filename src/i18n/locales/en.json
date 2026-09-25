@@ -550,7 +550,14 @@
       "rateUnder1": "Less than 1% of players",
       "rateNote": "Rarity: the share of players who have each one.",
       "rateNobody": "No one has it yet",
-      "moreUnlocked": "+{count} more achievement | +{count} more achievements"
+      "moreUnlocked": "+{count} more achievement | +{count} more achievements",
+      "titleUnlimited": "Unlimited achievements",
+      "titleChallenge": "Challenge achievements",
+      "challengeHint": "Every pack costs coins here: these are the achievements that count. Once unlocked, they stay unlocked, even if you recycle or trade the cards.",
+      "unlimitedHint": "Packs are free in Unlimited, so anyone gets there in time. For achievements that really show luck, see the Challenge.",
+      "challengeUnlocked": "Challenge achievement unlocked",
+      "hubTitle": "Challenge achievements",
+      "hubCta": "See the achievements"
     },
     "categories": {
       "packs": "Boosters",

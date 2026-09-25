@@ -1,22 +1,23 @@
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchPublicCollection, fetchPublicProfile } from '@/api/profiles'
+import { routeMode } from '@/router/modes'
 import { useAuthStore } from '@/stores/auth'
-import { useAchievementsStore } from '@/stores/achievements'
-import { useCollectionStore } from '@/stores/collection'
-import { useSetsStore } from '@/stores/sets'
 import { useAchievementText } from '@/composables/useAchievementText'
-import { CATEGORIES, STATUSES, achievementProgress, achievements, filterAchievements, rateOf } from '@/utils/achievements'
+import { useModeAchievements } from '@/composables/useModeAchievements'
+import { CATEGORIES, STATUSES, filterAchievements } from '@/utils/achievements'
 import AchievementTile from '@/components/AchievementTile.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import BrandLogo from '@/components/BrandLogo.vue'
 
-// Every achievement, by category, with search + category/status filters
-// (synced to the URL). Serves /achievements (own) and
-// /u/:username/achievements (public, works signed out), like ProfileView.
+// Every achievement of one game mode, by category, with search +
+// category/status filters (synced to the URL) and an Unlimited | Challenge
+// switch. Serves /achievements and /challenge/achievements (own, `mode`
+// prop) and /u/:username/achievements (public, works signed out; mode in
+// ?mode=, else the mode the viewer came from).
 const props = defineProps({
+  mode: { type: String, default: 'unlimited' },
   username: { type: String, default: '' },
 })
 
@@ -24,49 +25,16 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
-const collectionStore = useCollectionStore()
-const setsStore = useSetsStore()
 const text = useAchievementText()
-const achievementsStore = useAchievementsStore()
 
 const isOwn = computed(() => !props.username)
-
-// ---------- Data ----------
-
-const publicName = ref('')
-const publicEntries = ref([])
-const publicState = ref('idle') // loading | ready | missing | error
-
-async function loadPublic(username) {
-  publicState.value = 'loading'
-  try {
-    const profile = await fetchPublicProfile(username)
-    if (!profile) {
-      publicState.value = 'missing'
-      return
-    }
-    publicName.value = profile.username
-    publicEntries.value = await fetchPublicCollection(profile.username)
-    publicState.value = 'ready'
-  } catch {
-    publicState.value = 'error'
-  }
-}
-
-onMounted(() => {
-  setsStore.load()
-  achievementsStore.loadRates()
-  // Own page: also toasts anything unlocked since the last check
-  if (isOwn.value) achievementsStore.check()
-  else loadPublic(props.username)
+const MODES = ['challenge', 'unlimited'] // the challenge first: it's the one that counts
+const mode = computed(() => {
+  if (isOwn.value) return props.mode
+  return MODES.includes(route.query.mode) ? route.query.mode : routeMode(route)
 })
 
-const entries = computed(() => (isOwn.value ? collectionStore.entries : publicEntries.value))
-const firstLoad = computed(() => (isOwn.value ? !collectionStore.loaded : publicState.value === 'loading'))
-const failed = computed(() => (isOwn.value ? collectionStore.error && !collectionStore.loaded : publicState.value === 'error'))
-
-const list = computed(() => achievements(entries.value, setsStore.sets))
-const progress = computed(() => achievementProgress(list.value))
+const { list, progress, rate, hasRates, firstLoad, failed, missing, publicName } = useModeAchievements(mode, () => props.username)
 const percent = (part, total) => Math.round((part / (total || 1)) * 100)
 
 // ---------- Filters (URL-synced: ?cat=&status=&q=) ----------
@@ -90,6 +58,7 @@ watch([category, status, query], () => {
   if (syncingFromRoute) return
   router.replace({
     query: {
+      ...(route.query.mode && { mode: route.query.mode }),
       ...(category.value !== 'all' && { cat: category.value }),
       ...(status.value !== 'all' && { status: status.value }),
       ...(query.value && { q: query.value }),
@@ -117,8 +86,26 @@ const groups = computed(() =>
     .filter((group) => group.items.length),
 )
 
-const title = computed(() => (isOwn.value ? t('achievements.ui.title') : t('achievements.ui.publicTitle', { name: publicName.value || props.username })))
-const backRoute = computed(() => (isOwn.value ? { name: 'profile' } : { name: 'public-profile', params: { username: props.username } }))
+// Same filters in the other mode
+const filterQuery = computed(() => {
+  const { mode: _mode, ...rest } = route.query
+  return rest
+})
+const modeLink = (target) =>
+  isOwn.value
+    ? { name: target === 'challenge' ? 'challenge-achievements' : 'achievements', query: filterQuery.value }
+    : { name: 'public-achievements', params: { username: props.username }, query: { ...filterQuery.value, mode: target } }
+
+const title = computed(() => {
+  if (!isOwn.value) return t('achievements.ui.publicTitle', { name: publicName.value || props.username })
+  return mode.value === 'challenge' ? t('achievements.ui.titleChallenge') : t('achievements.ui.titleUnlimited')
+})
+const back = computed(() => {
+  if (!isOwn.value) return { to: { name: 'public-profile', params: { username: props.username } }, label: t('achievements.ui.backToProfile') }
+  return mode.value === 'challenge'
+    ? { to: { name: 'challenge' }, label: t('challenge.backToHub') }
+    : { to: { name: 'profile' }, label: t('achievements.ui.backToProfile') }
+})
 </script>
 
 <template>
@@ -131,13 +118,25 @@ const backRoute = computed(() => (isOwn.value ? { name: 'profile' } : { name: 'p
 
     <main class="container ach">
       <header class="ach-head">
-        <RouterLink :to="backRoute" class="ach-back">
-          <span aria-hidden="true">←</span> {{ t('achievements.ui.backToProfile') }}
+        <RouterLink :to="back.to" class="ach-back">
+          <span aria-hidden="true">←</span> {{ back.label }}
         </RouterLink>
+        <nav class="ach-modes" :aria-label="t('nav.modeSwitch')">
+          <RouterLink
+            v-for="item in MODES"
+            :key="item"
+            :to="modeLink(item)"
+            :class="{ active: mode === item }"
+            :aria-current="mode === item ? 'page' : undefined"
+          >
+            {{ t(item === 'challenge' ? 'nav.modeChallenge' : 'nav.modeUnlimited') }}
+          </RouterLink>
+        </nav>
         <h1 class="ach-title">{{ title }}</h1>
+        <p class="ach-mode-hint">{{ t(mode === 'challenge' ? 'achievements.ui.challengeHint' : 'achievements.ui.unlimitedHint') }}</p>
       </header>
 
-      <div v-if="publicState === 'missing'" class="alert alert-danger" role="alert">{{ t('profile.notFound', { name: username }) }}</div>
+      <div v-if="missing" class="alert alert-danger" role="alert">{{ t('profile.notFound', { name: username }) }}</div>
       <div v-else-if="failed" class="alert alert-danger" role="alert">{{ t('achievements.ui.loadError') }}</div>
 
       <template v-else-if="firstLoad">
@@ -172,7 +171,7 @@ const backRoute = computed(() => (isOwn.value ? { name: 'profile' } : { name: 'p
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2z" /></svg>
             <span>
               {{ t('achievements.ui.moreComing') }}
-              <template v-if="achievementsStore.rates?.players">{{ t('achievements.ui.rateNote') }}</template>
+              <template v-if="hasRates">{{ t('achievements.ui.rateNote') }}</template>
             </span>
           </p>
         </section>
@@ -234,7 +233,7 @@ const backRoute = computed(() => (isOwn.value ? { name: 'profile' } : { name: 'p
             <span class="ach-group-count">{{ group.unlocked }} / {{ group.total }}</span>
           </div>
           <ul class="ach-grid" role="list">
-            <AchievementTile v-for="item in group.items" :key="item.id" :item="item" :rate="rateOf(item, achievementsStore.rates, isOwn)" />
+            <AchievementTile v-for="item in group.items" :key="item.id" :item="item" :rate="rate(item)" />
           </ul>
         </section>
       </template>
@@ -259,6 +258,43 @@ const backRoute = computed(() => (isOwn.value ? { name: 'profile' } : { name: 'p
 
 .ach-back:hover {
   color: var(--pb-text);
+}
+
+.ach-modes {
+  display: flex;
+  width: fit-content;
+  gap: 4px;
+  margin-bottom: 1rem;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-surface);
+}
+
+.ach-modes a {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  color: var(--pb-text-muted);
+  font-weight: 700;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .ach-modes a:hover {
+    color: var(--pb-text);
+  }
+}
+
+.ach-modes a.active {
+  background: var(--pb-text);
+  color: var(--pb-bg);
+}
+
+.ach-mode-hint {
+  margin: 0.5rem 0 0;
+  max-width: 60ch;
+  color: var(--pb-text-muted);
 }
 
 .ach-title {

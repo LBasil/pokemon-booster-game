@@ -102,8 +102,13 @@ const max = (map) => Math.max(0, ...map.values())
  * Everything the achievements look at, in one pass over the collection.
  * @param {object[]} entries - collection entries ({ quantity, acquired_at, cards })
  * @param {object[]} sets - all sets ({ id, total, release_date })
+ * @param {{ mode?: string, packs?: number|null }} [server] - boosters opened in
+ *   that mode (player_achievements, migration 0009). The unlimited collection
+ *   only grows, and its oldest packs were never logged: cards / 10 is the
+ *   better count there. The challenge one shrinks (recycling, trades) and
+ *   grows without packs (crafting): the server's count is the truth.
  */
-export function collectorStats(entries, sets) {
+export function collectorStats(entries, sets, { mode = 'unlimited', packs = null } = {}) {
   const setsById = new Map(sets.map((set) => [set.id, set]))
   const s = {
     unique: entries.length,
@@ -168,7 +173,14 @@ export function collectorStats(entries, sets) {
   s.oldestYear = Math.min(Infinity, ...s.years)
   s.hits = s.buckets.holo + s.buckets.ultra + s.buckets.secret
   s.ultraPlus = s.buckets.ultra + s.buckets.secret
-  s.boosters = Math.floor(s.total / CARDS_PER_BOOSTER)
+  const fromCards = Math.floor(s.total / CARDS_PER_BOOSTER)
+  if (mode === 'challenge' && packs !== null) {
+    s.boosters = packs
+    s.pulled = packs * CARDS_PER_BOOSTER
+  } else {
+    s.boosters = Math.max(fromCards, packs ?? 0)
+    s.pulled = s.total
+  }
   return s
 }
 
@@ -196,7 +208,7 @@ tiers('packs', 'boosters', (s) => s.boosters, [1, 10, 25, 50, 100, 250, 500, 100
 
 // Collection
 tiers('collection', 'unique', (s) => s.unique, [10, 50, 100, 250, 500, 1000, 2500, 5000, 10000])
-tiers('collection', 'cards', (s) => s.total, [100, 500, 1000, 5000, 10000, 25000, 50000])
+tiers('collection', 'cards', (s) => s.pulled, [100, 500, 1000, 5000, 10000, 25000, 50000])
 
 // Pulls (unique cards per rarity)
 tiers('pulls', 'holo', (s) => s.hits, [1, 10, 50, 200])
@@ -300,13 +312,17 @@ export { DEFINITIONS }
 /**
  * @param {object[]} entries
  * @param {object[]} sets
+ * @param {{ mode?: string, packs?: number|null, unlocked?: Iterable<string> }} [server] -
+ *   see collectorStats; `unlocked` = ids the server already recorded: once
+ *   unlocked, an achievement stays unlocked even if the collection shrinks
  * @returns {{ id, category, title, desc, params, money, single, hidden, current, target, unlocked, ratio }[]}
  *   in display order (category, then definition order)
  */
-export function achievements(entries, sets) {
-  const stats = collectorStats(entries, sets)
+export function achievements(entries, sets, server = {}) {
+  const stats = collectorStats(entries, sets, server)
+  const kept = new Set(server.unlocked ?? [])
   return DEFINITIONS.map(({ metric, ...definition }) => {
-    const value = metric(stats)
+    const value = kept.has(definition.id) ? Math.max(metric(stats), definition.target) : metric(stats)
     const current = Math.min(value, definition.target)
     return {
       title: `items.${definition.id}`,
@@ -321,6 +337,14 @@ export function achievements(entries, sets) {
       ratio: current / definition.target,
     }
   })
+}
+
+/** The `count` locked achievements closest to unlocking (secret ones stay out of it). */
+export function nextUp(list, count = 4) {
+  return list
+    .filter((item) => !item.unlocked && !item.hidden)
+    .sort((a, b) => b.ratio - a.ratio || a.target - b.target)
+    .slice(0, count)
 }
 
 /** Unlocked / total, overall and per category (in CATEGORIES order). */
@@ -377,9 +401,12 @@ export function rateOf(item, rates, mine = false) {
 }
 
 // Most exciting first when rates don't say which is rarer
-const TOAST_PRIORITY = ['fun', 'pulls', 'teams', 'treasure', 'sets', 'pokedex', 'mechanics', 'types', 'history', 'artists', 'trainers', 'collection', 'packs', 'dedication']
+const TOAST_PRIORITY = ['pulls', 'fun', 'teams', 'treasure', 'sets', 'pokedex', 'mechanics', 'types', 'history', 'artists', 'trainers', 'collection', 'packs', 'dedication']
 
-/** Order for a batch of unlock toasts: rarest first, then TOAST_PRIORITY, then display order. */
+/**
+ * Order for a batch of unlock toasts: rarest first, then TOAST_PRIORITY, then
+ * the hardest of a category first (later definitions = bigger tiers).
+ */
 export function sortForToasts(items, rates) {
   const rate = (item) => rateOf(item, rates, true) ?? 100
   return items
@@ -388,7 +415,7 @@ export function sortForToasts(items, rates) {
       (a, b) =>
         rate(a.item) - rate(b.item) ||
         TOAST_PRIORITY.indexOf(a.item.category) - TOAST_PRIORITY.indexOf(b.item.category) ||
-        a.index - b.index,
+        b.index - a.index,
     )
     .map(({ item }) => item)
 }

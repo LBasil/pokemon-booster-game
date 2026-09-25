@@ -92,6 +92,7 @@ const PARENTS = {
   'challenge-binder': 'challenge-collection',
   history: 'profile',
   achievements: 'profile',
+  'challenge-achievements': 'challenge',
   'challenge-history': 'challenge',
 }
 const isActive = (name, inTabBar = false) =>

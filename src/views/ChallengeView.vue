@@ -15,19 +15,31 @@ import {
   msUntilReset,
 } from '@/utils/challenge'
 import { completionPercent } from '@/utils/progress'
+import { nextUp } from '@/utils/achievements'
+import { useModeAchievements } from '@/composables/useModeAchievements'
+import AchievementTile from '@/components/AchievementTile.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
 import ModeSwitch from '@/components/ModeSwitch.vue'
 import RecycleDuplicates from '@/components/RecycleDuplicates.vue'
 
-// Challenge mode hub: coins, daily reward, missions, and the separate
-// challenge collection (with duplicate recycling).
+// Challenge mode hub: coins, daily reward, missions, the separate
+// challenge collection (with duplicate recycling), trades and achievements.
 const { t, locale } = useI18n()
 const challenge = useChallengeStore()
 const collection = useChallengeCollectionStore()
 
 const firstLoad = computed(() => !challenge.loaded && !challenge.error)
+
+// Challenge achievements (also toasts anything unlocked since the last check,
+// e.g. through a trade or crafting)
+const modeAchievements = useModeAchievements('challenge')
+const achievementsNext = computed(() => nextUp(modeAchievements.list.value, 2))
+const achievementsPercent = computed(() => {
+  const { unlocked, total } = modeAchievements.progress.value
+  return Math.round((unlocked / total) * 100)
+})
 const state = computed(() => challenge.state)
 
 // ---------- Reset countdown (missions + daily reward, 00:00 UTC) ----------
@@ -289,6 +301,34 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
               <RouterLink :to="{ name: 'challenge-history' }" class="ch-link">{{ t('challenge.historyLink') }}</RouterLink>
             </div>
           </section>
+
+          <!-- ============ Achievements ============ -->
+          <section class="ch-tile ch-achievements" aria-labelledby="ch-achievements-title">
+            <div class="ch-tile-head">
+              <h2 id="ch-achievements-title" class="ch-tile-title">{{ t('achievements.ui.hubTitle') }}</h2>
+              <RouterLink :to="{ name: 'challenge-achievements' }" class="ch-link">{{ t('achievements.ui.hubCta') }}</RouterLink>
+            </div>
+            <p class="ch-big-number">
+              {{ formatNumber(modeAchievements.progress.value.unlocked) }}
+              <span class="ch-big-number-total">/ {{ formatNumber(modeAchievements.progress.value.total) }}</span>
+            </p>
+            <div
+              class="ch-bar ch-bar-holo"
+              role="progressbar"
+              :aria-label="t('achievements.ui.overall')"
+              aria-valuemin="0"
+              :aria-valuemax="modeAchievements.progress.value.total"
+              :aria-valuenow="modeAchievements.progress.value.unlocked"
+            >
+              <span :style="{ width: `${achievementsPercent}%` }"></span>
+            </div>
+            <template v-if="achievementsNext.length">
+              <h3 class="ch-label mt-3 mb-2">{{ t('achievements.ui.almostThere') }}</h3>
+              <ul class="ch-achievements-next" role="list">
+                <AchievementTile v-for="item in achievementsNext" :key="item.id" :item="item" :rate="modeAchievements.rate(item)" />
+              </ul>
+            </template>
+          </section>
         </div>
 
         <!-- ============ Rules ============ -->
@@ -401,6 +441,15 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 }
 
 /* ---------- Tiles ---------- */
+
+.ch-achievements-next {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 
 .ch-grid {
   display: grid;
@@ -809,7 +858,8 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .ch-wallet {
+  .ch-wallet,
+  .ch-achievements {
     grid-column: 1 / -1;
   }
 }
