@@ -1,12 +1,13 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useSettingsStore } from '@/stores/settings'
 
 // Light pointer effects, mounted once in App.vue:
 // - mouse only: a soft aurora glow behind the content (it lights up the glass
 //   panels from below) + a holo ring trailing the native cursor, which grows
 //   over anything clickable. The native cursor stays: precision first.
 // - mouse and touch: a small burst of holo sparks on each click / tap.
-// Nothing runs with prefers-reduced-motion.
+// Nothing runs with prefers-reduced-motion or Profile > Settings > Visual effects off.
 const HOT = 'a, button, [role="button"], [role="tab"], label, select, summary, .holo-card'
 const NO_SPARKS = 'input, textarea, select, [contenteditable]'
 const SPARKS = 7
@@ -23,6 +24,10 @@ let frame = 0
 let sparkId = 0
 
 function tick() {
+  if (!ring.value) {
+    frame = 0
+    return
+  }
   // The ring trails the pointer (lerp); the glow simply follows it
   pos.x += (target.x - pos.x) * 0.25
   pos.y += (target.y - pos.y) * 0.25
@@ -73,26 +78,44 @@ const removeSpark = (id) => {
   sparks.value = sparks.value.filter((spark) => spark.id !== id)
 }
 
+const settings = useSettingsStore()
 const enabled = ref(false)
+let reduced = true
 let mouse = false
 
-onMounted(() => {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+function start() {
+  if (enabled.value) return
   enabled.value = true
-  mouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches
   if (mouse) {
     window.addEventListener('pointermove', onMove, { passive: true })
     document.addEventListener('mouseout', onLeave)
   }
   window.addEventListener('pointerdown', onDown, { passive: true })
-})
+}
 
-onBeforeUnmount(() => {
+function stop() {
+  enabled.value = false
+  visible.value = false
+  sparks.value = []
   cancelAnimationFrame(frame)
+  frame = 0
   window.removeEventListener('pointermove', onMove)
   document.removeEventListener('mouseout', onLeave)
   window.removeEventListener('pointerdown', onDown)
+}
+
+onMounted(() => {
+  reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  mouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  if (!reduced && settings.effects) start()
 })
+
+watch(
+  () => settings.effects,
+  (on) => (on && !reduced ? start() : stop()),
+)
+
+onBeforeUnmount(stop)
 </script>
 
 <template>

@@ -33,6 +33,7 @@ src/
   components/               shared UI (auth form, theme toggle, language switch, booster/card visuals)
   i18n/locales/{en,fr}.json full UI coverage — every user-facing string goes here, none hardcoded
   utils/                    pure, testable helpers (e.g. groupCardsByQuantity)
+  composables/              i18n-aware helpers shared by components (useAchievementText)
 public/sw.js, manifest      PWA service worker + manifest + icons
 e2e/                        Playwright tests; e2e/support/supabase.js mocks the whole backend
 supabase/migrations/        SQL run manually in the Supabase SQL editor (no CLI/MCP access to the DB)
@@ -147,13 +148,17 @@ docs/manual-testing.md      checklist for a real-account click-through
   Site-wide touches: foil scrollbars (`--pb-scroll-thumb`), `::selection`,
   `accent-color`/`caret-color` in `global.css`; `PointerFx.vue` (mounted
   in `App.vue`) = aurora glow behind the content + holo ring trailing the
-  (kept) native cursor, mouse only, and a spark burst on click/tap. All
-  off under `prefers-reduced-motion` (so also in e2e, which forces it).
+  (kept) native cursor, mouse only, and a spark burst on click/tap. Page
+  changes fade `.pb-page > main` in (opacity only) and sweep a foil line
+  (`.route-sweep`, App.vue). All off under `prefers-reduced-motion` (so
+  also in e2e, which forces it) or with Profile > Settings > Visual
+  effects (`settings.effects` -> `html.pb-fx-off`).
 - Don't name classes after Bootstrap components (`.badge`, `.card`,
   `.alert`...): Bootstrap's styles leak in (e.g. `.badge` centers text).
 - **Signed-in page shell**: wrap the view in `<div class="pb-page">` and put
   `<AppHeader />` first. AppHeader = brand (links to the hub) + nav pills
-  (desktop) + language/theme/logout, and a fixed bottom tab bar on phones
+  (desktop) + language/theme (log out is a labeled button on the Profile
+  page only: a header icon got tapped by mistake), and a fixed bottom tab bar on phones
   and tablets (< 992px); `.pb-page` reserves the space for that bar. Don't put a
   `transform`/animation on a wrapper around AppHeader — it would break the
   tab bar's `position: fixed`. Legibility beats effects: anything
@@ -211,6 +216,28 @@ docs/manual-testing.md      checklist for a real-account click-through
   a background `load({ force: true })`). Resetting it once hid the whole
   challenge hub — and unmounted the component that was supposed to
   trigger the reload (Vue drops `emit` from unmounted components).
+- **Achievements** (`src/utils/achievements.js`): ~185 definitions in 14
+  categories, all computed client side from the unlimited collection +
+  sets in one pass (`collectorStats`) — nothing stored, so adding one
+  unlocks it retroactively and public profiles get them too. Add a
+  definition + its EN/FR title/description (`achievements.items.<id>.title`,
+  `achievements.desc.<family>`); `achievements.test.js` fails on any
+  missing translation. `hidden` ones show "???" until unlocked. UI:
+  `AchievementTile.vue`, summary on the profile ("Next up"), full page
+  `AchievementsView` (`/achievements`, `/u/:username/achievements`;
+  search + category/status filters synced to `?cat=&status=&q=`).
+  **Unlock toasts** (`useAchievementsStore().check()`, `AchievementToasts`
+  in App.vue): compares with the ids already seen on this device
+  (localStorage per account; the first check is a silent baseline) —
+  called on BoosterView mount + at the summary (never mid-reveal: no
+  spoilers), and on own profile / achievements page. Max 3 toasts, rarest
+  first, the last one "+N more". **Rates** ("12% of players", migration
+  0008): the client reports unlocked ids (`record_achievements`, retried
+  until the server confirms) and reads `achievement_rates()`; a missing
+  0008 just hides the rates. Deliberate, documented exception to rule 9:
+  the ids are client-claimed (the server can't recheck ~185 JS
+  definitions), acceptable because it only nudges an anonymous
+  percentage that nothing ranks or rewards on.
 - **Sounds/haptics**: `src/lib/sfx.js` synthesizes everything with Web Audio
   (no audio assets); every call takes `settings.sound` / `settings.vibration`
   from `useSettingsStore()`.
@@ -270,7 +297,13 @@ docs/manual-testing.md      checklist for a real-account click-through
   (35 checks as the anon/authenticated roles: RLS, column grants, unique
   usernames, owned-only showcase, rate limit, backfill of existing users,
   private profiles hidden everywhere, idempotent).
-- `npm test`: 81 unit tests. `npm run test:e2e`: 76 tests (38 x desktop +
+- **Achievement rates** built 2026-09-25: `0008_achievement_rates.sql`
+  **written but NOT applied** (run after 0007). Verified with PGlite
+  (15 checks: no client access to `achievement_unlocks`, anon can't
+  record, malformed/duplicate ids skipped, 500 ids max, only players with
+  unlimited cards count, anon reads rates, cascade on user delete, runs
+  twice). The client works without it (no percentages).
+- `npm test`: 99 unit tests. `npm run test:e2e`: 88 tests (44 x desktop +
   mobile). `npm run build` passes, 0 npm audit
   vulnerabilities. Screens were also reviewed in headless Chrome with
   realistic mocks (both themes, phone width) — not yet on a real phone.
@@ -285,7 +318,9 @@ docs/manual-testing.md      checklist for a real-account click-through
 
 - **Apply `0007_challenge_trades.sql`** in the SQL editor (user), then
   deploy right away: the current client calls the 0007 RPCs (badge,
-  trades, challenge leaderboards). 0001-0006 are applied.
+  trades, challenge leaderboards). 0001-0006 are applied. Then
+  `0008_achievement_rates.sql` (optional for the client: without it,
+  achievements just show no percentages).
 - Post-migration dashboard steps (user): Supabase Auth > URL Configuration
   redirect URLs (`<site>/game`, `<site>/reset-password`); check that
   `pull_feed` is in the `supabase_realtime` publication; the three GitHub

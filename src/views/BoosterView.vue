@@ -7,6 +7,7 @@ import { openBooster } from '@/api/boosters'
 import * as sfx from '@/lib/sfx'
 import { shareCard } from '@/lib/shareCard'
 import { modeRoutes } from '@/router/modes'
+import { useAchievementsStore } from '@/stores/achievements'
 import { useChallengeStore } from '@/stores/challenge'
 import { useProfileStore } from '@/stores/profile'
 import { useModeCollectionStore } from '@/stores/collection'
@@ -35,6 +36,8 @@ const routes = modeRoutes(props.mode)
 
 const { t, locale } = useI18n()
 const collectionStore = useModeCollectionStore(props.mode)
+// Achievements count the unlimited collection only
+const achievements = useAchievementsStore()
 const challenge = useChallengeStore()
 const setsStore = useSetsStore()
 const settings = useSettingsStore()
@@ -110,6 +113,8 @@ onMounted(() => {
 
   collectionStore.load().then(() => {
     if (!collectionStore.error) ownedIds = new Set(collectionStore.entries.map((entry) => entry.card_id))
+    // Baseline for the unlock toasts at the end of the opening
+    if (!isChallenge) achievements.check()
   })
   // The wishlist tracks the unlimited collection only
   if (!isChallenge) {
@@ -293,6 +298,13 @@ function backToSelect() {
   phase.value = 'select'
   pulled.value = []
 }
+
+// Unlock toasts once every card is face up (never mid-reveal: no spoilers)
+watch(phase, (value) => {
+  if (value !== 'done' || isChallenge) return
+  achievements.loadRates()
+  achievements.check()
+})
 
 const currentCard = computed(() =>
   step.value === 'reveal' && revealedCount.value > 0 ? currentCards.value[revealedCount.value - 1] : null,

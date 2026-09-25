@@ -1,4 +1,3 @@
-import { collectionStats, setProgress } from '@/utils/collection'
 import { rarityBucket } from '@/utils/rarity'
 
 // Every pack has exactly 10 cards (see open_booster), so the number of
@@ -33,48 +32,6 @@ export function rarityBreakdown(entries) {
   const counts = { common: 0, uncommon: 0, rare: 0, holo: 0, ultra: 0, secret: 0 }
   for (const entry of entries) counts[bucketOf(entry.cards)]++
   return counts
-}
-
-/**
- * Achievements, in display order. Each has a current value and a target so
- * locked ones can show progress.
- * @param {object[]} entries - collection entries
- * @param {object[]} sets - all sets (for completion and release dates)
- * @returns {{ id: string, current: number, target: number, unlocked: boolean }[]}
- */
-export function achievements(entries, sets) {
-  const stats = collectionStats(entries)
-  const boosters = boostersOpened(stats.totalCards)
-  const buckets = rarityBreakdown(entries)
-  const progress = setProgress(entries, sets)
-  const bestSetPercent = progress.reduce((best, item) => Math.max(best, item.percent), 0)
-  const releaseById = Object.fromEntries(sets.map((set) => [set.id, set.release_date ?? '']))
-  const vintage = entries.some((entry) => {
-    const date = releaseById[entry.cards.set_id]
-    return date && date < '2003'
-  })
-
-  const list = [
-    ['firstBooster', boosters, 1],
-    ['tenBoosters', boosters, 10],
-    ['hundredBoosters', boosters, 100],
-    ['firstHolo', buckets.holo + buckets.ultra + buckets.secret, 1],
-    ['firstUltra', buckets.ultra + buckets.secret, 1],
-    ['firstSecret', buckets.secret, 1],
-    ['hundredUnique', stats.uniqueCards, 100],
-    ['thousandCards', stats.totalCards, 1000],
-    ['tenSets', stats.setsStarted, 10],
-    ['halfSet', Math.floor(bestSetPercent), 50],
-    ['completeSet', Math.floor(bestSetPercent), 100],
-    ['vintage', vintage ? 1 : 0, 1],
-    ['bigValue', Math.floor(stats.value), 1000],
-  ]
-  return list.map(([id, current, target]) => ({
-    id,
-    current: Math.min(current, target),
-    target,
-    unlocked: current >= target,
-  }))
 }
 
 export const USERNAME_MIN = 2

@@ -260,60 +260,6 @@
     "achievementsTitle": "Succès",
     "unlocked": "Débloqué",
     "locked": "Verrouillé",
-    "achievements": {
-      "firstBooster": {
-        "title": "Premier paquet",
-        "desc": "Ouvre ton premier booster"
-      },
-      "tenBoosters": {
-        "title": "Échauffement",
-        "desc": "Ouvre 10 boosters"
-      },
-      "hundredBoosters": {
-        "title": "Déchireur fou",
-        "desc": "Ouvre 100 boosters"
-      },
-      "firstHolo": {
-        "title": "Ça brille !",
-        "desc": "Tire une holo ou mieux"
-      },
-      "firstUltra": {
-        "title": "Gros coup",
-        "desc": "Tire une ultra rare"
-      },
-      "firstSecret": {
-        "title": "Jackpot",
-        "desc": "Tire une carte secrète"
-      },
-      "hundredUnique": {
-        "title": "Classeur garni",
-        "desc": "Possède 100 cartes uniques"
-      },
-      "thousandCards": {
-        "title": "Montagne de cartes",
-        "desc": "Tire 1 000 cartes"
-      },
-      "tenSets": {
-        "title": "Globe-trotter",
-        "desc": "Entame 10 séries différentes"
-      },
-      "halfSet": {
-        "title": "À mi-chemin",
-        "desc": "Complète la moitié d'une série"
-      },
-      "completeSet": {
-        "title": "Série complète",
-        "desc": "Complète une série entière"
-      },
-      "vintage": {
-        "title": "Old school",
-        "desc": "Possède une carte d'avant 2003"
-      },
-      "bigValue": {
-        "title": "Coffre au trésor",
-        "desc": "Atteins 1 000 € de cote estimée"
-      }
-    },
     "accountTitle": "Compte",
     "accountDesc": "Connecté avec Supabase. La langue et le thème sont dans la barre du haut.",
     "join": "Créer mon compte",
@@ -334,6 +280,8 @@
     "soundDesc": "Déchirure, retournement des cartes et fanfare pour les gros tirages.",
     "vibrationLabel": "Vibration",
     "vibrationDesc": "Une petite vibration quand tu tires un hit (téléphones compatibles).",
+    "effectsLabel": "Effets visuels",
+    "effectsDesc": "Halo et anneau autour du curseur, étincelles au tap, transitions entre les pages.",
     "historyLink": "Mon historique de boosters",
     "installLabel": "Installer l'application",
     "installDesc": "Ajoute PokéBooster à ton écran d'accueil, comme une vraie app.",
@@ -566,6 +514,643 @@
       "failed": "Échoué",
       "expired": "Expiré",
       "pending": "En attente"
+    }
+  },
+  "achievements": {
+    "ui": {
+      "title": "Succès",
+      "publicTitle": "Succès de {name}",
+      "overall": "Progression totale",
+      "unlockedOf": "{unlocked} sur {total} débloqués",
+      "moreComing": "De nouveaux succès sont ajoutés de temps en temps. Ils sont calculés à partir de la collection : ceux que tu mérites déjà se débloquent tout de suite.",
+      "categoriesLabel": "Catégories",
+      "allCategories": "Toutes",
+      "searchLabel": "Chercher un succès",
+      "searchPlaceholder": "Chercher : Dracaufeu, holo, série…",
+      "statusLabel": "Afficher",
+      "status": {
+        "all": "Tous",
+        "unlocked": "Débloqués",
+        "progress": "En cours",
+        "locked": "Verrouillés"
+      },
+      "results": "{count} succès | {count} succès",
+      "empty": "Aucun succès ne correspond à ces filtres.",
+      "clear": "Effacer les filtres",
+      "hiddenTitle": "Succès secret",
+      "hiddenDesc": "Continue ta collection pour le découvrir.",
+      "almostThere": "Prochains succès",
+      "seeAll": "Voir tous les succès",
+      "backToProfile": "Retour au profil",
+      "loadError": "Impossible de charger les succès.",
+      "unlockedToast": "Succès débloqué !",
+      "secretUnlocked": "Succès secret débloqué !",
+      "dismiss": "Fermer",
+      "rate": "{rate} % des joueurs",
+      "rateUnder1": "Moins de 1 % des joueurs",
+      "rateNote": "Rareté : la part des joueurs qui possèdent chaque succès.",
+      "rateNobody": "Personne ne l’a encore",
+      "moreUnlocked": "+{count} autre succès | +{count} autres succès"
+    },
+    "categories": {
+      "packs": "Boosters",
+      "collection": "Collection",
+      "pulls": "Tirages",
+      "sets": "Séries",
+      "pokedex": "Pokédex",
+      "teams": "Équipes célèbres",
+      "types": "Types",
+      "trainers": "Dresseurs et Énergies",
+      "mechanics": "Mécaniques",
+      "treasure": "Trésor",
+      "history": "Histoire",
+      "artists": "Illustrateurs",
+      "fun": "Curiosités",
+      "dedication": "Assiduité"
+    },
+    "regions": {
+      "kanto": "Kanto",
+      "johto": "Johto",
+      "hoenn": "Hoenn",
+      "sinnoh": "Sinnoh",
+      "unova": "Unys",
+      "kalos": "Kalos",
+      "alola": "Alola",
+      "galar": "Galar",
+      "paldea": "Paldea"
+    },
+    "regionTitle": "Maître de {region}",
+    "typeTitle": "Spécialiste {type}",
+    "items": {
+      "boosters1": {
+        "title": "Premier booster"
+      },
+      "boosters10": {
+        "title": "Échauffement"
+      },
+      "boosters25": {
+        "title": "Accro"
+      },
+      "boosters50": {
+        "title": "Passionné"
+      },
+      "boosters100": {
+        "title": "Déchireur de boosters"
+      },
+      "boosters250": {
+        "title": "Accro à l’alu"
+      },
+      "boosters500": {
+        "title": "Inarrêtable"
+      },
+      "boosters1000": {
+        "title": "Légende du booster"
+      },
+      "boosters2500": {
+        "title": "Montagne de boosters"
+      },
+      "boosters5000": {
+        "title": "Boosters à l’infini"
+      },
+      "unique10": {
+        "title": "Premier classeur"
+      },
+      "unique50": {
+        "title": "Collection en herbe"
+      },
+      "unique100": {
+        "title": "Classeur bien rempli"
+      },
+      "unique250": {
+        "title": "Tourneur de pages"
+      },
+      "unique500": {
+        "title": "Collectionneur sérieux"
+      },
+      "unique1000": {
+        "title": "Archiviste"
+      },
+      "unique2500": {
+        "title": "Bibliothèque vivante"
+      },
+      "unique5000": {
+        "title": "Conservateur de musée"
+      },
+      "unique10000": {
+        "title": "Collectionneur ultime"
+      },
+      "cards100": {
+        "title": "Une poignée"
+      },
+      "cards500": {
+        "title": "Une pile"
+      },
+      "cards1000": {
+        "title": "Montagne de cartes"
+      },
+      "cards5000": {
+        "title": "Avalanche de cartes"
+      },
+      "cards10000": {
+        "title": "Océan de cartes"
+      },
+      "cards25000": {
+        "title": "Galaxie de cartes"
+      },
+      "cards50000": {
+        "title": "Univers de cartes"
+      },
+      "holo1": {
+        "title": "Ça brille !"
+      },
+      "holo10": {
+        "title": "Scintillant"
+      },
+      "holo50": {
+        "title": "Éblouissant"
+      },
+      "holo200": {
+        "title": "Aveuglant"
+      },
+      "ultra1": {
+        "title": "Gros tirage"
+      },
+      "ultra10": {
+        "title": "Hit-parade"
+      },
+      "ultra50": {
+        "title": "Machine à hits"
+      },
+      "ultra150": {
+        "title": "Légende des hits"
+      },
+      "secret1": {
+        "title": "Jackpot"
+      },
+      "secret5": {
+        "title": "Série chanceuse"
+      },
+      "secret25": {
+        "title": "Main en or"
+      },
+      "secret75": {
+        "title": "Gardien des secrets"
+      },
+      "rainbow": {
+        "title": "Spectre complet"
+      },
+      "setsStarted5": {
+        "title": "Explorateur"
+      },
+      "setsStarted10": {
+        "title": "Globe-trotteur"
+      },
+      "setsStarted25": {
+        "title": "Tour du monde"
+      },
+      "setsStarted50": {
+        "title": "Touche-à-tout"
+      },
+      "setsStarted100": {
+        "title": "Partout à la fois"
+      },
+      "setHalf": {
+        "title": "À mi-chemin"
+      },
+      "setThreeQuarters": {
+        "title": "Presque !"
+      },
+      "setsComplete1": {
+        "title": "Série complète"
+      },
+      "setsComplete3": {
+        "title": "Triple couronne"
+      },
+      "setsComplete10": {
+        "title": "Complétionniste"
+      },
+      "setsComplete25": {
+        "title": "Grand maître"
+      },
+      "dex10": {
+        "title": "Pokédex ouvert"
+      },
+      "dex50": {
+        "title": "Chercheur de terrain"
+      },
+      "dex151": {
+        "title": "151 et plus"
+      },
+      "dex251": {
+        "title": "Assistant du Professeur"
+      },
+      "dex386": {
+        "title": "Vétéran du Pokédex"
+      },
+      "dex500": {
+        "title": "Cinq cents !"
+      },
+      "dex750": {
+        "title": "Presque partout"
+      },
+      "dex1025": {
+        "title": "Attrapez-les tous"
+      },
+      "kantoStarters": {
+        "title": "Starters de Kanto"
+      },
+      "johtoStarters": {
+        "title": "Starters de Johto"
+      },
+      "hoennStarters": {
+        "title": "Starters de Hoenn"
+      },
+      "sinnohStarters": {
+        "title": "Starters de Sinnoh"
+      },
+      "charizardLine": {
+        "title": "Évolution enflammée"
+      },
+      "pikachuLine": {
+        "title": "Famille électrique"
+      },
+      "legendaryBirds": {
+        "title": "Oiseaux légendaires"
+      },
+      "legendaryBeasts": {
+        "title": "Bêtes légendaires"
+      },
+      "towerDuo": {
+        "title": "Duo des tours"
+      },
+      "eonDuo": {
+        "title": "Duo Éon"
+      },
+      "weatherTrio": {
+        "title": "Trio météo"
+      },
+      "lakeGuardians": {
+        "title": "Gardiens des lacs"
+      },
+      "creationTrio": {
+        "title": "Trio de la création"
+      },
+      "swordsOfJustice": {
+        "title": "Épées de la justice"
+      },
+      "taoTrio": {
+        "title": "Trio du Tao"
+      },
+      "kalosLegends": {
+        "title": "Légendes de Kalos"
+      },
+      "mewDuo": {
+        "title": "Mew et Mewtwo"
+      },
+      "eeveelutions": {
+        "title": "Évolitions"
+      },
+      "kantoFossils": {
+        "title": "Chasseur de fossiles"
+      },
+      "ghostLine": {
+        "title": "Famille fantôme"
+      },
+      "magikarpLine": {
+        "title": "Métamorphose"
+      },
+      "allTypes": {
+        "title": "Maître des types"
+      },
+      "dualType": {
+        "title": "Hybride"
+      },
+      "trainers10": {
+        "title": "Apprenti d’arène"
+      },
+      "trainers50": {
+        "title": "Stratège"
+      },
+      "trainers150": {
+        "title": "Tacticien"
+      },
+      "supporters10": {
+        "title": "Amis fidèles"
+      },
+      "supporters50": {
+        "title": "Entourage"
+      },
+      "items10": {
+        "title": "Sac à dos"
+      },
+      "items50": {
+        "title": "Sac à malices"
+      },
+      "stadiums5": {
+        "title": "À domicile"
+      },
+      "stadiums20": {
+        "title": "Tournée des stades"
+      },
+      "tools5": {
+        "title": "Bricoleur"
+      },
+      "energy5": {
+        "title": "Plein d’énergie"
+      },
+      "specialEnergy5": {
+        "title": "Charge spéciale"
+      },
+      "mechanics5": {
+        "title": "Expert des règles"
+      },
+      "mechanics10": {
+        "title": "Voyageur des ères"
+      },
+      "mechanics15": {
+        "title": "Règlement vivant"
+      },
+      "value10": {
+        "title": "Argent de poche"
+      },
+      "value100": {
+        "title": "Tirelire"
+      },
+      "value500": {
+        "title": "Bas de laine"
+      },
+      "value1000": {
+        "title": "Coffre au trésor"
+      },
+      "value5000": {
+        "title": "Trésor de dragon"
+      },
+      "value10000": {
+        "title": "Coffre-fort"
+      },
+      "value50000": {
+        "title": "Fort Knox"
+      },
+      "bestCard20": {
+        "title": "Belle trouvaille"
+      },
+      "bestCard100": {
+        "title": "Précieux"
+      },
+      "bestCard250": {
+        "title": "Pièce maîtresse"
+      },
+      "bestCard500": {
+        "title": "Graal"
+      },
+      "bestCard1000": {
+        "title": "Saint Graal"
+      },
+      "years5": {
+        "title": "Au fil des ans"
+      },
+      "years10": {
+        "title": "Une décennie de cartes"
+      },
+      "years20": {
+        "title": "Deux décennies"
+      },
+      "years25": {
+        "title": "Toutes les époques"
+      },
+      "artists5": {
+        "title": "Amateur d’art"
+      },
+      "artists25": {
+        "title": "Galerie"
+      },
+      "artists100": {
+        "title": "Historien de l’art"
+      },
+      "artists250": {
+        "title": "Mécène"
+      },
+      "artistFan10": {
+        "title": "Fan"
+      },
+      "artistFan50": {
+        "title": "Super fan"
+      },
+      "copies10": {
+        "title": "Je vois double"
+      },
+      "copies50": {
+        "title": "Accumulateur"
+      },
+      "copies200": {
+        "title": "Dragon des doubles"
+      },
+      "sameDex10": {
+        "title": "Chouchou"
+      },
+      "sameDex25": {
+        "title": "Obsession"
+      },
+      "days3": {
+        "title": "Habitué"
+      },
+      "days7": {
+        "title": "Rituel"
+      },
+      "days30": {
+        "title": "Dévoué"
+      },
+      "days100": {
+        "title": "À vie"
+      },
+      "mech_pokemonEx": {
+        "title": "EX-traordinaire"
+      },
+      "mech_gx": {
+        "title": "Ère GX"
+      },
+      "mech_v": {
+        "title": "V comme victoire"
+      },
+      "mech_vmax": {
+        "title": "Gigamax"
+      },
+      "mech_vstar": {
+        "title": "Pouvoir VSTAR"
+      },
+      "mech_svEx": {
+        "title": "ex-cellent"
+      },
+      "mech_tera": {
+        "title": "Téracristal"
+      },
+      "mech_radiant": {
+        "title": "Radieux"
+      },
+      "mech_mega": {
+        "title": "Méga-Évolution"
+      },
+      "mech_break": {
+        "title": "Percée BREAK"
+      },
+      "mech_aceSpec": {
+        "title": "As dans la manche"
+      },
+      "mech_prismStar": {
+        "title": "Étoile Prisme"
+      },
+      "mech_legend": {
+        "title": "Paire LÉGENDE"
+      },
+      "mech_tagTeam": {
+        "title": "Duo de choc"
+      },
+      "mech_baby": {
+        "title": "Premiers pas"
+      },
+      "mech_restored": {
+        "title": "Restauré"
+      },
+      "mech_levelUp": {
+        "title": "Niveau supérieur"
+      },
+      "mech_ancient": {
+        "title": "Antique"
+      },
+      "mech_future": {
+        "title": "Futur"
+      },
+      "mech_singleStrike": {
+        "title": "Poing Final"
+      },
+      "mech_rapidStrike": {
+        "title": "Mille Poings"
+      },
+      "mech_fusionStrike": {
+        "title": "Poing de Fusion"
+      },
+      "baseSet": {
+        "title": "Là où tout a commencé"
+      },
+      "wotc": {
+        "title": "Old school"
+      },
+      "decade2000": {
+        "title": "An 2000"
+      },
+      "decade2010": {
+        "title": "Vague rétro"
+      },
+      "decade2020": {
+        "title": "Ère moderne"
+      },
+      "allDecades": {
+        "title": "Voyageur temporel"
+      },
+      "pikachu": {
+        "title": "Pika pika !"
+      },
+      "charizard": {
+        "title": "Tout feu tout flamme"
+      },
+      "charizardHunter": {
+        "title": "Chasseur de Dracaufeu"
+      },
+      "heavyweight": {
+        "title": "Poids lourd"
+      },
+      "alphabet": {
+        "title": "De A à Z"
+      },
+      "magikarp": {
+        "title": "Trempette !"
+      },
+      "ditto": {
+        "title": "Morphing !"
+      },
+      "unown": {
+        "title": "Soupe alphabet"
+      },
+      "arceus": {
+        "title": "Le Créateur"
+      },
+      "featherweight": {
+        "title": "Poids plume"
+      }
+    },
+    "desc": {
+      "boosters": "Ouvre {count} booster | Ouvre {count} boosters",
+      "unique": "Possède {count} cartes différentes",
+      "cards": "Tire {count} cartes au total",
+      "holo": "Possède une carte holo ou mieux | Possède {count} cartes holo ou mieux différentes",
+      "ultra": "Possède une ultra rare ou mieux | Possède {count} ultra rares ou mieux différentes",
+      "secret": "Possède une rare secrète | Possède {count} rares secrètes différentes",
+      "setsStarted": "Commence {count} séries différentes",
+      "setsComplete": "Complète une série entière | Complète {count} séries",
+      "dex": "Possède {count} Pokémon différents (numéros du Pokédex)",
+      "region": "Possède tous les Pokémon de {region} (n° {from} à {to})",
+      "typeCards": "Possède {count} cartes Pokémon {type} différentes",
+      "trainers": "Possède {count} cartes Dresseur différentes",
+      "supporters": "Possède {count} cartes Supporter différentes",
+      "items": "Possède {count} cartes Objet différentes",
+      "stadiums": "Possède {count} cartes Stade différentes",
+      "tools": "Possède {count} cartes Outil Pokémon différentes",
+      "energy": "Possède {count} cartes Énergie différentes",
+      "specialEnergy": "Possède {count} cartes Énergie spéciale différentes",
+      "mechanic": "Possède une carte {mechanic}",
+      "mechanics": "Possède des cartes de {count} mécaniques différentes",
+      "value": "Atteins {amount} de valeur estimée",
+      "bestCard": "Possède une carte qui vaut {amount} ou plus",
+      "years": "Possède des cartes de {count} années de sortie différentes",
+      "artists": "Possède des cartes de {count} illustrateurs différents",
+      "artistFan": "Possède {count} cartes différentes du même illustrateur",
+      "copies": "Possède {count} exemplaires d’une même carte",
+      "sameDex": "Possède {count} cartes différentes du même Pokémon",
+      "days": "Obtiens de nouvelles cartes sur {count} jours différents",
+      "rainbow": "Possède une carte de chaque rareté, de commune à secrète",
+      "setHalf": "Complète la moitié d’une série",
+      "setThreeQuarters": "Complète 75 % d’une série",
+      "allTypes": "Possède un Pokémon de chacun des 11 types",
+      "dualType": "Possède un Pokémon à deux types",
+      "baseSet": "Possède une carte du Set de Base (1999)",
+      "wotc": "Possède une carte d’avant 2003, l’ère Wizards of the Coast",
+      "decade2000": "Possède une carte d’une série des années 2000",
+      "decade2010": "Possède une carte d’une série des années 2010",
+      "decade2020": "Possède une carte d’une série des années 2020",
+      "allDecades": "Possède des cartes de quatre décennies, des années 1990 aux années 2020",
+      "pikachu": "Possède 10 cartes Pikachu différentes",
+      "charizard": "Possède une carte Dracaufeu",
+      "charizardHunter": "Possède 10 cartes Dracaufeu différentes",
+      "heavyweight": "Possède un Pokémon de 300 PV ou plus",
+      "alphabet": "Possède des cartes dont le nom commence par chacune des 26 lettres",
+      "magikarp": "Possède 5 cartes Magicarpe différentes",
+      "ditto": "Possède une carte Métamorph",
+      "unown": "Possède 5 cartes Zarbi différentes",
+      "arceus": "Possède une carte Arceus",
+      "featherweight": "Possède un Pokémon de 30 PV ou moins",
+      "teams": {
+        "kantoStarters": "Possède Bulbizarre, Salamèche et Carapuce",
+        "johtoStarters": "Possède Germignon, Héricendre et Kaiminus",
+        "hoennStarters": "Possède Arcko, Poussifeu et Gobou",
+        "sinnohStarters": "Possède Tortipouss, Ouisticram et Tiplouf",
+        "charizardLine": "Possède Salamèche, Reptincel et Dracaufeu",
+        "pikachuLine": "Possède Pichu, Pikachu et Raichu",
+        "legendaryBirds": "Possède Artikodin, Électhor et Sulfura",
+        "legendaryBeasts": "Possède Raikou, Entei et Suicune",
+        "towerDuo": "Possède Lugia et Ho-Oh",
+        "eonDuo": "Possède Latias et Latios",
+        "weatherTrio": "Possède Kyogre, Groudon et Rayquaza",
+        "lakeGuardians": "Possède Créhelf, Créfollet et Créfadet",
+        "creationTrio": "Possède Dialga, Palkia et Giratina",
+        "swordsOfJustice": "Possède Cobaltium, Terrakium et Viridium",
+        "taoTrio": "Possède Reshiram, Zekrom et Kyurem",
+        "kalosLegends": "Possède Xerneas, Yveltal et Zygarde",
+        "mewDuo": "Possède Mewtwo et Mew",
+        "eeveelutions": "Possède Évoli et ses 8 évolutions",
+        "kantoFossils": "Possède Amonita, Kabuto et Ptéra",
+        "ghostLine": "Possède Fantominus, Spectrum et Ectoplasma",
+        "magikarpLine": "Possède Magicarpe et Léviator"
+      }
     }
   }
 }

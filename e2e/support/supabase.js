@@ -38,7 +38,8 @@ const MISSIONS = [
  * @param {import('@playwright/test').Page} page
  * @param {{ collection?: object[], challengeCollection?: object[], challenge?: object, godPack?: boolean,
  *   trades?: object[], partners?: Record<string, object[]>, badge?: { rewards: number, trades: number },
- *   profile?: object, feed?: object[], leaderboard?: object[], takenUsernames?: string[] }} [options]
+ *   profile?: object, feed?: object[], leaderboard?: object[], takenUsernames?: string[],
+ *   achievementRates?: object[] | 'missing' }} [options]
  */
 export async function mockSupabase(page, options = {}) {
   const state = {
@@ -69,6 +70,9 @@ export async function mockSupabase(page, options = {}) {
     partners: options.partners ?? { misty: [collectionEntry('base1-4'), collectionEntry('sv3pt5-150')] },
     badge: options.badge ?? { rewards: 0, trades: 0 },
     nextTradeId: 100,
+    // Achievement rates (migration 0008): achievement_rates() rows, or 'missing' = not applied
+    achievementRates: options.achievementRates ?? [],
+    recordedAchievements: new Set(),
   }
   const challengeState = () => {
     const c = state.challenge
@@ -219,6 +223,17 @@ export async function mockSupabase(page, options = {}) {
     }
 
     if (path === '/rest/v1/rpc/leaderboard') return json(state.leaderboard)
+    // ---- Achievements (migration 0008) ----
+    const missingFunction = () => json({ code: 'PGRST202', message: 'Could not find the function', details: null, hint: null }, 404)
+    if (path === '/rest/v1/rpc/achievement_rates') {
+      return state.achievementRates === 'missing' ? missingFunction() : json(state.achievementRates)
+    }
+    if (path === '/rest/v1/rpc/record_achievements') {
+      if (state.achievementRates === 'missing') return missingFunction()
+      const before = state.recordedAchievements.size
+      for (const id of JSON.parse(req.postData() || '{}').p_ids ?? []) state.recordedAchievements.add(id)
+      return json(state.recordedAchievements.size - before)
+    }
     if (path === '/rest/v1/rpc/public_collection') {
       const { p_username: name } = JSON.parse(req.postData() || '{}')
       return json(name?.toLowerCase() === 'misty' ? [collectionEntry('sv3pt5-199'), collectionEntry('base1-4')] : [])

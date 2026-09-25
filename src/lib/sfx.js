@@ -90,6 +90,16 @@ export function hit(enabled, { secret = false } = {}) {
   notes.forEach((freq, i) => tone(ac, { freq, start: now + 0.6 + i * 0.07, duration: 0.6, type: 'triangle', peak: 0.16 }))
 }
 
+/** Achievement unlocked: a soft bell pair, then a sparkle on top. */
+export function achievement(enabled) {
+  const ac = enabled && audio()
+  if (!ac) return
+  const now = ac.currentTime
+  tone(ac, { freq: 987.8, start: now, duration: 0.5, type: 'sine', peak: 0.14 })
+  tone(ac, { freq: 1480, start: now + 0.12, duration: 0.7, type: 'sine', peak: 0.12 })
+  tone(ac, { freq: 2960, start: now + 0.24, duration: 0.35, type: 'triangle', peak: 0.04 })
+}
+
 /** Short vibration pattern for hits (Android; ignored where unsupported). */
 export function buzz(enabled, pattern = [30, 40, 60]) {
   if (enabled && typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(pattern)

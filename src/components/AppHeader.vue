@@ -85,12 +85,13 @@ const TABS = computed(() =>
 )
 
 // Pages without their own link light up their parent: binders their
-// collection, histories the profile / challenge. The tab bar has no Trades
+// collection, histories and achievements the profile / challenge. The tab bar has no Trades
 // tab, so trades count as the challenge there.
 const PARENTS = {
   binder: 'collection',
   'challenge-binder': 'challenge-collection',
   history: 'profile',
+  achievements: 'profile',
   'challenge-history': 'challenge',
 }
 const isActive = (name, inTabBar = false) =>

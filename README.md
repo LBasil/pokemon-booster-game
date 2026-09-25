@@ -50,9 +50,17 @@ Supabase (Postgres + Auth + Realtime).
   image of the card.
 - **Booster history**: every pack you've opened, grouped by day.
 - **Profile**: trainer card with a unique username and a rank that grows
-  with the boosters you open, a showcase card, stats, rarity breakdown, 13
-  achievements, public/private switch, sound/vibration settings, and an
+  with the boosters you open, a showcase card, stats, rarity breakdown,
+  public/private switch, sound / vibration / visual effects settings, and an
   "install the app" button.
+- **Achievements**: 185 of them in 14 categories (boosters, pulls, sets,
+  Pokédex regions, famous teams, types, mechanics, treasure, illustrators,
+  a few secret ones…) at `/achievements` (and `/u/<username>/achievements`),
+  with search, category/status filters and progress bars per category and
+  overall. Computed from the collection, so new ones unlock retroactively.
+  A Steam-style **"Achievement unlocked" pop-up** (with a chime) shows at the
+  end of an opening — never mid-reveal, so nothing is spoiled — and each
+  achievement shows the **share of players** who have it.
 - **Community**: public profiles at `/u/<username>` (readable signed out,
   so the link can be shared), a **live feed** of the latest ultra/secret
   pulls (Supabase Realtime), and luck-based **leaderboards** (hit rate, best
@@ -62,7 +70,10 @@ Supabase (Postgres + Auth + Realtime).
 - **Dark/light theme** (follows the OS until you pick one) and
   **English/French** UI, both persisted locally.
 - **"Holo Collector" design** built on shared design tokens (`--pb-*` CSS
-  variables in `src/assets/styles/global.css`). Mobile-first.
+  variables in `src/assets/styles/global.css`). Mobile-first. Light touches
+  everywhere: foil scrollbars, a glow and holo ring following the mouse,
+  sparks on tap, page transitions (all can be turned off, and respect
+  "reduce motion").
 
 ## Tech stack
 
@@ -76,12 +87,13 @@ imported into Supabase by a script (see [Card data](#4-card-data)).
 ```
 src/
   views/          one component per route (Home, Hub, Boosters, Collection, SetBinder,
-                  History, Community, Profile — also public profiles —, ResetPassword, 404)
+                  History, Community, Profile — also public profiles —, Achievements, ResetPassword, 404)
   components/     shared UI (auth form, booster/card animations, card detail, charts…)
   stores/         Pinia: auth, profile, collection, sets, wishlist, theme, settings
   api/            Supabase queries/RPC calls
   lib/            Supabase client, sound effects, share image, PWA helpers
-  utils/          pure helpers (rarity, collection, profile, time…) + their unit tests
+  composables/    shared Composition API helpers (achievement texts)
+  utils/          pure helpers (rarity, collection, profile, achievements, time…) + their unit tests
   i18n/locales/   en.json / fr.json — all UI strings
 public/           manifest, icons, service worker (sw.js)
 e2e/              Playwright tests + a mocked Supabase backend
@@ -124,6 +136,10 @@ its **SQL editor** and run, in order:
 7. `supabase/migrations/0007_challenge_trades.sql` — trades between
    players, challenge leaderboards and the navigation badge. Run it after
    0006; the current client needs it.
+8. `supabase/migrations/0008_achievement_rates.sql` — "X% of players"
+   under each achievement: clients report their unlocks, anyone reads the
+   anonymous counts. Run it after 0007; until then the achievements work
+   without percentages.
 
 Then in **Authentication**:
 

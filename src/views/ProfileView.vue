@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchPublicCollection, fetchPublicProfile } from '@/api/profiles'
 import { modeRoutes, routeMode } from '@/router/modes'
+import { useAchievementsStore } from '@/stores/achievements'
 import { useAuthStore } from '@/stores/auth'
 import { useCollectionStore } from '@/stores/collection'
 import { useProfileStore } from '@/stores/profile'
@@ -11,8 +12,10 @@ import { useSetsStore } from '@/stores/sets'
 import { useSettingsStore } from '@/stores/settings'
 import { installPrompt, installed, promptInstall } from '@/lib/pwa'
 import { collectionStats, sortEntries } from '@/utils/collection'
-import { USERNAME_MAX, achievements, boostersOpened, rankFor, rarityBreakdown, validateUsername } from '@/utils/profile'
+import { achievementProgress, achievements, rateOf } from '@/utils/achievements'
+import { USERNAME_MAX, boostersOpened, rankFor, rarityBreakdown, validateUsername } from '@/utils/profile'
 import { BUCKETS, bestPull, rarityLabelKey, rarityTier } from '@/utils/rarity'
+import AchievementTile from '@/components/AchievementTile.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import BrandLogo from '@/components/BrandLogo.vue'
 import CardDetail from '@/components/CardDetail.vue'
@@ -33,6 +36,7 @@ const collectionStore = useCollectionStore()
 const profileStore = useProfileStore()
 const setsStore = useSetsStore()
 const settings = useSettingsStore()
+const achievementsStore = useAchievementsStore()
 
 const isOwn = computed(() => !props.username)
 
@@ -67,7 +71,9 @@ watch(
 
 onMounted(() => {
   setsStore.load()
-  if (isOwn.value) collectionStore.load()
+  achievementsStore.loadRates()
+  // Own profile: loads the collection, toasts anything unlocked since the last check
+  if (isOwn.value) achievementsStore.check()
   // Own username: also hides the trade button on your own public page
   if (auth.isLoggedIn) profileStore.load()
 })
@@ -186,26 +192,21 @@ const breakdown = computed(() => {
   return BUCKETS.map((bucket) => ({ bucket, count: counts[bucket], percent: (counts[bucket] / total) * 100 }))
 })
 
-// ---------- Achievements ----------
-
-const ACHIEVEMENT_ICONS = {
-  firstBooster: 'M7 3h10l1 3-1 15H7L6 6zM6 6h12',
-  tenBoosters: 'M5 5h9l1 3-1 13H5L4 8zM4 8h11M17 5l3 1-2 14',
-  hundredBoosters: 'M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.6 7.1 17.2 8 11.7 4 7.8l5.5-.8z',
-  firstHolo: 'M12 3l2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2z',
-  firstUltra: 'M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.6 7.1 17.2 8 11.7 4 7.8l5.5-.8zM5 21h14',
-  firstSecret: 'M6 3h12l3 6-9 12L3 9zM3 9h18M9 3l3 18 3-18',
-  hundredUnique: 'M8 3h11v15H8zM5 6v15h11',
-  thousandCards: 'M4 7h16M4 12h16M4 17h16',
-  tenSets: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
-  halfSet: 'M12 3a9 9 0 1 0 0 18V3z',
-  completeSet: 'M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4',
-  vintage: 'M12 7v5l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z',
-  bigValue: 'M12 3v18M17 7H9.5a3 3 0 0 0 0 6h5a3 3 0 0 1 0 6H6',
-}
+// ---------- Achievements (summary; the full list is AchievementsView) ----------
 
 const badges = computed(() => achievements(entries.value, setsStore.sets))
-const unlockedCount = computed(() => badges.value.filter((badge) => badge.unlocked).length)
+const badgeProgress = computed(() => achievementProgress(badges.value))
+const badgePercent = computed(() => Math.round((badgeProgress.value.unlocked / badgeProgress.value.total) * 100))
+// Closest to unlocking first (secret ones stay out of it)
+const almostThere = computed(() =>
+  badges.value
+    .filter((badge) => !badge.unlocked && !badge.hidden)
+    .sort((a, b) => b.ratio - a.ratio || a.target - b.target)
+    .slice(0, 4),
+)
+const achievementsRoute = computed(() =>
+  isOwn.value ? { name: 'achievements' } : { name: 'public-achievements', params: { username: profile.value?.username ?? props.username } },
+)
 
 // ---------- Account ----------
 
@@ -394,24 +395,27 @@ async function logout() {
           <section class="panel">
             <div class="section-head">
               <h2 class="pb-section-title">{{ t('profile.achievementsTitle') }}</h2>
-              <span class="section-count">{{ unlockedCount }} / {{ badges.length }}</span>
+              <span class="section-count">{{ badgeProgress.unlocked }} / {{ badgeProgress.total }}</span>
             </div>
-            <ul class="achv-grid" role="list">
-              <li v-for="badge in badges" :key="badge.id" class="achv" :class="{ unlocked: badge.unlocked }">
-                <span class="achv-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path :d="ACHIEVEMENT_ICONS[badge.id]" /></svg>
-                </span>
-                <span class="achv-body">
-                  <span class="achv-title">{{ t(`profile.achievements.${badge.id}.title`) }}</span>
-                  <span class="achv-desc">{{ t(`profile.achievements.${badge.id}.desc`) }}</span>
-                  <span v-if="!badge.unlocked && badge.target > 1" class="achv-progress">
-                    <span class="bar bar-sm" aria-hidden="true"><span :style="{ width: `${(badge.current / badge.target) * 100}%` }"></span></span>
-                    <span class="achv-progress-text">{{ formatNumber(badge.current) }} / {{ formatNumber(badge.target) }}</span>
-                  </span>
-                </span>
-                <span class="visually-hidden">{{ badge.unlocked ? t('profile.unlocked') : t('profile.locked') }}</span>
-              </li>
-            </ul>
+            <div
+              class="bar"
+              role="progressbar"
+              :aria-label="t('achievements.ui.overall')"
+              aria-valuemin="0"
+              :aria-valuemax="badgeProgress.total"
+              :aria-valuenow="badgeProgress.unlocked"
+            >
+              <span :style="{ width: `${badgePercent}%` }"></span>
+            </div>
+            <template v-if="almostThere.length">
+              <h3 class="achv-subtitle">{{ t('achievements.ui.almostThere') }}</h3>
+              <ul class="achv-grid" role="list">
+                <AchievementTile v-for="badge in almostThere" :key="badge.id" :item="badge" :rate="rateOf(badge, achievementsStore.rates, isOwn)" />
+              </ul>
+            </template>
+            <RouterLink :to="achievementsRoute" class="btn btn-outline-secondary achv-all">
+              {{ t('achievements.ui.seeAll') }} <span aria-hidden="true">→</span>
+            </RouterLink>
           </section>
 
           <section v-if="!isOwn && topCards.length" class="panel">
@@ -466,6 +470,13 @@ async function logout() {
                   <span class="switch-desc">{{ t('profile.vibrationDesc') }}</span>
                 </span>
                 <input type="checkbox" class="form-check-input pb-switch" role="switch" :checked="settings.vibration" @change="settings.set('vibration', $event.target.checked)" />
+              </label>
+              <label class="switch-row form-switch">
+                <span>
+                  <span class="switch-title">{{ t('profile.effectsLabel') }}</span>
+                  <span class="switch-desc">{{ t('profile.effectsDesc') }}</span>
+                </span>
+                <input type="checkbox" class="form-check-input pb-switch" role="switch" :checked="settings.effects" @change="settings.set('effects', $event.target.checked)" />
               </label>
               <div v-if="installPrompt && !installed" class="switch-row">
                 <span>
@@ -586,10 +597,6 @@ async function logout() {
   transition: width 0.8s var(--pb-ease-out);
 }
 
-.bar-sm {
-  height: 6px;
-  flex: 1;
-}
 
 /* ---------- Trainer card ---------- */
 
@@ -882,7 +889,6 @@ async function logout() {
 
 /* ---------- Achievements ---------- */
 
-/* Not .badge: Bootstrap already styles that class (centered, nowrap) */
 .achv-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -892,83 +898,18 @@ async function logout() {
   list-style: none;
 }
 
-.achv {
-  display: flex;
-  gap: 0.8rem;
-  align-items: flex-start;
-  padding: 0.85rem;
-  border-radius: var(--pb-radius-md);
-  border: 1px solid var(--pb-border);
-  background: var(--pb-input-bg);
-}
-
-.achv-icon {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: var(--pb-selected);
-  color: var(--pb-text-muted);
-}
-
-.achv-icon svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.achv.unlocked {
-  border-color: transparent;
-  background:
-    linear-gradient(var(--pb-bg-elevated), var(--pb-bg-elevated)) padding-box,
-    var(--pb-holo) border-box;
-  border: 1px solid transparent;
-}
-
-.achv.unlocked .achv-icon {
-  background: var(--pb-holo);
-  color: #0a0d1a;
-}
-
-.achv-body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  min-width: 0;
-  flex: 1;
-}
-
-.achv-title {
-  font-weight: 800;
-}
-
-.achv:not(.unlocked) .achv-title {
-  color: var(--pb-text-muted);
-}
-
-.achv-desc {
+.achv-subtitle {
+  margin: 1.25rem 0 0.75rem;
+  font-family: var(--pb-font-body);
   font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--pb-text-muted);
 }
 
-.achv-progress {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.35rem;
-}
-
-.achv-progress-text {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--pb-text-muted);
-  white-space: nowrap;
+.achv-all {
+  margin-top: 1rem;
 }
 
 /* ---------- Public profile ---------- */

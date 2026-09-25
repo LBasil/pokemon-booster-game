@@ -418,6 +418,56 @@ a {
   padding-bottom: calc(96px + env(safe-area-inset-bottom));
 }
 
+/* Page change: the content fades in (opacity only: a transform here would
+   become the containing block of fixed children) and a foil line sweeps
+   the top edge (App.vue). Both off with Profile > Settings > Visual effects. */
+.pb-page > main {
+  animation: pb-page-in 0.35s var(--pb-ease-out) both;
+}
+
+.route-sweep {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9998;
+  height: 2px;
+  pointer-events: none;
+  background: var(--pb-holo);
+  transform-origin: left;
+  animation: pb-sweep 0.7s var(--pb-ease-out) forwards;
+}
+
+.pb-fx-off .pb-page > main,
+.pb-fx-off .route-sweep {
+  animation: none;
+}
+
+.pb-fx-off .route-sweep {
+  display: none;
+}
+
+@keyframes pb-page-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pb-sweep {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  60% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
 /* The phone tab bar (AppHeader) shows below 992px */
 @media (min-width: 992px) {
   .pb-page {

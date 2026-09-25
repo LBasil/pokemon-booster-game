@@ -47,6 +47,12 @@ const router = createRouter({
       meta: { requiresAuth: true, sharedMode: true },
     },
     {
+      path: '/achievements',
+      name: 'achievements',
+      component: () => import('@/views/AchievementsView.vue'),
+      meta: { requiresAuth: true, sharedMode: true },
+    },
+    {
       path: '/community',
       name: 'community',
       component: () => import('@/views/CommunityView.vue'),
@@ -98,6 +104,13 @@ const router = createRouter({
       path: '/u/:username',
       name: 'public-profile',
       component: () => import('@/views/ProfileView.vue'),
+      props: true,
+      meta: { sharedMode: true },
+    },
+    {
+      path: '/u/:username/achievements',
+      name: 'public-achievements',
+      component: () => import('@/views/AchievementsView.vue'),
       props: true,
       meta: { sharedMode: true },
     },

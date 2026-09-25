@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { supabase } from '@/lib/supabaseClient'
+import { useAchievementsStore } from '@/stores/achievements'
 import { useChallengeStore } from '@/stores/challenge'
 import { useChallengeCollectionStore, useCollectionStore } from '@/stores/collection'
 import { useProfileStore } from '@/stores/profile'
@@ -14,6 +15,7 @@ function resetPlayerStores() {
   useTradesStore().$reset()
   useProfileStore().$reset()
   useWishlistStore().$reset()
+  useAchievementsStore().$reset()
 }
 
 export const useAuthStore = defineStore('auth', {
