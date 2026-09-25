@@ -8,6 +8,7 @@ import AppHeader from '@/components/AppHeader.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
 import HoloCard from '@/components/HoloCard.vue'
+import ModeSwitch from '@/components/ModeSwitch.vue'
 import { fetchFeed } from '@/api/social'
 import { useChallengeStore } from '@/stores/challenge'
 import { useProfileStore } from '@/stores/profile'
@@ -17,7 +18,8 @@ const { t, locale } = useI18n()
 const auth = useAuthStore()
 const profileStore = useProfileStore()
 const collectionStore = useCollectionStore()
-// Only shown once the challenge was visited (loading it creates the wallet)
+// Coins only once the challenge was visited (loading it creates the wallet);
+// what's waiting comes from the navigation badge (AppHeader loads it)
 const challenge = useChallengeStore()
 
 // A peek at the community's latest big pulls (full live feed on /community)
@@ -56,6 +58,7 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
 
     <main class="container hub">
       <section class="hub-intro">
+        <ModeSwitch class="hub-mode" />
         <span class="pb-eyebrow">{{ t('game.eyebrow') }}</span>
         <i18n-t keypath="game.greeting" tag="h1" class="hub-title" scope="global">
           <template #name>
@@ -137,10 +140,13 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
             <h2 class="hub-tile-title mt-2">{{ t('game.challengeTitle') }}</h2>
             <p class="hub-tile-desc mb-0">{{ t('game.challengeDesc') }}</p>
           </div>
-          <div v-if="challenge.loaded" class="hub-challenge-side">
-            <CoinAmount class="hub-challenge-coins" :amount="challenge.coins" />
-            <span v-if="challenge.pendingRewards" class="hub-challenge-pending">
-              {{ t('game.challengePending', { count: challenge.pendingRewards }, challenge.pendingRewards) }}
+          <div v-if="challenge.state || challenge.badge.rewards || challenge.badge.trades" class="hub-challenge-side">
+            <CoinAmount v-if="challenge.state" class="hub-challenge-coins" :amount="challenge.coins" />
+            <span v-if="challenge.badge.rewards" class="hub-challenge-pending">
+              {{ t('game.challengePending', { count: challenge.badge.rewards }, challenge.badge.rewards) }}
+            </span>
+            <span v-if="challenge.badge.trades" class="hub-challenge-pending">
+              {{ t('challenge.tradesWaiting', { count: challenge.badge.trades }, challenge.badge.trades) }}
             </span>
           </div>
           <span class="hub-tile-arrow" aria-hidden="true">→</span>
@@ -435,6 +441,11 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
   border: 3px solid transparent;
 }
 
+/* Mode switch above the greeting */
+.hub-mode {
+  margin-bottom: 1.25rem;
+}
+
 /* Challenge tile */
 .hub-challenge {
   display: flex;
@@ -614,6 +625,42 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
 }
 
 /* ---------- Breakpoints ---------- */
+
+/* Phones: what's waiting goes under the challenge tile's text */
+@media (max-width: 575.98px) {
+  .hub-challenge {
+    flex-wrap: wrap;
+  }
+
+  .hub-challenge-text {
+    flex-basis: calc(100% - 2.5rem);
+  }
+
+  .hub-challenge-side {
+    order: 3;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    flex-basis: 100%;
+  }
+}
+
+/* Phones: the challenge tile (and what's waiting there) right under the
+   main action, not below the collection and profile tiles */
+@media (max-width: 767.98px) {
+  .hub-feature {
+    order: 0;
+  }
+
+  .hub-challenge {
+    order: 1;
+  }
+
+  .hub-collection,
+  .hub-profile {
+    order: 2;
+  }
+}
 
 /* Phones & tablets: small packs tucked top-right so the CTA stays above the fold */
 @media (max-width: 991.98px) {

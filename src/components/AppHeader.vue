@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useChallengeStore } from '@/stores/challenge'
 import BrandLogo from '@/components/BrandLogo.vue'
+import CoinAmount from '@/components/CoinAmount.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 
@@ -81,11 +82,19 @@ const TABS = computed(() =>
       ],
 )
 
-// The binder lives under its collection
-const isActive = (name) =>
+// Pages without their own link light up their parent: binders their
+// collection, histories the profile / challenge. The tab bar has no Trades
+// tab, so trades count as the challenge there.
+const PARENTS = {
+  binder: 'collection',
+  'challenge-binder': 'challenge-collection',
+  history: 'profile',
+  'challenge-history': 'challenge',
+}
+const isActive = (name, inTabBar = false) =>
   route.name === name ||
-  (name === 'collection' && route.name === 'binder') ||
-  (name === 'challenge-collection' && route.name === 'challenge-binder')
+  PARENTS[route.name] === name ||
+  (inTabBar && name === 'challenge' && route.name === 'challenge-trades')
 
 async function logout() {
   await auth.signOut()
@@ -98,7 +107,6 @@ async function logout() {
     <RouterLink :to="{ name: 'game' }" class="app-header-brand" :aria-label="t('nav.hub')">
       <BrandLogo />
     </RouterLink>
-    <RouterLink v-if="inChallenge" :to="{ name: 'challenge' }" class="mode-badge">{{ t('nav.challengeMode') }}</RouterLink>
 
     <nav class="app-header-nav" :aria-label="t('nav.main')">
       <RouterLink
@@ -136,8 +144,8 @@ async function logout() {
         v-for="tab in TABS"
         :key="tab.name"
         :to="{ name: tab.name }"
-        :class="{ active: isActive(tab.name) }"
-        :aria-current="isActive(tab.name) ? 'page' : undefined"
+        :class="{ active: isActive(tab.name, true) }"
+        :aria-current="isActive(tab.name, true) ? 'page' : undefined"
       >
         <svg viewBox="0 0 24 24" aria-hidden="true"><path :d="tab.icon" /></svg>
         <span>{{ t(tab.label) }}</span>
@@ -146,12 +154,25 @@ async function logout() {
         </span>
       </RouterLink>
     </nav>
+
+    <!-- Every challenge page says so, with the way out (phones included) -->
+    <div v-if="inChallenge" class="mode-strip">
+      <RouterLink :to="{ name: 'challenge' }" class="mode-strip-name">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path :d="ICONS.challenge" /></svg>
+        {{ t('nav.challengeMode') }}
+      </RouterLink>
+      <CoinAmount v-if="challenge.state" class="mode-strip-coins" :amount="challenge.coins" />
+      <RouterLink :to="{ name: 'game' }" class="mode-strip-leave">
+        {{ t('nav.leaveChallenge') }} <span aria-hidden="true">→</span>
+      </RouterLink>
+    </div>
   </header>
 </template>
 
 <style scoped>
 .app-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
   padding-top: 1.25rem;
@@ -252,8 +273,7 @@ async function logout() {
 
 /* Small desktops: the challenge's 6 links need the brand's room */
 @media (min-width: 992px) and (max-width: 1199.98px) {
-  .is-challenge .app-header-brand :deep(.brand-name),
-  .is-challenge .mode-badge {
+  .is-challenge .app-header-brand :deep(.brand-name) {
     display: none;
   }
 
@@ -272,20 +292,59 @@ async function logout() {
   left: calc(50% + 6px);
 }
 
-/* "Challenge" pill next to the brand while in that mode */
-.mode-badge {
-  flex-shrink: 0;
-  padding: 0.3rem 0.7rem;
+/* Challenge strip: full-width row under the header */
+.mode-strip {
+  order: 10;
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.6rem 0.45rem 0.9rem;
   border-radius: 999px;
-  border: 1px solid var(--pb-border-strong);
-  background: var(--pb-surface);
-  color: var(--pb-coin);
-  font-family: var(--pb-font-display);
-  font-size: 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--pb-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--pb-accent) 14%, var(--pb-bg-elevated));
+  font-size: 0.85rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+}
+
+.mode-strip-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--pb-text);
+  font-family: var(--pb-font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.mode-strip-name svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--pb-coin);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mode-strip-coins {
+  color: var(--pb-coin);
+  font-weight: 800;
+}
+
+.mode-strip-leave {
+  margin-left: auto;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: var(--pb-surface);
+  color: var(--pb-text);
   white-space: nowrap;
+}
+
+.mode-strip-leave:hover {
+  color: var(--pb-text);
+  background: var(--pb-surface-hover);
 }
 
 /* Fixed bottom tab bar on phones; pages add .pb-page to leave room for it */
@@ -342,13 +401,6 @@ async function logout() {
 
 .app-tabbar a.active svg {
   stroke: var(--pb-text);
-}
-
-/* Phones: the tab bar already shows the mode (its Challenge tab is active) */
-@media (max-width: 575.98px) {
-  .mode-badge {
-    display: none;
-  }
 }
 
 /* Brand name is dropped on small phones so the controls fit */

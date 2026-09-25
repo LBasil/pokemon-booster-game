@@ -139,7 +139,6 @@ const ago = (iso) => timeAgo(iso, locale.value)
 
     <main class="container trades">
       <header>
-        <span class="pb-eyebrow">{{ t('challenge.eyebrow') }}</span>
         <h1 class="trades-title">{{ t('trades.title') }}</h1>
         <p class="pb-muted">{{ t('trades.subtitle', { max: TRADE_MAX_CARDS }) }}</p>
       </header>

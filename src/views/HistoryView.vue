@@ -95,8 +95,11 @@ function chip(card) {
 
     <main class="container history">
       <header>
-        <span class="pb-eyebrow">{{ mode === 'challenge' ? t('challenge.historyEyebrow') : t('history.eyebrow') }}</span>
-        <h1 class="history-title">{{ t('history.title') }}</h1>
+        <RouterLink :to="{ name: mode === 'challenge' ? 'challenge' : 'profile' }" class="history-back">
+          <span aria-hidden="true">←</span> {{ mode === 'challenge' ? t('challenge.backToHub') : t('history.backToProfile') }}
+        </RouterLink>
+        <span class="pb-eyebrow">{{ t('history.eyebrow') }}</span>
+        <h1 class="history-title">{{ mode === 'challenge' ? t('challenge.historyTitle') : t('history.title') }}</h1>
         <p class="pb-muted">{{ t('history.subtitle') }}</p>
       </header>
 
@@ -158,6 +161,18 @@ function chip(card) {
   flex-direction: column;
   gap: 1.5rem;
   padding-top: 1rem;
+}
+
+.history-back {
+  display: block;
+  width: fit-content;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: var(--pb-text-muted);
+}
+
+.history-back:hover {
+  color: var(--pb-text);
 }
 
 .history-title {

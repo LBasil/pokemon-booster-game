@@ -23,7 +23,11 @@
     "challenge": "Défi",
     "challengeMode": "Mode Défi",
     "trades": "Échanges",
-    "pending": "en attente | en attente"
+    "pending": "en attente | en attente",
+    "leaveChallenge": "Quitter",
+    "modeSwitch": "Mode de jeu",
+    "modeUnlimited": "Illimité",
+    "modeChallenge": "Défi"
   },
   "home": {
     "tagline": "Choisis une série — ou mélange-les toutes —, ouvre autant de paquets que tu veux, et regarde ta collection grandir à chaque tirage.",
@@ -380,7 +384,8 @@
     "empty": "Aucun booster ouvert pour l'instant.",
     "loadError": "Impossible de charger ton historique.",
     "hits": "{count} hit | {count} hits",
-    "more": "Charger plus"
+    "more": "Charger plus",
+    "backToProfile": "Profil"
   },
   "community": {
     "eyebrow": "En direct",
@@ -495,7 +500,6 @@
     "backToUnlimited": "Retour au mode illimité",
     "backToHub": "Accueil du défi",
     "boostersEyebrow": "Boosters du défi",
-    "collectionEyebrow": "Collection Défi",
     "balance": "Solde :",
     "notEnoughHint": "Pas assez de pièces.",
     "earnCoins": "Gagner des pièces",
@@ -505,11 +509,18 @@
     "craftTooExpensive": "Pas encore assez de pièces pour fabriquer cette carte.",
     "craftedNotice": "{card} fabriquée et ajoutée à ta collection !",
     "recycleCard": "Recycler {count} doublon | Recycler {count} doublons",
-    "historyEyebrow": "Boosters du défi",
     "historyLink": "Historique des boosters",
     "tradesDesc": "Échange des cartes avec d'autres dresseurs : jusqu'à 5 des tiennes contre jusqu'à 5 des leurs, ou offre-les.",
     "tradesCta": "Voir les échanges",
-    "tradesWaiting": "{count} offre en attente | {count} offres en attente"
+    "tradesWaiting": "{count} offre en attente | {count} offres en attente",
+    "emptyTitle": "Ta collection Défi démarre de zéro",
+    "emptyDesc": "Elle se remplit avec les boosters que tu achètes ici avec des pièces.",
+    "emptyUnlimitedSafe": "Ta {count} carte du mode illimité est toujours là. | Tes {count} cartes du mode illimité sont toutes toujours là.",
+    "seeUnlimitedCollection": "Ma collection illimitée",
+    "historyTitle": "Historique des boosters du défi",
+    "waitingDaily": "Ta récompense du jour est prête",
+    "waitingMissions": "{count} mission terminée | {count} missions terminées",
+    "seeMissions": "Voir les missions"
   },
   "trades": {
     "title": "Échanges",

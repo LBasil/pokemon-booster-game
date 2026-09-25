@@ -18,6 +18,7 @@ import { completionPercent } from '@/utils/progress'
 import AppHeader from '@/components/AppHeader.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
+import ModeSwitch from '@/components/ModeSwitch.vue'
 import RecycleDuplicates from '@/components/RecycleDuplicates.vue'
 
 // Challenge mode hub: coins, daily reward, missions, and the separate
@@ -94,6 +95,10 @@ const claimDaily = () =>
 
 // ---------- Missions ----------
 
+// Top-of-page summary of what's waiting (what the navigation badge counts),
+// so its reason is on screen right away, even on short desktop windows
+const finishedMissions = computed(() => challenge.missions.filter((m) => !m.claimed && m.progress >= m.target))
+
 const claimMission = (mission) =>
   run(mission, async () => {
     const reward = await challenge.claimMission(mission)
@@ -105,11 +110,10 @@ const claimMission = (mission) =>
 const percent = computed(() => completionPercent(collection.entries.length, collection.stats.totalCards))
 const percentLabel = computed(() => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1 }).format(percent.value))
 
-// Recycling moves the "recycle" mission: refresh it
+// The store refreshes the "recycle" mission itself
 function onRecycled(result) {
   errorMessage.value = ''
   notice.value = t('challenge.recycledNotice', { cards: result.recycled, coins: result.gained.toLocaleString(locale.value) }, result.recycled)
-  challenge.load({ force: true })
 }
 
 function onRecycleError(err) {
@@ -126,7 +130,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 
     <main class="container challenge">
       <section class="ch-intro">
-        <span class="pb-eyebrow">{{ t('challenge.eyebrow') }}</span>
+        <ModeSwitch class="ch-mode" />
         <h1 class="ch-title">{{ t('challenge.title') }}</h1>
         <p class="ch-subtitle">{{ t('challenge.subtitle') }}</p>
       </section>
@@ -142,6 +146,23 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
           <span v-if="notice" class="ch-notice">{{ notice }}</span>
         </p>
         <div v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
+
+        <ul v-if="state.daily_available || finishedMissions.length || challenge.badge.trades" class="ch-waiting" role="list">
+          <li v-if="state.daily_available">
+            <span>{{ t('challenge.waitingDaily') }}</span>
+            <button type="button" class="btn btn-primary btn-sm ch-claim" :disabled="busy === 'daily'" @click="claimDaily">
+              {{ t('challenge.claim') }} <CoinAmount :amount="state.daily_reward" signed />
+            </button>
+          </li>
+          <li v-if="finishedMissions.length">
+            <span>{{ t('challenge.waitingMissions', { count: finishedMissions.length }, finishedMissions.length) }}</span>
+            <a href="#ch-missions-title" class="btn btn-outline-secondary btn-sm">{{ t('challenge.seeMissions') }}</a>
+          </li>
+          <li v-if="challenge.badge.trades">
+            <span>{{ t('challenge.tradesWaiting', { count: challenge.badge.trades }, challenge.badge.trades) }}</span>
+            <RouterLink :to="{ name: 'challenge-trades' }" class="btn btn-outline-secondary btn-sm">{{ t('challenge.tradesCta') }}</RouterLink>
+          </li>
+        </ul>
 
         <div class="ch-grid">
           <!-- ============ Wallet ============ -->
@@ -321,6 +342,10 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   animation: pb-rise 0.6s var(--pb-ease-out) both;
 }
 
+.ch-mode {
+  margin-bottom: 1.25rem;
+}
+
 .ch-title {
   margin: 1rem 0 0.5rem;
   font-size: clamp(1.8rem, 5vw, 3rem);
@@ -332,6 +357,32 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   margin: 0;
   color: var(--pb-text-muted);
   font-size: 1.05rem;
+}
+
+.ch-waiting {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ch-waiting li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.6rem 0.6rem 0.6rem 1rem;
+  border-radius: var(--pb-radius-md);
+  border: 1px solid color-mix(in srgb, var(--pb-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--pb-accent) 12%, var(--pb-bg-elevated));
+  font-weight: 700;
+}
+
+#ch-missions-title {
+  scroll-margin-top: 1.5rem;
 }
 
 .ch-feedback {

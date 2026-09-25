@@ -64,7 +64,7 @@ test('accepting an offer swaps the cards and clears the badge', async ({ page })
   // Badge: 1 reward + 1 offer on the Challenge link, the offer count on the trades tile
   await expect(page.locator('.ch-trades-count')).toHaveText('1 offer waiting')
 
-  await page.getByRole('link', { name: 'Open trades' }).click()
+  await page.locator('.ch-waiting').getByRole('link', { name: 'Open trades' }).click()
   const offer = page.locator('.trade').filter({ hasText: 'Misty' })
   await expect(offer.getByRole('img', { name: 'Charizard' })).toBeVisible()
   await offer.getByRole('button', { name: 'Accept' }).click()

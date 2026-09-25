@@ -20,6 +20,10 @@ export const useChallengeStore = defineStore('challenge', {
     state: null, // challenge_state() payload
     loading: false,
     loaded: false,
+    // Mission progress changed server side (packs opened...): the next
+    // load() refetches. Never reset `loaded` for that: views show their
+    // loading skeleton while it's false.
+    stale: false,
     error: null,
     badge: { rewards: 0, trades: 0 },
     badgeAt: 0,
@@ -46,12 +50,13 @@ export const useChallengeStore = defineStore('challenge', {
     },
 
     async load({ force = false } = {}) {
-      if ((this.loaded && !force) || this.loading) return
+      if ((this.loaded && !this.stale && !force) || this.loading) return
       this.loading = true
       this.error = null
       try {
         this.state = await fetchChallengeState()
         this.loaded = true
+        this.stale = false
         this.loadBadge({ force: true })
       } catch (err) {
         this.error = err
@@ -82,8 +87,9 @@ export const useChallengeStore = defineStore('challenge', {
       if (this.state) {
         this.state = { ...this.state, coins: result.coins }
       }
-      // Mission progress changed server side
-      this.loaded = false
+      // Mission progress changed server side ("open all" calls this in a loop:
+      // refetch lazily rather than once per pack)
+      this.stale = true
       this.badgeAt = 0
       useChallengeCollectionStore().invalidate()
       return result
@@ -93,9 +99,11 @@ export const useChallengeStore = defineStore('challenge', {
     async recycle(cardId = null) {
       const result = await recycleDuplicates(cardId)
       if (this.state) this.state = { ...this.state, coins: result.coins }
-      this.loaded = false
-      this.badgeAt = 0
-      if (result.recycled) await useChallengeCollectionStore().load({ force: true })
+      if (result.recycled) {
+        // The "recycle" mission moved: refresh in the background
+        this.load({ force: true })
+        await useChallengeCollectionStore().load({ force: true })
+      }
       return result
     },
 

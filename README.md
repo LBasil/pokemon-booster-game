@@ -29,6 +29,9 @@ Supabase (Postgres + Auth + Realtime).
   challenge leaderboards. Badges in the navigation show rewards to claim
   and offers to answer. Every coin and card moves server-side, and the
   unlimited collection is never touched.
+- **Two modes, never mixed up**: an "Unlimited | Challenge" switch on both
+  hubs, and a "Challenge mode" strip (coins + "Leave") on every challenge
+  page.
 - **Sound & haptics**: synthesized sound effects (tearing, flips, hit
   fanfares — no audio files) and a vibration on hits, both switchable.
 - **Hub**: greeting, quick access to boosters, collection progress, profile

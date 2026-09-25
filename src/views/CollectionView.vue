@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { modeRoutes } from '@/router/modes'
 import { useChallengeStore } from '@/stores/challenge'
-import { useModeCollectionStore } from '@/stores/collection'
+import { useCollectionStore, useModeCollectionStore } from '@/stores/collection'
 import { useSetsStore } from '@/stores/sets'
 import { RARITY_FILTERS, SORTS, collectionStats, filterEntries, setProgress, sortEntries } from '@/utils/collection'
 import { completionPercent } from '@/utils/progress'
@@ -36,11 +36,18 @@ const setsStore = useSetsStore()
 const wishlist = useWishlistStore()
 const challenge = useChallengeStore()
 
+// In the challenge, the empty state reminds that the unlimited cards are safe
+const unlimitedStore = useCollectionStore()
+
 onMounted(() => {
   collectionStore.load()
   setsStore.load()
-  if (isChallenge) challenge.load()
-  else wishlist.load()
+  if (isChallenge) {
+    challenge.load()
+    unlimitedStore.load()
+  } else {
+    wishlist.load()
+  }
 })
 
 const recycleNotice = ref('')
@@ -206,8 +213,8 @@ function rarityChip(card) {
     <main class="container collection">
       <!-- ============ Header ============ -->
       <header class="coll-head">
-        <span class="pb-eyebrow">{{ isChallenge ? t('challenge.collectionEyebrow') : t('collection.eyebrow') }}</span>
-        <h1 class="coll-title">{{ t('collection.title') }}</h1>
+        <span class="pb-eyebrow">{{ t('collection.eyebrow') }}</span>
+        <h1 class="coll-title">{{ isChallenge ? t('challenge.collectionTitle') : t('collection.title') }}</h1>
 
         <div v-if="isChallenge && entries.length" class="coll-challenge">
           <p class="coll-balance">
@@ -263,11 +270,30 @@ function rarityChip(card) {
       <div v-else-if="!entries.length" class="coll-empty">
         <BoosterArt class="coll-empty-art" />
         <div>
-          <h2 class="coll-empty-title">{{ t('collection.emptyTitle') }}</h2>
-          <p class="pb-muted">{{ t('collection.empty') }}</p>
-          <RouterLink :to="{ name: routes.boosters }" class="btn btn-primary btn-lg glow-button">
-            {{ t('collection.goOpen') }}
-          </RouterLink>
+          <template v-if="isChallenge">
+            <h2 class="coll-empty-title">{{ t('challenge.emptyTitle') }}</h2>
+            <p class="pb-muted">
+              {{ t('challenge.emptyDesc') }}
+              <template v-if="unlimitedStore.entries.length">
+                {{ t('challenge.emptyUnlimitedSafe', { count: unlimitedStore.entries.length.toLocaleString(locale) }, unlimitedStore.entries.length) }}
+              </template>
+            </p>
+            <div class="coll-empty-actions">
+              <RouterLink :to="{ name: routes.boosters }" class="btn btn-primary btn-lg glow-button">
+                {{ t('challenge.openCta') }}
+              </RouterLink>
+              <RouterLink :to="{ name: 'collection' }" class="btn btn-outline-secondary btn-lg">
+                {{ t('challenge.seeUnlimitedCollection') }}
+              </RouterLink>
+            </div>
+          </template>
+          <template v-else>
+            <h2 class="coll-empty-title">{{ t('collection.emptyTitle') }}</h2>
+            <p class="pb-muted">{{ t('collection.empty') }}</p>
+            <RouterLink :to="{ name: routes.boosters }" class="btn btn-primary btn-lg glow-button">
+              {{ t('collection.goOpen') }}
+            </RouterLink>
+          </template>
         </div>
       </div>
 
@@ -430,6 +456,12 @@ function rarityChip(card) {
 }
 
 /* ---------- Header ---------- */
+
+.coll-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
 
 .coll-challenge {
   display: flex;
