@@ -431,7 +431,10 @@
       "trade_closed": "This offer has already been answered.",
       "trade_expired": "This offer has expired.",
       "trades_closed": "This trainer doesn’t accept trades.",
-      "card_not_for_trade": "One of these cards isn’t for trade any more."
+      "card_not_for_trade": "One of these cards isn’t for trade any more.",
+      "no_game": "This run is over. Start a new one.",
+      "slow_down": "Too many runs in a row: wait a minute.",
+      "minigame_unavailable": "No cards to compare right now. Try again later."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -473,7 +476,8 @@
       "tableCaption": "Coins per card, by rarity",
       "rarity": "Rarity",
       "recycleCol": "Recycle",
-      "craftCol": "Craft"
+      "craftCol": "Craft",
+      "minigame": "Mini-game: guess the pricier card to earn coins, 3 paid runs a day."
     },
     "buckets": {
       "common": "Common",
@@ -566,6 +570,46 @@
     "locksTitle": "No card kept out of trades | {count} card kept out of trades | {count} cards kept out of trades",
     "locksHint": "Open a card of your challenge collection and tap “Keep out of trades”.",
     "unlock": "Allow trades for {name}"
+  },
+  "minigame": {
+    "eyebrow": "Mini-game",
+    "title": "Higher or lower",
+    "subtitle": "Two cards, one question: which one is worth more? Earn coins for your challenge boosters.",
+    "hubDesc": "Guess which of two cards is worth more to earn coins.",
+    "unavailable": "The mini-game is coming soon.",
+    "loadError": "The mini-game could not be loaded. Try again in a moment.",
+    "paidLeft": "Paid runs left",
+    "todayCoins": "Earned today",
+    "best": "Best streak",
+    "bestShort": "best streak {count}",
+    "streak": "Streak: {count}",
+    "paidRun": "Paid run",
+    "freeRun": "For the record",
+    "question": "Which card is worth more?",
+    "timeLeft": "Time left",
+    "nextReward": "Next right answer:",
+    "keys": "Tap a card (or use the ← → keys).",
+    "right": "Right!",
+    "wrong": "Wrong!",
+    "late": "Time's up!",
+    "overTitle": "Run over",
+    "overLate": "Too slow!",
+    "overStreak": "{count} right answer | {count} right answers",
+    "overCoins": "Coins won:",
+    "record": "New record!",
+    "play": "Play",
+    "resume": "Resume the run",
+    "playAgain": "Play again",
+    "nextPaid": "{count} paid run left today | {count} paid runs left today",
+    "nextFree": "No more coins today: play for the record.",
+    "rulesTitle": "Rules",
+    "rules": {
+      "pick": "Two cards show up: tap the one worth more (Cardmarket price). You have {seconds} seconds.",
+      "run": "A run goes on until your first wrong answer (or until time runs out).",
+      "paid": "{runs} paid runs a day: {coins} coins per right answer, for the first {answers} of the run ({max} coins max per run).",
+      "free": "After that, play as much as you like for the record, without coins. Paid runs come back at midnight UTC.",
+      "harder": "The longer the streak, the closer the prices."
+    }
   },
   "achievements": {
     "ui": {

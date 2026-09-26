@@ -41,6 +41,14 @@ const WEEKLY = [
   { mission: 'week_daily', target: 5, reward: 300 },
 ]
 
+// The mini-game's pairs, in order: [left, right] (which one is pricier alternates)
+export const MINIGAME_PAIRS = [
+  ['sv3pt5-150', 'base1-4'], // right (2 vs 300)
+  ['sv3pt5-6', 'sv3pt5-4'], // left (12 vs 0.2)
+  ['sv3pt5-199', 'base1-58'], // left (180 vs 2)
+  ['sv3pt5-25', 'sv3pt5-190'], // right (0.3 vs 20)
+]
+
 /**
  * @param {import('@playwright/test').Page} page
  * @param {{ collection?: object[], challengeCollection?: object[], challenge?: object, godPack?: boolean,
@@ -90,6 +98,9 @@ export async function mockSupabase(page, options = {}) {
     mistyLocks: options.mistyLocks ?? [],
     mistyAcceptsTrades: options.mistyAcceptsTrades ?? true,
     sets: options.sets ?? SETS,
+    // "Higher or lower" (migration 0013): 'missing' = not applied; the pairs
+    // come in MINIGAME_PAIRS order, so tests know the right answer
+    minigame: options.minigame === 'missing' ? 'missing' : { paidUsed: 0, best: 0, todayCoins: 0, run: null, next: 0, ...options.minigame },
   }
   const challengeState = () => {
     const c = state.challenge
@@ -148,6 +159,63 @@ export async function mockSupabase(page, options = {}) {
     const raise = (message) => json({ code: 'P0001', message, details: null, hint: null }, 400)
     const c = state.challenge
     if (path === '/rest/v1/rpc/challenge_state') return json(challengeState())
+    // ---- Mini-game (migration 0013) ----
+    if (path.startsWith('/rest/v1/rpc/minigame_')) {
+      const mg = state.minigame
+      if (mg === 'missing') return json({ code: 'PGRST202', message: `Could not find the function public.${path.split('/').pop()} in the schema cache` }, 404)
+      const mgCard = (id) => {
+        const card = byId[id]
+        return { id, name: card.name, rarity: card.rarity, image_small: card.image_small, image_url: card.image_url, set_id: card.set_id, set_name: SETS.find((set) => set.id === card.set_id)?.name }
+      }
+      const drawPair = () => MINIGAME_PAIRS[mg.next++ % MINIGAME_PAIRS.length]
+      const mgState = () => ({
+        paid_runs: 3,
+        coins_per_answer: 5,
+        max_paid_answers: 20,
+        answer_seconds: 15,
+        coins: c.coins,
+        paid_left: Math.max(0, 3 - mg.paidUsed),
+        today_coins: mg.todayCoins,
+        best: mg.best,
+        run: mg.run && { paid: mg.run.paid, streak: mg.run.streak, coins: mg.run.coins, left: mgCard(mg.run.pair[0]), right: mgCard(mg.run.pair[1]), seconds_left: 15 },
+      })
+      if (path === '/rest/v1/rpc/minigame_state') return json(mgState())
+      if (path === '/rest/v1/rpc/minigame_start') {
+        const paid = mg.paidUsed < 3
+        if (paid) mg.paidUsed++
+        mg.run = { paid, streak: 0, coins: 0, pair: drawPair() }
+        return json(mgState())
+      }
+      if (path === '/rest/v1/rpc/minigame_answer') {
+        const run = mg.run
+        if (!run) return raise('no_game')
+        const pair = run.pair
+        const [left, right] = pair.map((id) => byId[id].value)
+        const correct = args.p_pick !== null && (args.p_pick === 'left' ? left >= right : right >= left)
+        let earned = 0
+        if (correct) {
+          earned = run.paid && run.streak < 20 ? 5 : 0
+          run.streak++
+          run.coins += earned
+          c.coins += earned
+          mg.todayCoins += earned
+          mg.best = Math.max(mg.best, run.streak)
+          run.pair = drawPair()
+        } else {
+          mg.run = null
+        }
+        return json({
+          correct,
+          late: args.p_pick === null,
+          earned,
+          streak: run.streak,
+          run_coins: run.coins,
+          left: { id: pair[0], value: left },
+          right: { id: pair[1], value: right },
+          state: mgState(),
+        })
+      }
+    }
     if (path === '/rest/v1/rpc/claim_daily_reward') {
       if (!c.daily_available) return raise('already_claimed')
       const reward = c.daily_reward

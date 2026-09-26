@@ -94,6 +94,7 @@ const PARENTS = {
   achievements: 'profile',
   'challenge-achievements': 'challenge',
   'challenge-history': 'challenge',
+  'challenge-minigame': 'challenge',
 }
 const isActive = (name, inTabBar = false) =>
   route.name === name ||

@@ -103,6 +103,13 @@ const router = createRouter({
       meta: { requiresAuth: true, mode: 'challenge' },
     },
     {
+      // "Higher or lower" mini-game: coins for the challenge (migration 0013)
+      path: '/challenge/minigame',
+      name: 'challenge-minigame',
+      component: () => import('@/views/MinigameView.vue'),
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
       path: '/challenge/trades',
       name: 'challenge-trades',
       component: () => import('@/views/TradesView.vue'),

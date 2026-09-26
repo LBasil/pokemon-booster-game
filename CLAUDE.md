@@ -24,7 +24,7 @@ src/
   main.js, App.vue          entry point, mounts pinia/router/i18n, applies saved theme
   router/index.js           routes + auth guard (requiresAuth meta -> redirect to "/")
   stores/                   pinia: auth, profile, collection (one store per mode), challenge,
-                            trades, sets, wishlist (per-player, reset on account switch),
+                            trades, minigame, sets, wishlist (per-player, reset on account switch),
                             theme + settings (per-device, localStorage)
   lib/supabaseClient.js     the one Supabase client instance, reads VITE_ env vars
   lib/                      also sfx.js (synthesized sounds), shareCard.js (share image), pwa.js
@@ -244,6 +244,22 @@ docs/manual-testing.md      checklist for a real-account click-through
   offered card since; `challenge_collection_of` returns `tradable`.
   Public profiles list the challenge collection with "Ask for it" ->
   `/challenge/trades?to=<name>&want=<card id>`.
+  **Mini-game "Higher or lower"** (0013, `/challenge/minigame`,
+  `MinigameView` + `useMinigameStore`): two cards, tap the pricier
+  (`cards.value`) within 15 s (server allows 20). Rules in SQL
+  (`minigame_rules()`, `minigame_min_ratio()`) mirrored in
+  `src/utils/minigame.js`: 3 paid runs per game day, 5 coins per right
+  answer for the first 20 of a run, then unlimited unpaid runs (best
+  streak); price ratio x3 -> x2 -> x1.5 -> x1.25 as the streak grows.
+  `minigame_runs` has no client access; `minigame_state/start/answer`
+  lock the wallet, the question never carries prices, a late or null
+  answer ends the run, the run in progress resumes after a reload.
+  Ledger kind `minigame` (one row per paid answer, so `coins_earned`
+  counts it). Accepted limit: prices are public, a script could look
+  them up — the daily cap bounds it. The store sets `unavailable` on a
+  missing RPC (PGRST202): the hub hides the tile. In the view, the card
+  list is `v-for` over the constant `SIDES` keyed by side only — a key
+  changing per pair made Vue patch detached nodes (prices vanished).
 - **Never let a player lose track of the mode** (user priority): every
   challenge page shows AppHeader's `.mode-strip` ("Challenge mode", coins,
   "Leave" → `/game`, phones included); Community and profiles
@@ -352,7 +368,8 @@ docs/manual-testing.md      checklist for a real-account click-through
   leaderboards), profiles + public profiles (incl. the challenge
   collection with "Ask for it"), ~240 achievements per mode (collapsible
   categories, rates, unlock toasts), challenge mode (coins, daily reward,
-  daily + weekly missions, recycle, craft, god packs, trades with live
+  daily + weekly missions, recycle, craft, god packs, "Higher or lower"
+  mini-game (needs 0013), trades with live
   updates, opt-out and cards kept out of trades), PWA, EN/FR, both themes.
 - What each migration does (details in each file's header comment):
   0001 schema · 0002 first RPCs (unused) · 0003 realistic packs + rarity
@@ -360,12 +377,14 @@ docs/manual-testing.md      checklist for a real-account click-through
   wishlist, prices, leaderboards · 0005 challenge mode · 0006 no pity
   timer · 0007 trades, challenge boards, badge · 0008 achievement rates ·
   0009 achievements per mode · 0010 subsets + pack stats · 0011 weekly
-  missions + realtime trades · 0012 trade preferences. Every one was
-  verified locally with PGlite before being handed over; 0010-0012 have
+  missions + realtime trades · 0012 trade preferences · 0013 "Higher or
+  lower" mini-game (**written 2026-09-26, not applied yet**: hand it to
+  the user). Every one was
+  verified locally with PGlite before being handed over; 0010-0013 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 118 unit tests, `npm run test:db` 71 database
-  checks, `npm run test:e2e` 131 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 122 unit tests, `npm run test:db` 107 database
+  checks, `npm run test:e2e` 143 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities.
 - Not verified automatically: Realtime (feed and trades — no websocket

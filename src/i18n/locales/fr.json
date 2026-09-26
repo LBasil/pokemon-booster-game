@@ -431,7 +431,10 @@
       "trade_closed": "Cette offre a déjà reçu une réponse.",
       "trade_expired": "Cette offre a expiré.",
       "trades_closed": "Ce dresseur n’accepte pas les échanges.",
-      "card_not_for_trade": "Une de ces cartes n’est plus échangeable."
+      "card_not_for_trade": "Une de ces cartes n’est plus échangeable.",
+      "no_game": "Cette partie est terminée. Lance-en une nouvelle.",
+      "slow_down": "Trop de parties d'affilée : attends une minute.",
+      "minigame_unavailable": "Aucune carte à comparer pour l'instant. Réessaie plus tard."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -473,7 +476,8 @@
       "tableCaption": "Pièces par carte, selon la rareté",
       "rarity": "Rareté",
       "recycleCol": "Recyclage",
-      "craftCol": "Fabrication"
+      "craftCol": "Fabrication",
+      "minigame": "Mini-jeu : devine la carte la plus chère pour gagner des pièces, 3 parties récompensées par jour."
     },
     "buckets": {
       "common": "Commune",
@@ -566,6 +570,46 @@
     "locksTitle": "Aucune carte gardée hors échanges | {count} carte gardée hors échanges | {count} cartes gardées hors échanges",
     "locksHint": "Ouvre une carte de ta collection défi et appuie sur « Ne pas échanger ».",
     "unlock": "Autoriser l’échange de {name}"
+  },
+  "minigame": {
+    "eyebrow": "Mini-jeu",
+    "title": "Plus ou moins",
+    "subtitle": "Deux cartes, une question : laquelle vaut le plus cher ? Gagne des pièces pour tes boosters du défi.",
+    "hubDesc": "Devine laquelle de deux cartes vaut le plus cher pour gagner des pièces.",
+    "unavailable": "Le mini-jeu arrive bientôt.",
+    "loadError": "Impossible de charger le mini-jeu. Réessaie dans un instant.",
+    "paidLeft": "Parties récompensées",
+    "todayCoins": "Gagné aujourd'hui",
+    "best": "Meilleure série",
+    "bestShort": "record : {count}",
+    "streak": "Série : {count}",
+    "paidRun": "Partie récompensée",
+    "freeRun": "Pour le record",
+    "question": "Laquelle vaut le plus cher ?",
+    "timeLeft": "Temps restant",
+    "nextReward": "Prochaine bonne réponse :",
+    "keys": "Touche une carte (ou utilise les flèches ← →).",
+    "right": "Bien vu !",
+    "wrong": "Raté !",
+    "late": "Temps écoulé !",
+    "overTitle": "Partie terminée",
+    "overLate": "Trop lent !",
+    "overStreak": "{count} bonne réponse | {count} bonnes réponses",
+    "overCoins": "Pièces gagnées :",
+    "record": "Nouveau record !",
+    "play": "Jouer",
+    "resume": "Reprendre la partie",
+    "playAgain": "Rejouer",
+    "nextPaid": "{count} partie récompensée restante aujourd'hui | {count} parties récompensées restantes aujourd'hui",
+    "nextFree": "Plus de pièces aujourd'hui : joue pour le record.",
+    "rulesTitle": "Règles",
+    "rules": {
+      "pick": "Deux cartes s'affichent : touche celle qui vaut le plus cher (prix Cardmarket). Tu as {seconds} secondes.",
+      "run": "Une partie continue jusqu'à ta première erreur (ou jusqu'à la fin du temps).",
+      "paid": "{runs} parties récompensées par jour : {coins} pièces par bonne réponse, pour les {answers} premières de la partie ({max} pièces max par partie).",
+      "free": "Ensuite, joue autant que tu veux pour le record, sans pièces. Les parties récompensées reviennent à minuit UTC.",
+      "harder": "Plus la série est longue, plus les prix sont proches."
+    }
   },
   "achievements": {
     "ui": {

@@ -22,7 +22,11 @@ Supabase (Postgres + Auth + Realtime).
   with coins. Start with 1,000 coins, pay 100 per booster, earn more with a
   daily reward that grows over a 7-day streak, three daily missions and
   four **weekly missions** (reset Monday 00:00 UTC, bigger rewards),
-  recycle duplicates into coins and craft the cards you're missing. Packs
+  recycle duplicates into coins and craft the cards you're missing. Earn
+  coins with the **"Higher or lower" mini-game** (`/challenge/minigame`):
+  two cards, tap the pricier one within 15 seconds; 3 paid runs a day at
+  5 coins per right answer (100 per run at most), then unlimited runs for
+  the record. Packs
   keep the real pull rates (no pity timer), except that 1 booster in 500 is
   a "god pack" (holos and better only). **Trade cards** with other
   trainers (up to 5 for 5, or as a gift; public profiles show their
@@ -184,6 +188,10 @@ its **SQL editor** and run, in order:
 12. `supabase/migrations/0012_trade_preferences.sql` — "Accept trade
    offers" switch and cards kept out of trades, enforced by the server. Run
    it after 0011; until then everyone accepts trades.
+13. `supabase/migrations/0013_minigame_higher_lower.sql` — the "Higher or
+   lower" mini-game (server-drawn pairs, answers checked and paid by the
+   server, 3 paid runs a day). Run it after 0012; until then the challenge
+   hub simply doesn't show the mini-game.
 
 Then in **Authentication**:
 

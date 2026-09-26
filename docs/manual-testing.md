@@ -76,6 +76,20 @@ address** for the sign-up part.
 - [ ] Community → "Challenge: cards" / "Challenge: value" boards list
       public players with a challenge collection.
 
+## Mini-game (after migration 0013)
+
+- [ ] Challenge hub → "Higher or lower" tile says "3 paid runs left
+      today" → Play: two real cards with pictures, no price shown.
+- [ ] Tap one → both prices show (green = pricier), "+5" and the header's
+      coins go up on a right answer; a new pair comes by itself.
+- [ ] A wrong answer (or letting the timer run out) ends the run with the
+      coins won; "Play again" says how many paid runs are left.
+- [ ] After 3 paid runs: "For the record" runs, no coins.
+- [ ] Leave mid-question and come back within a few seconds → the same
+      pair is still there (no escape from a hard pair by reloading).
+- [ ] On a phone: question, both cards, prices and "Right!" fit above the
+      tab bar.
+
 ## Trades (after migration 0007, two accounts A and B)
 
 - [ ] On B's public profile, A taps "Propose a trade" → the trades page

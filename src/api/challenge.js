@@ -20,6 +20,10 @@ export const CHALLENGE_ERRORS = [
   // trade preferences (migration 0012)
   'trades_closed',
   'card_not_for_trade',
+  // mini-game (migration 0013)
+  'no_game',
+  'slow_down',
+  'minigame_unavailable',
 ]
 
 async function call(name, args) {
@@ -105,3 +109,21 @@ export async function unlockCard(cardId) {
   const { error } = await supabase.from('trade_locks').delete().eq('card_id', cardId)
   if (error) throw error
 }
+
+// ---------- "Higher or lower" mini-game (migration 0013) ----------
+
+/**
+ * Rules, paid runs left today, best streak and the run in progress (its two
+ * cards come without their prices).
+ */
+export const fetchMinigameState = () => call('minigame_state')
+
+/** Starts a run (abandoning the one in progress); returns the state. */
+export const startMinigame = () => call('minigame_start')
+
+/**
+ * @param {'left' | 'right' | null} pick - null = time's up
+ * @returns {Promise<{ correct: boolean, late: boolean, earned: number, streak: number, run_coins: number,
+ *   left: { id: string, value: number }, right: { id: string, value: number }, state: object }>}
+ */
+export const answerMinigame = (pick) => call('minigame_answer', { p_pick: pick })
