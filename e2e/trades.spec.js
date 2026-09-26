@@ -153,6 +153,8 @@ test('cards kept out of trades can be neither asked for nor offered', async ({ p
   await page.getByRole('button', { name: 'Keep out of trades' }).click()
   await expect(page.getByRole('button', { name: 'Not for trade' })).toHaveAttribute('aria-pressed', 'true')
   expect(backend.state.locks).toEqual(['sv3pt5-4'])
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.coll-card', { hasText: 'Charmander' }).locator('.coll-lock')).toBeVisible()
 
   await page.goto('/challenge/trades?to=Misty')
   await expect(page.getByText('1 card kept out of trades')).toBeVisible()

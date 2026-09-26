@@ -139,3 +139,21 @@ test('no page scrolls sideways', async ({ page }, info) => {
     expect(scroll, path).toBeLessThanOrEqual(width)
   }
 })
+
+// Silent breakage (a thrown error in a computed, a failed request nobody
+// shows...) never makes a page fail visibly: catch it here
+test('no page logs an error', async ({ page }) => {
+  const problems = []
+  page.on('pageerror', (err) => problems.push(`${page.url()} threw: ${err.message}`))
+  page.on('console', (msg) => {
+    // Realtime can't connect to the fake host: expected in e2e
+    if (msg.type() === 'error' && !/websocket|realtime/i.test(msg.text())) problems.push(`${page.url()}: ${msg.text()}`)
+  })
+  await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4', 3)] })
+  const pages = ['/game', '/boosters', '/collection', '/collection?view=sets', '/collection?view=pokedex', '/collection?view=wishlist', '/collection/set/sv3pt5', '/history', '/profile', '/achievements', '/community', '/u/misty', '/u/misty/achievements', '/nope', ...CHALLENGE_PAGES]
+  for (const path of pages) {
+    await page.goto(path)
+    await page.waitForLoadState('networkidle')
+  }
+  expect(problems).toEqual([])
+})

@@ -6,6 +6,7 @@ import { modeRoutes } from '@/router/modes'
 import { useChallengeStore } from '@/stores/challenge'
 import { useCollectionStore, useModeCollectionStore } from '@/stores/collection'
 import { useSetsStore } from '@/stores/sets'
+import { useTradesStore } from '@/stores/trades'
 import { RARITY_FILTERS, SORTS, collectionStats, filterEntries, setProgress, sortEntries } from '@/utils/collection'
 import { completionPercent } from '@/utils/progress'
 import { rarityLabelKey, rarityTier } from '@/utils/rarity'
@@ -40,12 +41,16 @@ const challenge = useChallengeStore()
 // In the challenge, the empty state reminds that the unlimited cards are safe
 const unlimitedStore = useCollectionStore()
 
+// Challenge cards kept out of trades get a lock in the grid (migration 0012)
+const trades = useTradesStore()
+
 onMounted(() => {
   collectionStore.load()
   setsStore.load()
   if (isChallenge) {
     challenge.load()
     unlimitedStore.load()
+    trades.loadLocks()
   } else {
     wishlist.load()
   }
@@ -396,6 +401,10 @@ function rarityChip(card) {
                   <HoloCard :src="entry.cards.image_small || entry.cards.image_url" alt="" :max-tilt="10" />
                   <span v-if="entry.quantity > 1" class="coll-qty">
                     {{ t('collection.quantity', { quantity: entry.quantity }) }}
+                  </span>
+                  <span v-if="isChallenge && trades.isLocked(entry.card_id)" class="coll-lock" :title="t('trades.notForTrade')">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z" /></svg>
+                    <span class="visually-hidden">{{ t('trades.notForTrade') }}</span>
                   </span>
                 </span>
                 <span class="coll-card-name">{{ entry.cards.name }}</span>
@@ -827,6 +836,30 @@ function rarityChip(card) {
   color: #fff;
   font-size: 0.75rem;
   font-weight: 800;
+}
+
+.coll-lock {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(10, 13, 26, 0.85);
+  color: #fff;
+}
+
+.coll-lock svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .coll-card-name {

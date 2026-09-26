@@ -119,6 +119,7 @@ src/
 public/           manifest, icons, service worker (sw.js)
 e2e/              Playwright tests + a mocked Supabase backend
 supabase/migrations/   SQL to run in the Supabase SQL editor (schema, RLS, RPCs)
+supabase/tests/        migration tests in PGlite (npm run test:db)
 scripts/populate.mjs   admin script importing sets, cards and prices from pokemontcg.io
 .github/workflows/     CI (tests on every push) and the weekly card-data sync
 ```
@@ -239,6 +240,7 @@ npm run dev
 
 ```bash
 npm test          # unit tests (Vitest) on the pure logic in src/utils
+npm run test:db   # the SQL migrations in an in-memory Postgres (PGlite): RLS, grants, RPCs
 npm run test:e2e  # end-to-end tests (Playwright), desktop + mobile
 ```
 
@@ -246,8 +248,10 @@ The e2e tests build the app against a fake Supabase host and mock the whole
 backend (`e2e/support/supabase.js`), so they need no account, secret or
 network. Playwright's browser: `npx playwright install chromium` once — or,
 if that download is blocked, `PW_CHANNEL=chrome npm run test:e2e` uses your
-installed Google Chrome. CI (`.github/workflows/ci.yml`) runs unit tests,
-the build and the e2e tests on every push.
+installed Google Chrome. `test:db` needs nothing either: PGlite runs
+Postgres in-process, with Supabase's auth and roles stubbed
+(`supabase/tests/harness.mjs`). CI (`.github/workflows/ci.yml`) runs unit
+tests, database tests, the build and the e2e tests on every push.
 
 Before a release, go through the [manual test checklist](./docs/manual-testing.md)
 with a real account.
@@ -269,6 +273,7 @@ with a real account.
 | `npm run build`          | Production build                                                |
 | `npm run preview`        | Preview the production build locally                            |
 | `npm test`               | Unit tests (Vitest)                                             |
+| `npm run test:db`        | Migration tests in PGlite (optional filter: `npm run test:db 0012`) |
 | `npm run test:e2e`       | End-to-end tests (Playwright, mocked Supabase)                  |
 | `npm run populate:sets`  | Import the `sets` table from pokemontcg.io                      |
 | `npm run populate:cards` | Import the `cards` table (+ today's price snapshot)             |

@@ -37,6 +37,7 @@ src/
 public/sw.js, manifest      PWA service worker + manifest + icons
 e2e/                        Playwright tests; e2e/support/supabase.js mocks the whole backend
 supabase/migrations/        SQL run manually in the Supabase SQL editor (no CLI/MCP access to the DB)
+supabase/tests/             PGlite suites for the migrations (npm run test:db)
 scripts/populate.mjs        admin-only Node script: sets/cards/prices from pokemontcg.io — never bundled to the client
 .github/workflows/          ci.yml (unit + build + e2e) and sync-cards.yml (weekly populate:sync)
 docs/manual-testing.md      checklist for a real-account click-through
@@ -89,7 +90,9 @@ docs/manual-testing.md      checklist for a real-account click-through
    with `set local lock_timeout = '15s';` and put a `set local
    application_name = 'migration 000N: step i/n ...';` before each section,
    so the user can follow them live (query in `docs/manual-testing.md` >
-   "Watching a migration run").
+   "Watching a migration run"). Every new migration comes with a
+   `supabase/tests/000N_*.test.mjs` suite (`npm run test:db`, PGlite: RLS,
+   grants, RPCs, runs twice) that passes before it's handed over.
 8. **Keep `README.md` current.** Update it in the same change whenever setup
    steps, npm scripts, or the feature list change — it's the user-facing
    counterpart to this file.
@@ -226,6 +229,21 @@ docs/manual-testing.md      checklist for a real-account click-through
   so both modes never share a view instance. The wishlist, showcase, public
   collection and leaderboards stay unlimited-only; the pull feed has both
   (`pull_feed.mode`). Coins render with `CoinAmount.vue` (`--pb-coin`).
+  **Weekly missions** (0011): ISO week in UTC (Monday 00:00), ids
+  `week_*`, claimed through the same `claim_mission` with the ledger row
+  dated on the Monday (so the existing unique index = once a week);
+  `challenge_state()` returns `weekly` + `week_start`; the client only
+  mirrors the reset time (`msUntilWeeklyReset`).
+  **Trades**: `trade_offers` is in `supabase_realtime` (0011) and
+  `App.vue` runs `useTradesStore().live(userId)` while signed in (badge,
+  list, challenge collection after a swap). Preferences (0012):
+  `profiles.accepts_trades` (off -> `trades_closed`, waiting offers stay
+  answerable) and `trade_locks` (personal, client-written like the
+  wishlist): a locked card can't be asked for or offered
+  (`card_not_for_trade`), and an accept fails if the sender locked an
+  offered card since; `challenge_collection_of` returns `tradable`.
+  Public profiles list the challenge collection with "Ask for it" ->
+  `/challenge/trades?to=<name>&want=<card id>`.
 - **Never let a player lose track of the mode** (user priority): every
   challenge page shows AppHeader's `.mode-strip` ("Challenge mode", coins,
   "Leave" → `/game`, phones included); Community and profiles
@@ -244,7 +262,7 @@ docs/manual-testing.md      checklist for a real-account click-through
   a background `load({ force: true })`). Resetting it once hid the whole
   challenge hub — and unmounted the component that was supposed to
   trigger the reload (Vue drops `emit` from unmounted components).
-- **Achievements** (`src/utils/achievements.js`): ~185 definitions in 14
+- **Achievements** (`src/utils/achievements.js`): ~240 definitions in 16
   categories, **per game mode** (user decision: separate, the challenge
   put first — it's the one that counts). Computed client side from that
   mode's collection + sets in one pass (`collectorStats`), plus the
@@ -284,7 +302,7 @@ docs/manual-testing.md      checklist for a real-account click-through
   and reads `achievement_rates(mode)`; `src/api/achievements.js` falls
   back to the 0008 signatures and hides what a missing migration can't
   give. Deliberate, documented exception to rule 9:
-  the ids are client-claimed (the server can't recheck ~185 JS
+  the ids are client-claimed (the server can't recheck ~240 JS
   definitions), acceptable because it only nudges an anonymous
   percentage that nothing ranks or rewards on.
 - **Sounds/haptics**: `src/lib/sfx.js` synthesizes everything with Web Audio
@@ -299,146 +317,56 @@ docs/manual-testing.md      checklist for a real-account click-through
   `validate_palette.js --ordinal` in both themes); single series use
   `--pb-series`, gridlines `--pb-grid`. See `PriceChart.vue`.
 
-## Current state (updated 2026-09-25)
+## Current state (updated 2026-09-26)
 
-- Every view is redesigned in the "Holo Collector" design system: landing
-  (auth incl. forgot password), hub (with a live-pull teaser), boosters
-  (per-set generated packs, tear/flip/swipe, hit charge-up, sounds,
-  vibration, "open all at once", share best pull), collection (Cards /
-  Sets / Pokédex / Wishlist tabs, URL-synced filters, card detail with
-  price chart, wishlist toggle and share), set binder
-  (`/collection/set/:setId`), booster history (`/history`), community
-  (`/community`: live feed + leaderboards), profile + public profiles
-  (`/u/:username`), `/reset-password`, 404. PWA installable.
-- **Challenge mode** built 2026-09-25: migration
-  `0005_challenge_mode.sql` **applied 2026-09-25** (after 0004);
-  verified with PGlite (65 checks: RLS, grants, start bonus, daily streak,
-  missions, pity, god pack, recycle, craft, rate limit, feed, wishlist).
-  **The pity timer was then removed (user decision: nothing costs real
-  money, keep real-life pull rates; god packs stay)**:
-  `0006_challenge_no_pity.sql` **applied 2026-09-25** — verified with
-  PGlite on a 0005 database (28 checks: columns dropped, god pack kept and
-  still drawn, 17-18% hit rate over 1,000 packs, 27+ pack dry streaks
-  possible). Never reintroduce a pity timer or anything that bends the
-  rates in either mode.
-- **Challenge trades, history, leaderboards, badge** built 2026-09-25:
-  `0007_challenge_trades.sql` **applied 2026-09-25** (after 0006). Trades: `trade_offers` (read-only for clients), 1-5 of your cards
-  for 0-5 of theirs (0 = gift), public profiles only, 10 pending max,
-  7-day expiry, accept swaps atomically under both wallet locks (ordered)
-  or ends 'failed'. RPCs `propose_trade`, `respond_trade`, `cancel_trade`,
-  `my_trades`, `challenge_collection_of`; `challenge_badge()` (rewards +
-  incoming offers, never creates a wallet) drives the nav badges
-  (`useChallengeStore().loadBadge`, 60s throttle); `leaderboard()` gains
-  `challenge_unique` / `challenge_value`. Client: `/challenge/trades`
-  (TradesView, `?to=<username>` prefill, "Propose a trade" on public
-  profiles), `/challenge/history` (HistoryView `mode` prop, god packs
-  flagged). Verified with PGlite (49 checks). The desktop nav now starts
-  at 992px (6 links in the challenge); the tab bar covers phones and
-  tablets.
-- **Subsets + pack stats + lite animations** built 2026-09-25:
-  `0010_subsets_and_pack_stats.sql` **written but NOT applied** (run after
-  0009). Verified with PGlite on 0001-0010 (35 checks: links TG/Classic
-  only, not real sets or empty ones, idempotent, 3000 packs: subset ~25% and
-  only in slot 8, slot 10 odds unchanged, no repeats, subset id opens the
-  parent, any set never a subset, stats incl. streak/best day/top set,
-  challenge trades/gifts/coins/missions/crafts/recycling/daily streak,
-  private profile null, anon reads public stats, link_subsets service-role
-  only). History page shows the exact pack count (unlimited: cards / 10,
-  exact since packs are always 10 cards and that collection never
-  shrinks; challenge: server count). ~55 new achievements (luck, economy,
-  subsets, streaks). `npm test`: 112, e2e: 111 (2026-09-26: responsive
-  pass, collapsible achievement categories, history "With a hit" filter
-  (`fetchOpenings({ hitsOnly })`, server side), back-to-top button).
-- **Weekly missions, live trades, public challenge collection** built
-  2026-09-26: `0011_weekly_missions_live_trades.sql` **written but NOT
-  applied** (run after 0010). Weekly = ISO week in UTC (Monday 00:00):
-  4 missions (25 packs +400, 2 ultra+ +400, recycle 50 +250, daily reward
-  5 days +300), claimed through the same `claim_mission` (ledger row dated
-  on the Monday: the existing unique index = once a week);
-  `challenge_state()` gains `weekly` + `week_start`, `challenge_badge()`
-  counts them. `trade_offers` joins `supabase_realtime`: `App.vue` runs
-  `useTradesStore().live(userId)` while signed in (badge + list + challenge
-  collection on an accepted swap). Public profiles show the challenge
-  collection (`challenge_collection_of`, already in 0007) with "Ask for
-  it" -> `/challenge/trades?to=<name>&want=<card id>` (prefilled).
-  Verified with PGlite (23 checks: Monday start, progress this week only,
-  last week / unlimited excluded, claim once a week, refusals, badge,
-  daily missions untouched, publication, 0010 stats). Realtime itself
-  can't run in e2e (no websocket mock): check it with two accounts.
-  `npm test`: 113, e2e: 115.
-- **Trade preferences** built 2026-09-26: `0012_trade_preferences.sql`
-  **written but NOT applied** (run after 0011). `profiles.accepts_trades`
-  (owner-editable, column grant; off -> `propose_trade` raises
-  `trades_closed`, waiting offers stay answerable) and `trade_locks`
-  (personal, client writes like the wishlist, `user_id` defaults to
-  `auth.uid()`): a locked card can't be asked for or offered
-  (`card_not_for_trade`), and accepting fails if the sender locked an
-  offered card since; the receiver's own locks don't block what they
-  accept. `challenge_collection_of` gains `tradable` (dropped + recreated).
-  UI: lock/unlock in CardDetail (challenge, owned), "Accept trade offers"
-  switch + locked list on /challenge/trades, locked cards disabled in
-  both pickers, public profiles say "X doesn't accept trades" / "Not for
-  trade". `src/api/profiles.js` falls back to the pre-0012 columns. Verified
-  with PGlite (22 checks). `.pb-switch` moved to global.css. e2e: 121.
-- **2026-09-26: 0010 is applied but 0009 is NOT** (checked through the REST
-  API: `achievement_unlocks.mode` missing, `achievement_rates(p_mode)`
-  unknown) — so `player_achievements` fails on every call ("WITHIN GROUP
-  is required for ordered-set aggregate mode": `a.mode` without the column
-  parses as the `mode()` aggregate) and all pack-based achievements read 0.
-  Fix = run 0009, then 0010 again. 0010 now refuses to run without 0009.
-- **Supabase**: **migrations 0001-0008 are applied**, 0009 and 0010 are not yet (0007 + 0008
-  checked 2026-09-25 through the REST API: tables and RPCs answer).
-  Migrations 0001-0003 applied (0003 on 2026-09-24, then
-  `populate:sets` re-run: 176 sets with logo/symbol URLs). `cards` has
-  20,670 rows. **Migration 0004 (`0004_collector_social.sql`) applied
-  2026-09-25** (checked through the REST API with the service role key:
-  tables and RPCs answer) — the current client depends on it (it calls
-  `open_my_booster`, reads `profiles`, `wishlist`, `booster_openings`,
-  `pull_feed`, `card_price_history`, filters `collections.mode`). 0004 was verified locally with PGlite
-  (35 checks as the anon/authenticated roles: RLS, column grants, unique
-  usernames, owned-only showcase, rate limit, backfill of existing users,
-  private profiles hidden everywhere, idempotent).
-- **Achievement rates** built 2026-09-25: `0008_achievement_rates.sql`
-  **applied 2026-09-25** (after 0007). Verified with PGlite
-  (15 checks: no client access to `achievement_unlocks`, anon can't
-  record, malformed/duplicate ids skipped, 500 ids max, only players with
-  unlimited cards count, anon reads rates, cascade on user delete, runs
-  twice). The client works without it (no percentages).
-- **Achievements per mode** built 2026-09-25:
-  `0009_achievements_by_mode.sql` **written but NOT applied** (run after
-  0008). Verified with PGlite on a 0008 database with data (20 checks:
-  old rows become unlimited, key widened, old signatures dropped, a 0008
-  client still records unlimited, per-mode rates/players, invalid mode
-  refused, `player_achievements` own / public / private / unknown, packs
-  from `booster_openings`, runs twice).
-- `npm test`: 103 unit tests. `npm run test:e2e`: 98 tests (49 x desktop +
-  mobile). `npm run build` passes, 0 npm audit
-  vulnerabilities. Screens were also reviewed in headless Chrome with
-  realistic mocks (both themes, phone width) — not yet on a real phone.
-- `.env` is not on this machine (screens were tested with mocks);
+- **Live**: deployed on Vercel (`VITE_*` env vars set there; `vercel.json`
+  has the SPA rewrite and serves `sw.js` uncached), used by the user on a
+  real account ("tout fonctionne", 2026-09-26). **Migrations 0001-0012 are
+  all applied** (checked 2026-09-26 through the REST API with the service
+  role key). `cards` has 20,670 rows, `sets` 176 (9 subsets linked to
+  their parent).
+- Features: landing (auth, forgot password), hub, boosters (per-set packs,
+  real pull rates, subsets inside their parent's packs, tear/flip/swipe,
+  lite animations on touch screens, sounds, vibration, open all, share,
+  last set + count remembered), collection (Cards / Sets / Pokédex /
+  Wishlist, URL filters, card detail with price chart), set binders,
+  history (exact totals, "With a hit" filter), community (live feed +
+  leaderboards), profiles + public profiles (incl. the challenge
+  collection with "Ask for it"), ~240 achievements per mode (collapsible
+  categories, rates, unlock toasts), challenge mode (coins, daily reward,
+  daily + weekly missions, recycle, craft, god packs, trades with live
+  updates, opt-out and cards kept out of trades), PWA, EN/FR, both themes.
+- What each migration does (details in each file's header comment):
+  0001 schema · 0002 first RPCs (unused) · 0003 realistic packs + rarity
+  buckets + set art URLs · 0004 server-side packs, profiles, history, feed,
+  wishlist, prices, leaderboards · 0005 challenge mode · 0006 no pity
+  timer · 0007 trades, challenge boards, badge · 0008 achievement rates ·
+  0009 achievements per mode · 0010 subsets + pack stats · 0011 weekly
+  missions + realtime trades · 0012 trade preferences. Every one was
+  verified locally with PGlite before being handed over; 0010-0012 have
+  their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
+  the earlier checks lived in scratch scripts and are gone.
+- Tests: `npm test` 113 unit tests, `npm run test:db` 71 database
+  checks, `npm run test:e2e` 123 (desktop + Pixel 7, incl. "no page
+  scrolls sideways" and "no page logs an error"), `npm run build` passes,
+  0 npm audit vulnerabilities.
+- Not verified automatically: Realtime (feed and trades — no websocket
+  mock in e2e) and anything needing two real accounts; the user checks
+  those by hand.
+- `.env` is not on this machine (screens are tested with mocks);
   `scripts/.env.local` is (service role + the old pokemontcg.io key).
-- Deployed to Vercel for manual testing (`VITE_*` env vars set there;
-  `vercel.json` has the SPA rewrite and serves `sw.js` uncached).
 - Legacy static files of the original prototype were deleted — recoverable
   from git history if ever needed.
 
 ## TODO
 
-- **Apply `0011_weekly_missions_live_trades.sql` then
-  `0012_trade_preferences.sql`** (user; 0009 + 0010 were run 2026-09-26),
-  then **deploy**. Without 0012 everyone accepts trades and nothing is
-  locked (the client falls back silently). Without it the weekly block just
-  doesn't show and trades update on reload only.
-- Post-migration dashboard steps (user): Supabase Auth > URL Configuration
-  redirect URLs (`<site>/game`, `<site>/reset-password`); check that
-  `pull_feed` is in the `supabase_realtime` publication; the three GitHub
-  secrets for `sync-cards.yml`.
-- Go through `docs/manual-testing.md` with real accounts (never done so
-  far — real sign-ups need the confirmation email, which is ON; trades
-  need two accounts).
+- Dashboard steps never confirmed (user): Supabase Auth > URL
+  Configuration redirect URLs (`<site>/game`, `<site>/reset-password`);
+  the three GitHub secrets for `sync-cards.yml` (weekly card/price sync).
 - Parked (user, 2026-09-26: "on s'en fiche pour l'instant"): counter-offers,
-  real subset pull rates. Not wanted: push notifications (it's a website,
-  not really an app). Not urgent: rotating the pokemontcg.io key.
+  real subset pull rates (Classic Collection guessed at 1 pack in 3). Not
+  wanted: push notifications (it's a website, not really an app). Not
+  urgent: rotating the pokemontcg.io key.
 
 ## Known gaps
 
@@ -458,10 +386,13 @@ docs/manual-testing.md      checklist for a real-account click-through
 - The network intercepts HTTPS: Node scripts need `NODE_USE_SYSTEM_CA=1`
   (never `NODE_TLS_REJECT_UNAUTHORIZED=0`), and Playwright can't download
   browsers (use `PW_CHANNEL=chrome`).
-- PGlite (`@electric-sql/pglite`, installed in a scratch dir, not the
-  repo) is how migrations get checked locally: stub `auth.users`,
-  `auth.uid()` from `request.jwt.claim.sub`, and the anon/authenticated
-  roles, then run 0001..000N.
+- Migrations are checked locally with PGlite (`@electric-sql/pglite`,
+  dev dependency): `supabase/tests/harness.mjs` stubs `auth.users`,
+  `auth.uid()` (from `request.jwt.claim.sub`), the anon / authenticated /
+  service_role roles and the realtime publication, then `freshDb('000N')`
+  runs 0001..000N (the last one twice); `helpers(db).as(userId)` switches
+  roles. Querying as a player applies RLS — read other players' rows with
+  `asAdmin()`.
 - To check what's applied on the real project: REST calls with the
   service role key from `scripts/.env.local` (a missing table answers 404,
   an existing RPC called without a user answers `not_authenticated`).
