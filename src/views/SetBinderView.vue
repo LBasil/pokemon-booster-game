@@ -13,6 +13,7 @@ import { binderSlots, cardNumber } from '@/utils/collection'
 import { rarityTier } from '@/utils/rarity'
 import { packSetId, setLogoUrl } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
+import ScrollTopButton from '@/components/ScrollTopButton.vue'
 import CardDetail from '@/components/CardDetail.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
 import HoloCard from '@/components/HoloCard.vue'
@@ -160,6 +161,7 @@ const openEntry = computed(() => {
         </li>
       </ul>
     </main>
+    <ScrollTopButton />
 
     <CardDetail
       :entry="openEntry"

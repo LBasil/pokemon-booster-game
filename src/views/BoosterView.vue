@@ -81,7 +81,17 @@ async function preselectFromServer() {
     // keep "any set"
   }
 }
-const count = ref(1)
+// The number of packs is remembered with the set (same key family, per mode)
+const LAST_COUNT_KEY = `pb-last-count:${props.mode}`
+function readLastCount() {
+  try {
+    const saved = Number(localStorage.getItem(LAST_COUNT_KEY))
+    return COUNT_OPTIONS.includes(saved) ? saved : 1
+  } catch {
+    return 1
+  }
+}
+const count = ref(readLastCount())
 const setsLoading = computed(() => !setsStore.loaded && !setsStore.error)
 const loadError = computed(() => (setsStore.error ? t('boosters.loadError') : ''))
 
@@ -218,6 +228,11 @@ function openErrorFor(err) {
 async function startOpening() {
   if (!canAfford(count.value)) return
   saveLastSet(selectedSetId.value)
+  try {
+    localStorage.setItem(LAST_COUNT_KEY, String(count.value))
+  } catch {
+    // private mode
+  }
   totalToOpen.value = count.value
   openedSetId.value = selectedSetId.value
   boosterIndex.value = 0

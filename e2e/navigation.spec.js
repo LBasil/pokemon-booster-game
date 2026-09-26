@@ -126,3 +126,16 @@ test('after a challenge opening, another one can be started', async ({ page }) =
   await page.getByRole('button', { name: 'Change set' }).click()
   await expect(page.getByRole('button', { name: /Open 3 boosters/ })).toBeEnabled()
 })
+
+// Regression: the community leaderboard tabs once made the page 628px wide on phones
+test('no page scrolls sideways', async ({ page }, info) => {
+  test.skip(info.project.name !== 'mobile', 'phone layout')
+  await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4')] })
+  const pages = ['/game', '/boosters', '/collection', '/collection?view=sets', '/collection?view=pokedex', '/collection/set/sv3pt5', '/history', '/profile', '/achievements', '/community', '/u/misty', ...CHALLENGE_PAGES]
+  for (const path of pages) {
+    await page.goto(path)
+    await page.waitForLoadState('networkidle')
+    const [scroll, width] = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth])
+    expect(scroll, path).toBeLessThanOrEqual(width)
+  }
+})

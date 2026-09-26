@@ -853,6 +853,22 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   }
 }
 
+/* Narrow phones: the (decorative) packs would cover the balance */
+@media (max-width: 374.98px) {
+  .ch-wallet {
+    padding: 1.25rem;
+  }
+
+  .ch-wallet-art {
+    display: none;
+  }
+
+  .ch-wallet-text .ch-label,
+  .ch-coins {
+    max-width: none;
+  }
+}
+
 @media (min-width: 768px) {
   .ch-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

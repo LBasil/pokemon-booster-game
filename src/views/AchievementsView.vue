@@ -9,6 +9,7 @@ import { useModeAchievements } from '@/composables/useModeAchievements'
 import { CATEGORIES, STATUSES, filterAchievements } from '@/utils/achievements'
 import AchievementTile from '@/components/AchievementTile.vue'
 import AppHeader from '@/components/AppHeader.vue'
+import ScrollTopButton from '@/components/ScrollTopButton.vue'
 import BrandLogo from '@/components/BrandLogo.vue'
 
 // Every achievement of one game mode, by category, with search +
@@ -85,6 +86,39 @@ const groups = computed(() =>
     .map((summary) => ({ ...summary, items: results.value.filter((item) => item.category === summary.category) }))
     .filter((group) => group.items.length),
 )
+
+// ---------- Collapsible categories (remembered on this device) ----------
+
+const COLLAPSED_KEY = 'pb-achievements-collapsed'
+function readCollapsed() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(COLLAPSED_KEY)) ?? [])
+  } catch {
+    return new Set()
+  }
+}
+const collapsed = ref(readCollapsed())
+function saveCollapsed() {
+  try {
+    localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsed.value]))
+  } catch {
+    // private mode: kept for this visit only
+  }
+}
+// A search or a picked category opens what it found, so nothing is hidden
+const isOpen = (name) => Boolean(query.value) || category.value === name || !collapsed.value.has(name)
+function toggleGroup(name) {
+  const next = new Set(collapsed.value)
+  if (isOpen(name)) next.add(name)
+  else next.delete(name)
+  collapsed.value = next
+  saveCollapsed()
+}
+const allCollapsed = computed(() => groups.value.every((group) => !isOpen(group.category)))
+function toggleAll() {
+  collapsed.value = allCollapsed.value ? new Set() : new Set(progress.value.categories.map((summary) => summary.category))
+  saveCollapsed()
+}
 
 // Same filters in the other mode
 const filterQuery = computed(() => {
@@ -222,22 +256,38 @@ const back = computed(() => {
 
         <div class="ach-results-head">
           <p class="ach-results" role="status">{{ t('achievements.ui.results', { count: results.length }, results.length) }}</p>
-          <button v-if="isFiltered" type="button" class="btn btn-link ach-clear" @click="resetFilters">{{ t('achievements.ui.clear') }}</button>
+          <span class="ach-results-actions">
+            <button v-if="isFiltered" type="button" class="btn btn-link ach-clear" @click="resetFilters">{{ t('achievements.ui.clear') }}</button>
+            <button v-if="groups.length > 1 && !query" type="button" class="btn btn-link ach-clear" @click="toggleAll">
+              {{ allCollapsed ? t('achievements.ui.expandAll') : t('achievements.ui.collapseAll') }}
+            </button>
+          </span>
         </div>
 
         <p v-if="!results.length" class="ach-empty">{{ t('achievements.ui.empty') }}</p>
 
-        <section v-for="group in groups" :key="group.category" class="ach-group" :aria-labelledby="`ach-${group.category}`">
-          <div class="ach-group-head">
-            <h2 :id="`ach-${group.category}`" class="pb-section-title">{{ t(`achievements.categories.${group.category}`) }}</h2>
-            <span class="ach-group-count">{{ group.unlocked }} / {{ group.total }}</span>
-          </div>
-          <ul class="ach-grid" role="list">
+        <section v-for="group in groups" :key="group.category" class="ach-group" :class="{ closed: !isOpen(group.category) }" :aria-labelledby="`ach-${group.category}`">
+          <h2 :id="`ach-${group.category}`" class="ach-group-title">
+            <button
+              type="button"
+              class="ach-group-head"
+              :aria-expanded="isOpen(group.category)"
+              :aria-controls="`ach-list-${group.category}`"
+              @click="toggleGroup(group.category)"
+            >
+              <span class="pb-section-title">{{ t(`achievements.categories.${group.category}`) }}</span>
+              <span class="ach-group-count">{{ group.unlocked }} / {{ group.total }}</span>
+              <span class="ach-bar ach-group-bar" aria-hidden="true"><span :style="{ width: `${percent(group.unlocked, group.total)}%` }"></span></span>
+              <svg class="ach-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+          </h2>
+          <ul v-show="isOpen(group.category)" :id="`ach-list-${group.category}`" class="ach-grid" role="list">
             <AchievementTile v-for="item in group.items" :key="item.id" :item="item" :rate="rate(item)" />
           </ul>
         </section>
       </template>
     </main>
+    <ScrollTopButton />
   </div>
 </template>
 
@@ -540,17 +590,78 @@ const back = computed(() => {
 
 /* ---------- Groups ---------- */
 
+.ach-results-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.ach-group-title {
+  margin: 0 0 0.75rem;
+  font-size: inherit;
+}
+
+/* The whole header row toggles the category */
 .ach-group-head {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.35rem 0;
+  border: none;
+  background: none;
+  color: var(--pb-text);
+  text-align: left;
+}
+
+/* Same look as the other h2s (the text now sits in a button) */
+.ach-group-head .pb-section-title {
+  margin: 0;
+  font-family: var(--pb-font-display);
+  font-weight: 700;
 }
 
 .ach-group-count {
+  margin-left: auto;
   font-weight: 700;
   color: var(--pb-text-muted);
+  white-space: nowrap;
+}
+
+/* Progress at a glance, mostly useful once collapsed */
+.ach-group-bar {
+  flex: 0 0 72px;
+}
+
+.ach-chevron {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--pb-text-muted);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s;
+}
+
+.closed .ach-chevron {
+  transform: rotate(-90deg);
+}
+
+@media (hover: hover) {
+  .ach-group-head:hover .ach-chevron {
+    stroke: var(--pb-text);
+  }
+}
+
+.ach-group.closed .ach-group-title {
+  margin-bottom: 0;
+}
+
+@media (max-width: 374.98px) {
+  .ach-group-bar {
+    display: none;
+  }
 }
 
 .ach-grid {

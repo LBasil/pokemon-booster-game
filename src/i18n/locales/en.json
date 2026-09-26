@@ -10,7 +10,8 @@
     "switchToDark": "Switch to dark theme",
     "switchToLight": "Switch to light theme",
     "booster": "Booster",
-    "boosterCount": "{count} cards"
+    "boosterCount": "{count} cards",
+    "backToTop": "Back to top"
   },
   "nav": {
     "main": "Main navigation",
@@ -354,7 +355,11 @@
     "days": "{count} day | {count} days",
     "topSet": "Most opened set",
     "unloggedNote": "Details cover the {logged} boosters logged since {date}; {count} older booster was opened before logging started. | Details cover the {logged} boosters logged since {date}; {count} older boosters were opened before logging started.",
-    "since": "Since {date}. Days are counted in UTC, like the challenge."
+    "since": "Since {date}. Days are counted in UTC, like the challenge.",
+    "filterLabel": "Filter the boosters",
+    "filterAll": "All",
+    "filterHits": "With a hit",
+    "emptyHits": "No booster with an ultra rare or better yet. Keep opening!"
   },
   "community": {
     "eyebrow": "Live",
@@ -578,7 +583,9 @@
       "unlimitedHint": "Packs are free in Unlimited, so anyone gets there in time. For achievements that really show luck, see the Challenge.",
       "challengeUnlocked": "Challenge achievement unlocked",
       "hubTitle": "Challenge achievements",
-      "hubCta": "See the achievements"
+      "hubCta": "See the achievements",
+      "collapseAll": "Collapse all",
+      "expandAll": "Expand all"
     },
     "categories": {
       "packs": "Boosters",

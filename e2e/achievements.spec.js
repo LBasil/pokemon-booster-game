@@ -187,3 +187,25 @@ test('a public profile shows its challenge achievements too', async ({ page }) =
   await expect(page.locator('.achv.unlocked').filter({ hasText: 'Where it all began' })).toBeVisible()
   await expect(page.locator('.achv.unlocked').filter({ hasText: 'First pack' })).toBeVisible()
 })
+
+test('categories collapse, stay collapsed after a reload, and a search reopens them', async ({ page }) => {
+  await signIn(page)
+  await mockSupabase(page)
+  await page.goto('/achievements')
+  const toggle = page.getByRole('button', { name: /^Boosters/ }).and(page.locator('.ach-group-head'))
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  await expect(page.locator('#ach-list-packs')).toBeHidden()
+  await page.reload()
+  await expect(page.locator('#ach-list-packs')).toBeHidden()
+
+  await page.getByRole('searchbox', { name: 'Search an achievement' }).fill('booster')
+  await expect(page.locator('#ach-list-packs')).toBeVisible() // results are never hidden
+  await page.getByRole('searchbox', { name: 'Search an achievement' }).fill('')
+
+  await page.getByRole('button', { name: 'Collapse all' }).click()
+  await expect(page.locator('.ach-group:not(.closed)')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Expand all' }).click()
+  await expect(page.locator('.ach-group.closed')).toHaveCount(0)
+})

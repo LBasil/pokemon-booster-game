@@ -93,3 +93,15 @@ test('on a new device, the last pack logged by the server gives the preselection
   await page.goto('/boosters')
   await expect(page.locator('.preview-name')).toHaveText('Base')
 })
+
+test('the history can show only the boosters with a hit', async ({ page }) => {
+  const backend = await mockSupabase(page)
+  const opening = (id, hits) => ({ id, mode: 'unlimited', set_id: 'sv3pt5', card_ids: [], best_card_id: null, hits, secrets: 0, god_pack: false, opened_at: `2026-09-25T1${id}:00:00Z` })
+  backend.state.openings.push(opening(1, 0), opening(2, 1), opening(3, 0))
+  await page.goto('/history')
+  await expect(page.locator('.history-item')).toHaveCount(3)
+  await page.getByRole('button', { name: 'With a hit' }).click()
+  await expect(page.locator('.history-item')).toHaveCount(1)
+  await page.getByRole('button', { name: 'All', exact: true }).click()
+  await expect(page.locator('.history-item')).toHaveCount(3)
+})

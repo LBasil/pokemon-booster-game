@@ -12,6 +12,7 @@ import { packSummary } from '@/utils/profile'
 import { rarityLabelKey, rarityTier, sortForReveal } from '@/utils/rarity'
 import { setLogoUrl } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
+import ScrollTopButton from '@/components/ScrollTopButton.vue'
 
 // Past boosters, newest first, 20 at a time. Each row expands to show its
 // 10 cards (fetched once, then cached). Serves /history and
@@ -31,13 +32,18 @@ const loading = ref(false)
 const done = ref(false)
 const loadError = ref(false)
 const expanded = ref(new Set())
+// "With a hit" filter, applied by the server so paging stays right
+const hitsOnly = ref(false)
+let generation = 0
 
 async function loadMore() {
   if (loading.value || done.value) return
+  const current = generation
   loading.value = true
   loadError.value = false
   try {
-    const page = await fetchOpenings({ mode: props.mode, before: openings.value.at(-1)?.opened_at, limit: PAGE })
+    const page = await fetchOpenings({ mode: props.mode, before: openings.value.at(-1)?.opened_at, limit: PAGE, hitsOnly: hitsOnly.value })
+    if (current !== generation) return // the filter changed meanwhile
     openings.value.push(...page)
     if (page.length < PAGE) done.value = true
     // Best cards up front, so the collapsed rows can show them
@@ -48,6 +54,17 @@ async function loadMore() {
   } finally {
     loading.value = false
   }
+}
+
+function setHitsOnly(value) {
+  if (hitsOnly.value === value) return
+  hitsOnly.value = value
+  generation++
+  openings.value = []
+  expanded.value = new Set()
+  done.value = false
+  loading.value = false
+  loadMore()
 }
 
 async function addCards(ids) {
@@ -184,10 +201,23 @@ function chip(card) {
         </template>
       </section>
 
+      <div v-if="openings.length || hitsOnly" class="history-filter" role="group" :aria-label="t('history.filterLabel')">
+        <button type="button" class="history-chip" :class="{ active: !hitsOnly }" :aria-pressed="!hitsOnly" @click="setHitsOnly(false)">
+          {{ t('history.filterAll') }}
+        </button>
+        <button type="button" class="history-chip" :class="{ active: hitsOnly }" :aria-pressed="hitsOnly" @click="setHitsOnly(true)">
+          {{ t('history.filterHits') }}
+        </button>
+      </div>
+
       <div v-if="loadError && !openings.length" class="alert alert-danger" role="alert">{{ t('history.loadError') }}</div>
 
       <div v-else-if="!openings.length && loading" class="history-list">
         <div v-for="n in 5" :key="n" class="pb-skeleton" style="height: 76px"></div>
+      </div>
+
+      <div v-else-if="!openings.length && hitsOnly" class="history-empty">
+        <p>{{ t('history.emptyHits') }}</p>
       </div>
 
       <div v-else-if="!openings.length" class="history-empty">
@@ -233,6 +263,7 @@ function chip(card) {
         {{ t('history.more') }}
       </button>
     </main>
+    <ScrollTopButton />
   </div>
 </template>
 
@@ -260,6 +291,27 @@ function chip(card) {
   margin: 1rem 0 0.5rem;
   font-size: clamp(1.8rem, 5vw, 2.6rem);
   font-weight: 800;
+}
+
+.history-filter {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.history-chip {
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-surface);
+  color: var(--pb-text-muted);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.history-chip.active {
+  background: var(--pb-text);
+  border-color: var(--pb-text);
+  color: var(--pb-bg);
 }
 
 .totals-grid {

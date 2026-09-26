@@ -211,17 +211,26 @@ function scoreLabel(row) {
   }
 }
 
+/* minmax(0, 1fr): the leaderboard tabs (nowrap) must scroll, not widen the page */
 .community-layout {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem;
   align-items: start;
 }
 
 .panel {
+  min-width: 0;
   padding: 1.5rem;
   border-radius: var(--pb-radius-lg);
   border: 1px solid var(--pb-border);
   background: var(--pb-surface);
+}
+
+@media (max-width: 575.98px) {
+  .panel {
+    padding: 1rem;
+  }
 }
 
 .community-empty {

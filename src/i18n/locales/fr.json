@@ -10,7 +10,8 @@
     "switchToDark": "Passer au thème sombre",
     "switchToLight": "Passer au thème clair",
     "booster": "Booster",
-    "boosterCount": "{count} cartes"
+    "boosterCount": "{count} cartes",
+    "backToTop": "Remonter en haut"
   },
   "nav": {
     "main": "Navigation principale",
@@ -354,7 +355,11 @@
     "days": "{count} jour | {count} jours",
     "topSet": "Série la plus ouverte",
     "unloggedNote": "Le détail porte sur les {logged} boosters enregistrés depuis le {date} ; {count} booster plus ancien a été ouvert avant le début de l'enregistrement. | Le détail porte sur les {logged} boosters enregistrés depuis le {date} ; {count} boosters plus anciens ont été ouverts avant le début de l'enregistrement.",
-    "since": "Depuis le {date}. Les jours sont comptés en UTC, comme pour le défi."
+    "since": "Depuis le {date}. Les jours sont comptés en UTC, comme pour le défi.",
+    "filterLabel": "Filtrer les boosters",
+    "filterAll": "Tous",
+    "filterHits": "Avec un hit",
+    "emptyHits": "Aucun booster avec une ultra rare ou mieux pour l'instant. Continue d'ouvrir !"
   },
   "community": {
     "eyebrow": "En direct",
@@ -578,7 +583,9 @@
       "unlimitedHint": "En Illimité, les boosters sont gratuits : tout le monde y arrive avec le temps. Pour des succès qui montrent vraiment la chance, va voir le Défi.",
       "challengeUnlocked": "Succès Défi débloqué !",
       "hubTitle": "Succès du Défi",
-      "hubCta": "Voir les succès"
+      "hubCta": "Voir les succès",
+      "collapseAll": "Tout replier",
+      "expandAll": "Tout déplier"
     },
     "categories": {
       "packs": "Boosters",

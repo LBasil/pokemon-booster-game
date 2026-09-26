@@ -303,6 +303,28 @@ const isActive = (name, inTabBar = false) =>
   white-space: nowrap;
 }
 
+/* Narrow phones (320px): tighter so the three parts fit on one line */
+@media (max-width: 374.98px) {
+  .mode-strip {
+    gap: 0.5rem;
+    padding-left: 0.7rem;
+    font-size: 0.78rem;
+  }
+
+  .mode-strip-name {
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+  }
+
+  .mode-strip-name svg {
+    display: none;
+  }
+
+  .mode-strip-leave {
+    padding: 0.25rem 0.6rem;
+  }
+}
+
 .mode-strip-leave:hover {
   color: var(--pb-text);
   background: var(--pb-surface-hover);

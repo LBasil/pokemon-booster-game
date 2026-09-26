@@ -129,7 +129,8 @@ docs/manual-testing.md      checklist for a real-account click-through
   badges compare against the collection loaded on page mount. The picker
   preselects `?set=`, else the last set opened in that mode on this device
   (localStorage `pb-last-set:<mode>`, '' = any set), else the set of the
-  last pack `booster_openings` logged in that mode (new device).
+  last pack `booster_openings` logged in that mode (new device). The pack
+  count (1/3/5/10) is remembered too (`pb-last-count:<mode>`).
 - **Rarity**: 6 buckets (common, uncommon, rare, holo, ultra, secret)
   computed in SQL by `rarity_bucket()` (generated column
   `cards.rarity_bucket`) and mirrored in JS by `rarityBucket()` in
@@ -171,6 +172,15 @@ docs/manual-testing.md      checklist for a real-account click-through
   (`.route-sweep`, App.vue). All off under `prefers-reduced-motion` (so
   also in e2e, which forces it) or with Profile > Settings > Visual
   effects (`settings.effects` -> `html.pb-fx-off`).
+- **Responsive**: a single-column grid must say `grid-template-columns:
+  minmax(0, 1fr)` (and its items `min-width: 0`), or a nowrap/scrolling
+  child (tabs, chips) widens the page — it made /community 628px wide on
+  phones. `e2e/navigation.spec.js` > "no page scrolls sideways" checks every
+  page at phone width; add new pages there. Check 320px too (narrowest
+  supported): tab counts, the challenge wallet art and the mode strip
+  icon hide below 375px.
+- Long pages (collection, binder, achievements, history) mount
+  `ScrollTopButton.vue` after `</main>` (sits above the phone tab bar).
 - Don't name classes after Bootstrap components (`.badge`, `.card`,
   `.alert`...): Bootstrap's styles leak in (e.g. `.badge` centers text).
 - **Signed-in page shell**: wrap the view in `<div class="pb-page">` and put
@@ -259,7 +269,9 @@ docs/manual-testing.md      checklist for a real-account click-through
   `AchievementsView` (`/challenge/achievements` + `/achievements`, `mode`
   prop; `/u/:username/achievements?mode=`; Challenge | Unlimited switch
   keeping the filters; search + category/status filters synced to
-  `?cat=&status=&q=`).
+  `?cat=&status=&q=`). Categories collapse (header button, "Collapse /
+  Expand all"), remembered per device in `pb-achievements-collapsed`; a
+  search or a picked category always shows what it matches.
   **Unlock toasts** (`useAchievementsStore().check()`, `AchievementToasts`
   in App.vue): `check(mode)` compares with the ids already seen on this
   device (localStorage per account and mode; the first check is a silent
@@ -334,7 +346,9 @@ docs/manual-testing.md      checklist for a real-account click-through
   only). History page shows the exact pack count (unlimited: cards / 10,
   exact since packs are always 10 cards and that collection never
   shrinks; challenge: server count). ~55 new achievements (luck, economy,
-  subsets, streaks). `npm test`: 112, e2e: 106.
+  subsets, streaks). `npm test`: 112, e2e: 111 (2026-09-26: responsive
+  pass, collapsible achievement categories, history "With a hit" filter
+  (`fetchOpenings({ hitsOnly })`, server side), back-to-top button).
 - **2026-09-26: 0010 is applied but 0009 is NOT** (checked through the REST
   API: `achievement_unlocks.mode` missing, `achievement_rates(p_mode)`
   unknown) — so `player_achievements` fails on every call ("WITHIN GROUP

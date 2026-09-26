@@ -48,11 +48,13 @@ Supabase (Postgres + Auth + Realtime).
   first pull date, illustrator, **price history chart** (weekly Cardmarket
   snapshots), wishlist toggle for missing cards, and **sharing** a generated
   image of the card.
-- **Last set remembered**: the booster page preselects the set you opened
-  last, separately in each mode (on a new device: your last logged pack).
+- **Last set remembered**: the booster page preselects the set (and the
+  number of packs) you opened last, separately in each mode (on a new
+  device: your last logged pack).
 - **Booster history**: every pack you've opened, grouped by day, under
   your totals: the **exact number of boosters opened**, today, best day,
-  packs with a hit (and the rate), longest daily streak, most opened set.
+  packs with a hit (and the rate), longest daily streak, most opened set,
+  and an "All | With a hit" filter to find your big pulls.
 - **Subsets inside their parent's packs**: Trainer Gallery, Galarian
   Gallery, Shiny Vault and Classic Collection were never sold as boosters,
   so they aren't in the set list: their cards turn up in the parent set's
@@ -72,8 +74,8 @@ Supabase (Postgres + Auth + Realtime).
   recycling or trading. At `/challenge/achievements` and `/achievements`
   (and `/u/<username>/achievements?mode=…`), with an Unlimited | Challenge
   switch,
-  with search, category/status filters and progress bars per category and
-  overall. Computed from the collection, so new ones unlock retroactively.
+  with search, category/status filters, progress bars per category and
+  overall, and **collapsible categories** (remembered on the device). Computed from the collection, so new ones unlock retroactively.
   A Steam-style **"Achievement unlocked" pop-up** (with a chime) shows at the
   end of an opening — never mid-reveal, so nothing is spoiled — and each
   achievement shows the **share of players** who have it.

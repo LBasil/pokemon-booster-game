@@ -307,7 +307,8 @@ export async function mockSupabase(page, options = {}) {
     }
     if (table === 'booster_openings') {
       const mode = url.searchParams.get('mode')?.replace('eq.', '') ?? 'unlimited'
-      return json(state.openings.filter((o) => (o.mode ?? 'unlimited') === mode))
+      const hitsOnly = url.searchParams.get('hits') === 'gt.0'
+      return json(state.openings.filter((o) => (o.mode ?? 'unlimited') === mode && (!hitsOnly || o.hits > 0)))
     }
     if (table === 'card_price_history') {
       return json([

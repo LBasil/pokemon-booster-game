@@ -11,6 +11,7 @@ import { completionPercent } from '@/utils/progress'
 import { rarityLabelKey, rarityTier } from '@/utils/rarity'
 import { setLogoUrl } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
+import ScrollTopButton from '@/components/ScrollTopButton.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
 import CardDetail from '@/components/CardDetail.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
@@ -70,6 +71,11 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 const formatPercent = (value) => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1 }).format(value)
 const formatEuros = (value) =>
   new Intl.NumberFormat(locale.value, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value)
+// The stat tile is a third of a phone's width: €12.3K rather than €12,345
+const formatEurosShort = (value) =>
+  value >= 10000
+    ? new Intl.NumberFormat(locale.value, { style: 'currency', currency: 'EUR', notation: 'compact', maximumFractionDigits: 1 }).format(value)
+    : formatEuros(value)
 
 // ---------- Filters (mirrored in the URL so back/forward and links work) ----------
 
@@ -253,7 +259,7 @@ function rarityChip(card) {
           </div>
           <div class="coll-stat">
             <dt>{{ t('collection.statValue') }}</dt>
-            <dd>{{ formatEuros(stats.value) }}</dd>
+            <dd class="coll-stat-value" :title="formatEuros(stats.value)">{{ formatEurosShort(stats.value) }}</dd>
             <p class="coll-stat-note">{{ t('collection.valueNote') }}</p>
           </div>
         </dl>
@@ -433,6 +439,7 @@ function rarityChip(card) {
         </section>
       </template>
     </main>
+    <ScrollTopButton />
 
     <CardDetail
       :entry="openEntry"
@@ -506,23 +513,24 @@ function rarityChip(card) {
   font-weight: 800;
 }
 
+/* Phones: the pool progress full width, then the three counts in one
+   compact row, so the cards start on the first screen */
 .coll-stats {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
   margin: 0;
 }
 
 .coll-stat {
-  padding: 1rem 1.1rem;
+  min-width: 0;
+  padding: 0.7rem 0.8rem;
   border-radius: var(--pb-radius-md);
   border: 1px solid var(--pb-border);
   background: var(--pb-surface);
 }
 
-/* Phones: pool progress and value full width, the two counts side by side */
-.coll-stat-main,
-.coll-stat:last-child {
+.coll-stat-main {
   grid-column: 1 / -1;
 }
 
@@ -537,13 +545,38 @@ function rarityChip(card) {
 .coll-stat dd {
   margin: 0.3rem 0 0;
   font-family: var(--pb-font-display);
-  font-size: 1.5rem;
+  font-size: 1.15rem;
+  white-space: nowrap;
   font-weight: 800;
   line-height: 1.1;
 }
 
 .coll-stat-main dd {
-  font-size: 2rem;
+  font-size: 1.7rem;
+}
+
+@media (max-width: 767.98px) {
+  .coll-stat dt {
+    font-size: 0.65rem;
+  }
+
+  .coll-stat:not(.coll-stat-main) .coll-stat-note {
+    display: none;
+  }
+}
+
+@media (max-width: 374.98px) {
+  .coll-stat dd {
+    font-size: 1rem;
+  }
+
+  .coll-stat-main dd {
+    font-size: 1.5rem;
+  }
+
+  .coll-tabs .coll-tab-count {
+    display: none;
+  }
 }
 
 .coll-stat-total {
@@ -583,10 +616,10 @@ function rarityChip(card) {
 
 /* ---------- Tabs ---------- */
 
+/* Phones: the tabs share the full width, so none is cut off */
 .coll-tabs {
-  display: inline-flex;
-  align-self: flex-start;
-  max-width: 100%;
+  display: flex;
+  width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
   gap: 4px;
@@ -597,11 +630,15 @@ function rarityChip(card) {
 }
 
 .coll-tabs button {
-  flex-shrink: 0;
+  flex: 1 1 0;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 1rem;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.35rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
   border: none;
   border-radius: calc(var(--pb-radius-md) - 4px);
   background: none;
@@ -947,11 +984,37 @@ function rarityChip(card) {
 @media (min-width: 768px) {
   .coll-stats {
     grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
   }
 
-  .coll-stat-main,
-  .coll-stat:last-child {
+  .coll-stat {
+    padding: 1rem 1.1rem;
+  }
+
+  .coll-stat dd {
+    font-size: 1.5rem;
+  }
+
+  .coll-stat-main dd {
+    font-size: 2rem;
+  }
+
+  .coll-stat-main {
     grid-column: auto;
+  }
+
+  .coll-tabs {
+    display: inline-flex;
+    width: auto;
+    align-self: flex-start;
+    max-width: 100%;
+  }
+
+  .coll-tabs button {
+    flex: 0 0 auto;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
+    font-size: 1rem;
   }
 
   .coll-toolbar {
