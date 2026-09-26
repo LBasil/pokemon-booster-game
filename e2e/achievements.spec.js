@@ -209,3 +209,31 @@ test('categories collapse, stay collapsed after a reload, and a search reopens t
   await page.getByRole('button', { name: 'Expand all' }).click()
   await expect(page.locator('.ach-group.closed')).toHaveCount(0)
 })
+
+test('claiming a mission toasts the achievement it unlocks right away, not at the next reload', async ({ page }) => {
+  await signIn(page)
+  await mockSupabase(page, {
+    stats: { challenge: { missions: 4 } },
+    challenge: { progress: { open_packs: 0, pull_holo: 0, recycle: 0, week_open_packs: 25 } },
+  })
+  await page.goto('/challenge')
+  await expect(page.getByRole('heading', { name: 'This week' })).toBeVisible()
+  await page.waitForTimeout(500) // the silent first check (baseline)
+  await expect(page.locator('.ach-toast')).toHaveCount(0)
+  await page.locator('.ch-mission').filter({ hasText: 'Open 25 boosters' }).getByRole('button').click()
+  await expect(page.locator('.ach-toast').filter({ hasText: 'On a mission' })).toBeVisible()
+})
+
+test('an achievement another device already toasted is not toasted again', async ({ page }) => {
+  await signIn(page)
+  const backend = await mockSupabase(page)
+  await page.goto('/challenge/achievements?cat=pulls')
+  await expect(page.locator('.achv').filter({ hasText: 'Jackpot' })).toBeVisible()
+  await page.waitForTimeout(500) // this device's baseline
+  // Unlocked (and reported) on another device meanwhile
+  backend.state.recorded.challenge.add('secret1')
+  await page.reload()
+  await expect(page.locator('.achv.unlocked').filter({ hasText: 'Jackpot' })).toBeVisible()
+  await page.waitForTimeout(1000)
+  await expect(page.locator('.ach-toast')).toHaveCount(0)
+})

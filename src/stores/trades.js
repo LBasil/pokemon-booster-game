@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { cancelTrade, fetchTradeLocks, fetchTrades, lockCard, proposeTrade, respondTrade, subscribeToTrades, unlockCard } from '@/api/challenge'
+import { useAchievementsStore } from '@/stores/achievements'
 import { useChallengeStore } from '@/stores/challenge'
 import { useChallengeCollectionStore } from '@/stores/collection'
 import { groupTrades } from '@/utils/trades'
@@ -49,7 +50,10 @@ export const useTradesStore = defineStore('trades', {
     /** @returns {Promise<'accepted' | 'declined' | 'failed'>} */
     async respond(tradeId, accept) {
       const { status } = await respondTrade(tradeId, accept)
-      if (status === 'accepted') await useChallengeCollectionStore().load({ force: true })
+      if (status === 'accepted') {
+        await useChallengeCollectionStore().load({ force: true })
+        useAchievementsStore().check('challenge') // trades, new cards
+      }
       await this.refresh()
       return status
     },
@@ -63,7 +67,10 @@ export const useTradesStore = defineStore('trades', {
       return subscribeToTrades(userId, (row) => {
         useChallengeStore().loadBadge({ force: true })
         if (this.loaded) this.load({ force: true })
-        if (row?.status === 'accepted') useChallengeCollectionStore().invalidate()
+        if (row?.status === 'accepted') {
+          useChallengeCollectionStore().invalidate()
+          useAchievementsStore().check('challenge') // an offer of ours went through
+        }
       })
     },
 

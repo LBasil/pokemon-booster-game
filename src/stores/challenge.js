@@ -8,6 +8,7 @@ import {
   openChallengeBooster,
   recycleDuplicates,
 } from '@/api/challenge'
+import { useAchievementsStore } from '@/stores/achievements'
 import { useChallengeCollectionStore } from '@/stores/collection'
 import { affordablePacks } from '@/utils/challenge'
 
@@ -72,6 +73,7 @@ export const useChallengeStore = defineStore('challenge', {
       const next = await claimDailyReward()
       this.state = next
       this.loadBadge({ force: true })
+      useAchievementsStore().check('challenge') // daily streak, coins earned
       return next.reward
     },
 
@@ -80,6 +82,7 @@ export const useChallengeStore = defineStore('challenge', {
       const next = await claimMission(mission)
       this.state = next
       this.loadBadge({ force: true })
+      useAchievementsStore().check('challenge') // missions, coins earned
       return next.reward
     },
 
@@ -105,6 +108,7 @@ export const useChallengeStore = defineStore('challenge', {
         // The "recycle" mission moved: refresh in the background
         this.load({ force: true })
         await useChallengeCollectionStore().load({ force: true })
+        useAchievementsStore().check('challenge')
       }
       return result
     },
@@ -113,6 +117,7 @@ export const useChallengeStore = defineStore('challenge', {
       const result = await craftCard(card.id)
       if (this.state) this.state = { ...this.state, coins: result.coins }
       await useChallengeCollectionStore().load({ force: true })
+      useAchievementsStore().check('challenge')
       return result
     },
   },

@@ -194,6 +194,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  achievements.paused = false
   desktopQuery.removeEventListener('change', onMediaChange)
   clearTimeout(tearTimer)
 })
@@ -373,8 +374,10 @@ function backToSelect() {
   pulled.value = []
 }
 
-// Unlock toasts once every card is face up (never mid-reveal: no spoilers)
+// Unlock toasts once every card is face up (never mid-reveal: no spoilers,
+// even from checks elsewhere, e.g. a trade accepted live)
 watch(phase, (value) => {
+  achievements.paused = value === 'open'
   if (value === 'done') achievements.check(props.mode)
 })
 

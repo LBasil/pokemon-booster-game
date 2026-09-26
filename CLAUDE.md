@@ -295,7 +295,13 @@ docs/manual-testing.md      checklist for a real-account click-through
   device (localStorage per account and mode; the first check is a silent
   baseline) — called on BoosterView mount + at the summary in both modes
   (never mid-reveal: no spoilers), and wherever `useModeAchievements`
-  shows the player's own (profile, achievements page, challenge hub). Max 3 toasts, rarest
+  shows the player's own (profile, achievements page, challenge hub), and
+  right after any challenge action that can unlock one (daily reward,
+  missions, recycle, craft, trades incl. one accepted live) — otherwise
+  they surfaced at a random later reload. Ids the server already recorded
+  (`player_achievements().unlocked`) count as seen: another device toasted
+  them. `achievements.paused` (set by BoosterView while `phase === 'open'`)
+  drops checks mid-reveal; the summary's check catches up. Max 3 toasts, rarest
   first, the last one "+N more". **Rates** ("12% of players", migrations
   0008 + 0009, per mode): the client reports unlocked ids
   (`record_achievements(ids, mode)`, retried until the server confirms)
@@ -354,7 +360,7 @@ docs/manual-testing.md      checklist for a real-account click-through
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
 - Tests: `npm test` 115 unit tests, `npm run test:db` 71 database
-  checks, `npm run test:e2e` 125 (desktop + Pixel 7, incl. "no page
+  checks, `npm run test:e2e` 129 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities.
 - Not verified automatically: Realtime (feed and trades — no websocket

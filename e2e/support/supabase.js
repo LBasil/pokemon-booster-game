@@ -160,6 +160,8 @@ export async function mockSupabase(page, options = {}) {
       if (c.progress[m.mission] < m.target) return raise('mission_incomplete')
       c.claimed.push(m.mission)
       c.coins += m.reward
+      const stats = (state.stats.challenge ??= {})
+      stats.missions = (stats.missions ?? 0) + 1
       return json({ ...challengeState(), reward: m.reward })
     }
     if (path === '/rest/v1/rpc/open_challenge_booster') {

@@ -14,7 +14,8 @@ import { achievements, newlyUnlocked, sortForToasts, toastBatch } from '@/utils/
 // collection + the server's data (ids already unlocked, packs opened) and
 // toasts those unlocked since the last check on this device (ids kept in
 // localStorage per account and mode; the very first check is a silent
-// baseline). It also reports unlocks to the server for the rates; ids the
+// baseline; ids the server already recorded count as seen: another device
+// toasted them). It also reports unlocks to the server for the rates; ids the
 // server has confirmed are remembered too, so a failed report (offline,
 // migration missing) is retried on the next check.
 const MODES = ['unlimited', 'challenge']
@@ -56,6 +57,9 @@ export const useAchievementsStore = defineStore('achievements', {
     ratesAt: perMode(0),
     // The player's own server data per mode: { unlocked: [...], packs } or null
     server: perMode(null),
+    // Set while cards are being revealed: a check then would spoil the pulls
+    // (the pack is already saved); the summary's check catches up
+    paused: false,
   }),
   actions: {
     /** The player's own achievements in a mode (loads what's missing), or null. */
@@ -73,16 +77,18 @@ export const useAchievementsStore = defineStore('achievements', {
       // Both needed: an unloaded list would unlock (and toast) old achievements later
       if (!collection.loaded || !sets.loaded || auth.user?.id !== userId) return null
       this.server[mode] = server
-      return { userId, list: achievements(collection.entries, sets.sets, { mode, ...server }) }
+      return { userId, server, list: achievements(collection.entries, sets.sets, { mode, ...server }) }
     },
 
     async check(mode = 'unlimited') {
+      if (this.paused) return
       const own = await this.own(mode)
-      if (!own) return
-      const { userId, list } = own
+      if (!own || this.paused) return
+      const { userId, server, list } = own
       const unlocked = list.filter((item) => item.unlocked).map((item) => item.id)
       const key = storageKey('seen', mode, userId)
-      const seen = readIds(key) ?? memory.get(key) ?? null
+      const local = readIds(key) ?? memory.get(key) ?? null
+      const seen = local && new Set([...local, ...(server?.unlocked ?? [])])
       const fresh = newlyUnlocked(list, seen)
       const baseline = new Set([...(seen ?? []), ...unlocked])
       memory.set(key, baseline)
