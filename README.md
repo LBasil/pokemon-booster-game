@@ -48,6 +48,8 @@ Supabase (Postgres + Auth + Realtime).
   first pull date, illustrator, **price history chart** (weekly Cardmarket
   snapshots), wishlist toggle for missing cards, and **sharing** a generated
   image of the card.
+- **Last set remembered**: the booster page preselects the set you opened
+  last, separately in each mode (on a new device: your last logged pack).
 - **Booster history**: every pack you've opened, grouped by day, under
   your totals: the **exact number of boosters opened**, today, best day,
   packs with a hit (and the rate), longest daily streak, most opened set.
@@ -162,7 +164,8 @@ its **SQL editor** and run, in order:
    (Trainer Gallery, Shiny Vault, Classic Collection…) come inside their
    parent set's packs instead of being opened on their own (they gave packs
    of 10 holos), and the server returns exact pack stats (history totals,
-   luck / streak / economy achievements). Run it after 0009; until then
+   luck / streak / economy achievements). Run it after 0009 (it refuses to
+   run otherwise); until then
    those totals and achievements stay empty. New subsets get linked by
    `npm run populate:sync` (`link_subsets()`).
 

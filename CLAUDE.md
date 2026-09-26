@@ -126,7 +126,10 @@ docs/manual-testing.md      checklist for a real-account click-through
   first, best last via `sortForReveal`) -> summary with best pull. Hits
   (ultra/secret) charge up ~0.55s face-down before flipping with a flash;
   their name/badges are delayed until then so nothing is spoiled. "New!"
-  badges compare against the collection loaded on page mount.
+  badges compare against the collection loaded on page mount. The picker
+  preselects `?set=`, else the last set opened in that mode on this device
+  (localStorage `pb-last-set:<mode>`, '' = any set), else the set of the
+  last pack `booster_openings` logged in that mode (new device).
 - **Rarity**: 6 buckets (common, uncommon, rare, holo, ultra, secret)
   computed in SQL by `rarity_bucket()` (generated column
   `cards.rarity_bucket`) and mirrored in JS by `rarityBucket()` in
@@ -331,7 +334,13 @@ docs/manual-testing.md      checklist for a real-account click-through
   only). History page shows the exact pack count (unlimited: cards / 10,
   exact since packs are always 10 cards and that collection never
   shrinks; challenge: server count). ~55 new achievements (luck, economy,
-  subsets, streaks). `npm test`: 112, e2e: 102.
+  subsets, streaks). `npm test`: 112, e2e: 106.
+- **2026-09-26: 0010 is applied but 0009 is NOT** (checked through the REST
+  API: `achievement_unlocks.mode` missing, `achievement_rates(p_mode)`
+  unknown) — so `player_achievements` fails on every call ("WITHIN GROUP
+  is required for ordered-set aggregate mode": `a.mode` without the column
+  parses as the `mode()` aggregate) and all pack-based achievements read 0.
+  Fix = run 0009, then 0010 again. 0010 now refuses to run without 0009.
 - **Supabase**: **migrations 0001-0008 are applied**, 0009 and 0010 are not yet (0007 + 0008
   checked 2026-09-25 through the REST API: tables and RPCs answer).
   Migrations 0001-0003 applied (0003 on 2026-09-24, then
@@ -370,7 +379,7 @@ docs/manual-testing.md      checklist for a real-account click-through
 
 ## TODO
 
-- **Apply `0009_achievements_by_mode.sql` then `0010_subsets_and_pack_stats.sql`**
+- **Apply `0009_achievements_by_mode.sql`, then re-run `0010_subsets_and_pack_stats.sql`**
   in the SQL editor (user), then **deploy** the current client (it uses the 0007-0009 RPCs; without
   0009 the challenge achievements just lack rates and persistence).
 - Post-migration dashboard steps (user): Supabase Auth > URL Configuration

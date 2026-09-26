@@ -76,3 +76,20 @@ test('the history shows the exact number of boosters opened', async ({ page }) =
   await expect(page.locator('.history-totals')).toContainText('50 %')
   await expect(page.locator('.totals-note')).toContainText('3 older boosters')
 })
+
+test('the last opened set is preselected next time, per mode', async ({ page }) => {
+  await mockSupabase(page)
+  await page.goto('/boosters')
+  await page.evaluate(() => localStorage.setItem('pb-last-set:unlimited', 'base1'))
+  await page.reload()
+  await expect(page.locator('.preview-name')).toHaveText('Base')
+  await page.goto('/challenge/boosters')
+  await expect(page.locator('.preview-name')).toHaveText('Any set') // the challenge remembers its own
+})
+
+test('on a new device, the last pack logged by the server gives the preselection', async ({ page }) => {
+  const backend = await mockSupabase(page)
+  backend.state.openings.push({ id: 1, mode: 'unlimited', set_id: 'base1', card_ids: [], best_card_id: null, hits: 0, secrets: 0, god_pack: false, opened_at: '2026-09-25T10:00:00Z' })
+  await page.goto('/boosters')
+  await expect(page.locator('.preview-name')).toHaveText('Base')
+})

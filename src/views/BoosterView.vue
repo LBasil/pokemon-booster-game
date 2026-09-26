@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { fetchSetCover } from '@/api/sets'
 import { openBooster } from '@/api/boosters'
+import { fetchOpenings } from '@/api/history'
 import * as sfx from '@/lib/sfx'
 import { shareCard } from '@/lib/shareCard'
 import { modeRoutes } from '@/router/modes'
@@ -48,8 +49,38 @@ const COUNT_OPTIONS = [1, 3, 5, 10]
 // ---------- Set selection ----------
 
 const sets = computed(() => setsStore.sets)
-// ?set=<id> (e.g. from a binder's "open this set") preselects that set
-const selectedSetId = ref(typeof useRoute().query.set === 'string' ? useRoute().query.set : '')
+// Preselection: ?set=<id> (e.g. a binder's "open this set"), else the last
+// set opened in this mode on this device ('' = any set), else (new device)
+// the set of the last pack the server logged in this mode
+const LAST_SET_KEY = `pb-last-set:${props.mode}`
+function readLastSet() {
+  try {
+    return localStorage.getItem(LAST_SET_KEY)
+  } catch {
+    return null
+  }
+}
+function saveLastSet(setId) {
+  try {
+    localStorage.setItem(LAST_SET_KEY, setId)
+  } catch {
+    // private mode: no preselection next time
+  }
+}
+const querySet = useRoute().query.set
+const storedSet = typeof querySet === 'string' ? null : readLastSet()
+const selectedSetId = ref(typeof querySet === 'string' ? querySet : (storedSet ?? ''))
+let pickedByUser = false
+const markPicked = () => (pickedByUser = true)
+async function preselectFromServer() {
+  if (typeof querySet === 'string' || storedSet !== null) return
+  try {
+    const [last] = await fetchOpenings({ mode: props.mode, limit: 1 })
+    if (last && !pickedByUser && !selectedSetId.value) selectedSetId.value = parentPackOf(last.set_id, setsStore.byId)
+  } catch {
+    // keep "any set"
+  }
+}
 const count = ref(1)
 const setsLoading = computed(() => !setsStore.loaded && !setsStore.error)
 const loadError = computed(() => (setsStore.error ? t('boosters.loadError') : ''))
@@ -61,7 +92,10 @@ const selectedSet = computed(() => sets.value.find((set) => set.id === selectedS
 watch(
   () => setsStore.byId,
   (byId) => {
-    if (selectedSetId.value) selectedSetId.value = parentPackOf(selectedSetId.value, byId)
+    if (!selectedSetId.value) return
+    // A remembered set that no longer exists falls back to "any set"
+    if (setsStore.loaded && !byId[selectedSetId.value]) selectedSetId.value = ''
+    else selectedSetId.value = parentPackOf(selectedSetId.value, byId)
   },
   { immediate: true },
 )
@@ -146,6 +180,7 @@ onMounted(() => {
   }
 
   setsStore.load()
+  preselectFromServer()
 })
 
 onBeforeUnmount(() => {
@@ -182,6 +217,7 @@ function openErrorFor(err) {
 
 async function startOpening() {
   if (!canAfford(count.value)) return
+  saveLastSet(selectedSetId.value)
   totalToOpen.value = count.value
   openedSetId.value = selectedSetId.value
   boosterIndex.value = 0
@@ -494,7 +530,7 @@ async function shareBest() {
 
         <aside v-if="isDesktop" class="select-side">
           <h2 class="pb-section-title mb-3">{{ t('boosters.seriesTitle') }}</h2>
-          <SetPicker v-model="selectedSetId" :sets="sets" :loading="setsLoading" />
+          <SetPicker v-model="selectedSetId" :sets="sets" :loading="setsLoading" @update:model-value="markPicked" />
         </aside>
 
         <dialog v-else ref="pickerDialog" class="picker-sheet" @click.self="closePicker">
@@ -505,7 +541,7 @@ async function shareBest() {
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
               </button>
             </div>
-            <SetPicker v-model="selectedSetId" :sets="sets" :loading="setsLoading" />
+            <SetPicker v-model="selectedSetId" :sets="sets" :loading="setsLoading" @update:model-value="markPicked" />
           </div>
         </dialog>
       </section>

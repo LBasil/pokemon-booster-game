@@ -30,6 +30,20 @@
 
 set local lock_timeout = '15s';
 
+-- player_achievements below reads achievement_unlocks.mode (0009): without
+-- it every call fails ("WITHIN GROUP is required for ordered-set aggregate
+-- mode"), so refuse to run out of order.
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'achievement_unlocks' and column_name = 'mode'
+  ) then
+    raise exception 'Run 0009_achievements_by_mode.sql first, then this migration again';
+  end if;
+end;
+$$;
+
 -- ---------- 1. Subsets ----------
 
 set local application_name = 'migration 0010: step 1/3 subsets';
