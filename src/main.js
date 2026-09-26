@@ -9,6 +9,7 @@ import router from './router'
 import { i18n } from './i18n'
 import { useThemeStore } from '@/stores/theme'
 import { setupPwa } from '@/lib/pwa'
+import { watchAppVersion } from '@/lib/appVersion'
 
 const app = createApp(App)
 
@@ -19,5 +20,6 @@ app.use(i18n)
 useThemeStore().init()
 
 setupPwa()
+if (import.meta.env.PROD) watchAppVersion()
 
 app.mount('#app')

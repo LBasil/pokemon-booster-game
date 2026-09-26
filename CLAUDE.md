@@ -325,6 +325,11 @@ docs/manual-testing.md      checklist for a real-account click-through
   `vercel.json` no longer rewrites `/assets/*` to `index.html` (a missing
   chunk is a 404, not HTML). E2e: navigation.spec.js > "after a deploy"
   (needs `serviceWorkers: 'block'` for `page.route` to see the chunk).
+  Before that happens: `src/lib/appVersion.js` refetches `/` when the app
+  returns to the foreground (5 min throttle, + every 30 min), compares the
+  entry script (`/assets/index-<hash>.js`) and, once it changed, the router
+  makes the next real page change (path, not query) a full load; fires
+  `pb:update-ready` (the e2e waits on it). Prod builds only.
 - **Charts**: load the `dataviz` skill first. Rarity buckets are ordinal, so
   charts use one violet ramp (`--pb-bucket-*`, validated with the skill's
   `validate_palette.js --ordinal` in both themes); single series use
@@ -359,8 +364,8 @@ docs/manual-testing.md      checklist for a real-account click-through
   verified locally with PGlite before being handed over; 0010-0012 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 115 unit tests, `npm run test:db` 71 database
-  checks, `npm run test:e2e` 129 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 118 unit tests, `npm run test:db` 71 database
+  checks, `npm run test:e2e` 131 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities.
 - Not verified automatically: Realtime (feed and trades — no websocket

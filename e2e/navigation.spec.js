@@ -177,3 +177,43 @@ test.describe('after a deploy', () => {
     await expect(page.getByRole('heading', { name: 'My collection' })).toBeVisible()
   })
 })
+
+test.describe('a new version deployed while the app is open', () => {
+  test.use({ serviceWorkers: 'block' })
+
+  test('is loaded with the next page change, not in the middle of a page', async ({ page }) => {
+    await mockSupabase(page)
+    let deployed = false
+    // index.html as the server serves it: the entry script changes with a deploy
+    await page.route(
+      (url) => url.pathname === '/',
+      async (route) => {
+        if (!deployed || route.request().resourceType() !== 'fetch') return route.fallback()
+        const html = await (await route.fetch()).text()
+        return route.fulfill({ contentType: 'text/html', body: html.replace(/index-[\w-]+\.js/, 'index-NEWBUILD.js') })
+      },
+    )
+    await page.goto('/boosters')
+    await expect(page.locator('a[href="/collection"]:visible').first()).toBeVisible()
+    await page.evaluate(() => (window.oldBuild = true))
+    deployed = true
+
+    // Back to the foreground past the throttle: the app asks for index.html
+    await page.clock.install()
+    await page.clock.fastForward('06:00')
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          window.addEventListener('pb:update-ready', resolve, { once: true })
+          document.dispatchEvent(new Event('visibilitychange'))
+        }),
+    )
+    await expect(page.locator('a[href="/collection"]:visible').first()).toBeVisible() // no reload meanwhile
+    expect(await page.evaluate(() => window.oldBuild)).toBe(true)
+
+    await page.locator('a[href="/collection"]:visible').first().click()
+    await expect(page).toHaveURL(/\/collection$/)
+    await expect(page.getByRole('heading', { name: 'My collection' })).toBeVisible()
+    expect(await page.evaluate(() => window.oldBuild)).toBeUndefined() // a full load
+  })
+})

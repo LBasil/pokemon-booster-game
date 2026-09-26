@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { trackMode } from './modes'
 import { isChunkLoadError } from '@/utils/chunkError'
+import { hasUpdate } from '@/lib/appVersion'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -136,7 +137,14 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach(async (to) => {
+router.beforeEach(async (to, from) => {
+  // A new deploy is live (lib/appVersion.js): load it with this page change
+  // (a real one: filters rewrite the query string as the player types)
+  if (hasUpdate() && from.name && to.path !== from.path) {
+    window.location.assign(to.fullPath)
+    return false
+  }
+
   const auth = useAuthStore()
   if (!auth.ready) await auth.init()
 

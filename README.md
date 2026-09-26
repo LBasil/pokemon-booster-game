@@ -88,6 +88,9 @@ Supabase (Postgres + Auth + Realtime).
   pull, complete sets).
 - **Installable PWA**: manifest, icons, and a service worker that keeps the
   app and already-seen card art available offline.
+- **Always the latest version**: a tab left open picks up a new deploy by
+  itself at the next page change (and a page whose files a deploy removed
+  still opens).
 - **Dark/light theme** (follows the OS until you pick one) and
   **English/French** UI, both persisted locally.
 - **"Holo Collector" design** built on shared design tokens (`--pb-*` CSS
