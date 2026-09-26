@@ -244,8 +244,17 @@ docs/manual-testing.md      checklist for a real-account click-through
   offered card since; `challenge_collection_of` returns `tradable`.
   Public profiles list the challenge collection with "Ask for it" ->
   `/challenge/trades?to=<name>&want=<card id>`.
-  **Mini-game "Higher or lower"** (0013, `/challenge/minigame`,
-  `MinigameView` + `useMinigameStore`): two cards, tap the pricier
+  **Mini-games** (user: "I'll add plenty"): `/challenge/games`
+  (`GamesView`) lists every game of `src/utils/games.js` (id, route
+  `challenge-game-<id>`, icon; EN/FR `games.items.<id>` — `games.test.js`
+  checks them); `useGames()` gives each game's status (plug a new game's
+  store there) to that page and to the `.ch-games` tile right under the
+  wallet on `/challenge`. In the challenge, AppHeader has a "Mini-games"
+  pill and phone tab (it replaced Home there: the mode strip's "Leave"
+  goes home), and game pages light it up (`PARENTS`) and link back to it.
+  **"Higher or lower"** (0013, `/challenge/games/higher-lower`; the old
+  `/challenge/minigame` redirects, `MinigameView` + `useMinigameStore`):
+  two cards, tap the pricier
   (`cards.value`) within 15 s (server allows 20). Rules in SQL
   (`minigame_rules()`, `minigame_min_ratio()`) mirrored in
   `src/utils/minigame.js`: 3 paid runs per game day, 5 coins per right
@@ -257,7 +266,7 @@ docs/manual-testing.md      checklist for a real-account click-through
   Ledger kind `minigame` (one row per paid answer, so `coins_earned`
   counts it). Accepted limit: prices are public, a script could look
   them up — the daily cap bounds it. The store sets `unavailable` on a
-  missing RPC (PGRST202): the hub hides the tile. In the view, the card
+  missing RPC (PGRST202): the game shows "Coming soon". In the view, the card
   list is `v-for` over the constant `SIDES` keyed by side only — a key
   changing per pair made Vue patch detached nodes (prices vanished).
 - **Never let a player lose track of the mode** (user priority): every
@@ -383,8 +392,8 @@ docs/manual-testing.md      checklist for a real-account click-through
   verified locally with PGlite before being handed over; 0010-0013 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 122 unit tests, `npm run test:db` 107 database
-  checks, `npm run test:e2e` 143 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 124 unit tests, `npm run test:db` 107 database
+  checks, `npm run test:e2e` 147 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities.
 - Not verified automatically: Realtime (feed and trades — no websocket

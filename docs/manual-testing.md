@@ -78,8 +78,10 @@ address** for the sign-up part.
 
 ## Mini-game (after migration 0013)
 
-- [ ] Challenge hub → "Higher or lower" tile says "3 paid runs left
-      today" → Play: two real cards with pictures, no price shown.
+- [ ] In the challenge, the "Mini-games" tab (tab bar on a phone) and the
+      tile under the wallet lead to the games page; "Higher or lower" says
+      "3 paid runs left today" → Play: two real cards with pictures, no
+      price shown.
 - [ ] Tap one → both prices show (green = pricier), "+5" and the header's
       coins go up on a right answer; a new pair comes by itself.
 - [ ] A wrong answer (or letting the timer run out) ends the run with the

@@ -28,7 +28,8 @@
     "leaveChallenge": "Quitter",
     "modeSwitch": "Mode de jeu",
     "modeUnlimited": "Illimité",
-    "modeChallenge": "Défi"
+    "modeChallenge": "Défi",
+    "games": "Mini-jeux"
   },
   "home": {
     "tagline": "Choisis une série — ou mélange-les toutes —, ouvre autant de paquets que tu veux, et regarde ta collection grandir à chaque tirage.",
@@ -477,7 +478,7 @@
       "rarity": "Rareté",
       "recycleCol": "Recyclage",
       "craftCol": "Fabrication",
-      "minigame": "Mini-jeu : devine la carte la plus chère pour gagner des pièces, 3 parties récompensées par jour."
+      "minigame": "Mini-jeux : chacun rapporte des pièces sur quelques parties par jour, puis se joue pour le record."
     },
     "buckets": {
       "common": "Commune",
@@ -570,6 +571,22 @@
     "locksTitle": "Aucune carte gardée hors échanges | {count} carte gardée hors échanges | {count} cartes gardées hors échanges",
     "locksHint": "Ouvre une carte de ta collection défi et appuie sur « Ne pas échanger ».",
     "unlock": "Autoriser l’échange de {name}"
+  },
+  "games": {
+    "eyebrow": "Défi",
+    "title": "Mini-jeux",
+    "subtitle": "Gagne des pièces pour tes boosters du défi. Chaque jeu a quelques parties récompensées par jour, ensuite tu joues autant que tu veux pour le record.",
+    "hubDesc": "Gagne des pièces pour tes boosters en jouant.",
+    "seeAll": "Tous les mini-jeux",
+    "soon": "Bientôt disponible",
+    "more": "D'autres mini-jeux arrivent.",
+    "back": "Mini-jeux",
+    "items": {
+      "higher-lower": {
+        "title": "Plus ou moins",
+        "desc": "Laquelle des deux cartes vaut le plus cher ?"
+      }
+    }
   },
   "minigame": {
     "eyebrow": "Mini-jeu",

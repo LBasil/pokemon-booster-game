@@ -304,7 +304,7 @@ const formatPrice = (value) =>
         </section>
       </template>
 
-      <RouterLink :to="{ name: 'challenge' }" class="mg-back"><span aria-hidden="true">←</span> {{ t('challenge.backToHub') }}</RouterLink>
+      <RouterLink :to="{ name: 'challenge-games' }" class="mg-back"><span aria-hidden="true">←</span> {{ t('games.back') }}</RouterLink>
     </main>
   </div>
 </template>

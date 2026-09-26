@@ -9,15 +9,40 @@ test.beforeEach(async ({ page }) => {
 
 const card = (page, side) => page.locator(`.mg-card[data-side="${side}"]`)
 
-test('the challenge hub leads to the mini-game, which pays right answers until a wrong one', async ({ page }) => {
-  const backend = await mockSupabase(page)
+// The mini-games have their own tab in the challenge (tab bar on phones)
+const gamesTab = (page) => page.locator('a[href="/challenge/games"]:visible').first()
+
+test('the mini-games are one tap away in the challenge, near the top of its hub', async ({ page }) => {
+  await mockSupabase(page)
   await page.goto('/challenge')
-  const tile = page.locator('.ch-minigame')
+  const tile = page.locator('.ch-games')
   await expect(tile).toContainText('Higher or lower')
   await expect(tile).toContainText('3 paid runs left today')
-  await tile.getByRole('link', { name: 'Play' }).click()
-  await expect(page).toHaveURL(/\/challenge\/minigame$/)
+  // Right under the wallet
+  expect(await page.locator('.ch-grid > .ch-tile').evaluateAll((els) => els.findIndex((el) => el.classList.contains('ch-games')))).toBe(1)
+
+  await gamesTab(page).click()
+  await expect(page).toHaveURL(/\/challenge\/games$/)
+  await expect(page.getByRole('heading', { level: 1, name: 'Mini-games' })).toBeVisible()
   await expect(page.locator('.mode-strip')).toBeVisible() // still in the challenge
+  await expect(gamesTab(page)).toHaveAttribute('aria-current', 'page')
+
+  await page.locator('.game-tile').filter({ hasText: 'Higher or lower' }).click()
+  await expect(page).toHaveURL(/\/challenge\/games\/higher-lower$/)
+  await expect(gamesTab(page)).toHaveClass(/active|router-link-active/) // the game lights up its parent tab
+  await page.getByRole('link', { name: 'Mini-games' }).last().click()
+  await expect(page).toHaveURL(/\/challenge\/games$/)
+})
+
+test('the old mini-game address still works', async ({ page }) => {
+  await mockSupabase(page)
+  await page.goto('/challenge/minigame')
+  await expect(page).toHaveURL(/\/challenge\/games\/higher-lower$/)
+})
+
+test('higher or lower pays right answers until a wrong one', async ({ page }) => {
+  const backend = await mockSupabase(page)
+  await page.goto('/challenge/games/higher-lower')
 
   await page.getByRole('button', { name: 'Play' }).click()
   await expect(page.getByRole('heading', { name: 'Which card is worth more?' })).toBeVisible()
@@ -59,7 +84,7 @@ test('the challenge hub leads to the mini-game, which pays right answers until a
 
 test('the arrow keys answer too', async ({ page }) => {
   await mockSupabase(page)
-  await page.goto('/challenge/minigame')
+  await page.goto('/challenge/games/higher-lower')
   await page.getByRole('button', { name: 'Play' }).click()
   await expect(card(page, 'left')).toBeEnabled()
   await page.keyboard.press('ArrowRight')
@@ -68,7 +93,7 @@ test('the arrow keys answer too', async ({ page }) => {
 
 test('once the paid runs are used, the game goes on for the record only', async ({ page }) => {
   await mockSupabase(page, { minigame: { paidUsed: 3, best: 7 } })
-  await page.goto('/challenge/minigame')
+  await page.goto('/challenge/games/higher-lower')
   await expect(page.getByText('No more coins today: play for the record.')).toBeVisible()
   await expect(page.locator('.mg-stats')).toContainText('0 / 3')
   await expect(page.locator('.mg-stats')).toContainText('7')
@@ -82,7 +107,7 @@ test('once the paid runs are used, the game goes on for the record only', async 
 test('the run ends when time runs out', async ({ page }) => {
   await page.clock.install()
   const backend = await mockSupabase(page)
-  await page.goto('/challenge/minigame')
+  await page.goto('/challenge/games/higher-lower')
   await page.getByRole('button', { name: 'Play' }).click()
   await expect(card(page, 'left')).toBeEnabled()
   await page.clock.fastForward('00:16')
@@ -93,21 +118,23 @@ test('the run ends when time runs out', async ({ page }) => {
 
 test('a run in progress is resumed after a reload', async ({ page }) => {
   await mockSupabase(page)
-  await page.goto('/challenge/minigame')
+  await page.goto('/challenge/games/higher-lower')
   await page.getByRole('button', { name: 'Play' }).click()
   await expect(card(page, 'left')).toContainText('Mewtwo')
-  await page.goto('/challenge')
-  await expect(page.locator('.ch-minigame').getByRole('link', { name: 'Resume the run' })).toBeVisible()
-  await page.goto('/challenge/minigame')
+  await page.goto('/challenge/games')
+  await expect(page.locator('.game-tile').filter({ hasText: 'Higher or lower' })).toContainText('Resume the run')
+  await page.goto('/challenge/games/higher-lower')
   await expect(card(page, 'left')).toContainText('Mewtwo')
   await expect(page.getByRole('button', { name: 'Play' })).toHaveCount(0)
 })
 
-test('before migration 0013 the hub simply has no mini-game', async ({ page }) => {
+test('before migration 0013 the game says it is coming soon', async ({ page }) => {
   await mockSupabase(page, { minigame: 'missing' })
   await page.goto('/challenge')
-  await expect(page.locator('.ch-wallet')).toBeVisible()
-  await expect(page.locator('.ch-minigame')).toHaveCount(0)
-  await page.goto('/challenge/minigame')
+  await expect(page.locator('.ch-games')).toContainText('Coming soon')
+  await page.goto('/challenge/games')
+  await expect(page.locator('.game-tile')).toContainText('Coming soon')
+  await expect(page.locator('.game-tile .game-cta')).toHaveCount(0)
+  await page.goto('/challenge/games/higher-lower')
   await expect(page.getByText('The mini-game is coming soon.')).toBeVisible()
 })

@@ -103,12 +103,20 @@ const router = createRouter({
       meta: { requiresAuth: true, mode: 'challenge' },
     },
     {
-      // "Higher or lower" mini-game: coins for the challenge (migration 0013)
-      path: '/challenge/minigame',
-      name: 'challenge-minigame',
+      // Mini-games: coins for the challenge (every game in src/utils/games.js)
+      path: '/challenge/games',
+      name: 'challenge-games',
+      component: () => import('@/views/GamesView.vue'),
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
+      // "Higher or lower" (migration 0013)
+      path: '/challenge/games/higher-lower',
+      name: 'challenge-game-higher-lower',
       component: () => import('@/views/MinigameView.vue'),
       meta: { requiresAuth: true, mode: 'challenge' },
     },
+    { path: '/challenge/minigame', redirect: { name: 'challenge-game-higher-lower' } },
     {
       path: '/challenge/trades',
       name: 'challenge-trades',

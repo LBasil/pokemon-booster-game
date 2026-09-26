@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await signIn(page)
 })
 
-const CHALLENGE_PAGES = ['/challenge', '/challenge/boosters', '/challenge/collection', '/challenge/collection/set/sv3pt5', '/challenge/history', '/challenge/trades', '/challenge/achievements', '/challenge/minigame']
+const CHALLENGE_PAGES = ['/challenge', '/challenge/boosters', '/challenge/collection', '/challenge/collection/set/sv3pt5', '/challenge/history', '/challenge/trades', '/challenge/achievements', '/challenge/games', '/challenge/games/higher-lower']
 
 test('every challenge page says so and leads back to unlimited mode in one tap', async ({ page }) => {
   await mockSupabase(page)

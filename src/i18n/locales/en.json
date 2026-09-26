@@ -28,7 +28,8 @@
     "leaveChallenge": "Leave",
     "modeSwitch": "Game mode",
     "modeUnlimited": "Unlimited",
-    "modeChallenge": "Challenge"
+    "modeChallenge": "Challenge",
+    "games": "Mini-games"
   },
   "home": {
     "tagline": "Pick any set — or mix them all — open as many packs as you like, and watch your collection grow with every pull.",
@@ -477,7 +478,7 @@
       "rarity": "Rarity",
       "recycleCol": "Recycle",
       "craftCol": "Craft",
-      "minigame": "Mini-game: guess the pricier card to earn coins, 3 paid runs a day."
+      "minigame": "Mini-games: each one pays a few runs a day in coins, then plays on for the record."
     },
     "buckets": {
       "common": "Common",
@@ -570,6 +571,22 @@
     "locksTitle": "No card kept out of trades | {count} card kept out of trades | {count} cards kept out of trades",
     "locksHint": "Open a card of your challenge collection and tap “Keep out of trades”.",
     "unlock": "Allow trades for {name}"
+  },
+  "games": {
+    "eyebrow": "Challenge",
+    "title": "Mini-games",
+    "subtitle": "Earn coins for your challenge boosters. Each game has a few paid runs a day, then you can play as much as you like for the record.",
+    "hubDesc": "Earn coins for your boosters by playing.",
+    "seeAll": "All mini-games",
+    "soon": "Coming soon",
+    "more": "More mini-games are on the way.",
+    "back": "Mini-games",
+    "items": {
+      "higher-lower": {
+        "title": "Higher or lower",
+        "desc": "Which of the two cards is worth more?"
+      }
+    }
   },
   "minigame": {
     "eyebrow": "Mini-game",

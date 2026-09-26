@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router'
 import { routeMode } from '@/router/modes'
 import { useAuthStore } from '@/stores/auth'
 import { useChallengeStore } from '@/stores/challenge'
+import { GAME_ROUTES } from '@/utils/games'
 import BrandLogo from '@/components/BrandLogo.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
@@ -43,6 +44,7 @@ const ICONS = {
   community: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 7.5M18 14a6 6 0 0 1 4 7',
   profile: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0',
   challenge: 'M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6',
+  games: 'M7 8h10a5 5 0 0 1 0 10c-1.6 0-2.4-.8-3-2h-4c-.6 1.2-1.4 2-3 2A5 5 0 0 1 7 8zM8 11v4M6 13h4M15.5 12.5h.01M17.5 14.5h.01',
 }
 
 const NAV = computed(() =>
@@ -51,6 +53,7 @@ const NAV = computed(() =>
         { name: 'challenge', label: 'nav.challenge' },
         { name: 'challenge-boosters', label: 'nav.boosters' },
         { name: 'challenge-collection', label: 'nav.collection' },
+        { name: 'challenge-games', label: 'nav.games' },
         { name: 'challenge-trades', label: 'nav.trades' },
         { name: 'community', label: 'nav.community' },
         { name: 'profile', label: 'nav.profile' },
@@ -65,14 +68,15 @@ const NAV = computed(() =>
 )
 
 // Phone tab bar: 5 destinations with icons. The challenge swaps in its own
-// hub, boosters and collection (Community stays one tap away on the hubs).
+// hub, boosters, collection and mini-games (Community stays one tap away on
+// the hubs; the home page is the mode strip's "Leave", on every challenge page).
 const TABS = computed(() =>
   inChallenge.value
     ? [
-        { name: 'game', label: 'nav.hub', icon: ICONS.hub },
         { name: 'challenge', label: 'nav.challenge', icon: ICONS.challenge },
         { name: 'challenge-boosters', label: 'nav.boosters', icon: ICONS.boosters },
         { name: 'challenge-collection', label: 'nav.collection', icon: ICONS.collection },
+        { name: 'challenge-games', label: 'nav.games', icon: ICONS.games },
         { name: 'profile', label: 'nav.profile', icon: ICONS.profile },
       ]
     : [
@@ -94,7 +98,7 @@ const PARENTS = {
   achievements: 'profile',
   'challenge-achievements': 'challenge',
   'challenge-history': 'challenge',
-  'challenge-minigame': 'challenge',
+  ...Object.fromEntries(GAME_ROUTES.map((name) => [name, 'challenge-games'])),
 }
 const isActive = (name, inTabBar = false) =>
   route.name === name ||

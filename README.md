@@ -23,7 +23,9 @@ Supabase (Postgres + Auth + Realtime).
   daily reward that grows over a 7-day streak, three daily missions and
   four **weekly missions** (reset Monday 00:00 UTC, bigger rewards),
   recycle duplicates into coins and craft the cards you're missing. Earn
-  coins with the **"Higher or lower" mini-game** (`/challenge/minigame`):
+  coins with the **mini-games** (`/challenge/games`, their own tab in the
+  challenge and a tile near the top of its hub), starting with
+  **"Higher or lower"**:
   two cards, tap the pricier one within 15 seconds; 3 paid runs a day at
   5 coins per right answer (100 per run at most), then unlimited runs for
   the record. Packs

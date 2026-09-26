@@ -3,7 +3,6 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useChallengeStore } from '@/stores/challenge'
 import { useChallengeCollectionStore } from '@/stores/collection'
-import { useMinigameStore } from '@/stores/minigame'
 import { BUCKETS } from '@/utils/rarity'
 import {
   CRAFT_PRICE,
@@ -18,6 +17,7 @@ import {
 } from '@/utils/challenge'
 import { completionPercent } from '@/utils/progress'
 import { nextUp } from '@/utils/achievements'
+import { useGames } from '@/composables/useGames'
 import { useModeAchievements } from '@/composables/useModeAchievements'
 import AchievementTile from '@/components/AchievementTile.vue'
 import AppHeader from '@/components/AppHeader.vue'
@@ -31,7 +31,7 @@ import RecycleDuplicates from '@/components/RecycleDuplicates.vue'
 const { t, locale } = useI18n()
 const challenge = useChallengeStore()
 const collection = useChallengeCollectionStore()
-const minigame = useMinigameStore()
+const { games, load: loadGames } = useGames()
 
 const firstLoad = computed(() => !challenge.loaded && !challenge.error)
 
@@ -53,7 +53,7 @@ let resetTimer = null
 onMounted(() => {
   challenge.load({ force: true })
   collection.load()
-  minigame.load()
+  loadGames()
   clock = setInterval(() => (now.value = Date.now()), 30_000)
   // Reload right after the reset so new missions and the reward show up
   resetTimer = setTimeout(() => challenge.load({ force: true }), msUntilReset() + 2000)
@@ -214,6 +214,27 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
             </div>
           </section>
 
+          <!-- ============ Mini-games (every game in src/utils/games.js) ============ -->
+          <section class="ch-tile ch-games" aria-labelledby="ch-games-title">
+            <div class="ch-tile-head">
+              <h2 id="ch-games-title" class="ch-tile-title">{{ t('games.title') }}</h2>
+              <RouterLink :to="{ name: 'challenge-games' }" class="ch-link">{{ t('games.seeAll') }}</RouterLink>
+            </div>
+            <p class="ch-muted">{{ t('games.hubDesc') }}</p>
+            <ul class="ch-games-list" role="list">
+              <li v-for="game in games" :key="game.id">
+                <RouterLink :to="{ name: game.route }" class="ch-game" :class="{ off: !game.available }">
+                  <span class="ch-game-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path :d="game.icon" /></svg></span>
+                  <span class="ch-game-text">
+                    <span class="ch-game-title">{{ game.title }}</span>
+                    <span v-if="game.line" class="ch-game-status">{{ game.line }}</span>
+                  </span>
+                  <span v-if="game.available" class="ch-game-cta" aria-hidden="true">→</span>
+                </RouterLink>
+              </li>
+            </ul>
+          </section>
+
           <!-- ============ Daily reward ============ -->
           <section class="ch-tile ch-daily" aria-labelledby="ch-daily-title">
             <h2 id="ch-daily-title" class="ch-tile-title">{{ t('challenge.dailyTitle') }}</h2>
@@ -294,22 +315,6 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
             </template>
           </section>
 
-          <!-- ============ Mini-game (migration 0013; hidden before it) ============ -->
-          <section v-if="!minigame.unavailable" class="ch-tile ch-minigame" aria-labelledby="ch-minigame-title">
-            <div class="ch-minigame-text">
-              <span class="ch-label">{{ t('minigame.eyebrow') }}</span>
-              <h2 id="ch-minigame-title" class="ch-tile-title">{{ t('minigame.title') }}</h2>
-              <p class="ch-muted">{{ t('minigame.hubDesc') }}</p>
-              <p v-if="minigame.loaded" class="ch-minigame-status">
-                {{ minigame.paidLeft ? t('minigame.nextPaid', { count: minigame.paidLeft }, minigame.paidLeft) : t('minigame.nextFree') }}
-                <template v-if="minigame.best"> · {{ t('minigame.bestShort', { count: minigame.best }) }}</template>
-              </p>
-            </div>
-            <RouterLink :to="{ name: 'challenge-minigame' }" class="btn btn-outline-secondary ch-minigame-cta">
-              {{ minigame.run ? t('minigame.resume') : t('minigame.play') }}
-            </RouterLink>
-          </section>
-
           <!-- ============ Challenge collection ============ -->
           <section class="ch-tile ch-collection" aria-labelledby="ch-collection-title">
             <div class="ch-tile-head">
@@ -382,7 +387,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
             <li>{{ t('challenge.rules.rates') }}</li>
             <li>{{ t('challenge.rules.godPack', { odds: formatNumber(GOD_PACK_ODDS) }) }}</li>
             <li>{{ t('challenge.rules.recycle') }}</li>
-            <li v-if="!minigame.unavailable">{{ t('challenge.rules.minigame') }}</li>
+            <li>{{ t('challenge.rules.minigame') }}</li>
             <li>{{ t('challenge.rules.separate') }}</li>
           </ul>
           <div class="ch-table-wrap">
@@ -835,31 +840,75 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   white-space: nowrap;
 }
 
-.ch-minigame {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem 1.5rem;
+.ch-games-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
 }
 
-.ch-minigame-text {
-  flex: 1 1 18rem;
+.ch-game {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: var(--pb-radius-md);
+  border: 1px solid var(--pb-border);
+  background: var(--pb-bg-elevated);
+  color: var(--pb-text);
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+
+@media (hover: hover) {
+  .ch-game:hover {
+    border-color: var(--pb-ring);
+  }
+}
+
+.ch-game.off {
+  opacity: 0.7;
+}
+
+.ch-game-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--pb-radius-sm);
+  background: var(--pb-holo);
+}
+
+.ch-game-icon svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  fill: none;
+  stroke: var(--pb-accent-ink);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ch-game-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
   min-width: 0;
 }
 
-.ch-minigame .ch-label {
-  display: block;
-  margin-bottom: 0.35rem;
-}
-
-.ch-minigame-status {
-  margin: 0.5rem 0 0;
+.ch-game-title {
   font-weight: 700;
 }
 
-.ch-minigame-cta {
-  flex: 0 0 auto;
+.ch-game-status {
+  font-size: 0.85rem;
+  color: var(--pb-text-muted);
+}
+
+.ch-game-cta {
+  font-weight: 700;
 }
 
 .ch-trades-actions {
@@ -960,9 +1009,13 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   }
 
   .ch-wallet,
-  .ch-minigame,
+  .ch-games,
   .ch-achievements {
     grid-column: 1 / -1;
+  }
+
+  .ch-games-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
