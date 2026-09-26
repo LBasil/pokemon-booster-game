@@ -312,6 +312,13 @@ docs/manual-testing.md      checklist for a real-account click-through
   Supabase; it caches only `no-cors` image loads (a cached opaque image
   served to the CORS load of `shareCard` would taint its canvas).
   Registered in production builds only (`src/lib/pwa.js`).
+- **Deploys vs open tabs**: routes are lazy chunks; a tab opened before a
+  deploy asks for hashes that no longer exist and the router silently
+  aborts (nav links "stop working", new features missing). `router.onError`
+  reloads onto the target once (`isChunkLoadError`, 10s loop guard) and
+  `vercel.json` no longer rewrites `/assets/*` to `index.html` (a missing
+  chunk is a 404, not HTML). E2e: navigation.spec.js > "after a deploy"
+  (needs `serviceWorkers: 'block'` for `page.route` to see the chunk).
 - **Charts**: load the `dataviz` skill first. Rarity buckets are ordinal, so
   charts use one violet ramp (`--pb-bucket-*`, validated with the skill's
   `validate_palette.js --ordinal` in both themes); single series use
@@ -346,8 +353,8 @@ docs/manual-testing.md      checklist for a real-account click-through
   verified locally with PGlite before being handed over; 0010-0012 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 113 unit tests, `npm run test:db` 71 database
-  checks, `npm run test:e2e` 123 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 115 unit tests, `npm run test:db` 71 database
+  checks, `npm run test:e2e` 125 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities.
 - Not verified automatically: Realtime (feed and trades — no websocket

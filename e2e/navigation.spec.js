@@ -157,3 +157,23 @@ test('no page logs an error', async ({ page }) => {
   }
   expect(problems).toEqual([])
 })
+
+test.describe('after a deploy', () => {
+  // The service worker would serve the chunk itself, out of page.route's reach
+  test.use({ serviceWorkers: 'block' })
+
+  test('a page whose chunk is gone still opens (the app reloads onto it)', async ({ page }) => {
+    await mockSupabase(page)
+    // The old build's chunk: once, like a tab opened before the deploy
+    let stale = true
+    await page.route('**/assets/CollectionView-*.js', (route) => {
+      if (!stale) return route.fallback()
+      stale = false
+      return route.fulfill({ status: 404, body: 'Not found' })
+    })
+    await page.goto('/boosters')
+    await page.locator('a[href="/collection"]:visible').first().click()
+    await expect(page).toHaveURL(/\/collection$/)
+    await expect(page.getByRole('heading', { name: 'My collection' })).toBeVisible()
+  })
+})

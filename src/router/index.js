@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { trackMode } from './modes'
+import { isChunkLoadError } from '@/utils/chunkError'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -149,5 +150,20 @@ router.beforeEach(async (to) => {
 })
 
 router.afterEach(trackMode)
+
+// A new deploy while the app is open: the old build's lazy chunks are gone,
+// so load the page the player asked for from scratch (once, not in a loop
+// if the chunk is really unreachable, e.g. offline)
+const CHUNK_RELOAD_KEY = 'pb-chunk-reload'
+router.onError((error, to) => {
+  if (!isChunkLoadError(error)) return
+  try {
+    if (Date.now() - Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) ?? 0) < 10_000) return
+    sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()))
+  } catch {
+    // no storage: still worth one reload
+  }
+  window.location.assign(to?.fullPath ?? window.location.href)
+})
 
 export default router
