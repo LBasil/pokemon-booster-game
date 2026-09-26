@@ -30,7 +30,7 @@ export const useProfileStore = defineStore('profile', {
     },
 
     /**
-     * @param {{ username?: string, is_public?: boolean, showcase_card_id?: string|null }} fields
+     * @param {{ username?: string, is_public?: boolean, showcase_card_id?: string|null, accepts_trades?: boolean }} fields
      * @throws {Error} with `code === 'taken'` when the username is already used
      */
     async update(fields) {

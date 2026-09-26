@@ -5,6 +5,7 @@ import { fetchPriceHistory } from '@/api/cards'
 import { shareCard } from '@/lib/shareCard'
 import { useChallengeStore } from '@/stores/challenge'
 import { useProfileStore } from '@/stores/profile'
+import { useTradesStore } from '@/stores/trades'
 import { useWishlistStore } from '@/stores/wishlist'
 import { craftPrice, recycleValue } from '@/utils/challenge'
 import { cardNumber } from '@/utils/collection'
@@ -85,6 +86,27 @@ const craft = () =>
     await challenge.craft(card.value)
     return t('challenge.craftedNotice', { card: card.value.name })
   })
+
+// Keep a challenge card out of trades (migration 0012)
+const trades = useTradesStore()
+const lockBusy = ref(false)
+watch(
+  () => props.entry && isChallenge.value && props.interactive,
+  (show) => {
+    if (show) trades.loadLocks()
+  },
+)
+async function toggleLock() {
+  lockBusy.value = true
+  coinNotice.value = ''
+  try {
+    await trades.toggleLock(card.value.id)
+  } catch {
+    coinNotice.value = t('challenge.errors.generic')
+  } finally {
+    lockBusy.value = false
+  }
+}
 
 const recycle = () =>
   coinAction(async () => {
@@ -240,7 +262,21 @@ function onPointerUp(event) {
               <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 14v5h14v-5" /></svg>
               {{ t('collection.share') }}
             </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              :aria-pressed="trades.isLocked(card.id)"
+              :disabled="lockBusy"
+              @click="toggleLock"
+            >
+              <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path v-if="trades.isLocked(card.id)" d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z" />
+                <path v-else d="M7 11V8a5 5 0 0 1 9.6-2M6 11h12v9H6z" />
+              </svg>
+              {{ trades.isLocked(card.id) ? t('trades.lockedCard') : t('trades.lockCard') }}
+            </button>
           </template>
+          <p v-if="owned && trades.isLocked(card.id)" class="detail-notice">{{ t('trades.lockedHint') }}</p>
           <p v-if="!owned && challenge.coins < price && !coinNotice" class="detail-notice">
             {{ t('challenge.craftTooExpensive') }}
           </p>

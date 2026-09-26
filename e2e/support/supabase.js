@@ -52,7 +52,7 @@ const WEEKLY = [
 export async function mockSupabase(page, options = {}) {
   const state = {
     collection: options.collection ?? [collectionEntry('sv3pt5-4', 2), collectionEntry('base1-4')],
-    profile: options.profile ?? { id: USER.id, username: 'Ash', is_public: true, showcase_card_id: null, created_at: USER.created_at },
+    profile: options.profile ?? { id: USER.id, username: 'Ash', is_public: true, showcase_card_id: null, created_at: USER.created_at, accepts_trades: true },
     wishlist: [],
     openings: [],
     feed: options.feed ?? [
@@ -84,6 +84,11 @@ export async function mockSupabase(page, options = {}) {
     recorded: { unlimited: new Set(), challenge: new Set() },
     packs: { unlimited: 0, challenge: 0 },
     stats: options.stats ?? {},
+    // Trade preferences (migration 0012): my locked card ids, Misty's
+    // locked card ids and whether she accepts trades
+    locks: options.locks ?? [],
+    mistyLocks: options.mistyLocks ?? [],
+    mistyAcceptsTrades: options.mistyAcceptsTrades ?? true,
     sets: options.sets ?? SETS,
   }
   const challengeState = () => {
@@ -199,11 +204,17 @@ export async function mockSupabase(page, options = {}) {
     if (path === '/rest/v1/rpc/challenge_badge') return json(state.badge)
     if (path === '/rest/v1/rpc/my_trades') return json(state.trades)
     if (path === '/rest/v1/rpc/challenge_collection_of') {
-      return json(state.partners[args.p_username.trim().toLowerCase()] ?? [])
+      const name = args.p_username.trim().toLowerCase()
+      const locked = name === 'misty' ? state.mistyLocks : []
+      return json((state.partners[name] ?? []).map((entry) => ({ ...entry, tradable: !locked.includes(entry.card_id) })))
     }
     if (path === '/rest/v1/rpc/propose_trade') {
       const partner = state.partners[args.p_username.trim().toLowerCase()]
       if (!partner) return raise('trainer_not_found')
+      if (args.p_username.trim().toLowerCase() === 'misty' && !state.mistyAcceptsTrades) return raise('trades_closed')
+      if (args.p_offer.some((id) => state.locks.includes(id)) || args.p_request.some((id) => state.mistyLocks.includes(id))) {
+        return raise('card_not_for_trade')
+      }
       const id = state.nextTradeId++
       state.trades.unshift({
         id,
@@ -296,11 +307,26 @@ export async function mockSupabase(page, options = {}) {
       const ilike = url.searchParams.get('username')
       if (ilike) {
         const name = decodeURIComponent(ilike.replace('ilike.', '')).replaceAll('\\', '').toLowerCase()
-        if (name === 'misty') return rows([{ id: 'misty-id', username: 'Misty', is_public: true, showcase_card_id: 'sv3pt5-199', created_at: '2026-08-01T00:00:00Z' }])
+        if (name === 'misty') {
+          return rows([{ id: 'misty-id', username: 'Misty', is_public: true, showcase_card_id: 'sv3pt5-199', created_at: '2026-08-01T00:00:00Z', accepts_trades: state.mistyAcceptsTrades }])
+        }
         if (name === state.profile.username.toLowerCase()) return rows([state.profile])
         return rows([])
       }
       return rows([state.profile])
+    }
+    if (table === 'trade_locks') {
+      if (method === 'POST') {
+        const { card_id: id } = JSON.parse(req.postData() || '{}')
+        if (!state.locks.includes(id)) state.locks.push(id)
+        return route.fulfill({ status: 201, body: '' })
+      }
+      if (method === 'DELETE') {
+        const id = url.searchParams.get('card_id')?.replace('eq.', '')
+        state.locks = state.locks.filter((x) => x !== id)
+        return route.fulfill({ status: 204, body: '' })
+      }
+      return json(state.locks.map((id) => ({ card_id: id })))
     }
     if (table === 'wishlist') {
       if (method === 'POST') {

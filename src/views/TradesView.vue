@@ -3,7 +3,9 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { fetchChallengeCollectionOf } from '@/api/challenge'
+import { fetchPublicProfile } from '@/api/profiles'
 import { useChallengeCollectionStore } from '@/stores/collection'
+import { useProfileStore } from '@/stores/profile'
 import { useTradesStore } from '@/stores/trades'
 import { rarityTier } from '@/utils/rarity'
 import { timeAgo } from '@/utils/time'
@@ -19,10 +21,35 @@ const route = useRoute()
 const trades = useTradesStore()
 const myCollection = useChallengeCollectionStore()
 
+const profileStore = useProfileStore()
+
 onMounted(() => {
   trades.load({ force: true })
+  trades.loadLocks()
   myCollection.load()
+  profileStore.load()
 })
+
+// ---------- Trade preferences (migration 0012) ----------
+
+const acceptsTrades = computed(() => profileStore.profile?.accepts_trades !== false)
+const prefBusy = ref(false)
+async function setAcceptsTrades(value) {
+  prefBusy.value = true
+  try {
+    await profileStore.update({ accepts_trades: value })
+  } catch (err) {
+    showError(err)
+  } finally {
+    prefBusy.value = false
+  }
+}
+
+// My cards kept out of trades, named when they're in the collection
+const lockedCards = computed(() =>
+  trades.locks.map((id) => ({ id, name: myCollection.entries.find((entry) => entry.card_id === id)?.cards.name ?? id })),
+)
+const unlock = (cardId) => trades.toggleLock(cardId).catch(showError)
 
 const groups = computed(() => trades.groups)
 const firstLoad = computed(() => !trades.loaded && !trades.error)
@@ -63,7 +90,7 @@ const cancel = (trade) =>
 
 const partnerName = ref(typeof route.query.to === 'string' ? route.query.to : '')
 const partner = ref(null) // { username, entries } once found
-const partnerState = ref('idle') // idle | loading | empty | error
+const partnerState = ref('idle') // idle | loading | empty | closed (refuses trades) | error
 const giving = ref([]) // my card ids
 const asking = ref([]) // partner card ids
 const giveQuery = ref('')
@@ -78,12 +105,16 @@ async function findPartner() {
   asking.value = []
   errorMessage.value = ''
   try {
-    const entries = await fetchChallengeCollectionOf(name)
-    partner.value = { username: name, entries }
+    const [entries, profile] = await Promise.all([fetchChallengeCollectionOf(name), fetchPublicProfile(name).catch(() => null)])
+    partner.value = { username: profile?.username ?? name, entries }
+    if (profile && profile.accepts_trades === false) {
+      partnerState.value = 'closed'
+      return
+    }
     partnerState.value = entries.length ? 'idle' : 'empty'
     // ?want=<card id> (a public profile's "Ask for it"): already picked
     const wanted = route.query.want
-    if (typeof wanted === 'string' && entries.some((entry) => entry.card_id === wanted)) asking.value = [wanted]
+    if (typeof wanted === 'string' && entries.some((entry) => entry.card_id === wanted && entry.tradable !== false)) asking.value = [wanted]
   } catch (err) {
     partnerState.value = 'error'
     showError(err)
@@ -205,6 +236,44 @@ const ago = (iso) => timeAgo(iso, locale.value)
         <section class="composer" aria-labelledby="trades-new">
           <h2 id="trades-new" class="pb-section-title">{{ t('trades.newTitle') }}</h2>
 
+          <!-- What others may ask me for (migration 0012) -->
+          <div class="trade-prefs">
+            <label class="trade-pref form-switch">
+              <span>
+                <span id="accept-trades-title" class="trade-pref-title">{{ t('trades.acceptLabel') }}</span>
+                <span id="accept-trades-desc" class="trade-pref-desc">{{ acceptsTrades ? t('trades.acceptOn') : t('trades.acceptOff') }}</span>
+              </span>
+              <input
+                type="checkbox"
+                class="form-check-input pb-switch"
+                role="switch"
+                aria-labelledby="accept-trades-title"
+                aria-describedby="accept-trades-desc"
+                :checked="acceptsTrades"
+                :disabled="prefBusy || !profileStore.profile"
+                @change="setAcceptsTrades($event.target.checked)"
+              />
+            </label>
+            <div class="trade-locks">
+              <p class="trade-pref-title">{{ t('trades.locksTitle', { count: lockedCards.length }, lockedCards.length) }}</p>
+              <p class="trade-pref-desc">{{ t('trades.locksHint') }}</p>
+              <ul v-if="lockedCards.length" class="trade-lock-list" role="list">
+                <li v-for="card in lockedCards" :key="card.id" class="trade-lock">
+                  <span>{{ card.name }}</span>
+                  <button
+                    type="button"
+                    class="trade-lock-remove"
+                    :aria-label="t('trades.unlock', { name: card.name })"
+                    :title="t('trades.unlock', { name: card.name })"
+                    @click="unlock(card.id)"
+                  >
+                    ×
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
           <form class="composer-find" @submit.prevent="findPartner">
             <label for="trade-partner" class="form-label">{{ t('trades.partnerLabel') }}</label>
             <div class="composer-find-row">
@@ -221,6 +290,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
               </button>
             </div>
             <p v-if="partnerState === 'empty'" class="composer-hint">{{ t('trades.partnerEmpty', { name: partnerName.trim() }) }}</p>
+            <p v-if="partnerState === 'closed'" class="composer-hint">{{ t('trades.partnerClosed', { name: partner.username }) }}</p>
           </form>
 
           <div v-if="partner && partnerState === 'idle'" class="composer-pickers">
@@ -239,12 +309,13 @@ const ago = (iso) => timeAgo(iso, locale.value)
                     class="picker-card"
                     :data-tier="rarityTier(entry.cards)"
                     :aria-pressed="giving.includes(entry.card_id)"
-                    :disabled="!giving.includes(entry.card_id) && giving.length >= TRADE_MAX_CARDS"
+                    :disabled="trades.isLocked(entry.card_id) || (!giving.includes(entry.card_id) && giving.length >= TRADE_MAX_CARDS)"
                     @click="giving = toggleCard(giving, entry.card_id)"
                   >
                     <img :src="entry.cards.image_small" alt="" loading="lazy" />
                     <span class="picker-name">{{ entry.cards.name }}</span>
                     <span v-if="entry.quantity > 1" class="picker-qty">x{{ entry.quantity }}</span>
+                    <span v-if="trades.isLocked(entry.card_id)" class="picker-locked">{{ t('trades.notForTrade') }}</span>
                   </button>
                 </li>
               </ul>
@@ -264,11 +335,12 @@ const ago = (iso) => timeAgo(iso, locale.value)
                     class="picker-card"
                     :data-tier="rarityTier(entry.cards)"
                     :aria-pressed="asking.includes(entry.card_id)"
-                    :disabled="!asking.includes(entry.card_id) && asking.length >= TRADE_MAX_CARDS"
+                    :disabled="entry.tradable === false || (!asking.includes(entry.card_id) && asking.length >= TRADE_MAX_CARDS)"
                     @click="asking = toggleCard(asking, entry.card_id)"
                   >
                     <img :src="entry.cards.image_small" alt="" loading="lazy" />
                     <span class="picker-name">{{ entry.cards.name }}</span>
+                    <span v-if="entry.tradable === false" class="picker-locked">{{ t('trades.notForTrade') }}</span>
                   </button>
                 </li>
               </ul>
@@ -515,6 +587,86 @@ const ago = (iso) => timeAgo(iso, locale.value)
   border-radius: var(--pb-radius-lg);
   border: 1px solid var(--pb-border);
   background: var(--pb-surface);
+}
+
+.trade-prefs {
+  display: grid;
+  gap: 0.9rem;
+  margin-bottom: 1.25rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--pb-radius-md);
+  border: 1px solid var(--pb-border);
+  background: var(--pb-input-bg);
+}
+
+.trade-pref {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-left: 0;
+  cursor: pointer;
+}
+
+.trade-pref > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.trade-pref-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.trade-pref-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--pb-text-muted);
+}
+
+.trade-lock-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trade-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.3rem 0.2rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-surface);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.trade-lock-remove {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: var(--pb-selected);
+  color: var(--pb-text);
+  line-height: 1;
+}
+
+.picker-locked {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 22px;
+  padding: 0.1rem 0.3rem;
+  border-radius: 999px;
+  background: var(--pb-text);
+  color: var(--pb-bg);
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-align: center;
 }
 
 .composer-find {

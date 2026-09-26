@@ -27,7 +27,8 @@ Supabase (Postgres + Auth + Realtime).
   a "god pack" (holos and better only). **Trade cards** with other
   trainers (up to 5 for 5, or as a gift; public profiles show their
   **challenge collection** with an "Ask for it" button per card; offers
-  and answers show up **live**, no reload), follow your challenge booster history, and climb the two
+  and answers show up **live**, no reload; you can turn trade offers off,
+  or keep chosen cards **out of trades** from their detail), follow your challenge booster history, and climb the two
   challenge leaderboards. Badges in the navigation show rewards to claim
   and offers to answer. Every coin and card moves server-side, and the
   unlimited collection is never touched.
@@ -176,6 +177,9 @@ its **SQL editor** and run, in order:
    challenge missions, and trade offers pushed live (adds `trade_offers` to
    the Realtime publication). Run it after 0010; until then no weekly
    missions, and trades refresh on reload only.
+12. `supabase/migrations/0012_trade_preferences.sql` — "Accept trade
+   offers" switch and cards kept out of trades, enforced by the server. Run
+   it after 0011; until then everyone accepts trades.
 
 Then in **Authentication**:
 

@@ -238,6 +238,21 @@ a {
 
 /* ---------- Utilities ---------- */
 
+/* Settings switch (Bootstrap form-switch input) in the brand color */
+.pb-switch {
+  flex-shrink: 0;
+  margin-left: 0 !important;
+  width: 3rem !important;
+  height: 1.6rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.pb-switch:checked {
+  background-color: var(--pb-accent);
+  border-color: var(--pb-accent);
+}
+
 .pb-holo-text {
   background: var(--pb-holo-text);
   background-size: 200% 100%;

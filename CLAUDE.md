@@ -366,6 +366,20 @@ docs/manual-testing.md      checklist for a real-account click-through
   daily missions untouched, publication, 0010 stats). Realtime itself
   can't run in e2e (no websocket mock): check it with two accounts.
   `npm test`: 113, e2e: 115.
+- **Trade preferences** built 2026-09-26: `0012_trade_preferences.sql`
+  **written but NOT applied** (run after 0011). `profiles.accepts_trades`
+  (owner-editable, column grant; off -> `propose_trade` raises
+  `trades_closed`, waiting offers stay answerable) and `trade_locks`
+  (personal, client writes like the wishlist, `user_id` defaults to
+  `auth.uid()`): a locked card can't be asked for or offered
+  (`card_not_for_trade`), and accepting fails if the sender locked an
+  offered card since; the receiver's own locks don't block what they
+  accept. `challenge_collection_of` gains `tradable` (dropped + recreated).
+  UI: lock/unlock in CardDetail (challenge, owned), "Accept trade offers"
+  switch + locked list on /challenge/trades, locked cards disabled in
+  both pickers, public profiles say "X doesn't accept trades" / "Not for
+  trade". `src/api/profiles.js` falls back to the pre-0012 columns. Verified
+  with PGlite (22 checks). `.pb-switch` moved to global.css. e2e: 121.
 - **2026-09-26: 0010 is applied but 0009 is NOT** (checked through the REST
   API: `achievement_unlocks.mode` missing, `achievement_rates(p_mode)`
   unknown) — so `player_achievements` fails on every call ("WITHIN GROUP
@@ -410,8 +424,10 @@ docs/manual-testing.md      checklist for a real-account click-through
 
 ## TODO
 
-- **Apply `0011_weekly_missions_live_trades.sql`** (user; 0009 + 0010 were
-  run 2026-09-26), then **deploy**. Without it the weekly block just
+- **Apply `0011_weekly_missions_live_trades.sql` then
+  `0012_trade_preferences.sql`** (user; 0009 + 0010 were run 2026-09-26),
+  then **deploy**. Without 0012 everyone accepts trades and nothing is
+  locked (the client falls back silently). Without it the weekly block just
   doesn't show and trades update on reload only.
 - Post-migration dashboard steps (user): Supabase Auth > URL Configuration
   redirect URLs (`<site>/game`, `<site>/reset-password`); check that

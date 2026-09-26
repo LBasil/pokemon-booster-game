@@ -129,3 +129,47 @@ test('a public profile shows its challenge collection, and a card can be asked f
   const ask = page.getByRole('group', { name: /You ask Misty for/ })
   await expect(ask.getByText('1/5')).toBeVisible() // Charizard already picked
 })
+
+test('a trainer who refuses trades says so, and no offer can be started', async ({ page }) => {
+  await mockSupabase(page, { mistyAcceptsTrades: false })
+  await page.goto('/u/Misty')
+  await expect(page.getByText('Misty doesn’t accept trades.')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Propose a trade to Misty' })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Ask for it' })).toHaveCount(0)
+
+  await page.goto('/challenge/trades?to=Misty')
+  await expect(page.getByText('Misty doesn’t accept trades.')).toBeVisible()
+  await expect(page.getByRole('group', { name: /You ask Misty for/ })).toHaveCount(0)
+})
+
+test('cards kept out of trades can be neither asked for nor offered', async ({ page }) => {
+  const backend = await mockSupabase(page, { mistyLocks: ['base1-4'], challengeCollection: [collectionEntry('sv3pt5-4'), collectionEntry('sv3pt5-7')] })
+  await page.goto('/u/Misty')
+  await expect(page.locator('.challenge-card', { hasText: 'Charizard' })).toContainText('Not for trade')
+
+  // My own card: locked from its detail
+  await page.goto('/challenge/collection')
+  await page.locator('.coll-card', { hasText: 'Charmander' }).click()
+  await page.getByRole('button', { name: 'Keep out of trades' }).click()
+  await expect(page.getByRole('button', { name: 'Not for trade' })).toHaveAttribute('aria-pressed', 'true')
+  expect(backend.state.locks).toEqual(['sv3pt5-4'])
+
+  await page.goto('/challenge/trades?to=Misty')
+  await expect(page.getByText('1 card kept out of trades')).toBeVisible()
+  await expect(page.getByRole('group', { name: /You give/ }).getByRole('button', { name: /Charmander/ })).toBeDisabled()
+  await expect(page.getByRole('group', { name: /You ask Misty for/ }).getByRole('button', { name: /Charizard/ })).toBeDisabled()
+
+  await page.getByRole('button', { name: 'Allow trades for Charmander' }).click()
+  await expect(page.getByRole('group', { name: /You give/ }).getByRole('button', { name: /Charmander/ })).toBeEnabled()
+  expect(backend.state.locks).toEqual([])
+})
+
+test('trade offers can be turned off from the trades page', async ({ page }) => {
+  const backend = await mockSupabase(page)
+  await page.goto('/challenge/trades')
+  const toggle = page.getByRole('switch', { name: /Accept trade offers/ })
+  await expect(toggle).toBeChecked()
+  await toggle.click()
+  await expect(page.getByText('Nobody can send you an offer.', { exact: false })).toBeVisible()
+  expect(backend.state.profile.accepts_trades).toBe(false)
+})

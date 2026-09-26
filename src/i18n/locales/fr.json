@@ -429,7 +429,9 @@
       "too_many_trades": "Tu as déjà 10 offres en attente. Annule-en une ou attends les réponses.",
       "trade_not_found": "Cette offre n'existe plus.",
       "trade_closed": "Cette offre a déjà reçu une réponse.",
-      "trade_expired": "Cette offre a expiré."
+      "trade_expired": "Cette offre a expiré.",
+      "trades_closed": "Ce dresseur n’accepte pas les échanges.",
+      "card_not_for_trade": "Une de ces cartes n’est plus échangeable."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -552,7 +554,18 @@
       "failed": "Échoué",
       "expired": "Expiré",
       "pending": "En attente"
-    }
+    },
+    "lockCard": "Ne pas échanger",
+    "lockedCard": "Pas à échanger",
+    "lockedHint": "Personne ne peut te demander cette carte, et tu ne peux pas l’offrir tant qu’elle est verrouillée.",
+    "notForTrade": "Pas à échanger",
+    "partnerClosed": "{name} n’accepte pas les échanges.",
+    "acceptLabel": "Accepter les offres d’échange",
+    "acceptOn": "Les autres dresseurs peuvent t’envoyer des offres.",
+    "acceptOff": "Personne ne peut t’envoyer d’offre. Celles déjà reçues restent là pour que tu y répondes.",
+    "locksTitle": "Aucune carte gardée hors échanges | {count} carte gardée hors échanges | {count} cartes gardées hors échanges",
+    "locksHint": "Ouvre une carte de ta collection défi et appuie sur « Ne pas échanger ».",
+    "unlock": "Autoriser l’échange de {name}"
   },
   "achievements": {
     "ui": {

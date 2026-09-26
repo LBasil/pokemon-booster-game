@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { cancelTrade, fetchTrades, proposeTrade, respondTrade, subscribeToTrades } from '@/api/challenge'
+import { cancelTrade, fetchTradeLocks, fetchTrades, lockCard, proposeTrade, respondTrade, subscribeToTrades, unlockCard } from '@/api/challenge'
 import { useChallengeStore } from '@/stores/challenge'
 import { useChallengeCollectionStore } from '@/stores/collection'
 import { groupTrades } from '@/utils/trades'
@@ -13,9 +13,13 @@ export const useTradesStore = defineStore('trades', {
     loading: false,
     loaded: false,
     error: null,
+    // Challenge cards kept out of trades (migration 0012), by card id
+    locks: [],
+    locksLoaded: false,
   }),
   getters: {
     groups: (state) => groupTrades(state.trades),
+    isLocked: (state) => (cardId) => state.locks.includes(cardId),
   },
   actions: {
     async load({ force = false } = {}) {
@@ -61,6 +65,28 @@ export const useTradesStore = defineStore('trades', {
         if (this.loaded) this.load({ force: true })
         if (row?.status === 'accepted') useChallengeCollectionStore().invalidate()
       })
+    },
+
+    async loadLocks({ force = false } = {}) {
+      if (this.locksLoaded && !force) return
+      try {
+        this.locks = await fetchTradeLocks()
+        this.locksLoaded = true
+      } catch {
+        // offline: nothing shown as locked, the server still enforces it
+      }
+    },
+
+    /** Keeps a card out of trades, or lets it back in (optimistic). */
+    async toggleLock(cardId) {
+      const locked = this.locks.includes(cardId)
+      this.locks = locked ? this.locks.filter((id) => id !== cardId) : [...this.locks, cardId]
+      try {
+        await (locked ? unlockCard(cardId) : lockCard(cardId))
+      } catch (err) {
+        this.locks = locked ? [...this.locks, cardId] : this.locks.filter((id) => id !== cardId)
+        throw err
+      }
     },
 
     async cancel(tradeId) {

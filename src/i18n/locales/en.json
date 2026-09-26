@@ -429,7 +429,9 @@
       "too_many_trades": "You already have 10 offers waiting. Cancel one or wait for answers.",
       "trade_not_found": "This offer no longer exists.",
       "trade_closed": "This offer has already been answered.",
-      "trade_expired": "This offer has expired."
+      "trade_expired": "This offer has expired.",
+      "trades_closed": "This trainer doesn’t accept trades.",
+      "card_not_for_trade": "One of these cards isn’t for trade any more."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -552,7 +554,18 @@
       "failed": "Failed",
       "expired": "Expired",
       "pending": "Pending"
-    }
+    },
+    "lockCard": "Keep out of trades",
+    "lockedCard": "Not for trade",
+    "lockedHint": "Nobody can ask you for this card, and you can’t offer it until you unlock it.",
+    "notForTrade": "Not for trade",
+    "partnerClosed": "{name} doesn’t accept trades.",
+    "acceptLabel": "Accept trade offers",
+    "acceptOn": "Other trainers can send you offers.",
+    "acceptOff": "Nobody can send you an offer. Offers already waiting stay here for you to answer.",
+    "locksTitle": "No card kept out of trades | {count} card kept out of trades | {count} cards kept out of trades",
+    "locksHint": "Open a card of your challenge collection and tap “Keep out of trades”.",
+    "unlock": "Allow trades for {name}"
   },
   "achievements": {
     "ui": {

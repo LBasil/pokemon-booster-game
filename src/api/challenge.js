@@ -17,6 +17,9 @@ export const CHALLENGE_ERRORS = [
   'trade_not_found',
   'trade_closed',
   'trade_expired',
+  // trade preferences (migration 0012)
+  'trades_closed',
+  'card_not_for_trade',
 ]
 
 async function call(name, args) {
@@ -77,4 +80,28 @@ export function subscribeToTrades(userId, onChange) {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'trade_offers' }, (payload) => onChange(payload.new))
     .subscribe()
   return () => supabase.removeChannel(channel)
+}
+
+// ---------- Cards not for trade (migration 0012) ----------
+
+// PostgREST's answer for a table that doesn't exist yet
+const MISSING_TABLE = 'PGRST205'
+
+/** Ids of the player's challenge cards kept out of trades ([] before 0012). */
+export async function fetchTradeLocks() {
+  const { data, error } = await supabase.from('trade_locks').select('card_id')
+  if (error?.code === MISSING_TABLE) return []
+  if (error) throw error
+  return data.map((row) => row.card_id)
+}
+
+// user_id defaults to auth.uid() in the database
+export async function lockCard(cardId) {
+  const { error } = await supabase.from('trade_locks').insert({ card_id: cardId })
+  if (error && error.code !== '23505') throw error // already locked: fine
+}
+
+export async function unlockCard(cardId) {
+  const { error } = await supabase.from('trade_locks').delete().eq('card_id', cardId)
+  if (error) throw error
 }

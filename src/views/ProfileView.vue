@@ -179,14 +179,17 @@ const challengeMatches = computed(() => searchEntries(challengeEntries.value, ch
 const challengeVisible = computed(() => challengeMatches.value.slice(0, challengeShown.value))
 watch(challengeQuery, () => (challengeShown.value = CHALLENGE_PAGE))
 
-// Signed in, on someone else's profile: challenge trades are possible
-const canTrade = computed(
+// Signed in, on someone else's profile: challenge trades are possible,
+// unless that player turned them off (accepts_trades, migration 0012)
+const othersProfile = computed(
   () =>
     !isOwn.value &&
     auth.isLoggedIn &&
     Boolean(profile.value) &&
     profile.value.username.toLowerCase() !== profileStore.profile?.username?.toLowerCase(),
 )
+const tradesClosed = computed(() => othersProfile.value && profile.value.accepts_trades === false)
+const canTrade = computed(() => othersProfile.value && !tradesClosed.value)
 const askRoute = (entry) => ({ name: 'challenge-trades', query: { to: profile.value.username, want: entry.card_id } })
 
 // ---------- Card detail (top cards or challenge cards) ----------
@@ -351,6 +354,7 @@ async function logout() {
             >
               {{ t('trades.proposeTo', { name: profile.username }) }}
             </RouterLink>
+            <p v-else-if="tradesClosed" class="trades-closed-note">{{ t('trades.partnerClosed', { name: profile.username }) }}</p>
           </section>
 
           <section class="showcase" :aria-label="t('profile.showcaseTitle')">
@@ -510,7 +514,8 @@ async function logout() {
                     <span v-if="entry.quantity > 1" class="challenge-qty">×{{ entry.quantity }}</span>
                   </button>
                   <span class="challenge-name">{{ entry.cards.name }}</span>
-                  <RouterLink v-if="canTrade" :to="askRoute(entry)" class="challenge-ask">{{ t('profile.askForCard') }}</RouterLink>
+                  <span v-if="entry.tradable === false" class="challenge-locked">{{ t('trades.notForTrade') }}</span>
+                  <RouterLink v-else-if="canTrade" :to="askRoute(entry)" class="challenge-ask">{{ t('profile.askForCard') }}</RouterLink>
                 </li>
               </ul>
               <button
@@ -1181,6 +1186,18 @@ async function logout() {
   text-overflow: ellipsis;
 }
 
+.challenge-locked {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--pb-text-muted);
+}
+
+.trades-closed-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: var(--pb-text-muted);
+}
+
 .challenge-ask {
   font-size: 0.75rem;
   font-weight: 700;
@@ -1224,20 +1241,6 @@ async function logout() {
 
 .switch-row.form-switch {
   padding-left: 0;
-}
-
-.pb-switch {
-  flex-shrink: 0;
-  margin-left: 0 !important;
-  width: 3rem !important;
-  height: 1.6rem;
-  margin: 0;
-  cursor: pointer;
-}
-
-.pb-switch:checked {
-  background-color: var(--pb-accent);
-  border-color: var(--pb-accent);
 }
 
 .trade-link {
