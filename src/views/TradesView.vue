@@ -12,7 +12,8 @@ import AppHeader from '@/components/AppHeader.vue'
 
 // Trades between players (challenge mode): answer offers, follow the ones
 // you sent, and build a new one (?to=<username> prefills the partner, e.g.
-// from a public profile). The server checks and swaps the cards.
+// from a public profile, and ?want=<card id> one of their cards). The
+// server checks and swaps the cards.
 const { t, locale } = useI18n()
 const route = useRoute()
 const trades = useTradesStore()
@@ -80,6 +81,9 @@ async function findPartner() {
     const entries = await fetchChallengeCollectionOf(name)
     partner.value = { username: name, entries }
     partnerState.value = entries.length ? 'idle' : 'empty'
+    // ?want=<card id> (a public profile's "Ask for it"): already picked
+    const wanted = route.query.want
+    if (typeof wanted === 'string' && entries.some((entry) => entry.card_id === wanted)) asking.value = [wanted]
   } catch (err) {
     partnerState.value = 'error'
     showError(err)

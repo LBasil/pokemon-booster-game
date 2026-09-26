@@ -117,3 +117,15 @@ test('the community has challenge leaderboards', async ({ page }) => {
   await expect(page.locator('.board-score').first()).toHaveText('42 cards')
   expect(rpcCalls(backend, 'leaderboard').some((c) => JSON.parse(c.body).p_kind === 'challenge_unique')).toBe(true)
 })
+
+test('a public profile shows its challenge collection, and a card can be asked for', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4')] })
+  await page.goto('/u/Misty')
+  const panel = page.locator('section', { has: page.getByRole('heading', { name: 'Challenge collection' }) })
+  await expect(panel).toContainText('2 cards')
+  await panel.locator('.challenge-card', { hasText: 'Charizard' }).getByRole('link', { name: 'Ask for it' }).click()
+
+  await expect(page).toHaveURL(/\/challenge\/trades\?to=Misty&want=base1-4/)
+  const ask = page.getByRole('group', { name: /You ask Misty for/ })
+  await expect(ask.getByText('1/5')).toBeVisible() // Charizard already picked
+})

@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { fetchChallengeCollectionOf } from '@/api/challenge'
 import { fetchPublicCollection, fetchPublicProfile } from '@/api/profiles'
 import { modeRoutes, routeMode } from '@/router/modes'
 import { useAuthStore } from '@/stores/auth'
@@ -15,6 +16,7 @@ import { nextUp } from '@/utils/achievements'
 import { useModeAchievements } from '@/composables/useModeAchievements'
 import { USERNAME_MAX, boostersOpened, rankFor, rarityBreakdown, validateUsername } from '@/utils/profile'
 import { BUCKETS, bestPull, rarityLabelKey, rarityTier } from '@/utils/rarity'
+import { searchEntries } from '@/utils/trades'
 import AchievementTile from '@/components/AchievementTile.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import BrandLogo from '@/components/BrandLogo.vue'
@@ -55,6 +57,7 @@ async function loadPublic(username) {
     }
     publicEntries.value = await fetchPublicCollection(publicProfile.value.username)
     publicState.value = 'ready'
+    loadChallenge(publicProfile.value.username)
   } catch {
     publicState.value = 'error'
   }
@@ -153,8 +156,49 @@ async function setShowcase(cardId) {
 // ---------- Public profile: best cards ----------
 
 const topCards = computed(() => sortEntries(entries.value, 'rarity').slice(0, 8))
+
+// ---------- Public profile: challenge collection (what you could trade for) ----------
+
+const CHALLENGE_PAGE = 24
+const challengeEntries = ref([])
+const challengeState = ref('idle') // loading | ready | error
+const challengeQuery = ref('')
+const challengeShown = ref(CHALLENGE_PAGE)
+
+async function loadChallenge(username) {
+  challengeState.value = 'loading'
+  try {
+    challengeEntries.value = sortEntries(await fetchChallengeCollectionOf(username), 'rarity')
+    challengeState.value = 'ready'
+  } catch {
+    challengeState.value = 'error'
+  }
+}
+
+const challengeMatches = computed(() => searchEntries(challengeEntries.value, challengeQuery.value))
+const challengeVisible = computed(() => challengeMatches.value.slice(0, challengeShown.value))
+watch(challengeQuery, () => (challengeShown.value = CHALLENGE_PAGE))
+
+// Signed in, on someone else's profile: challenge trades are possible
+const canTrade = computed(
+  () =>
+    !isOwn.value &&
+    auth.isLoggedIn &&
+    Boolean(profile.value) &&
+    profile.value.username.toLowerCase() !== profileStore.profile?.username?.toLowerCase(),
+)
+const askRoute = (entry) => ({ name: 'challenge-trades', query: { to: profile.value.username, want: entry.card_id } })
+
+// ---------- Card detail (top cards or challenge cards) ----------
+
+const detailSource = ref('top') // top | challenge
+const detailList = computed(() => (detailSource.value === 'challenge' ? challengeVisible.value : topCards.value))
 const detailIndex = ref(-1)
-const detailEntry = computed(() => topCards.value[detailIndex.value] ?? null)
+const detailEntry = computed(() => detailList.value[detailIndex.value] ?? null)
+function openDetail(source, index) {
+  detailSource.value = source
+  detailIndex.value = index
+}
 
 // ---------- Sharing & privacy ----------
 
@@ -301,7 +345,7 @@ async function logout() {
 
             <!-- Someone else's public profile: start a challenge trade with them -->
             <RouterLink
-              v-if="!isOwn && auth.isLoggedIn && profile && profile.username.toLowerCase() !== profileStore.profile?.username?.toLowerCase()"
+              v-if="canTrade"
               :to="{ name: 'challenge-trades', query: { to: profile.username } }"
               class="btn btn-outline-secondary btn-sm trade-link"
             >
@@ -431,11 +475,53 @@ async function logout() {
             <h2 class="pb-section-title">{{ t('profile.topCards') }}</h2>
             <ul class="top-grid" role="list">
               <li v-for="(entry, index) in topCards" :key="entry.card_id">
-                <button type="button" class="top-card" :aria-label="entry.cards.name" @click="detailIndex = index">
+                <button type="button" class="top-card" :aria-label="entry.cards.name" @click="openDetail('top', index)">
                   <HoloCard :src="entry.cards.image_small || entry.cards.image_url" alt="" :max-tilt="10" />
                 </button>
               </li>
             </ul>
+          </section>
+
+          <!-- Someone else's challenge collection: browse it before offering a trade -->
+          <section v-if="!isOwn && (challengeState === 'loading' || challengeEntries.length)" class="panel" aria-labelledby="challenge-coll-title">
+            <div class="section-head">
+              <h2 id="challenge-coll-title" class="pb-section-title">{{ t('profile.challengeCollection') }}</h2>
+              <span class="section-count">{{ t('profile.challengeCount', { count: challengeEntries.length }, challengeEntries.length) }}</span>
+            </div>
+            <p class="challenge-desc">{{ canTrade ? t('profile.challengeTradeHint') : t('profile.challengeDesc') }}</p>
+
+            <div v-if="challengeState === 'loading'" class="challenge-grid">
+              <div v-for="n in 6" :key="n" class="pb-skeleton" style="aspect-ratio: 63 / 88"></div>
+            </div>
+            <template v-else>
+              <input
+                v-if="challengeEntries.length > CHALLENGE_PAGE"
+                v-model="challengeQuery"
+                type="search"
+                class="form-control challenge-search"
+                :placeholder="t('collection.searchPlaceholder')"
+                :aria-label="t('collection.searchLabel')"
+              />
+              <p v-if="!challengeMatches.length" class="challenge-desc">{{ t('collection.noResults') }}</p>
+              <ul class="challenge-grid" role="list">
+                <li v-for="(entry, index) in challengeVisible" :key="entry.card_id" class="challenge-card">
+                  <button type="button" class="top-card" :aria-label="entry.cards.name" @click="openDetail('challenge', index)">
+                    <img :src="entry.cards.image_small || entry.cards.image_url" alt="" loading="lazy" />
+                    <span v-if="entry.quantity > 1" class="challenge-qty">×{{ entry.quantity }}</span>
+                  </button>
+                  <span class="challenge-name">{{ entry.cards.name }}</span>
+                  <RouterLink v-if="canTrade" :to="askRoute(entry)" class="challenge-ask">{{ t('profile.askForCard') }}</RouterLink>
+                </li>
+              </ul>
+              <button
+                v-if="challengeMatches.length > challengeShown"
+                type="button"
+                class="btn btn-outline-secondary challenge-more"
+                @click="challengeShown += CHALLENGE_PAGE"
+              >
+                {{ t('profile.showMore', { count: challengeMatches.length - challengeShown }) }}
+              </button>
+            </template>
           </section>
 
           <template v-if="isOwn">
@@ -543,7 +629,7 @@ async function logout() {
       :entry="detailEntry"
       :set="detailEntry ? setsStore.byId[detailEntry.cards.set_id] : null"
       :has-prev="detailIndex > 0"
-      :has-next="detailIndex < topCards.length - 1"
+      :has-next="detailIndex < detailList.length - 1"
       :interactive="false"
       @prev="detailIndex--"
       @next="detailIndex++"
@@ -1032,6 +1118,77 @@ async function logout() {
   padding: 0;
   border: none;
   background: none;
+}
+
+/* ---------- Public challenge collection ---------- */
+
+.challenge-desc {
+  margin: 0 0 0.9rem;
+  font-size: 0.9rem;
+  color: var(--pb-text-muted);
+}
+
+.challenge-search {
+  margin-bottom: 0.9rem;
+}
+
+.challenge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 0.9rem 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.challenge-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.challenge-card .top-card {
+  position: relative;
+}
+
+.challenge-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 63 / 88;
+  object-fit: cover;
+  border-radius: 4.5% / 3.2%;
+  box-shadow: var(--pb-shadow-card);
+}
+
+.challenge-qty {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--pb-text);
+  color: var(--pb-bg);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.challenge-name {
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.challenge-ask {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.challenge-more {
+  display: block;
+  margin: 1rem auto 0;
 }
 
 /* ---------- Sharing & settings ---------- */

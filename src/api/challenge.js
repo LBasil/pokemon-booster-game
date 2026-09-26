@@ -65,3 +65,16 @@ export const proposeTrade = (username, offerIds, requestIds) =>
 export const respondTrade = (tradeId, accept) => call('respond_trade', { p_trade_id: tradeId, p_accept: accept })
 
 export const cancelTrade = (tradeId) => call('cancel_trade', { p_trade_id: tradeId })
+
+/**
+ * Live changes to the player's offers (migration 0011 puts trade_offers in
+ * the supabase_realtime publication; RLS only sends the player's own).
+ * Calls onChange(newRow) on any insert/update. Returns an unsubscribe function.
+ */
+export function subscribeToTrades(userId, onChange) {
+  const channel = supabase
+    .channel(`trades-${userId}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'trade_offers' }, (payload) => onChange(payload.new))
+    .subscribe()
+  return () => supabase.removeChannel(channel)
+}

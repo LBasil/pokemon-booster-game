@@ -20,12 +20,14 @@ Supabase (Postgres + Auth + Realtime).
   own collection from the browser console.
 - **Challenge mode** (`/challenge`): a second, separate collection built
   with coins. Start with 1,000 coins, pay 100 per booster, earn more with a
-  daily reward that grows over a 7-day streak and three daily missions,
+  daily reward that grows over a 7-day streak, three daily missions and
+  four **weekly missions** (reset Monday 00:00 UTC, bigger rewards),
   recycle duplicates into coins and craft the cards you're missing. Packs
   keep the real pull rates (no pity timer), except that 1 booster in 500 is
   a "god pack" (holos and better only). **Trade cards** with other
-  trainers (up to 5 for 5, or as a gift; "Propose a trade" on any public
-  profile), follow your challenge booster history, and climb the two
+  trainers (up to 5 for 5, or as a gift; public profiles show their
+  **challenge collection** with an "Ask for it" button per card; offers
+  and answers show up **live**, no reload), follow your challenge booster history, and climb the two
   challenge leaderboards. Badges in the navigation show rewards to claim
   and offers to answer. Every coin and card moves server-side, and the
   unlimited collection is never touched.
@@ -170,6 +172,10 @@ its **SQL editor** and run, in order:
    run otherwise); until then
    those totals and achievements stay empty. New subsets get linked by
    `npm run populate:sync` (`link_subsets()`).
+11. `supabase/migrations/0011_weekly_missions_live_trades.sql` — weekly
+   challenge missions, and trade offers pushed live (adds `trade_offers` to
+   the Realtime publication). Run it after 0010; until then no weekly
+   missions, and trades refresh on reload only.
 
 Then in **Authentication**:
 

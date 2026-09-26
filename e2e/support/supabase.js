@@ -33,6 +33,13 @@ const MISSIONS = [
   { mission: 'pull_holo', target: 1, reward: 100 },
   { mission: 'recycle', target: 5, reward: 50 },
 ]
+// Weekly missions (migration 0011)
+const WEEKLY = [
+  { mission: 'week_open_packs', target: 25, reward: 400 },
+  { mission: 'week_pull_ultra', target: 2, reward: 400 },
+  { mission: 'week_recycle', target: 50, reward: 250 },
+  { mission: 'week_daily', target: 5, reward: 300 },
+]
 
 /**
  * @param {import('@playwright/test').Page} page
@@ -62,7 +69,7 @@ export async function mockSupabase(page, options = {}) {
       daily_streak: 0,
       daily_available: true,
       daily_reward: 200,
-      progress: { open_packs: 0, pull_holo: 0, recycle: 0 },
+      progress: { open_packs: 0, pull_holo: 0, recycle: 0, week_open_packs: 0, week_pull_ultra: 0, week_recycle: 0, week_daily: 0 },
       claimed: [],
       ...options.challenge,
     },
@@ -88,6 +95,8 @@ export async function mockSupabase(page, options = {}) {
       daily_reward: c.daily_reward,
       today: new Date().toISOString().slice(0, 10),
       missions: MISSIONS.map((m) => ({ ...m, progress: Math.min(c.progress[m.mission], m.target), claimed: c.claimed.includes(m.mission) })),
+      weekly: WEEKLY.map((m) => ({ ...m, progress: Math.min(c.progress[m.mission] ?? 0, m.target), claimed: c.claimed.includes(m.mission) })),
+      week_start: '2026-09-21',
     }
   }
   const calls = []
@@ -141,7 +150,7 @@ export async function mockSupabase(page, options = {}) {
       return json({ ...challengeState(), reward })
     }
     if (path === '/rest/v1/rpc/claim_mission') {
-      const m = MISSIONS.find((x) => x.mission === args.p_mission)
+      const m = [...MISSIONS, ...WEEKLY].find((x) => x.mission === args.p_mission)
       if (c.claimed.includes(m.mission)) return raise('already_claimed')
       if (c.progress[m.mission] < m.target) return raise('mission_incomplete')
       c.claimed.push(m.mission)
@@ -152,6 +161,7 @@ export async function mockSupabase(page, options = {}) {
       if (c.coins < 100) return raise('not_enough_coins')
       c.coins -= 100
       c.progress.open_packs++
+      c.progress.week_open_packs++
       c.progress.pull_holo++
       state.packs.challenge++
       for (const card of PACK) {

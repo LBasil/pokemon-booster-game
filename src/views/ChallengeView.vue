@@ -13,6 +13,7 @@ import {
   countdownParts,
   dailyReward,
   msUntilReset,
+  msUntilWeeklyReset,
 } from '@/utils/challenge'
 import { completionPercent } from '@/utils/progress'
 import { nextUp } from '@/utils/achievements'
@@ -64,6 +65,13 @@ const resetIn = computed(() => {
   return hours ? t('challenge.inHours', { hours, minutes }) : t('challenge.inMinutes', { minutes })
 })
 
+// Weekly missions: Monday 00:00 UTC ("3 d 5 h" when more than a day away)
+const weeklyResetIn = computed(() => {
+  const { hours, minutes } = countdownParts(msUntilWeeklyReset(new Date(now.value)))
+  if (hours >= 24) return t('challenge.inDays', { days: Math.floor(hours / 24), hours: hours % 24 })
+  return hours ? t('challenge.inHours', { hours, minutes }) : t('challenge.inMinutes', { minutes })
+})
+
 // ---------- Feedback ----------
 
 const notice = ref('')
@@ -109,7 +117,15 @@ const claimDaily = () =>
 
 // Top-of-page summary of what's waiting (what the navigation badge counts),
 // so its reason is on screen right away, even on short desktop windows
-const finishedMissions = computed(() => challenge.missions.filter((m) => !m.claimed && m.progress >= m.target))
+const finishedMissions = computed(() => [...challenge.missions, ...challenge.weekly].filter((m) => !m.claimed && m.progress >= m.target))
+
+// Today's missions, then this week's (migration 0011; none before it)
+const missionGroups = computed(() =>
+  [
+    { key: 'daily', missions: challenge.missions },
+    { key: 'weekly', missions: challenge.weekly },
+  ].filter((group) => group.missions.length),
+)
 
 const claimMission = (mission) =>
   run(mission, async () => {
@@ -232,8 +248,13 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
               <h2 id="ch-missions-title" class="ch-tile-title">{{ t('challenge.missionsTitle') }}</h2>
               <span class="ch-reset">{{ t('challenge.resetIn', { time: resetIn }) }}</span>
             </div>
+            <template v-for="group in missionGroups" :key="group.key">
+            <div v-if="group.key === 'weekly'" class="ch-week-head">
+              <h3 class="ch-week-title">{{ t('challenge.weeklyTitle') }}</h3>
+              <span class="ch-reset">{{ t('challenge.resetIn', { time: weeklyResetIn }) }}</span>
+            </div>
             <ul class="ch-mission-list" role="list">
-              <li v-for="mission in challenge.missions" :key="mission.mission" class="ch-mission" :class="{ claimed: mission.claimed }">
+              <li v-for="mission in group.missions" :key="mission.mission" class="ch-mission" :class="{ claimed: mission.claimed }">
                 <div class="ch-mission-text">
                   <p class="ch-mission-name">{{ t(`challenge.missions.${mission.mission}`, { count: mission.target }, mission.target) }}</p>
                   <div class="ch-mission-progress">
@@ -267,6 +288,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
                 </button>
               </li>
             </ul>
+            </template>
           </section>
 
           <!-- ============ Challenge collection ============ -->
@@ -681,6 +703,22 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   font-size: 0.8rem;
   font-weight: 600;
   white-space: nowrap;
+}
+
+/* Weekly missions: a second list under the daily ones */
+.ch-week-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.25rem 0 0.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--pb-border);
+}
+
+.ch-week-title {
+  margin: 0;
+  font-size: 0.95rem;
 }
 
 .ch-mission-list {

@@ -12,7 +12,8 @@ import { useChallengeCollectionStore } from '@/stores/collection'
 import { affordablePacks } from '@/utils/challenge'
 
 // The signed-in player's challenge wallet: coins, daily reward
-// and today's missions. Every change comes back from the server.
+// and today's + this week's missions (weekly: migration 0011, empty
+// before). Every change comes back from the server.
 // `badge` = what's waiting (rewards + incoming trades) for the navigation.
 const BADGE_TTL = 60_000
 export const useChallengeStore = defineStore('challenge', {
@@ -31,11 +32,12 @@ export const useChallengeStore = defineStore('challenge', {
   getters: {
     coins: (s) => s.state?.coins ?? 0,
     missions: (s) => s.state?.missions ?? [],
+    weekly: (s) => s.state?.weekly ?? [],
     affordable: (s) => affordablePacks(s.state?.coins),
     // Missions done but not yet claimed + the daily reward: drives the hub badge
     pendingRewards: (s) =>
       (s.state?.daily_available ? 1 : 0) +
-      (s.state?.missions ?? []).filter((m) => !m.claimed && m.progress >= m.target).length,
+      [...(s.state?.missions ?? []), ...(s.state?.weekly ?? [])].filter((m) => !m.claimed && m.progress >= m.target).length,
   },
   actions: {
     /** Refreshes the navigation badge (at most once a minute unless forced). */

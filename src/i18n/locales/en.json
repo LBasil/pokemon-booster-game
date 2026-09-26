@@ -296,7 +296,13 @@
       "auto": "Auto",
       "full": "Full",
       "light": "Light"
-    }
+    },
+    "challengeCollection": "Challenge collection",
+    "challengeCount": "{count} card | {count} cards",
+    "challengeDesc": "Cards built up in the challenge mode, with coins.",
+    "challengeTradeHint": "Spotted a card you want? Ask for it and pick what you give in return.",
+    "askForCard": "Ask for it",
+    "showMore": "Show more ({count})"
   },
   "notFound": {
     "title": "This booster is empty",
@@ -441,7 +447,11 @@
     "missions": {
       "open_packs": "Open {count} booster | Open {count} boosters",
       "pull_holo": "Pull a holo or better | Pull {count} holos or better",
-      "recycle": "Recycle {count} duplicate | Recycle {count} duplicates"
+      "recycle": "Recycle {count} duplicate | Recycle {count} duplicates",
+      "week_open_packs": "Open {count} booster | Open {count} boosters",
+      "week_pull_ultra": "Pull an ultra rare or better | Pull {count} ultra rares or better",
+      "week_recycle": "Recycle {count} duplicate | Recycle {count} duplicates",
+      "week_daily": "Claim the daily reward on {count} day | Claim the daily reward on {count} days"
     },
     "collectionTitle": "Challenge collection",
     "seeCollection": "See all",
@@ -494,7 +504,9 @@
     "historyTitle": "Challenge booster history",
     "waitingDaily": "Your daily reward is ready",
     "waitingMissions": "{count} mission finished | {count} missions finished",
-    "seeMissions": "See missions"
+    "seeMissions": "See missions",
+    "weeklyTitle": "This week",
+    "inDays": "{days} d {hours} h"
   },
   "trades": {
     "title": "Trades",
@@ -1368,7 +1380,7 @@
       "packStreak": "Open boosters {count} days in a row",
       "packDays": "Open boosters on {count} different days",
       "coinsEarned": "Earn {count} coins (the starting bonus excluded)",
-      "missions": "Complete {count} daily missions",
+      "missions": "Complete {count} missions (daily or weekly)",
       "dailyStreak": "Claim the daily reward {count} days in a row",
       "trades": "Complete a trade | Complete {count} trades",
       "gifts": "Give cards to another player | Give cards to other players {count} times",

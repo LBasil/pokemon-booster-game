@@ -349,6 +349,23 @@ docs/manual-testing.md      checklist for a real-account click-through
   subsets, streaks). `npm test`: 112, e2e: 111 (2026-09-26: responsive
   pass, collapsible achievement categories, history "With a hit" filter
   (`fetchOpenings({ hitsOnly })`, server side), back-to-top button).
+- **Weekly missions, live trades, public challenge collection** built
+  2026-09-26: `0011_weekly_missions_live_trades.sql` **written but NOT
+  applied** (run after 0010). Weekly = ISO week in UTC (Monday 00:00):
+  4 missions (25 packs +400, 2 ultra+ +400, recycle 50 +250, daily reward
+  5 days +300), claimed through the same `claim_mission` (ledger row dated
+  on the Monday: the existing unique index = once a week);
+  `challenge_state()` gains `weekly` + `week_start`, `challenge_badge()`
+  counts them. `trade_offers` joins `supabase_realtime`: `App.vue` runs
+  `useTradesStore().live(userId)` while signed in (badge + list + challenge
+  collection on an accepted swap). Public profiles show the challenge
+  collection (`challenge_collection_of`, already in 0007) with "Ask for
+  it" -> `/challenge/trades?to=<name>&want=<card id>` (prefilled).
+  Verified with PGlite (23 checks: Monday start, progress this week only,
+  last week / unlimited excluded, claim once a week, refusals, badge,
+  daily missions untouched, publication, 0010 stats). Realtime itself
+  can't run in e2e (no websocket mock): check it with two accounts.
+  `npm test`: 113, e2e: 115.
 - **2026-09-26: 0010 is applied but 0009 is NOT** (checked through the REST
   API: `achievement_unlocks.mode` missing, `achievement_rates(p_mode)`
   unknown) — so `player_achievements` fails on every call ("WITHIN GROUP
@@ -393,9 +410,9 @@ docs/manual-testing.md      checklist for a real-account click-through
 
 ## TODO
 
-- **Apply `0009_achievements_by_mode.sql`, then re-run `0010_subsets_and_pack_stats.sql`**
-  in the SQL editor (user), then **deploy** the current client (it uses the 0007-0009 RPCs; without
-  0009 the challenge achievements just lack rates and persistence).
+- **Apply `0011_weekly_missions_live_trades.sql`** (user; 0009 + 0010 were
+  run 2026-09-26), then **deploy**. Without it the weekly block just
+  doesn't show and trades update on reload only.
 - Post-migration dashboard steps (user): Supabase Auth > URL Configuration
   redirect URLs (`<site>/game`, `<site>/reset-password`); check that
   `pull_feed` is in the `supabase_realtime` publication; the three GitHub
@@ -403,20 +420,9 @@ docs/manual-testing.md      checklist for a real-account click-through
 - Go through `docs/manual-testing.md` with real accounts (never done so
   far — real sign-ups need the confirmation email, which is ON; trades
   need two accounts).
-- Push notifications when the app is closed (daily reward ready, trade
-  offer received): needs Web Push — VAPID keys, a subscriptions table, and
-  a Supabase Edge Function + scheduled job to send them, which I can't
-  deploy without CLI access. In-app badges cover the app-open case.
-- Live trade updates: subscribe to `trade_offers` changes (Realtime) so an
-  incoming offer or an answer shows up without a reload.
-- Counter-offers: answer a trade with a modified offer instead of only
-  accept/decline.
-- Show the challenge collection on public profiles (a tab next to the
-  unlimited one), so partners can browse before offering.
-- Challenge-only achievement categories (trades done, god packs, coins
-  earned, daily streaks): need server counts, e.g. more fields in
-  `player_achievements`.
-- Weekly missions (bigger goals, bigger rewards) on top of the daily ones.
+- Parked (user, 2026-09-26: "on s'en fiche pour l'instant"): counter-offers,
+  real subset pull rates. Not wanted: push notifications (it's a website,
+  not really an app). Not urgent: rotating the pokemontcg.io key.
 
 ## Known gaps
 

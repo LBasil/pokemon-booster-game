@@ -6,6 +6,7 @@ import {
   craftPrice,
   dailyReward,
   msUntilReset,
+  msUntilWeeklyReset,
   recyclePreview,
   recycleValue,
 } from './challenge'
@@ -51,5 +52,12 @@ describe('challenge economy', () => {
     expect(msUntilReset(new Date('2026-12-31T23:59:00Z'))).toBe(60 * 1000)
     expect(countdownParts(90 * 60 * 1000)).toEqual({ hours: 1, minutes: 30 })
     expect(countdownParts(10)).toEqual({ hours: 0, minutes: 1 })
+  })
+
+  it('resets the weekly missions on Monday 00:00 UTC', () => {
+    const hour = 60 * 60 * 1000
+    expect(msUntilWeeklyReset(new Date('2026-09-27T23:00:00Z'))).toBe(hour) // Sunday night
+    expect(msUntilWeeklyReset(new Date('2026-09-28T00:00:00Z'))).toBe(7 * 24 * hour) // just reset
+    expect(msUntilWeeklyReset(new Date('2026-09-26T12:00:00Z'))).toBe(36 * hour) // Saturday noon
   })
 })

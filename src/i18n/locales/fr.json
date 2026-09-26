@@ -296,7 +296,13 @@
       "auto": "Auto",
       "full": "Complètes",
       "light": "Légères"
-    }
+    },
+    "challengeCollection": "Collection défi",
+    "challengeCount": "{count} carte | {count} cartes",
+    "challengeDesc": "Les cartes obtenues en mode défi, avec des pièces.",
+    "challengeTradeHint": "Une carte te plaît ? Demande-la et choisis ce que tu donnes en échange.",
+    "askForCard": "La demander",
+    "showMore": "Voir plus ({count})"
   },
   "notFound": {
     "title": "Ce booster est vide",
@@ -441,7 +447,11 @@
     "missions": {
       "open_packs": "Ouvrir {count} booster | Ouvrir {count} boosters",
       "pull_holo": "Obtenir une holo ou mieux | Obtenir {count} holos ou mieux",
-      "recycle": "Recycler {count} doublon | Recycler {count} doublons"
+      "recycle": "Recycler {count} doublon | Recycler {count} doublons",
+      "week_open_packs": "Ouvre {count} booster | Ouvre {count} boosters",
+      "week_pull_ultra": "Tire une ultra rare ou mieux | Tire {count} ultra rares ou mieux",
+      "week_recycle": "Recycle {count} doublon | Recycle {count} doublons",
+      "week_daily": "Récupère la récompense du jour {count} jour | Récupère la récompense du jour {count} jours"
     },
     "collectionTitle": "Collection Défi",
     "seeCollection": "Tout voir",
@@ -494,7 +504,9 @@
     "historyTitle": "Historique des boosters du défi",
     "waitingDaily": "Ta récompense du jour est prête",
     "waitingMissions": "{count} mission terminée | {count} missions terminées",
-    "seeMissions": "Voir les missions"
+    "seeMissions": "Voir les missions",
+    "weeklyTitle": "Cette semaine",
+    "inDays": "{days} j {hours} h"
   },
   "trades": {
     "title": "Échanges",
@@ -1368,7 +1380,7 @@
       "packStreak": "Ouvre des boosters {count} jours de suite",
       "packDays": "Ouvre des boosters sur {count} jours différents",
       "coinsEarned": "Gagne {count} pièces (bonus de départ non compris)",
-      "missions": "Termine {count} missions du jour",
+      "missions": "Termine {count} missions (du jour ou de la semaine)",
       "dailyStreak": "Récupère la récompense du jour {count} jours de suite",
       "trades": "Termine un échange | Termine {count} échanges",
       "gifts": "Offre des cartes à un autre joueur | Offre des cartes à d’autres joueurs {count} fois",

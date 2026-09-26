@@ -45,6 +45,13 @@ export function msUntilReset(now = new Date()) {
   return next - now.getTime()
 }
 
+/** Milliseconds until the weekly missions reset (Monday 00:00 UTC, migration 0011). */
+export function msUntilWeeklyReset(now = new Date()) {
+  const daysLeft = (8 - now.getUTCDay()) % 7 || 7 // getUTCDay: 0 = Sunday
+  const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + daysLeft)
+  return next - now.getTime()
+}
+
 /** "5 h 12 min" / "12 min" style countdown parts. */
 export function countdownParts(ms) {
   const minutes = Math.max(1, Math.ceil(ms / 60000))

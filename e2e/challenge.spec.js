@@ -113,3 +113,15 @@ test('a missing card can be crafted from the binder', async ({ page }) => {
   await page.getByRole('button', { name: /Giovanni/ }).click()
   await expect(detail.getByRole('button', { name: /Craft/ })).toBeDisabled()
 })
+
+test('weekly missions show under the daily ones and can be claimed', async ({ page }) => {
+  await mockSupabase(page, { challenge: { progress: { open_packs: 0, pull_holo: 0, recycle: 0, week_open_packs: 25 } } })
+  await page.goto('/challenge')
+  await expect(page.getByRole('heading', { name: 'This week' })).toBeVisible()
+  const weekly = page.locator('.ch-mission').filter({ hasText: 'Open 25 boosters' })
+  await expect(page.locator('.ch-waiting')).toContainText('1 mission') // the reason for the badge, up top
+  await weekly.getByRole('button').click()
+  await expect(weekly).toContainText('Claimed')
+  await expect(page.locator('.ch-coins')).toContainText('1,400')
+  await expect(page.locator('.ch-mission').filter({ hasText: 'Pull 2 ultra rares or better' }).getByRole('button')).toBeDisabled()
+})

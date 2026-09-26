@@ -111,7 +111,7 @@ test('recycling from the challenge hub keeps the page on screen', async ({ page 
   await page.getByRole('button', { name: 'Recycle duplicates' }).click()
   await page.getByRole('button', { name: 'Yes, recycle them' }).click()
   await expect(page.getByText('42 duplicates recycled: +42 coins')).toBeVisible()
-  await expect(page.locator('.ch-mission')).toHaveCount(3)
+  await expect(page.locator('.ch-mission')).toHaveCount(7) // 3 daily + 4 weekly
   await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
   await expect(page.locator('.ch-coins')).toContainText('1,042')
 })
