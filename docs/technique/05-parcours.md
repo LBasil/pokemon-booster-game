@@ -13,7 +13,7 @@ qui revient à l'écran.
 5. [Le hub du Défi : récompenses, missions, recyclage, fabrication](#5-le-hub-du-défi)
 6. [Échanger des cartes](#6-échanger-des-cartes)
 7. [Succès](#7-succès)
-8. [Le mini-jeu « Plus ou moins »](#8-le-mini-jeu-du-défi)
+8. [Les mini-jeux du Défi](#8-les-mini-jeux-du-défi)
 9. [Communauté : fil et classements](#9-communauté--fil-et-classements)
 10. [Un déploiement pendant qu'un onglet est ouvert](#10-un-déploiement-pendant-quun-onglet-est-ouvert)
 
@@ -469,7 +469,9 @@ repliables (mémorisées par appareil dans `pb-achievements-collapsed`).
 
 ---
 
-## 8. Le mini-jeu du Défi
+## 8. Les mini-jeux du Défi
+
+### « Plus ou moins »
 
 Page : [MinigameView.vue](../../src/views/MinigameView.vue)
 (`/challenge/games/higher-lower`), store `minigame`, migration 0013.
@@ -513,6 +515,58 @@ sequenceDiagram
   prix s'affichent, même si le store a déjà reçu la suivante. La liste des
   cartes boucle sur la constante `SIDES`, avec le côté pour clé : une clé
   qui changeait à chaque paire faisait disparaître les prix.
+
+### « Électrode Shiny Flip »
+
+Page : [ElectrodeFlipView.vue](../../src/views/ElectrodeFlipView.vue)
+(`/challenge/games/electrode-flip`), store `electrodeFlip`, migration 0014.
+
+Le Voltorbataille (Voltorb Flip) de HeartGold/SoulSilver, avec des
+Électrode shiny : 25 cases cachent des 1, 2, 3 et des Électrode ; au bout
+de chaque ligne et colonne, la somme de ses points et son nombre
+d'Électrode.
+
+```mermaid
+sequenceDiagram
+  actor J as Joueur
+  participant EV as ElectrodeFlipView
+  participant DB as Postgres
+
+  EV->>DB: electrode_flip_state() — reprend un plateau en cours
+  J->>EV: « Jouer un plateau »
+  EV->>DB: electrode_flip_start()
+  DB-->>EV: indices des lignes/colonnes, cases toutes cachées
+  loop chaque case
+    J->>EV: touche une case (en mode Mémo : pose une marque, rien n'est envoyé)
+    EV->>DB: electrode_flip_flip(index)
+    DB-->>EV: valeur, points, plateau (entier s'il est fini), état
+  end
+  J->>EV: « Encaisser » (facultatif)
+  EV->>DB: electrode_flip_cash_out()
+```
+
+- **Règles** (**miroir** : `electrode_flip_rules()` / `electrode_flip_end()`
+  et `src/utils/electrodeFlip.js`) : points = produit des cases
+  retournées. Tous les 2 et 3 retournés → plateau gagné, niveau + 1
+  (5 niveaux, dispositions de Voltorb Flip niveaux 1 à 5 :
+  `electrode_flip_layout()`, de 6 à 10 Électrode). Un Électrode → perdu,
+  0 point. Encaisser garde les points. Après une défaite ou un
+  encaissement, le niveau descend au nombre de cases retournées s'il est
+  plus bas (au moins 1).
+- **Pièces** : points = pièces, 300 par jour de jeu (UTC) au maximum
+  (`electrode_flip_today()` additionne les plateaux du jour) ; ensuite
+  les plateaux se jouent pour le record (meilleur plateau, meilleur
+  niveau). Une ligne `electrode_flip` par plateau payé dans le journal
+  (compte dans les « pièces gagnées »).
+- **Anti-triche** : le plateau reste sur le serveur, le client ne reçoit
+  que les indices et les cases déjà retournées. `electrode_flip_start()`
+  reprend le plateau en cours au lieu d'en redistribuer un, pour qu'on ne
+  puisse pas fuir un plateau mal parti en rechargeant.
+- **Mémo** : marques (Électrode, 1, 2, 3) posées sur les cases cachées,
+  purement locales à la vue ; le clic droit marque un Électrode. Les
+  lignes sans Électrode sont en vert, celles qui n'ont que des 1 et des
+  Électrode sont estompées (`lineKind()`).
+- Électrode dessiné en CSS (tokens `--pb-electrode-*`, bleu shiny).
 
 ---
 

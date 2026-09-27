@@ -31,7 +31,10 @@ How it works inside (every table, RPC and flow, in French):
   **"Higher or lower"**:
   two cards, tap the pricier one within 15 seconds; 3 paid runs a day at
   5 coins per right answer (100 per run at most), then unlimited runs for
-  the record. Packs
+  the record — and **"Shiny Electrode Flip"** (Voltorb Flip): a 5x5 board
+  of 1s, 2s, 3s and shiny Electrodes with row/column hints; flip every 2
+  and 3 to clear it and move up a level (5 levels), an Electrode loses the
+  board, cash out any time; points = coins, up to 300 a day. Packs
   keep the real pull rates (no pity timer), except that 1 booster in 500 is
   a "god pack" (holos and better only). **Trade cards** with other
   trainers (up to 5 for 5, or as a gift; public profiles show their
@@ -200,6 +203,10 @@ its **SQL editor** and run, in order:
    lower" mini-game (server-drawn pairs, answers checked and paid by the
    server, 3 paid runs a day). Run it after 0012; until then the challenge
    hub simply doesn't show the mini-game.
+14. `supabase/migrations/0014_minigame_electrode_flip.sql` — the "Shiny
+   Electrode Flip" mini-game (boards dealt and kept by the server, 300
+   coins a day at most). Run it after 0013; until then the game says
+   "Coming soon".
 
 Then in **Authentication**:
 

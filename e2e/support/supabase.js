@@ -57,6 +57,17 @@ export const MINIGAME_PAIRS = [
  *   achievementRates?: object[] | 'missing', sets?: object[], stats?: Record<string, object> }} [options] - rates rows may carry a `mode` (default unlimited);
  *   sets replaces SETS; stats = player_achievements().stats per mode (migration 0010)
  */
+// "Shiny Electrode Flip" (migration 0014): every board the mock deals, row
+// by row (0 = Electrode). The 2s are tiles 2 and 18, the 3 is tile 5, the
+// Electrodes are tiles 3, 9, 11 and 20: clearing it scores 2 x 3 x 2 = 12.
+export const ELECTRODE_BOARD = [
+  1, 1, 2, 0, 1,
+  3, 1, 1, 1, 0,
+  1, 0, 1, 1, 1,
+  1, 1, 1, 2, 1,
+  0, 1, 1, 1, 1,
+]
+
 export async function mockSupabase(page, options = {}) {
   const state = {
     collection: options.collection ?? [collectionEntry('sv3pt5-4', 2), collectionEntry('base1-4')],
@@ -101,6 +112,8 @@ export async function mockSupabase(page, options = {}) {
     // "Higher or lower" (migration 0013): 'missing' = not applied; the pairs
     // come in MINIGAME_PAIRS order, so tests know the right answer
     minigame: options.minigame === 'missing' ? 'missing' : { paidUsed: 0, best: 0, todayCoins: 0, run: null, next: 0, ...options.minigame },
+    electrodeFlip:
+      options.electrodeFlip === 'missing' ? 'missing' : { level: 1, todayCoins: 0, bestPoints: 0, bestLevel: 0, board: null, ...options.electrodeFlip },
   }
   const challengeState = () => {
     const c = state.challenge
@@ -214,6 +227,81 @@ export async function mockSupabase(page, options = {}) {
           right: { id: pair[1], value: right },
           state: mgState(),
         })
+      }
+    }
+    // ---- Shiny Electrode Flip (migration 0014) ----
+    if (path.startsWith('/rest/v1/rpc/electrode_flip_')) {
+      const ef = state.electrodeFlip
+      if (ef === 'missing') return json({ code: 'PGRST202', message: `Could not find the function public.${path.split('/').pop()} in the schema cache` }, 404)
+      const line = (indexes) => ({
+        points: indexes.reduce((sum, i) => sum + ef.board.tiles[i], 0),
+        electrodes: indexes.filter((i) => ef.board.tiles[i] === 0).length,
+      })
+      const five = [0, 1, 2, 3, 4]
+      const efView = () => {
+        const b = ef.board
+        return {
+          level: b.level,
+          points: b.points,
+          flips: b.flips,
+          status: b.status,
+          rows: five.map((r) => line(five.map((c) => r * 5 + c))),
+          cols: five.map((c) => line(five.map((r) => r * 5 + c))),
+          tiles: b.tiles.map((v, i) => (b.flipped[i] || b.status !== 'playing' ? v : null)),
+          flipped: [...b.flipped],
+        }
+      }
+      const efState = () => ({
+        levels: 5,
+        daily_coins: 300,
+        coins: c.coins,
+        level: ef.board?.status === 'playing' ? ef.board.level : ef.level,
+        today_coins: ef.todayCoins,
+        coins_left: Math.max(0, 300 - ef.todayCoins),
+        best_points: ef.bestPoints,
+        best_level: ef.bestLevel,
+        board: ef.board?.status === 'playing' ? efView() : null,
+      })
+      const end = (status) => {
+        const b = ef.board
+        if (status === 'lost') b.points = 0
+        const earned = Math.max(0, Math.min(b.points, 300 - ef.todayCoins))
+        c.coins += earned
+        ef.todayCoins += earned
+        b.status = status
+        if (status !== 'lost') ef.bestPoints = Math.max(ef.bestPoints, b.points)
+        if (status === 'won') ef.bestLevel = Math.max(ef.bestLevel, b.level)
+        ef.level = status === 'won' ? Math.min(b.level + 1, 5) : Math.max(1, Math.min(b.level, b.flips))
+        return earned
+      }
+      if (path === '/rest/v1/rpc/electrode_flip_state') return json(efState())
+      if (path === '/rest/v1/rpc/electrode_flip_start') {
+        if (ef.board?.status !== 'playing') {
+          ef.board = { level: ef.level, tiles: [...ELECTRODE_BOARD], flipped: Array(25).fill(false), flips: 0, points: 0, status: 'playing' }
+        }
+        return json(efState())
+      }
+      if (path === '/rest/v1/rpc/electrode_flip_flip') {
+        const b = ef.board
+        if (b?.status !== 'playing') return raise('no_game')
+        const i = args.p_index
+        if (b.flipped[i]) return raise('already_flipped')
+        const value = b.tiles[i]
+        b.flipped[i] = true
+        if (value > 0) {
+          b.flips++
+          b.points = b.points === 0 ? value : b.points * value
+        }
+        let earned = 0
+        if (value === 0) earned = end('lost')
+        else if (b.tiles.every((v, j) => v < 2 || b.flipped[j])) earned = end('won')
+        return json({ index: i, value, earned, result: efView(), state: efState() })
+      }
+      if (path === '/rest/v1/rpc/electrode_flip_cash_out') {
+        if (ef.board?.status !== 'playing') return raise('no_game')
+        if (!ef.board.flips) return raise('nothing_to_cash')
+        const earned = end('cashed')
+        return json({ earned, result: efView(), state: efState() })
       }
     }
     if (path === '/rest/v1/rpc/claim_daily_reward') {

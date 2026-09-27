@@ -435,7 +435,10 @@
       "card_not_for_trade": "One of these cards isn’t for trade any more.",
       "no_game": "This run is over. Start a new one.",
       "slow_down": "Too many runs in a row: wait a minute.",
-      "minigame_unavailable": "No cards to compare right now. Try again later."
+      "minigame_unavailable": "No cards to compare right now. Try again later.",
+      "invalid_tile": "That tile doesn’t exist.",
+      "already_flipped": "That tile is already flipped.",
+      "nothing_to_cash": "Flip at least one tile before cashing out."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -478,7 +481,7 @@
       "rarity": "Rarity",
       "recycleCol": "Recycle",
       "craftCol": "Craft",
-      "minigame": "Mini-games: each one pays a few runs a day in coins, then plays on for the record."
+      "minigame": "Mini-games: each one pays coins up to a daily limit, then plays on for the record."
     },
     "buckets": {
       "common": "Common",
@@ -575,7 +578,7 @@
   "games": {
     "eyebrow": "Challenge",
     "title": "Mini-games",
-    "subtitle": "Earn coins for your challenge boosters. Each game has a few paid runs a day, then you can play as much as you like for the record.",
+    "subtitle": "Earn coins for your challenge boosters. Each game pays coins up to a daily limit, then you can play as much as you like for the record.",
     "hubDesc": "Earn coins for your boosters by playing.",
     "seeAll": "All mini-games",
     "soon": "Coming soon",
@@ -585,6 +588,10 @@
       "higher-lower": {
         "title": "Higher or lower",
         "desc": "Which of the two cards is worth more?"
+      },
+      "electrode-flip": {
+        "title": "Shiny Electrode Flip",
+        "desc": "Flip tiles, multiply your points, dodge the Electrodes."
       }
     }
   },
@@ -626,6 +633,59 @@
       "paid": "{runs} paid runs a day: {coins} coins per right answer, for the first {answers} of the run ({max} coins max per run).",
       "free": "After that, play as much as you like for the record, without coins. Paid runs come back at midnight UTC.",
       "harder": "The longer the streak, the closer the prices."
+    }
+  },
+  "electrodeFlip": {
+    "eyebrow": "Mini-game",
+    "title": "Shiny Electrode Flip",
+    "subtitle": "Flip the tiles, multiply your points and dodge the shiny Electrodes. Clear the board to move up a level.",
+    "unavailable": "The mini-game is coming soon.",
+    "loadError": "Couldn’t load the mini-game. Try again in a moment.",
+    "level": "Level {level}",
+    "levelShort": "level {level}",
+    "points": "Points:",
+    "paidChip": "Pays coins",
+    "freeChip": "For the record",
+    "coinsLeftLine": "{count} coins left to win today",
+    "nextFree": "No more coins today: play for the record.",
+    "deal": "Deal a level {level} board",
+    "next": "Next board (level {level})",
+    "cashOut": "Cash out {points} points",
+    "memo": "Memo",
+    "memoPick": "Mark to place",
+    "memoOn": "Memo: tap hidden tiles to note what you think they hide.",
+    "howTo": "Flip every 2 and 3. Right-click (or Memo) marks a tile.",
+    "markElectrode": "Electrode",
+    "mark": "Mark {value}",
+    "tileHidden": "Row {row}, column {col}: hidden",
+    "tileMarked": "Row {row}, column {col}: hidden, marked {marks}",
+    "tileValue": "Row {row}, column {col}: {value}",
+    "tileElectrode": "Row {row}, column {col}: Electrode",
+    "rowHint": "Row {n}: {points} points, {electrodes} Electrodes",
+    "colHint": "Column {n}: {points} points, {electrodes} Electrodes",
+    "over": {
+      "won": "Board cleared!",
+      "lost": "Boom! A shiny Electrode.",
+      "cashed": "Cashed out"
+    },
+    "overPoints": "{points} points",
+    "overCoins": "Coins won:",
+    "capped": "No coins: today’s limit is reached.",
+    "record": "New record!",
+    "nextUp": "Next board: level {level}",
+    "nextDown": "Next board: back to level {level}",
+    "nextSame": "Next board: level {level} again",
+    "statLevel": "Level",
+    "statToday": "Won today",
+    "statBest": "Best board",
+    "rulesTitle": "Rules",
+    "rules": {
+      "tiles": "Each tile hides a 1, 2, 3 or an Electrode. At the end of each row and column: its points and how many Electrodes it holds.",
+      "points": "Your points multiply with every tile flipped. Flip every 2 and 3 to clear the board and move up a level ({levels} levels, more Electrodes each time).",
+      "electrode": "An Electrode loses the board and its points. You can cash out at any time to keep them.",
+      "level": "After a loss or a cash out, the level drops to the number of tiles you flipped, if that’s lower.",
+      "coins": "Points are paid in coins, up to {max} a day. After that, play for the record; the limit resets at midnight UTC.",
+      "memo": "Memo: note what you’ve worked out on hidden tiles (right-click marks an Electrode)."
     }
   },
   "achievements": {

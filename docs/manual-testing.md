@@ -92,6 +92,20 @@ address** for the sign-up part.
 - [ ] On a phone: question, both cards, prices and "Right!" fit above the
       tab bar.
 
+## Shiny Electrode Flip (after migration 0014)
+
+- [ ] The games page lists "Shiny Electrode Flip" with "300 coins left to
+      win today · level 1" → Deal a level 1 board: 25 hidden tiles, a
+      points + Electrode hint at the end of each row and column.
+- [ ] Flip tiles: points multiply; "Cash out N points" keeps them (+N in
+      the header's coins).
+- [ ] Flip every 2 and 3 → "Board cleared!", coins, "Next board: level 2";
+      the whole board shows, unflipped tiles dimmed.
+- [ ] An Electrode → "Boom!", no coins, level drops to the tiles flipped.
+- [ ] Reload mid-board → the same board comes back (no fresh deal).
+- [ ] Memo marks (and right click) don't flip anything.
+- [ ] On a 320px phone: the whole board and its hints fit, both themes.
+
 ## Trades (after migration 0007, two accounts A and B)
 
 - [ ] On B's public profile, A taps "Propose a trade" → the trades page

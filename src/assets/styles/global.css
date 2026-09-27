@@ -71,6 +71,11 @@
   /* Challenge mode coins (icon fill + amounts) */
   --pb-coin: #ffd23f;
   --pb-coin-edge: #b8860b;
+
+  /* Shiny Electrode (Electrode Flip mini-game): blue top, white bottom */
+  --pb-electrode-top: #4d8dff;
+  --pb-electrode-bottom: #f1f4fb;
+  --pb-electrode-edge: #0a0d1a;
 }
 
 [data-bs-theme='light'] {
@@ -113,6 +118,10 @@
 
   --pb-coin: #a16207;
   --pb-coin-edge: #854d0e;
+
+  --pb-electrode-top: #2563eb;
+  --pb-electrode-bottom: #ffffff;
+  --pb-electrode-edge: #1e293b;
 }
 
 /* Map tokens onto Bootstrap so its components follow the design system */

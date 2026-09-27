@@ -22,6 +22,7 @@ erDiagram
   AUTH_USERS ||--o{ TRADE_LOCKS : verrouille
   AUTH_USERS ||--o{ ACHIEVEMENT_UNLOCKS : débloque
   AUTH_USERS ||--o{ MINIGAME_RUNS : joue
+  AUTH_USERS ||--o{ ELECTRODE_FLIP_BOARDS : joue
   PROFILES ||--o{ PULL_FEED : "gros tirages"
   SETS ||--o{ CARDS : contient
   SETS ||--o{ SETS : "sous-set de"
@@ -202,7 +203,7 @@ onglets de dépenser les mêmes pièces.
 ### `challenge_ledger`
 
 Le journal de **chaque mouvement de pièces** : `kind` (`start`, `daily`,
-`booster`, `recycle`, `craft`, `mission`, `minigame`), `amount` (+ gagné,
+`booster`, `recycle`, `craft`, `mission`, `minigame`, `electrode_flip`), `amount` (+ gagné,
 − dépensé), `card_id`, `quantity`, `mission`, `game_day`, `created_at`.
 
 Un index unique `(user_id, mission, game_day) where kind = 'mission'`
@@ -243,6 +244,16 @@ a été tirée), `status` (`playing`, `lost`, `timeout`, `abandoned`),
 **Aucun accès client**, même en lecture : les prix de la paire en cours ne
 doivent pas fuiter.
 
+### `electrode_flip_boards`
+
+Une ligne par plateau d'« Électrode Shiny Flip » : `level` (1 à 5),
+`tiles` (25 cases ligne par ligne, 0 = Électrode, sinon 1 à 3),
+`flipped` (25 booléens), `flips` (cases à points retournées), `points`,
+`coins` (pièces payées), `status` (`playing`, `won`, `lost`,
+`cashed`), `next_level` (posé à la fin), `game_day`. Un seul plateau
+`playing` par joueur (index unique). **Aucun accès client**, même en
+lecture : le plateau ne doit pas fuiter.
+
 ---
 
 ## Succès
@@ -279,6 +290,7 @@ elles servent de briques aux RPC décrites dans la
 | `challenge_recycle_value(bucket)`, `challenge_craft_price(bucket)`, `challenge_daily_reward(streak)` | Barème du Défi (**miroir** : `src/utils/challenge.js`) |
 | `owns_challenge_cards`, `move_challenge_cards`, `has_trade_lock`, `trade_ttl` | Vérifications et transfert des échanges |
 | `minigame_rules`, `minigame_min_ratio`, `minigame_pair`, `minigame_card` | Règles et tirage des paires du mini-jeu |
+| `electrode_flip_rules`, `electrode_flip_layout`, `electrode_flip_deal`, `electrode_flip_view`, `electrode_flip_today`, `electrode_flip_end` | Règles, distribution et fin des plateaux d'« Électrode Shiny Flip » (`view` = ce que voit le client) |
 | `handle_new_user`, `unique_username`, `profiles_before_update` | Création du profil, pseudo libre, contrôle de la vitrine |
 | `link_subsets`, `guess_subset_parent`, `subset_default_rate` | Relie les nouveaux sous-sets à leur parent (service role, appelé par l'import) |
 
@@ -303,7 +315,8 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0010 | `subsets_and_pack_stats` | Sous-sets dans les boosters de leur parent, statistiques exactes de packs |
 | 0011 | `weekly_missions_live_trades` | Missions hebdomadaires, échanges en temps réel |
 | 0012 | `trade_preferences` | Refuser les échanges, cartes hors échange |
-| 0013 | `minigame_higher_lower` | Mini-jeu « Plus ou moins » (écrite le 2026-09-26, **à appliquer**) |
+| 0013 | `minigame_higher_lower` | Mini-jeu « Plus ou moins » |
+| 0014 | `minigame_electrode_flip` | Mini-jeu « Électrode Shiny Flip » (écrite le 2026-09-27, **à appliquer**) |
 
-Les migrations 0001 à 0012 sont appliquées sur le projet réel (vérifié le
-2026-09-26).
+Les migrations 0001 à 0013 sont appliquées sur le projet réel (vérifié le
+2026-09-27).

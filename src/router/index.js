@@ -118,6 +118,13 @@ const router = createRouter({
     },
     { path: '/challenge/minigame', redirect: { name: 'challenge-game-higher-lower' } },
     {
+      // "Shiny Electrode Flip" (migration 0014)
+      path: '/challenge/games/electrode-flip',
+      name: 'challenge-game-electrode-flip',
+      component: () => import('@/views/ElectrodeFlipView.vue'),
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
       path: '/challenge/trades',
       name: 'challenge-trades',
       component: () => import('@/views/TradesView.vue'),

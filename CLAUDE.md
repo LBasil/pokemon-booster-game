@@ -288,6 +288,23 @@ docs/technique/             technical doc (French, user choice): overview, front
   missing RPC (PGRST202): the game shows "Coming soon". In the view, the card
   list is `v-for` over the constant `SIDES` keyed by side only — a key
   changing per pair made Vue patch detached nodes (prices vanished).
+  **"Shiny Electrode Flip"** (0014, `/challenge/games/electrode-flip`,
+  `ElectrodeFlipView` + `useElectrodeFlipStore`): Voltorb Flip with
+  shiny Electrodes (CSS-drawn, `--pb-electrode-*` tokens). 5x5 board of
+  1/2/3/Electrode, row + column hints (points, Electrodes); points =
+  product of the flipped tiles; every 2 and 3 flipped = won, level + 1
+  (5 levels, Voltorb Flip layouts in `electrode_flip_layout()`); an
+  Electrode = lost (0 points); cash out keeps the points; after a loss or
+  cash out the level drops to the tiles flipped if lower. Points = coins,
+  300 per game day max (`electrode_flip_today()`), then boards play for
+  the record. Mirror: `src/utils/electrodeFlip.js`. The board lives in
+  `electrode_flip_boards` (no client access); the client only gets the
+  hints and the flipped tiles (`electrode_flip_view()`), the whole board
+  once it's over. `electrode_flip_start()` resumes the board in progress
+  instead of dealing a new one (no escaping a bad board by reloading).
+  Memo marks (and right click = Electrode mark) are client-only. Ledger
+  kind `electrode_flip`, one row per paid board. Each game's hub line and
+  record come from `statusOf` in `useGames()`.
 - **Never let a player lose track of the mode** (user priority): every
   challenge page shows AppHeader's `.mode-strip` ("Challenge mode", coins,
   "Leave" → `/game`, phones included); Community and profiles
@@ -379,12 +396,12 @@ docs/technique/             technical doc (French, user choice): overview, front
   `validate_palette.js --ordinal` in both themes); single series use
   `--pb-series`, gridlines `--pb-grid`. See `PriceChart.vue`.
 
-## Current state (updated 2026-09-26)
+## Current state (updated 2026-09-27)
 
 - **Live**: deployed on Vercel (`VITE_*` env vars set there; `vercel.json`
   has the SPA rewrite and serves `sw.js` uncached), used by the user on a
-  real account ("tout fonctionne", 2026-09-26). **Migrations 0001-0012 are
-  all applied** (checked 2026-09-26 through the REST API with the service
+  real account ("tout fonctionne", 2026-09-26). **Migrations 0001-0013 are
+  all applied** (checked 2026-09-27 through the REST API with the service
   role key). `cards` has 20,670 rows, `sets` 176 (9 subsets linked to
   their parent).
 - Features: landing (auth, forgot password), hub, boosters (per-set packs,
@@ -396,8 +413,8 @@ docs/technique/             technical doc (French, user choice): overview, front
   leaderboards), profiles + public profiles (incl. the challenge
   collection with "Ask for it"), ~240 achievements per mode (collapsible
   categories, rates, unlock toasts), challenge mode (coins, daily reward,
-  daily + weekly missions, recycle, craft, god packs, "Higher or lower"
-  mini-game (needs 0013), trades with live
+  daily + weekly missions, recycle, craft, god packs, mini-games "Higher
+  or lower" and "Shiny Electrode Flip" (needs 0014), trades with live
   updates, opt-out and cards kept out of trades), PWA, EN/FR, both themes.
 - What each migration does (details in each file's header comment):
   0001 schema · 0002 first RPCs (unused) · 0003 realistic packs + rarity
@@ -406,13 +423,13 @@ docs/technique/             technical doc (French, user choice): overview, front
   timer · 0007 trades, challenge boards, badge · 0008 achievement rates ·
   0009 achievements per mode · 0010 subsets + pack stats · 0011 weekly
   missions + realtime trades · 0012 trade preferences · 0013 "Higher or
-  lower" mini-game (**written 2026-09-26, not applied yet**: hand it to
-  the user). Every one was
-  verified locally with PGlite before being handed over; 0010-0013 have
+  lower" mini-game · 0014 "Shiny Electrode Flip" mini-game (**written
+  2026-09-27, not applied yet**: hand it to the user). Every one was
+  verified locally with PGlite before being handed over; 0010-0014 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 130 unit tests, `npm run test:db` 107 database
-  checks, `npm run test:e2e` 154 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 135 unit tests, `npm run test:db` 148 database
+  checks, `npm run test:e2e` 168 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities.
 - Not verified automatically: Realtime (feed and trades — no websocket
@@ -437,6 +454,13 @@ docs/technique/             technical doc (French, user choice): overview, front
 
 - The hit-rate leaderboard only counts packs opened after 0004 (older
   packs were never logged).
+- Card prices (`cards.value`, €): pokemontcg.io dropped Cardmarket for
+  recent sets (Prismatic Evolutions, Mega Evolution...), so
+  `cardPriceEur()` (`src/utils/cardPrice.js`, used by populate) falls
+  back to TCGplayer USD x `USD_TO_EUR` (0.86). Without it whole
+  collections showed "0 €" (fixed 2026-09-27). The newest sets (me2pt5,
+  me3-me5, me55: ~980 cards) have no price at all yet: 0 until the
+  weekly sync finds one.
 - Price charts need at least two `populate:cards` runs on different days;
   the weekly Action provides that once its secrets are set.
 - The pokemontcg.io API key in use is the one exposed in this repo's git

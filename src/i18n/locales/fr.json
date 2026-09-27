@@ -435,7 +435,10 @@
       "card_not_for_trade": "Une de ces cartes n’est plus échangeable.",
       "no_game": "Cette partie est terminée. Lance-en une nouvelle.",
       "slow_down": "Trop de parties d'affilée : attends une minute.",
-      "minigame_unavailable": "Aucune carte à comparer pour l'instant. Réessaie plus tard."
+      "minigame_unavailable": "Aucune carte à comparer pour l'instant. Réessaie plus tard.",
+      "invalid_tile": "Cette case n'existe pas.",
+      "already_flipped": "Cette case est déjà retournée.",
+      "nothing_to_cash": "Retourne au moins une case avant d'encaisser."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -478,7 +481,7 @@
       "rarity": "Rareté",
       "recycleCol": "Recyclage",
       "craftCol": "Fabrication",
-      "minigame": "Mini-jeux : chacun rapporte des pièces sur quelques parties par jour, puis se joue pour le record."
+      "minigame": "Mini-jeux : chacun rapporte des pièces jusqu'à une limite par jour, puis se joue pour le record."
     },
     "buckets": {
       "common": "Commune",
@@ -575,7 +578,7 @@
   "games": {
     "eyebrow": "Défi",
     "title": "Mini-jeux",
-    "subtitle": "Gagne des pièces pour tes boosters du défi. Chaque jeu a quelques parties récompensées par jour, ensuite tu joues autant que tu veux pour le record.",
+    "subtitle": "Gagne des pièces pour tes boosters du défi. Chaque jeu rapporte des pièces jusqu'à une limite par jour, ensuite tu joues autant que tu veux pour le record.",
     "hubDesc": "Gagne des pièces pour tes boosters en jouant.",
     "seeAll": "Tous les mini-jeux",
     "soon": "Bientôt disponible",
@@ -585,6 +588,10 @@
       "higher-lower": {
         "title": "Plus ou moins",
         "desc": "Laquelle des deux cartes vaut le plus cher ?"
+      },
+      "electrode-flip": {
+        "title": "Électrode Shiny Flip",
+        "desc": "Retourne les cases, multiplie tes points, évite les Électrode."
       }
     }
   },
@@ -626,6 +633,59 @@
       "paid": "{runs} parties récompensées par jour : {coins} pièces par bonne réponse, pour les {answers} premières de la partie ({max} pièces max par partie).",
       "free": "Ensuite, joue autant que tu veux pour le record, sans pièces. Les parties récompensées reviennent à minuit UTC.",
       "harder": "Plus la série est longue, plus les prix sont proches."
+    }
+  },
+  "electrodeFlip": {
+    "eyebrow": "Mini-jeu",
+    "title": "Électrode Shiny Flip",
+    "subtitle": "Retourne les cases, multiplie tes points et évite les Électrode shiny. Vide le plateau pour monter de niveau.",
+    "unavailable": "Le mini-jeu arrive bientôt.",
+    "loadError": "Impossible de charger le mini-jeu. Réessaie dans un instant.",
+    "level": "Niveau {level}",
+    "levelShort": "niveau {level}",
+    "points": "Points :",
+    "paidChip": "Rapporte des pièces",
+    "freeChip": "Pour le record",
+    "coinsLeftLine": "Encore {count} pièces à gagner aujourd'hui",
+    "nextFree": "Plus de pièces aujourd'hui : joue pour le record.",
+    "deal": "Jouer un plateau niveau {level}",
+    "next": "Plateau suivant (niveau {level})",
+    "cashOut": "Encaisser {points} points",
+    "memo": "Mémo",
+    "memoPick": "Marque à poser",
+    "memoOn": "Mémo : touche les cases cachées pour noter ce que tu penses qu'elles cachent.",
+    "howTo": "Retourne tous les 2 et les 3. Clic droit (ou Mémo) pour marquer une case.",
+    "markElectrode": "Électrode",
+    "mark": "Marque {value}",
+    "tileHidden": "Ligne {row}, colonne {col} : cachée",
+    "tileMarked": "Ligne {row}, colonne {col} : cachée, marquée {marks}",
+    "tileValue": "Ligne {row}, colonne {col} : {value}",
+    "tileElectrode": "Ligne {row}, colonne {col} : Électrode",
+    "rowHint": "Ligne {n} : {points} points, {electrodes} Électrode",
+    "colHint": "Colonne {n} : {points} points, {electrodes} Électrode",
+    "over": {
+      "won": "Plateau terminé !",
+      "lost": "Boum ! Un Électrode shiny.",
+      "cashed": "Points encaissés"
+    },
+    "overPoints": "{points} points",
+    "overCoins": "Pièces gagnées :",
+    "capped": "Pas de pièces : la limite du jour est atteinte.",
+    "record": "Nouveau record !",
+    "nextUp": "Prochain plateau : niveau {level}",
+    "nextDown": "Prochain plateau : retour au niveau {level}",
+    "nextSame": "Prochain plateau : encore niveau {level}",
+    "statLevel": "Niveau",
+    "statToday": "Gagné aujourd'hui",
+    "statBest": "Meilleur plateau",
+    "rulesTitle": "Règles",
+    "rules": {
+      "tiles": "Chaque case cache un 1, un 2, un 3 ou un Électrode. Au bout de chaque ligne et colonne : ses points et son nombre d'Électrode.",
+      "points": "Tes points se multiplient à chaque case retournée. Retourne tous les 2 et les 3 pour vider le plateau et monter de niveau ({levels} niveaux, de plus en plus d'Électrode).",
+      "electrode": "Un Électrode fait perdre le plateau et ses points. Tu peux encaisser à tout moment pour les garder.",
+      "level": "Après une défaite ou un encaissement, le niveau descend au nombre de cases retournées, s'il est plus bas.",
+      "coins": "Les points sont payés en pièces, jusqu'à {max} par jour. Ensuite, joue pour le record ; la limite revient à minuit UTC.",
+      "memo": "Mémo : note ce que tu as deviné sur les cases cachées (clic droit pour marquer un Électrode)."
     }
   },
   "achievements": {

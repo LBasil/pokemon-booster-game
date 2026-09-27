@@ -77,6 +77,7 @@ Chaque page est un *chunk* chargé à la demande
 | `/challenge/games` | `challenge-games` | `GamesView` | connecté | défi |
 | `/challenge/games/higher-lower` | `challenge-game-higher-lower` | `MinigameView` | connecté | défi |
 | `/challenge/minigame` | — | redirige vers le mini-jeu | — | — |
+| `/challenge/games/electrode-flip` | `challenge-game-electrode-flip` | `ElectrodeFlipView` | connecté | défi |
 | `/challenge/trades` | `challenge-trades` | `TradesView` | connecté | défi |
 | `/u/:username` | `public-profile` | `ProfileView` (`username` en prop) | **public** | partagé |
 | `/u/:username/achievements` | `public-achievements` | `AchievementsView` | **public** | partagé |
@@ -157,6 +158,7 @@ ne recharge pas si c'est déjà chargé (sauf `force`), et expose `loading`,
 | `challenge` | `challenge_state()` : pièces, récompense quotidienne, missions ; `badge` | pages du Défi, en-tête | `openBooster`, `claimDaily`, `claimMission`, `recycle`, `craft`. `stale` après un pack (missions à recompter) |
 | `trades` | Offres d'échange, cartes verrouillées | `TradesView`, `App.vue` (direct) | `propose`, `respond`, `cancel`, `toggleLock` (optimiste), `live(userId)` |
 | `minigame` | État de « Plus ou moins » | page du jeu, hub des jeux | `unavailable` si la migration 0013 manque ; répercute le solde de pièces dans `challenge` |
+| `electrodeFlip` | État d'« Électrode Shiny Flip » : niveau, pièces restantes, records, plateau en cours | page du jeu, hub des jeux | `flip(index)`, `cashOut()` ; `unavailable` si la migration 0014 manque ; répercute le solde de pièces |
 | `achievements` | Toasts, taux par mode, données serveur par mode | `check(mode)` un peu partout | Voir [Parcours > Succès](05-parcours.md#7-succès) |
 | `settings` | `sound`, `vibration`, `effects`, `animations` | — | Par appareil (`localStorage`). `liteAnimations` = animations légères sur écran tactile en mode `auto` |
 | `theme` | `isLight` | `main.js` | Pose `data-bs-theme` sur `<html>` (Bootstrap + tokens suivent) |
@@ -219,6 +221,8 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `achievements.js` | Les ~240 définitions, `collectorStats` (tout en une passe), `achievements()`, `nextUp`, `achievementProgress`, filtres, taux, tri des toasts |
 | `challenge.js` | Économie du Défi (**miroir** du SQL) : prix, recyclage, fabrication, récompense quotidienne, comptes à rebours UTC |
 | `minigame.js` | Règles de « Plus ou moins » (**miroir** de `minigame_rules()`) |
+| `electrodeFlip.js` | Règles d'« Électrode Shiny Flip » (**miroir** de `electrode_flip_rules()` / `electrode_flip_end()`) : points, niveau suivant, pièces, lignes sûres |
+| `cardPrice.js` | `cardPriceEur(card)` : prix en € d'une carte pokemontcg.io (Cardmarket, sinon TCGplayer converti). Utilisé par `scripts/populate.mjs` |
 | `trades.js` | Limites des échanges (**miroir** de `propose_trade`), `groupTrades`, `searchEntries` |
 | `sets.js` | URL des logos, sous-sets (`isSubset`, `packSetId`, `subsetsOf`), `groupSetsByYear` |
 | `games.js` | Registre des mini-jeux |
@@ -329,5 +333,6 @@ remplissent déjà la condition.
 
 **Un mini-jeu** : une entrée dans `utils/games.js` (id, route, icône),
 les textes `games.items.<id>`, la route `challenge-game-<id>`, son statut
-dans `useGames()`, ses RPC côté serveur (les gains se décident en SQL,
+dans `useGames()` (`statusOf` : son store, sa ligne « ce qu'il paie encore
+aujourd'hui », son record), ses RPC côté serveur (les gains se décident en SQL,
 comme pour « Plus ou moins »).

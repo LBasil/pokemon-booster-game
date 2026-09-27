@@ -24,6 +24,10 @@ export const CHALLENGE_ERRORS = [
   'no_game',
   'slow_down',
   'minigame_unavailable',
+  // Shiny Electrode Flip (migration 0014)
+  'invalid_tile',
+  'already_flipped',
+  'nothing_to_cash',
 ]
 
 async function call(name, args) {
@@ -127,3 +131,24 @@ export const startMinigame = () => call('minigame_start')
  *   left: { id: string, value: number }, right: { id: string, value: number }, state: object }>}
  */
 export const answerMinigame = (pick) => call('minigame_answer', { p_pick: pick })
+
+// ---------- "Shiny Electrode Flip" mini-game (migration 0014) ----------
+
+/**
+ * Rules, level, coins left today, records and the board in progress (its
+ * hints, and only the tiles already flipped).
+ */
+export const fetchElectrodeFlipState = () => call('electrode_flip_state')
+
+/** Deals a board (or returns the one in progress); returns the state. */
+export const startElectrodeFlip = () => call('electrode_flip_start')
+
+/**
+ * @param {number} index - tile 0..24, row by row
+ * @returns {Promise<{ index: number, value: number, earned: number, result: object, state: object }>}
+ *   value 0 = an Electrode; result = the board after the flip (every tile once it's over)
+ */
+export const flipElectrodeTile = (index) => call('electrode_flip_flip', { p_index: index })
+
+/** Ends the board, keeping its points. @returns {Promise<{ earned: number, result: object, state: object }>} */
+export const cashOutElectrodeFlip = () => call('electrode_flip_cash_out')

@@ -39,7 +39,7 @@ onMounted(() => {
               <span class="game-desc">{{ game.desc }}</span>
               <span v-if="game.line" class="game-status">
                 {{ game.line }}
-                <template v-if="game.best"> · {{ t('minigame.bestShort', { count: game.best }) }}</template>
+                <template v-if="game.record"> · {{ game.record }}</template>
               </span>
             </span>
             <span v-if="game.available" class="game-cta">{{ game.inProgress ? t('minigame.resume') : t('minigame.play') }}</span>

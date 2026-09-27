@@ -377,6 +377,49 @@ passe en `unavailable` et le jeu affiche « Bientôt ».
 
 ---
 
+## Mini-jeu « Électrode Shiny Flip » (Défi, migration 0014)
+
+| RPC | JS | Rôle |
+| --- | --- | --- |
+| `electrode_flip_state()` | `fetchElectrodeFlipState()` | Règles, niveau, pièces gagnées et restantes aujourd'hui, records, plateau en cours |
+| `electrode_flip_start()` | `startElectrodeFlip()` | Distribue un plateau au niveau du joueur, ou renvoie celui en cours (jamais abandonné : ce serait esquiver une défaite). 20 par minute au maximum (`slow_down`). Renvoie l'état |
+| `electrode_flip_flip(p_index)` | `flipElectrodeTile(index)` | Retourne la case 0..24 (ligne par ligne). Finit le plateau sur un Électrode (perdu) ou quand tous les 2 et 3 sont retournés (gagné, payé) |
+| `electrode_flip_cash_out()` | `cashOutElectrodeFlip()` | Termine le plateau en gardant ses points (au moins une case retournée) |
+
+État (`electrode_flip_state`) :
+
+```json
+{
+  "levels": 5, "daily_coins": 300,
+  "coins": 1300, "level": 2, "today_coins": 48, "coins_left": 252,
+  "best_points": 72, "best_level": 1,
+  "board": {
+    "level": 2, "points": 6, "flips": 3, "status": "playing",
+    "rows": [{ "points": 5, "electrodes": 1 }, "…5 lignes…"],
+    "cols": [{ "points": 6, "electrodes": 1 }, "…5 colonnes…"],
+    "tiles": [null, 1, 2, null, "…25 cases : null tant que cachée…"],
+    "flipped": [false, true, true, false, "…"]
+  }
+}
+```
+
+Réponse (`electrode_flip_flip`, `electrode_flip_cash_out`) :
+
+```json
+{
+  "index": 7, "value": 3, "earned": 0,
+  "result": { "…le plateau après coup ; toutes les cases une fois fini…" },
+  "state": { "…electrode_flip_state()…" }
+}
+```
+
+(`index` et `value` seulement pour `flip` ; `value` 0 = Électrode.)
+Erreurs : `no_game`, `invalid_tile`, `already_flipped`,
+`nothing_to_cash`, `slow_down`. RPC absente (`PGRST202`) → store
+`unavailable`, « Bientôt ».
+
+---
+
 ## Import des cartes (admin)
 
 `scripts/populate.mjs` utilise la clé **service role** et fait des `upsert`

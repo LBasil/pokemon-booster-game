@@ -1,39 +1,50 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useElectrodeFlipStore } from '@/stores/electrodeFlip'
 import { useMinigameStore } from '@/stores/minigame'
 import { GAMES } from '@/utils/games'
 
 /**
  * The challenge mini-games with their status for today, for the games page
- * and the challenge hub. Each game plugs its store in `load` and `statusOf`.
- * @returns {{ games: import('vue').ComputedRef<object[]>, load: () => void, paidLeft: import('vue').ComputedRef<number> }}
+ * and the challenge hub. Each game plugs its store in `load` and `statusOf`
+ * (`line`: what it still pays today; `record`: its best, '' if none yet).
+ * @returns {{ games: import('vue').ComputedRef<object[]>, load: () => void }}
  */
 export function useGames() {
   const { t } = useI18n()
   const higherLower = useMinigameStore()
+  const electrodeFlip = useElectrodeFlipStore()
 
   const statusOf = {
     'higher-lower': () => ({
-      available: !higherLower.unavailable,
-      loaded: higherLower.loaded,
-      paidLeft: higherLower.paidLeft,
-      best: higherLower.best,
+      store: higherLower,
       inProgress: Boolean(higherLower.run),
+      line: higherLower.paidLeft
+        ? t('minigame.nextPaid', { count: higherLower.paidLeft }, higherLower.paidLeft)
+        : t('minigame.nextFree'),
+      record: higherLower.best ? t('minigame.bestShort', { count: higherLower.best }) : '',
+    }),
+    'electrode-flip': () => ({
+      store: electrodeFlip,
+      inProgress: Boolean(electrodeFlip.board),
+      line: electrodeFlip.coinsLeft
+        ? t('electrodeFlip.coinsLeftLine', { count: electrodeFlip.coinsLeft })
+        : t('electrodeFlip.nextFree'),
+      record: t('electrodeFlip.levelShort', { level: electrodeFlip.level }),
     }),
   }
 
   const games = computed(() =>
     GAMES.map((game) => {
-      const status = statusOf[game.id]()
-      let line = ''
-      if (!status.available) line = t('games.soon')
-      else if (status.loaded) {
-        line = status.paidLeft ? t('minigame.nextPaid', { count: status.paidLeft }, status.paidLeft) : t('minigame.nextFree')
-      }
+      const { store, ...status } = statusOf[game.id]()
+      const available = !store.unavailable
       return {
         ...game,
         ...status,
-        line,
+        available,
+        loaded: store.loaded,
+        line: !available ? t('games.soon') : store.loaded ? status.line : '',
+        record: available && store.loaded ? status.record : '',
         title: t(`games.items.${game.id}.title`),
         desc: t(`games.items.${game.id}.desc`),
       }
@@ -42,8 +53,9 @@ export function useGames() {
 
   return {
     games,
-    load: () => higherLower.load(),
-    // Paid runs left across every game (the hub shows it)
-    paidLeft: computed(() => games.value.reduce((sum, game) => sum + (game.available ? game.paidLeft : 0), 0)),
+    load: () => {
+      higherLower.load()
+      electrodeFlip.load()
+    },
   }
 }
