@@ -41,6 +41,8 @@ supabase/tests/             PGlite suites for the migrations (npm run test:db)
 scripts/populate.mjs        admin-only Node script: sets/cards/prices from pokemontcg.io — never bundled to the client
 .github/workflows/          ci.yml (unit + build + e2e) and sync-cards.yml (weekly populate:sync)
 docs/manual-testing.md      checklist for a real-account click-through
+docs/technique/             technical doc (French, user choice): overview, front-end, database,
+                            API reference (params/responses/errors), flows with diagrams, tooling
 ```
 
 ## Golden rules (do not violate these)
@@ -96,6 +98,12 @@ docs/manual-testing.md      checklist for a real-account click-through
 8. **Keep `README.md` current.** Update it in the same change whenever setup
    steps, npm scripts, or the feature list change — it's the user-facing
    counterpart to this file.
+   **Also keep `docs/technique/` current** (French; code names stay
+   English), in the same change: new table/column/RPC -> 03 base de
+   données + 04 référence API; new route/store/composable -> 02 front-end;
+   changed game behavior (packs, economy, profile, achievements, trades,
+   mini-games) -> the matching section of 05 parcours; new tooling or
+   deploy step -> 06 outillage; bump "Dernière mise à jour" in its README.
 9. **Game state that others can see is written by the server only.**
    Collections, booster openings and the pull feed feed public profiles and
    leaderboards, so clients never insert/update them: they go through

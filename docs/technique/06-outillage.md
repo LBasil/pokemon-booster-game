@@ -1,0 +1,178 @@
+# 6. Outillage et exploitation
+
+[← Parcours détaillés](05-parcours.md) · [Sommaire](README.md)
+
+## 1. Scripts npm
+
+| Commande | Rôle |
+| --- | --- |
+| `npm run dev` | Serveur de développement Vite (lit `.env` : `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) |
+| `npm run build` / `npm run preview` | Build de production dans `dist/` / le servir localement |
+| `npm test` | Tests unitaires Vitest (`src/**/*.test.js`) |
+| `npm run test:db` | Tests des migrations dans PGlite (`supabase/tests/*.test.mjs`) |
+| `npm run test:e2e` | Tests Playwright de bout en bout (ordinateur + Pixel 7) |
+| `npm run populate:sets` / `populate:cards` / `populate:sync` | Import pokemontcg.io (admin, clé service role) |
+
+Node 22 (`.nvmrc`). Sur la machine de dev : `nvm use` (la version par
+défaut est trop vieille) ; le réseau intercepte HTTPS, donc les scripts
+Node se lancent avec `NODE_USE_SYSTEM_CA=1` et Playwright avec
+`PW_CHANNEL=chrome` (il ne peut pas télécharger son navigateur).
+
+---
+
+## 2. Les trois niveaux de tests
+
+```mermaid
+flowchart LR
+  U["Unitaires (Vitest)<br/>fonctions pures de src/utils"] --> D["Base de données (PGlite)<br/>migrations : RLS, droits, RPC"] --> E["Bout en bout (Playwright)<br/>vraie app, faux Supabase"]
+```
+
+### Unitaires — `npm test`
+
+Chaque fichier de `src/utils/` a son `*.test.js` voisin : raretés,
+statistiques, rangs, économie du Défi, règles du mini-jeu, succès (dont un
+test qui échoue si une traduction EN/FR manque), etc. Toute nouvelle
+logique pure va dans `src/utils/` avec ses tests.
+
+### Base de données — `npm run test:db`
+
+Il n'y a pas d'accès en ligne de commande au vrai projet Supabase. Les
+migrations sont donc testées dans **PGlite** (Postgres compilé en
+WebAssembly, sans serveur) :
+
+- [supabase/tests/harness.mjs](../../supabase/tests/harness.mjs) simule ce
+  que fournit Supabase : une table `auth.users`, `auth.uid()` lu dans
+  `request.jwt.claim.sub`, les rôles `anon` / `authenticated` /
+  `service_role`, la publication Realtime ;
+- `freshDb('000N')` exécute les migrations 0001 à 000N, **la dernière deux
+  fois** (elles doivent pouvoir être relancées) ;
+- `helpers(db).as(userId)` change de rôle pour tester la RLS « en tant que »
+  joueur ; `asAdmin()` pour lire les lignes des autres.
+
+Chaque migration depuis 0010 a sa suite (`supabase/tests/000N_*.test.mjs`)
+qui vérifie la RLS, les droits et les RPC.
+
+### Bout en bout — `npm run test:e2e`
+
+[playwright.config.js](../../playwright.config.js) construit l'app dans
+`dist-e2e/` en pointant vers un faux hôte `https://e2e.supabase.test`, puis
+la sert sur le port 4174. **Tout Supabase est simulé** dans
+[e2e/support/supabase.js](../../e2e/support/supabase.js) : `mockSupabase(page,
+options)` intercepte chaque requête REST/RPC et répond à partir d'un état
+en mémoire (collection, profil, portefeuille, échanges…) ; `signIn(page)`
+pose une fausse session. Aucun secret, aucun réseau.
+
+- Deux projets : **desktop** (Chrome) et **mobile** (Pixel 7, qui passe par
+  les animations légères).
+- Les tests forcent `prefers-reduced-motion` : effets décoratifs coupés.
+- Tests transverses dans `navigation.spec.js` : aucune page ne défile
+  horizontalement à la largeur d'un téléphone, aucune page n'écrit
+  d'erreur dans la console, le mode reste visible partout, reprise après
+  un déploiement.
+- **Une fonctionnalité qui appelle un nouveau point d'accès doit l'ajouter
+  au faux Supabase**, sinon la requête échoue dans les tests.
+- Animations : utiliser `click({ force: true })` sur les éléments animés
+  et attendre que le booster soit activé.
+
+### Ce qui n'est pas testé automatiquement
+
+Realtime (fil et échanges : pas de simulation de WebSocket) et tout ce qui
+demande deux vrais comptes. Ces points sont couverts par la checklist
+manuelle [docs/manual-testing.md](../manual-testing.md).
+
+---
+
+## 3. Import des cartes
+
+[scripts/populate.mjs](../../scripts/populate.mjs), lancé à la main ou par
+le workflow hebdomadaire. Il lit `scripts/.env.local` (non versionné) :
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `POKEMONTCG_API_KEY`.
+
+| Cible | Fait |
+| --- | --- |
+| `sets` | Pages de 250 sets → `upsert` dans `sets` (dont `logo_url`, `symbol_url` fournis par l'API) |
+| `cards [page]` | Pages de 250 cartes → `upsert` dans `cards` (`value` = prix moyen de vente Cardmarket) + un relevé du jour dans `card_price_history` ; puis `link_subsets()` |
+| `sync [page]` | `sets` puis `cards` puis `link_subsets()` |
+
+L'API pokemontcg.io est capricieuse : chaque page est retentée 6 fois avec
+un délai croissant, et une pause de 300 ms sépare les pages. Le numéro de
+page optionnel permet de reprendre un import interrompu.
+
+**Workflow** [sync-cards.yml](../../.github/workflows/sync-cards.yml) :
+tous les lundis à 04:00 UTC (ou à la demande, avec une page de départ),
+`populate.mjs sync`. Il faut trois secrets de dépôt : `SUPABASE_URL`,
+`SUPABASE_SERVICE_ROLE_KEY`, `POKEMONTCG_API_KEY`. Deux imports à des
+jours différents sont nécessaires pour qu'une courbe de prix apparaisse.
+
+---
+
+## 4. Intégration continue et déploiement
+
+**CI** ([ci.yml](../../.github/workflows/ci.yml)) : à chaque push sur
+`main` et chaque pull request : `npm ci`, tests unitaires, tests base de
+données, build, installation de Chromium, tests e2e. Le rapport Playwright
+est conservé 7 jours en cas d'échec.
+
+**Déploiement** : Vercel construit et sert l'app. Les variables `VITE_*`
+sont définies dans Vercel.
+[vercel.json](../../vercel.json) renvoie toutes les routes vers
+`index.html` (SPA) **sauf `/assets/*`**, et sert `sw.js` sans cache. Les
+onglets déjà ouverts passent au nouveau build tout seuls
+([Parcours § 10](05-parcours.md#10-un-déploiement-pendant-quun-onglet-est-ouvert)).
+
+**Réglages Supabase à faire dans le tableau de bord** : *Authentication >
+URL Configuration*, ajouter `<site>/game` et `<site>/reset-password` aux
+URL de redirection.
+
+**Vérifier ce qui est appliqué sur le vrai projet** : des appels REST avec
+la clé service role de `scripts/.env.local`. Une table absente répond 404 ;
+une RPC existante appelée sans utilisateur répond `not_authenticated`.
+
+---
+
+## 5. Écrire une migration
+
+Le schéma ne change **que** par un nouveau fichier
+`supabase/migrations/000N_nom.sql`, exécuté à la main dans l'éditeur SQL
+de Supabase.
+
+1. **En-tête** : un commentaire qui explique ce que fait la migration,
+   après laquelle la lancer, et si elle peut être relancée.
+2. **Suivi en direct** : l'éditeur n'affiche que « running ». La migration
+   commence donc par `set local lock_timeout = '15s';` (une attente de
+   verrou échoue au lieu de bloquer) et chaque section par
+   `set local application_name = 'migration 000N: step i/n …';`. On suit
+   la progression depuis un autre onglet avec la requête de
+   [manual-testing.md > Watching a migration run](../manual-testing.md#watching-a-migration-run).
+3. **Relançable** : `create … if not exists`, `create or replace`,
+   `drop policy if exists` avant `create policy`, blocs `do $$ … $$` qui
+   vérifient l'état.
+4. **Sécurité** : RLS activée sur chaque nouvelle table ; aucune règle
+   d'écriture client sur une donnée de jeu. Les écritures passent par des
+   fonctions `security definer` avec `set search_path = public, pg_temp`,
+   qui ne touchent que `auth.uid()`, verrouillent le portefeuille si elles
+   touchent aux pièces, et limitent leur fréquence si besoin. Retirer
+   `execute` des fonctions internes à `public, anon, authenticated`.
+5. **Suite de tests** `supabase/tests/000N_nom.test.mjs` (RLS, droits,
+   RPC, double exécution) qui passe avec `npm run test:db`.
+6. **Client tolérant** : tant que la migration n'est pas appliquée, le
+   client doit continuer de marcher (repli sur `42703` / `PGRST202` /
+   `PGRST205`).
+7. **Mettre à jour** : le faux Supabase des tests e2e, cette doc
+   ([Base de données](03-base-de-donnees.md) et
+   [Référence API](04-reference-api.md)), `README.md`, `CLAUDE.md`.
+8. La **confier à la personne qui a accès au projet** pour l'exécuter,
+   puis vérifier qu'elle est appliquée.
+
+---
+
+## 6. Secrets et configuration
+
+| Où | Contient | Exposé ? |
+| --- | --- | --- |
+| `.env` (dev) / variables Vercel | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | Oui, dans le bundle, et c'est normal : la protection vient de la RLS |
+| `scripts/.env.local` (non versionné) | URL, **clé service role**, clé pokemontcg.io | Jamais. Node uniquement, rien sous `src/` ne l'importe |
+| Secrets GitHub | Les trois mêmes, pour le workflow de synchro | Jamais |
+
+La clé pokemontcg.io actuelle apparaît dans l'historique git : il faudra
+la changer si le dépôt devient public.

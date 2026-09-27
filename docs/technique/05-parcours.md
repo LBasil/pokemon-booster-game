@@ -1,0 +1,562 @@
+# 5. Parcours détaillés
+
+[← Référence API](04-reference-api.md) · [Sommaire](README.md) · Suivant : [Outillage →](06-outillage.md)
+
+Chaque section suit un scénario de bout en bout : ce que fait la vue, quel
+store intervient, quelles requêtes partent, ce que le serveur fait et ce
+qui revient à l'écran.
+
+1. [Inscription et connexion](#1-inscription-et-connexion)
+2. [Ouvrir un booster](#2-ouvrir-un-booster)
+3. [Afficher un profil](#3-afficher-un-profil)
+4. [Collection et classeur](#4-collection-et-classeur)
+5. [Le hub du Défi : récompenses, missions, recyclage, fabrication](#5-le-hub-du-défi)
+6. [Échanger des cartes](#6-échanger-des-cartes)
+7. [Succès](#7-succès)
+8. [Le mini-jeu « Plus ou moins »](#8-le-mini-jeu-du-défi)
+9. [Communauté : fil et classements](#9-communauté--fil-et-classements)
+10. [Un déploiement pendant qu'un onglet est ouvert](#10-un-déploiement-pendant-quun-onglet-est-ouvert)
+
+---
+
+## 1. Inscription et connexion
+
+```mermaid
+sequenceDiagram
+  actor J as Joueur
+  participant AP as AuthPanel.vue
+  participant AS as store auth
+  participant SA as Supabase Auth
+  participant DB as Postgres
+
+  J->>AP: e-mail, mot de passe, pseudo
+  AP->>AS: signUp({ email, password, username })
+  AS->>SA: auth.signUp (data.username, redirect /game)
+  SA->>DB: INSERT auth.users
+  DB->>DB: trigger handle_new_user → INSERT profiles (pseudo unique)
+  SA-->>AS: session (ou null si confirmation par e-mail)
+  alt confirmation requise
+    AP-->>J: « Vérifie tes e-mails »
+    J->>SA: clique le lien → revient sur /game, connecté
+  else session directe
+    AP-->>J: redirection vers /game
+  end
+```
+
+- **Connexion** : `auth.signIn` → `signInWithPassword` ; la garde du
+  routeur envoie ensuite `/` vers `/game`.
+- **Mot de passe oublié** : `requestPasswordReset(email)` → e-mail avec un
+  lien vers `/reset-password`, qui ouvre une session de récupération ;
+  `ResetPasswordView` appelle `updatePassword`.
+- **Changement de compte** : `onAuthStateChange` compare l'id du compte ;
+  s'il change (ou à la déconnexion), `resetPlayerStores()` vide la
+  collection, le Défi, les échanges, le profil, les souhaits et les
+  succès. Les données d'un compte ne restent jamais affichées pour un
+  autre.
+- Le pseudo affiché vient de `profiles`, pas des métadonnées Auth
+  (`useProfileStore().displayName`, avec l'e-mail en attendant).
+
+---
+
+## 2. Ouvrir un booster
+
+Page : [BoosterView.vue](../../src/views/BoosterView.vue), la même pour
+les deux modes (`/boosters` et `/challenge/boosters`, prop `mode`).
+
+### Vue d'ensemble
+
+```mermaid
+sequenceDiagram
+  actor J as Joueur
+  participant BV as BoosterView
+  participant ST as stores
+  participant RPC as Postgres (RPC)
+
+  Note over BV: phase = select
+  BV->>ST: charge collection du mode (→ « Nouveau ! »), sets, souhaits ou portefeuille
+  BV->>ST: achievements.check(mode) : référence pour les toasts
+  J->>BV: choisit un set + 1/3/5/10 boosters, « Ouvrir »
+  Note over BV: phase = open, achievements.paused = true
+  loop pour chaque booster
+    BV->>RPC: open_my_booster(set) ou open_challenge_booster(set)
+    RPC->>RPC: tire 10 cartes, sauvegarde, journalise, publie les hits
+    RPC-->>BV: 10 cartes (+ pièces, god_pack en Défi)
+    Note over BV: packState loading → ready (le booster s'active)
+    J->>BV: tape le booster → déchirure (1300 ms, 550 ms en léger)
+    Note over BV: step = reveal
+    loop 10 cartes
+      J->>BV: tape / balaie la pile → carte suivante + son
+    end
+  end
+  Note over BV: phase = done → récapitulatif
+  BV->>ST: achievements.check(mode) → toasts des succès débloqués
+```
+
+### Étape par étape, côté client
+
+1. **Au chargement de la page** :
+   - la collection du mode est chargée ; ses ids servent à marquer
+     « Nouveau ! » les cartes jamais possédées ;
+   - en Illimité, la liste de souhaits (pour marquer « Recherchée ! ») ;
+     en Défi, l'état du portefeuille (`challenge.load({ force: true })`) ;
+   - `achievements.check(mode)` pose la référence des succès déjà vus ;
+   - **présélection du set** : `?set=` dans l'URL, sinon le dernier set
+     ouvert dans ce mode sur cet appareil (`localStorage
+     pb-last-set:<mode>`, `''` = n'importe quel set), sinon (nouvel
+     appareil) le set du dernier pack enregistré par le serveur
+     (`fetchOpenings({ limit: 1 })`). Le nombre de boosters est retenu
+     aussi (`pb-last-count:<mode>`). Un sous-set est remplacé par son
+     parent (`packSetId`).
+2. **Sélection** : sur ordinateur, `SetPicker` est affiché dans la page ;
+   sur téléphone, il s'ouvre dans un `<dialog>` en bas de l'écran.
+   Le booster affiché (`BoosterArt`) montre le logo, le symbole et la
+   carte phare du set (`fetchSetCover`, mise en cache). En Défi, le
+   bouton affiche le coût (100 pièces par booster) et se désactive si le
+   solde est insuffisant.
+3. **`startOpening()`** : retient le set et le nombre, passe en
+   `phase = 'open'`, puis `prepareBooster()`.
+4. **`drawPack()`** : **un appel serveur par booster**. Le pack est tiré
+   **et sauvegardé** avant toute animation : quitter la page en pleine
+   révélation ne fait perdre aucune carte. Ensuite :
+   - la collection du mode est invalidée (et la liste de souhaits en
+     Illimité) ;
+   - les cartes sont triées pour la révélation (`sortForReveal` : communes
+     d'abord, meilleure carte à la fin) et marquées `isNew` / `isWanted` ;
+   - les images sont préchargées ; `packState = 'ready'` active le booster.
+5. **Déchirure** : un tap sur `BoosterPack` → `packState = 'tearing'`, son
+   `tear`, puis au bout de `TEAR_MS` (1300 ms) ou `TEAR_MS_LITE` (550 ms)
+   → `step = 'reveal'` et la pile `CardStack` apparaît.
+6. **Révélation** : chaque tap (ou balayage de la carte face visible)
+   incrémente `revealedCount`. `playReveal` joue `flip` (+ `rare` pour une
+   rare/holo) ; un **hit** (ultra/secret) se « charge » 0,55 s face cachée,
+   se retourne avec un flash, joue `hit` et vibre. Son nom et ses badges
+   n'apparaissent qu'à ce moment : rien n'est dévoilé à l'avance.
+7. Après la 10e carte, un tap → `finishBooster()` : booster suivant
+   (retour à l'étape 4) ou `phase = 'done'`.
+8. **« Tout ouvrir d'un coup »** (`openAllNow`) : tire les boosters
+   restants à la suite, sans animation, puis affiche le récapitulatif.
+9. **Récapitulatif** : cartes regroupées par quantité et triées par
+   rareté, nombre de nouvelles cartes, meilleure carte (`bestPull`),
+   bouton de partage (`shareCard`). Les packs divins du Défi sont
+   signalés.
+10. **Succès** : tant que `phase === 'open'`, `achievements.paused` bloque
+    toute vérification (même déclenchée ailleurs, par exemple un échange
+    accepté en direct) pour ne rien dévoiler. En `done`, `check(mode)`
+    affiche les succès débloqués.
+
+Si un appel échoue (réseau, pièces insuffisantes), le message s'affiche
+et on revient à la sélection, ou au récapitulatif si des cartes ont déjà
+été tirées.
+
+### Côté serveur : Illimité
+
+`open_my_booster(p_set_id)` (migrations 0004 puis 0005) :
+
+1. `require_player()` : erreur si pas connecté.
+2. `check_booster_rate()` : refuse au-delà de 60 packs dans la minute.
+3. `open_booster(p_set_id)` : tire les 10 cartes (ci-dessous).
+4. `save_booster_opening(user, 'unlimited', cards)` :
+   - `INSERT INTO collections … ON CONFLICT DO UPDATE SET quantity =
+     quantity + excluded.quantity` (atomique : jamais de « lire puis
+     écrire » côté client) ;
+   - `INSERT booster_openings` (ids, meilleure carte, nombre de hits) ;
+   - retire les cartes tirées de `wishlist` ;
+   - si le profil est public, ajoute les ultra/secret à `pull_feed` (que
+     Realtime diffuse aussitôt) ; purge de temps en temps les lignes de
+     plus de 30 jours.
+5. Renvoie les 10 cartes.
+
+### Côté serveur : Défi
+
+`open_challenge_booster(p_set_id)` (migration 0006) :
+
+1. Verrouille le portefeuille (`lock_challenge_wallet`) : deux onglets ne
+   peuvent pas dépenser les mêmes pièces.
+2. Limite de fréquence ; `not_enough_coins` sous 100 pièces.
+3. Tire un pack normal avec `open_booster`, qui choisit aussi le set si
+   « n'importe quel set ».
+4. Une fois sur 500 : **pack divin**. Les 10 cartes sont retirées dans le
+   même set sur les slots holo ×6, ultra ×3, secret ×1.
+5. Débite 100 pièces, ajoute une ligne `booster` (−100) au journal.
+6. `save_booster_opening(user, 'challenge', cards, god_pack)` (la liste
+   de souhaits n'est pas touchée : elle appartient à l'Illimité).
+7. Renvoie `{ cards, coins, god_pack }`. Le store met le solde à jour et
+   marque l'état `stale` : la progression des missions sera relue en
+   arrière-plan.
+
+Il n'y a **pas de « pity timer »** : les taux sont les mêmes qu'en
+Illimité (décision du 2026-09-25, migration 0006).
+
+### Le tirage côté serveur (`open_booster`)
+
+`open_booster(p_set_id)` (migrations 0003, puis 0010 pour les sous-sets)
+construit un pack **slot par slot**, comme un vrai booster moderne. Ne
+jamais revenir à un tirage uniforme : il donnait ~4 rares et 1 ou 2 hits
+par pack.
+
+1. **Choix du set** : un sous-set demandé → le set parent ; `null` → un
+   set réel au hasard (pas un sous-set, au moins 4 communes et une rare).
+   Un pack ne mélange jamais plusieurs sets.
+2. **Les slots** :
+
+| Slot | Contenu |
+| --- | --- |
+| 1–4 | commune |
+| 5–7 | peu commune |
+| 8 | reverse : 50 % commune, 38 % peu commune, 12 % rare. **Ou une carte du sous-set**, avec la probabilité `subset_rate` du sous-set (si le set en a un) |
+| 9 | reverse / hit : 31 % commune, 35 % peu commune, 25 % rare, 8,2 % ultra, 0,8 % secret |
+| 10 | slot rare : 70 % rare, 21 % holo, 8 % ultra, 1 % secret |
+
+   Résultat : environ 1 holo sur 5 packs, 1 ultra ou mieux sur 5 à 6
+   packs, 1 secret sur ~55 packs. Ces taux ont été vérifiés en simulant
+   3000 packs par set.
+3. **Chaque carte** (`pick_booster_card`) : une carte au hasard de la
+   rareté voulue ; si le set n'en a pas, la rareté inférieure qui existe
+   (Base Set n'a pas d'ultra : ses tirages « ultra » deviennent des holo).
+   Pas de doublon dans un pack, sauf si le set est trop petit.
+4. **Carte de sous-set** (`pick_subset_card`) : holo 60 %, ultra 36 %,
+   secret 4 % (ou la rareté la plus proche que le sous-set possède).
+
+---
+
+## 3. Afficher un profil
+
+Page : [ProfileView.vue](../../src/views/ProfileView.vue), pour
+`/profile` (le sien, modifiable) et `/u/:username` (public, lecture
+seule, visible même sans être connecté).
+
+### Ce qui est chargé
+
+```mermaid
+sequenceDiagram
+  participant PV as ProfileView
+  participant MA as useModeAchievements(mode, username)
+  participant API as api/ + RPC
+
+  alt profil public (/u/:username)
+    PV->>API: fetchPublicProfile(name) — profiles, RLS : public ou soi
+    PV->>API: public_collection(name) — collection Illimité
+    PV->>API: challenge_collection_of(name) — collection Défi (+ tradable)
+    MA->>API: fetchPublicProfile + collection du mode + player_achievements(mode, name)
+  else son profil (/profile)
+    PV->>API: profileStore.load() — fetchMyProfile
+    PV->>API: collectionStore.load() — collection Illimité (vitrine)
+    MA->>API: achievements.check(mode) → collection du mode + player_achievements(mode)
+  end
+  Note over PV: tout le reste est calculé dans le navigateur
+```
+
+### D'où vient chaque chiffre
+
+Un sélecteur **Défi | Illimité** en haut de la colonne principale pilote
+toutes les statistiques. Les deux collections sont séparées : un joueur
+qui ne joue qu'en Défi afficherait « 1 booster, 0 € » si on ne lisait que
+l'Illimité (bug corrigé le 2026-09-27).
+
+- **Mode par défaut** : son propre profil s'ouvre sur le mode d'où vient
+  le joueur (`routeMode`). Le profil de quelqu'un d'autre s'ouvre sur le
+  Défi, puis passe sur l'Illimité si la collection Défi est vide et
+  l'Illimité non (tant que le visiteur n'a pas choisi lui-même).
+- `useModeAchievements(mode, username)` fournit `entries` (la collection
+  de ce mode) et `server` (réponse de `player_achievements`).
+
+| Élément affiché | Calcul |
+| --- | --- |
+| **Boosters ouverts** | `packSummary({ mode, totalCards, server }).total`. En Défi : le compte du serveur (`booster_openings`), car recyclage, fabrication et échanges changent le nombre de cartes. En Illimité : le max de « cartes ÷ 10 » et du compte serveur (les packs d'avant 0004 n'étaient pas journalisés, mais la collection Illimité ne grandit que par paquets de 10) |
+| **Niveau et rang** | `rankFor(boosters)` : Débutant 0, Dresseur 10, Collectionneur 50, Expert 150, Maître 400, Légende 1000 boosters. La carte du dresseur indique le mode |
+| Cartes tirées, uniques, sets commencés, valeur | `collectionStats(entries)` : somme des quantités, nombre de lignes, sets distincts, somme de `value × quantité` |
+| Répartition des raretés | `rarityBreakdown(entries)` : cartes uniques par rareté |
+| Succès (progression, « Presque ! ») | `modeAchievements.list` → `achievementProgress`, `nextUp` |
+| Meilleures cartes (profil public) | Les 8 premières de `sortEntries(entries, 'rarity')` |
+| **Carte vitrine** | Toujours la collection **Illimité** : la carte choisie (`showcase_card_id`), sinon la meilleure carte (`bestPull`) |
+| Collection Défi (profil public) | `challenge_collection_of`, triée par rareté, 24 par page, recherche ; bouton « Demander » → `/challenge/trades?to=<pseudo>&want=<id>` ; « Pas à échanger » si verrouillée |
+
+### Actions sur son propre profil
+
+| Action | Appel |
+| --- | --- |
+| Changer de pseudo | `validateUsername` (2–24 caractères) puis `profileStore.update({ username })`. Pris → « déjà utilisé » (unicité sans tenir compte de la casse) |
+| Choisir la vitrine | `ShowcasePicker` → `update({ showcase_card_id })` ; le serveur refuse une carte non possédée |
+| Profil public/privé | `update({ is_public })`. Un profil privé disparaît du fil, des classements et de `/u/…` |
+| Réglages (son, vibration, effets, animations) | `settingsStore.set()`, par appareil, rien côté serveur |
+| Installer l'app | `promptInstall()` |
+| Déconnexion | `auth.signOut()` puis retour à l'accueil (bouton sur cette page uniquement) |
+
+---
+
+## 4. Collection et classeur
+
+**Collection** ([CollectionView.vue](../../src/views/CollectionView.vue),
+`/collection` et `/challenge/collection`) :
+
+- Au chargement : collection du mode, sets ; en Illimité la liste de
+  souhaits ; en Défi le portefeuille, la collection Illimité (pour
+  rassurer : « tes cartes Illimité sont en sécurité ») et les verrous
+  d'échange.
+- **Onglets** : Cartes, Sets, Pokédex, Souhaits (pas de Souhaits en Défi).
+- **Filtres dans l'URL** : `?view=&q=&set=&rarity=&dupes=1&sort=&dex=`.
+  Changer d'onglet, de set ou de Pokémon crée une entrée d'historique
+  (le bouton retour y revient) ; taper ou ajuster un filtre remplace
+  l'entrée courante.
+- Tout le filtrage/tri est local (`filterEntries`, `sortEntries`) : la
+  collection est chargée en une requête, puis affichée 48 cartes à la fois
+  au fil du défilement (`IntersectionObserver`).
+- En Défi : `RecycleDuplicates` (« N doublons → +X pièces », en deux
+  temps) ; la fiche carte propose de fabriquer ou recycler.
+- La fiche carte (`CardDetail`) charge l'historique de prix
+  (`fetchPriceHistory`) et permet de parcourir la liste (flèches,
+  balayage).
+
+**Classeur** ([SetBinderView.vue](../../src/views/SetBinderView.vue),
+`/collection/set/:setId`) : `fetchSetCards(setId)` donne toutes les cartes
+du set ; `binderSlots` les range par numéro et y associe les quantités
+possédées. Les cartes manquantes sont grisées ; en Défi, elles affichent
+leur prix de fabrication. Les cartes d'un sous-set sont signalées comme
+venant des boosters du parent.
+
+---
+
+## 5. Le hub du Défi
+
+Page : [ChallengeView.vue](../../src/views/ChallengeView.vue) (`/challenge`).
+
+Au chargement : `challenge.load({ force: true })` (**crée le portefeuille
+avec 1000 pièces au premier passage**), la collection Défi, le statut des
+mini-jeux ; un minuteur recharge l'état juste après 00:00 UTC.
+
+| Action | Store → RPC | Ce que fait le serveur |
+| --- | --- | --- |
+| Récompense quotidienne | `challenge.claimDaily()` → `claim_daily_reward` | Série +1 si réclamée hier, sinon 1 ; 200 + 50 × (série − 1), plafond 500 ; journal `daily` |
+| Réclamer une mission | `challenge.claimMission(id)` → `claim_mission` | Vérifie progression ≥ objectif et pas déjà réclamée (index unique du journal) ; crédite ; journal `mission` |
+| Recycler les doublons | `challenge.recycle(cardId?)` → `recycle_duplicates` | Ramène chaque carte à 1 exemplaire ; crédite selon la rareté ; journal `recycle` avec la quantité (compte pour la mission) |
+| Fabriquer une carte | `challenge.craft(card)` → `craft_card` | Débite le prix de la rareté ; +1 exemplaire ; journal `craft` |
+
+Après chaque action, le store remplace l'état par celui renvoyé par le
+serveur, rafraîchit le badge (`loadBadge`) et appelle
+`achievements.check('challenge')`.
+
+**Missions** (progression calculée par le serveur à chaque lecture) :
+
+| Id | Objectif | Récompense | Compté depuis |
+| --- | --- | --- | --- |
+| `open_packs` | 3 boosters Défi aujourd'hui | 75 | `booster_openings` |
+| `pull_holo` | 1 pack dont la meilleure carte est holo ou mieux | 100 | `booster_openings.best_card_id` |
+| `recycle` | 5 doublons recyclés aujourd'hui | 50 | `challenge_ledger` |
+| `week_open_packs` | 25 boosters cette semaine | 400 | |
+| `week_pull_ultra` | 2 ultra ou mieux cette semaine | 400 | |
+| `week_recycle` | 50 doublons recyclés cette semaine | 250 | |
+| `week_daily` | récompense quotidienne réclamée 5 jours | 300 | |
+
+**Badge** : `challenge_badge()` compte ce qui attend le joueur
+(récompense du jour, missions finies non réclamées, offres reçues). Il
+s'affiche sur les liens du Défi, et chaque badge a sa raison visible sur
+la page où il mène (encadré `.ch-waiting` en haut de `/challenge`).
+
+---
+
+## 6. Échanger des cartes
+
+Page : [TradesView.vue](../../src/views/TradesView.vue)
+(`/challenge/trades`). Uniquement avec la collection Défi (en Illimité,
+toute carte est à un booster près).
+
+```mermaid
+sequenceDiagram
+  actor A as Joueur A (expéditeur)
+  participant DB as Postgres
+  participant RT as Realtime
+  actor B as Joueur B (destinataire)
+
+  A->>DB: propose_trade('B', [cartes de A], [cartes de B])
+  DB->>DB: B public ? accepte les échanges ? cartes possédées ? non verrouillées ? < 10 offres ?
+  DB-->>A: id de l'offre
+  DB-->>RT: INSERT trade_offers
+  RT-->>B: changement → badge + liste rechargés
+  B->>DB: respond_trade(id, accept = true)
+  DB->>DB: verrouille les 2 portefeuilles (toujours dans le même ordre)
+  DB->>DB: revérifie possession + verrou de A → échange les exemplaires
+  DB-->>B: { status: accepted | failed }
+  DB-->>RT: UPDATE trade_offers
+  RT-->>A: badge, liste, collection Défi invalidée, check des succès
+```
+
+- **Préparer une offre** : `?to=<pseudo>` préremplit le partenaire (lien
+  depuis un profil), `?want=<id>` une de ses cartes. La collection du
+  partenaire vient de `challenge_collection_of`. Sélecteurs : 5 cartes au
+  maximum par côté (`toggleCard`), 60 résultats affichés (la recherche
+  affine).
+- **Règles** (serveur) : 1 à 5 cartes offertes, 0 à 5 demandées (0 =
+  cadeau), un exemplaire de chaque, 10 offres en attente au maximum,
+  expiration après 7 jours, partenaire public qui accepte les échanges.
+- **Accepter** : l'échange est atomique. Si une carte n'est plus possédée,
+  ou si l'expéditeur a verrouillé une carte offerte entre-temps, l'offre
+  finit en `failed`, sans rien déplacer. `move_challenge_cards` supprime
+  le dernier exemplaire ou décrémente, puis ajoute chez l'autre.
+- **Préférences** : « Accepter les échanges » (`profiles.accepts_trades`) ;
+  les offres déjà reçues restent possibles à accepter. Cartes verrouillées :
+  `trades.toggleLock(id)` (optimiste, annulé en cas d'erreur).
+- **Temps réel** : `App.vue` lance `trades.live(userId)` dès la connexion.
+  À chaque changement : badge rafraîchi, liste rechargée si elle était
+  chargée ; si l'offre est acceptée, collection Défi invalidée et
+  vérification des succès.
+
+---
+
+## 7. Succès
+
+Définitions : [src/utils/achievements.js](../../src/utils/achievements.js)
+(~240, 16 catégories). **Calculés dans le navigateur, par mode.** Le
+Défi est mis en avant, c'est celui qui compte.
+
+### Calcul
+
+`achievements(entries, sets, { mode, unlocked, packs, stats })` :
+
+1. `collectorStats` parcourt la collection **une seule fois** et en tire
+   tout ce dont les définitions ont besoin : uniques, total, valeur,
+   raretés, sets (et pourcentage de complétion), Pokédex, types, sous-types
+   (EX, GX, V…), artistes, années, etc. Plus les statistiques serveur
+   (`stats` de `player_achievements`) : packs avec hit, meilleure journée,
+   séries, sets ouverts ; en Défi, échanges, cadeaux, pièces gagnées,
+   missions, fabrications, recyclage.
+2. Chaque définition donne une `metric(stats)` et une `target`. Débloqué
+   si `metric ≥ target`, **ou** si l'id est déjà dans `unlocked` (côté
+   serveur) : un succès ne se reperd pas quand la collection Défi
+   rétrécit.
+3. `modes: [...]` réserve une définition à un mode (économie, pack divin =
+   Défi) ; `hidden` affiche « ??? » tant que ce n'est pas débloqué.
+
+Ajouter une définition la débloque **rétroactivement** pour tous ceux qui
+remplissent déjà la condition, sans migration.
+
+### Notifications (toasts)
+
+```mermaid
+flowchart TD
+  A["check(mode)"] --> B{"paused ?<br/>(révélation en cours)"}
+  B -- oui --> Z[ne rien faire]
+  B -- non --> C["own(mode) : player_achievements + collection + sets"]
+  C --> D["liste débloquée maintenant"]
+  D --> E{"déjà vus sur cet appareil ?<br/>localStorage par compte et mode<br/>+ ids déjà enregistrés côté serveur"}
+  E -- "première fois" --> F["référence silencieuse"]
+  E -- "nouveaux ids" --> G["toasts (3 max, les plus rares d'abord, puis « +N »)"]
+  F --> H["record_achievements(ids manquants, mode)"]
+  G --> H
+  H --> I["taux rafraîchis"]
+```
+
+`check()` est appelé au chargement de `BoosterView` et à son
+récapitulatif, sur les pages qui affichent ses propres succès (profil,
+page des succès, hub du Défi), et juste après chaque action du Défi qui
+peut en débloquer un (récompense, mission, recyclage, fabrication,
+échange, fin de partie du mini-jeu). Un id déjà enregistré par le serveur
+compte comme « vu » : un autre appareil l'a déjà annoncé.
+
+### Taux (« 12 % des joueurs »)
+
+Le client déclare ses ids débloqués (`record_achievements`, retenté tant
+que le serveur n'a pas confirmé) et lit `achievement_rates(mode)` (mis en
+cache 10 min). C'est l'exception assumée à la règle « le serveur écrit » :
+les ids sont déclarés par le client, mais ils ne font varier qu'un
+pourcentage anonyme.
+
+### Pages
+
+`AchievementsView` : `/achievements`, `/challenge/achievements` et
+`/u/:pseudo/achievements?mode=`. Sélecteur Défi | Illimité, recherche,
+filtres catégorie/statut dans l'URL (`?cat=&status=&q=`), catégories
+repliables (mémorisées par appareil dans `pb-achievements-collapsed`).
+
+---
+
+## 8. Le mini-jeu du Défi
+
+Page : [MinigameView.vue](../../src/views/MinigameView.vue)
+(`/challenge/games/higher-lower`), store `minigame`, migration 0013.
+
+Deux cartes : taper la plus chère (prix Cardmarket `cards.value`) en
+moins de 15 secondes. La partie dure jusqu'à la première erreur.
+
+```mermaid
+sequenceDiagram
+  actor J as Joueur
+  participant MV as MinigameView
+  participant DB as Postgres
+
+  MV->>DB: minigame_state() — reprend une partie en cours
+  J->>MV: « Jouer »
+  MV->>DB: minigame_start()
+  DB-->>MV: état + paire (noms et images, SANS prix)
+  Note over MV: minuteur 15 s
+  J->>MV: tape une carte (ou le temps s'écoule → null)
+  MV->>DB: minigame_answer('left' | 'right' | null)
+  DB->>DB: compare les prix, en retard si > 20 s, paie si partie payée
+  DB-->>MV: correct, prix des deux cartes, gains, état suivant (nouvelle paire)
+  Note over MV: montre les prix de la paire affichée, puis passe à la suivante
+```
+
+- **Règles** (**miroir** : `minigame_rules()` et `src/utils/minigame.js`) :
+  3 parties payées par jour de jeu (UTC), 5 pièces par bonne réponse sur
+  les 20 premières d'une partie (100 par partie, 300 par jour au
+  maximum), puis parties illimitées non payées pour le record.
+- **Difficulté** : l'écart de prix se resserre avec la série. La carte la
+  plus chère vaut au moins ×3 (série 0–2), ×2 (3–5), ×1,5 (6–9), puis
+  ×1,25, et au plus le double de ce ratio.
+- **Anti-triche** : le serveur garde les prix jusqu'à la réponse ; le
+  client ne connaît que les noms et les images. Une réponse arrivée après
+  20 s (15 s + marge d'affichage et de réseau) ou `null` termine la
+  partie. Limite acceptée : les prix sont publics (table `cards`), un
+  script pourrait les chercher, mais le plafond quotidien borne le gain.
+- Chaque bonne réponse payée = une ligne `minigame` dans le journal (elle
+  compte dans les « pièces gagnées » des succès).
+- Côté vue, la paire affichée (`shown`) reste en place pendant que les
+  prix s'affichent, même si le store a déjà reçu la suivante. La liste des
+  cartes boucle sur la constante `SIDES`, avec le côté pour clé : une clé
+  qui changeait à chaque paire faisait disparaître les prix.
+
+---
+
+## 9. Communauté : fil et classements
+
+Page : [CommunityView.vue](../../src/views/CommunityView.vue)
+(`/community`, mode partagé).
+
+- **Fil** : `fetchFeed(30)` puis `subscribeToFeed` (Realtime, `INSERT`
+  sur `pull_feed`). Chaque nouveau tirage s'ajoute en haut (50 au
+  maximum), surligné 4 s ; « il y a 3 min » se met à jour toutes les 30 s.
+  Le fil vient de `save_booster_opening` : chaque ultra/secret d'un profil
+  public, dans les deux modes (badge « Défi »).
+- **Classements** : `fetchLeaderboard(kind, 20)` à chaque changement
+  d'onglet (5 classements, [détail](04-reference-api.md#leaderboardp_kind-text-p_limit-int--20)).
+  Arriver depuis le Défi ouvre sur « Défi : cartes ». Sa propre ligne est
+  mise en évidence.
+- **Mise en page** : une colonne sur téléphone ; à partir de 992 px, deux
+  colonnes, le fil prend la hauteur du classement et défile à l'intérieur
+  (`contain: size`). Avec une souris, les onglets passent à la ligne au
+  lieu de défiler.
+
+Seuls les profils publics apparaissent (RLS sur `pull_feed`, filtre
+`is_public` dans `leaderboard`).
+
+---
+
+## 10. Un déploiement pendant qu'un onglet est ouvert
+
+```mermaid
+sequenceDiagram
+  participant T as Onglet ouvert (ancien build)
+  participant V as Vercel
+  participant R as Routeur
+
+  Note over T: l'app revient au premier plan (ou 30 min passées)
+  T->>V: GET / (no-store)
+  V-->>T: index.html avec /assets/index-<nouveau hash>.js
+  T->>T: hash différent → updateReady, événement pb:update-ready
+  Note over T: le joueur continue sans interruption
+  T->>R: clic vers une autre page
+  R->>T: window.location.assign(page) → chargement complet du nouveau build
+```
+
+Filet de sécurité : si un ancien chunk est demandé avant cette détection
+(il n'existe plus → 404), `router.onError` recharge la page cible une
+fois.

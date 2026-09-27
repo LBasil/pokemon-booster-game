@@ -4,6 +4,9 @@ Open Pokémon boosters — any set, as many as you want — and build your own
 collection. A Vue 3 single-page app (installable as a PWA) backed by
 Supabase (Postgres + Auth + Realtime).
 
+How it works inside (every table, RPC and flow, in French):
+[technical documentation](./docs/technique/README.md).
+
 ## Features
 
 - **Real authentication** via Supabase Auth (email/password), with email
@@ -132,6 +135,7 @@ supabase/migrations/   SQL to run in the Supabase SQL editor (schema, RLS, RPCs)
 supabase/tests/        migration tests in PGlite (npm run test:db)
 scripts/populate.mjs   admin script importing sets, cards and prices from pokemontcg.io
 .github/workflows/     CI (tests on every push) and the weekly card-data sync
+docs/technique/        technical documentation (French): architecture, database, API, flows, tooling
 ```
 
 ## Setup
