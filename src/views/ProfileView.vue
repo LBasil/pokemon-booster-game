@@ -14,7 +14,7 @@ import { installPrompt, installed, promptInstall } from '@/lib/pwa'
 import { collectionStats, sortEntries } from '@/utils/collection'
 import { nextUp } from '@/utils/achievements'
 import { useModeAchievements } from '@/composables/useModeAchievements'
-import { USERNAME_MAX, boostersOpened, rankFor, rarityBreakdown, validateUsername } from '@/utils/profile'
+import { USERNAME_MAX, packSummary, rankFor, rarityBreakdown, validateUsername } from '@/utils/profile'
 import { BUCKETS, bestPull, rarityLabelKey, rarityTier } from '@/utils/rarity'
 import { searchEntries } from '@/utils/trades'
 import AchievementTile from '@/components/AchievementTile.vue'
@@ -94,10 +94,30 @@ const memberSince = computed(() => {
   return date ? new Date(date).toLocaleDateString(locale.value, { month: 'long', year: 'numeric' }) : ''
 })
 
+// ---------- Game mode of the numbers (stats, rarity, level, achievements) ----------
+
+// Défi | Illimité tabs. Own profile: the mode the player came from. Someone
+// else's: the challenge first (it's the one that counts), unless they only
+// ever played unlimited. The two collections are separate, so reading only
+// the unlimited one showed challenge players as "1 booster, 0 €".
+const PROFILE_MODES = ['challenge', 'unlimited']
+const mode = ref(props.username ? 'challenge' : routeMode(route))
+const modePicked = ref(false)
+function pickMode(next) {
+  modePicked.value = true
+  mode.value = next
+}
+
+const modeAchievements = useModeAchievements(mode, () => props.username)
+const modeEntries = modeAchievements.entries
+const modeLoading = modeAchievements.firstLoad
+
 // ---------- Stats & rank ----------
 
-const stats = computed(() => collectionStats(entries.value))
-const boosters = computed(() => boostersOpened(stats.value.totalCards))
+const stats = computed(() => collectionStats(modeEntries.value))
+const boosters = computed(
+  () => packSummary({ mode: mode.value, totalCards: stats.value.totalCards, server: modeAchievements.server.value }).total,
+)
 const rank = computed(() => rankFor(boosters.value))
 
 // ---------- Username (unique, case-insensitive) ----------
@@ -155,7 +175,7 @@ async function setShowcase(cardId) {
 
 // ---------- Public profile: best cards ----------
 
-const topCards = computed(() => sortEntries(entries.value, 'rarity').slice(0, 8))
+const topCards = computed(() => sortEntries(modeEntries.value, 'rarity').slice(0, 8))
 
 // ---------- Public profile: challenge collection (what you could trade for) ----------
 
@@ -178,6 +198,12 @@ async function loadChallenge(username) {
 const challengeMatches = computed(() => searchEntries(challengeEntries.value, challengeQuery.value))
 const challengeVisible = computed(() => challengeMatches.value.slice(0, challengeShown.value))
 watch(challengeQuery, () => (challengeShown.value = CHALLENGE_PAGE))
+
+// Someone who only ever played unlimited: open on their unlimited numbers
+watch([publicState, challengeState], ([pub, challenge]) => {
+  if (modePicked.value || isOwn.value || pub !== 'ready' || challenge !== 'ready') return
+  if (!challengeEntries.value.length && publicEntries.value.length) mode.value = 'unlimited'
+})
 
 // Signed in, on someone else's profile: challenge trades are possible,
 // unless that player turned them off (accepts_trades, migration 0012)
@@ -231,24 +257,20 @@ async function setPublic(isPublic) {
 // ---------- Rarity breakdown ----------
 
 const breakdown = computed(() => {
-  const counts = rarityBreakdown(entries.value)
-  const total = entries.value.length || 1
+  const counts = rarityBreakdown(modeEntries.value)
+  const total = modeEntries.value.length || 1
   return BUCKETS.map((bucket) => ({ bucket, count: counts[bucket], percent: (counts[bucket] / total) * 100 }))
 })
 
 // ---------- Achievements (summary; the full list is AchievementsView) ----------
 
-// Défi | Illimité tabs, starting in the mode the player came from
-const ACHIEVEMENT_MODES = ['challenge', 'unlimited'] // the challenge first: it's the one that counts
-const achievementMode = ref(routeMode(route))
-const modeAchievements = useModeAchievements(achievementMode, () => props.username)
 const badgeProgress = modeAchievements.progress
 const badgePercent = computed(() => Math.round((badgeProgress.value.unlocked / badgeProgress.value.total) * 100))
 const almostThere = computed(() => nextUp(modeAchievements.list.value))
 const achievementsRoute = computed(() =>
   isOwn.value
-    ? { name: modeRoutes(achievementMode.value).achievements }
-    : { name: 'public-achievements', params: { username: profile.value?.username ?? props.username }, query: { mode: achievementMode.value } },
+    ? { name: modeRoutes(mode.value).achievements }
+    : { name: 'public-achievements', params: { username: profile.value?.username ?? props.username }, query: { mode: mode.value } },
 )
 
 // ---------- Account ----------
@@ -323,7 +345,10 @@ async function logout() {
             </div>
 
             <div class="rank-progress">
-              <p class="rank-progress-count">{{ t('profile.boostersOpened', { count: formatNumber(boosters) }, boosters) }}</p>
+              <p class="rank-progress-count">
+                {{ t('profile.boostersOpened', { count: formatNumber(boosters) }, boosters) }}
+                <span class="rank-mode">· {{ t(mode === 'challenge' ? 'nav.modeChallenge' : 'nav.modeUnlimited') }}</span>
+              </p>
               <div class="bar" role="progressbar" :aria-label="t('profile.rankProgress')" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="Math.round(rank.progress * 100)">
                 <span :style="{ width: `${Math.max(rank.progress * 100, 2)}%` }"></span>
               </div>
@@ -393,8 +418,23 @@ async function logout() {
 
         <!-- ============ Stats, rarity, achievements, account ============ -->
         <div class="profile-main">
-          <section :aria-label="t('profile.statsTitle')">
-            <dl class="stat-grid">
+          <!-- Separate collections: every number below is for this mode -->
+          <div class="achv-modes profile-modes" role="tablist" :aria-label="t('nav.modeSwitch')">
+            <button
+              v-for="item in PROFILE_MODES"
+              :key="item"
+              type="button"
+              role="tab"
+              :aria-selected="mode === item"
+              :class="{ active: mode === item }"
+              @click="pickMode(item)"
+            >
+              {{ t(item === 'challenge' ? 'nav.modeChallenge' : 'nav.modeUnlimited') }}
+            </button>
+          </div>
+
+          <section :aria-label="t('profile.statsTitle')" :aria-busy="modeLoading">
+            <dl class="stat-grid" :class="{ loading: modeLoading }">
               <div class="stat">
                 <dt>{{ t('profile.statBoosters') }}</dt>
                 <dd>{{ formatNumber(boosters) }}</dd>
@@ -418,7 +458,7 @@ async function logout() {
             </dl>
           </section>
 
-          <section v-if="entries.length" class="panel">
+          <section v-if="modeEntries.length" class="panel">
             <h2 class="pb-section-title">{{ t('profile.rarityTitle') }}</h2>
             <div class="rarity-bar" role="img" :aria-label="breakdown.filter((b) => b.count).map((b) => `${t(`profile.buckets.${b.bucket}`)} ${b.count}`).join(', ')">
               <span
@@ -440,19 +480,6 @@ async function logout() {
             <div class="section-head">
               <h2 class="pb-section-title">{{ t('profile.achievementsTitle') }}</h2>
               <span class="section-count">{{ badgeProgress.unlocked }} / {{ badgeProgress.total }}</span>
-            </div>
-            <div class="achv-modes" role="tablist" :aria-label="t('nav.modeSwitch')">
-              <button
-                v-for="item in ACHIEVEMENT_MODES"
-                :key="item"
-                type="button"
-                role="tab"
-                :aria-selected="achievementMode === item"
-                :class="{ active: achievementMode === item }"
-                @click="achievementMode = item"
-              >
-                {{ t(item === 'challenge' ? 'nav.modeChallenge' : 'nav.modeUnlimited') }}
-              </button>
             </div>
             <div
               class="bar"
@@ -855,6 +882,11 @@ async function logout() {
   font-weight: 700;
 }
 
+.rank-mode {
+  color: var(--pb-text-muted);
+  font-weight: 600;
+}
+
 .rank-progress-next {
   margin: 0.5rem 0 0;
   font-size: 0.85rem;
@@ -935,6 +967,11 @@ async function logout() {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
   margin: 0;
+}
+
+/* The other mode's numbers are loading */
+.stat-grid.loading dd {
+  opacity: 0.4;
 }
 
 .stat {
@@ -1047,6 +1084,10 @@ async function logout() {
 .achv-modes button.active {
   background: var(--pb-text);
   color: var(--pb-bg);
+}
+
+.profile-modes {
+  margin-bottom: -0.5rem;
 }
 
 .switch-row-wrap {

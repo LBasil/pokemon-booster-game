@@ -182,6 +182,11 @@ docs/manual-testing.md      checklist for a real-account click-through
   page at phone width; add new pages there. Check 320px too (narrowest
   supported): tab counts, the challenge wallet art and the mode strip
   icon hide below 375px.
+- **Community on desktop** (>= 992px, two columns): the feed panel takes
+  the leaderboard's height (`contain: size`) and scrolls inside; board
+  rows share columns through `subgrid`; with a mouse (`hover: hover` +
+  `pointer: fine`) the board tabs wrap — a hidden scroll row left the last
+  tab unreachable on PC.
 - Long pages (collection, binder, achievements, history) mount
   `ScrollTopButton.vue` after `</main>` (sits above the phone tab bar).
 - Don't name classes after Bootstrap components (`.badge`, `.card`,
@@ -211,7 +216,13 @@ docs/manual-testing.md      checklist for a real-account click-through
   metadata is no longer read for the username — use `useProfileStore()`
   (`displayName` falls back to auth until loaded). `ProfileView.vue` serves
   both `/profile` (own, editable) and `/u/:username` (public, read-only,
-  works signed out, `props: true`).
+  works signed out, `props: true`). Its numbers (level, stats, rarity,
+  best cards, achievements) follow one Challenge | Unlimited switch at the
+  top of the main column, fed by `useModeAchievements` (`entries`,
+  `server`; boosters = `packSummary`). Own: the mode you came from;
+  someone else's: challenge first, unlimited if their challenge
+  collection is empty. It used to read the unlimited collection only, so
+  challenge players showed "1 booster, 0 €". Showcase stays unlimited.
 - **Game modes**: `collections.mode` / `booster_openings.mode`
   ('unlimited' | 'challenge'). The **challenge mode** (migrations 0005 + 0006) has
   its **own separate collection** (user decision) and a coin economy:
@@ -393,7 +404,7 @@ docs/manual-testing.md      checklist for a real-account click-through
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
 - Tests: `npm test` 124 unit tests, `npm run test:db` 107 database
-  checks, `npm run test:e2e` 147 (desktop + Pixel 7, incl. "no page
+  checks, `npm run test:e2e` 154 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities.
 - Not verified automatically: Realtime (feed and trades — no websocket

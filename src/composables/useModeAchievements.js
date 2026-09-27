@@ -61,15 +61,15 @@ export function useModeAchievements(mode, username = '') {
   // ---------- Own ----------
   const collection = computed(() => useModeCollectionStore(toValue(mode)))
 
-  const list = computed(() => {
-    const currentMode = toValue(mode)
-    const entries = isOwn.value ? collection.value.entries : publicEntries.value
-    const server = isOwn.value ? store.server[currentMode] : publicServer.value
-    return achievements(entries, setsStore.sets, { mode: currentMode, ...server })
-  })
+  // That mode's collection and server stats (the profile's numbers read them too)
+  const entries = computed(() => (isOwn.value ? collection.value.entries : publicEntries.value))
+  const server = computed(() => (isOwn.value ? store.server[toValue(mode)] : publicServer.value))
+  const list = computed(() => achievements(entries.value, setsStore.sets, { mode: toValue(mode), ...server.value }))
 
   return {
     list,
+    entries,
+    server,
     progress: computed(() => achievementProgress(list.value)),
     rate: (item) => rateOf(item, store.rates[toValue(mode)], isOwn.value),
     hasRates: computed(() => Boolean(store.rates[toValue(mode)]?.players)),

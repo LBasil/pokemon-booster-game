@@ -51,6 +51,7 @@ test('achievements can be searched and filtered, in sync with the URL', async ({
 test('public achievements are readable signed out', async ({ page }) => {
   await mockSupabase(page)
   await page.goto('/u/misty')
+  await page.getByRole('tab', { name: 'Unlimited' }).click() // public profiles open on the challenge
   await page.getByRole('link', { name: /See all achievements/ }).click()
   await expect(page).toHaveURL(/\/u\/misty\/achievements\?mode=unlimited$/i)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Misty’s achievements')

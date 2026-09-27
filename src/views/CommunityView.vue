@@ -103,7 +103,7 @@ function scoreLabel(row) {
 
       <div class="community-layout">
         <!-- ============ Live feed ============ -->
-        <section class="panel" aria-labelledby="feed-title">
+        <section class="panel feed-panel" aria-labelledby="feed-title">
           <h2 id="feed-title" class="pb-section-title">{{ t('community.feedTitle') }}</h2>
 
           <div v-if="feedState === 'error'" class="alert alert-danger mt-3" role="alert">{{ t('community.feedError') }}</div>
@@ -365,19 +365,26 @@ function scoreLabel(row) {
   color: var(--pb-text-muted);
 }
 
+/* Rows share their columns (subgrid): cards and scores line up */
 .board-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   gap: 0.4rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.board-list > .pb-skeleton {
+  grid-column: 1 / -1;
+}
+
 .board-row {
-  display: flex;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
   align-items: center;
-  gap: 0.75rem;
+  column-gap: 0.75rem;
   padding: 0.55rem 0.75rem;
   border-radius: var(--pb-radius-md);
   border: 1px solid var(--pb-border);
@@ -408,7 +415,7 @@ function scoreLabel(row) {
 }
 
 .board-user {
-  flex: 1;
+  grid-column: 2;
   min-width: 0;
   font-weight: 800;
   overflow: hidden;
@@ -417,6 +424,8 @@ function scoreLabel(row) {
 }
 
 .board-card {
+  grid-column: 3;
+  justify-self: end;
   width: 30px;
   aspect-ratio: 63 / 88;
   object-fit: cover;
@@ -424,16 +433,41 @@ function scoreLabel(row) {
 }
 
 .board-score {
-  flex-shrink: 0;
+  grid-column: 4;
   font-weight: 700;
   font-size: 0.85rem;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
+/* A mouse can't swipe the tabs sideways: wrap them instead of hiding the last ones */
+@media (hover: hover) and (pointer: fine) {
+  .board-tabs {
+    flex-wrap: wrap;
+  }
+}
+
 @media (min-width: 992px) {
   .community-layout {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  /* Side by side, the feed (30+ pulls) takes the leaderboard's height and
+     scrolls inside, instead of stretching the page next to an empty column.
+     contain: size = its content doesn't size the grid row. */
+  .feed-panel {
+    align-self: stretch;
+    contain: size;
+    min-height: 36rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .feed-panel .feed-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 0.25rem;
   }
 }
 </style>

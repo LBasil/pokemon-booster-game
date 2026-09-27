@@ -13,3 +13,15 @@ test('community shows the live feed and the leaderboards', async ({ page }) => {
   await page.getByRole('link', { name: 'Misty' }).first().click()
   await expect(page).toHaveURL('/u/Misty')
 })
+
+test('on a computer every leaderboard tab is reachable (no hidden overflow)', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'phones swipe the tab row')
+  await signIn(page)
+  await mockSupabase(page)
+  await page.goto('/community')
+  const tabs = page.locator('.board-tabs')
+  const last = page.getByRole('tab').last()
+  await expect(last).toBeVisible()
+  const [box, lastBox] = await Promise.all([tabs.boundingBox(), last.boundingBox()])
+  expect(lastBox.x + lastBox.width).toBeLessThanOrEqual(box.x + box.width + 1)
+})

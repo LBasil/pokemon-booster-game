@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { collectionEntry } from './support/data.js'
 import { mockSupabase, signIn } from './support/supabase.js'
 
 test('renaming: taken usernames are refused, free ones saved', async ({ page }) => {
@@ -40,4 +41,28 @@ test('unknown or private profiles say so', async ({ page }) => {
   await mockSupabase(page)
   await page.goto('/u/nobody')
   await expect(page.getByRole('heading', { name: 'Trainer not found' })).toBeVisible()
+})
+
+test("a public profile's numbers follow the game mode, challenge first", async ({ page }) => {
+  await mockSupabase(page, {
+    // Mostly played in the challenge: 3 cards there, none in unlimited
+    partners: { misty: [{ ...collectionEntry('sv3pt5-199'), quantity: 3 }] },
+  })
+  await page.route('**/rest/v1/rpc/public_collection', (route) => route.fulfill({ json: [] }))
+  await page.goto('/u/misty')
+  const stat = (label) => page.locator('.stat').filter({ hasText: label }).locator('dd')
+  await expect(page.getByRole('tab', { name: 'Challenge' })).toHaveAttribute('aria-selected', 'true')
+  await expect(stat('Boosters opened')).toHaveText('4') // the server's count of challenge packs
+  await expect(stat('Cards pulled')).toHaveText('3')
+  await expect(page.locator('.rank-progress-count')).toContainText('Challenge')
+
+  await page.getByRole('tab', { name: 'Unlimited' }).click()
+  await expect(stat('Cards pulled')).toHaveText('0')
+})
+
+test('someone who only played unlimited opens on their unlimited numbers', async ({ page }) => {
+  await mockSupabase(page, { partners: {} })
+  await page.goto('/u/misty')
+  await expect(page.getByRole('tab', { name: 'Unlimited' })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.locator('.stat').filter({ hasText: 'Cards pulled' }).locator('dd')).toHaveText('2')
 })
