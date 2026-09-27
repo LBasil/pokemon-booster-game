@@ -1,5 +1,6 @@
-# Weekly import from pokemontcg.io: new sets and cards, fresh Cardmarket
-# prices, and a price-history snapshot (the card detail's price chart).
+# Weekly import from pokemontcg.io: new sets and cards, fresh prices
+# (Cardmarket, else TCGplayer converted to euros: src/utils/cardPrice.js),
+# and a price-history snapshot (the card detail's price chart).
 #
 # Needs three repository secrets (Settings > Secrets and variables > Actions):
 #   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, POKEMONTCG_API_KEY

@@ -63,7 +63,7 @@ flowchart LR
 | **Bootstrap 5** | Base CSS, recouverte par le design system « Holo Collector » | [src/assets/styles/global.css](../../src/assets/styles/global.css) |
 | **Supabase** | **Tout le back-end** : comptes (Auth), base Postgres, API REST générée, temps réel | [supabase/migrations/](../../supabase/migrations/) |
 | **Vercel** | Héberge le build statique | [vercel.json](../../vercel.json) |
-| **pokemontcg.io** | Source des sets, cartes, images et prix Cardmarket, importés par un script d'admin | [scripts/populate.mjs](../../scripts/populate.mjs) |
+| **pokemontcg.io** | Source des sets, cartes, images et prix (Cardmarket, sinon TCGplayer converti en €), importés par un script d'admin | [scripts/populate.mjs](../../scripts/populate.mjs) |
 
 Il n'y a **pas de serveur applicatif** à nous. Le navigateur parle
 directement à Supabase. La logique qui doit rester fiable (tirer un pack,

@@ -49,7 +49,8 @@ How it works inside (every table, RPC and flow, in French):
 - **Hub**: greeting, quick access to boosters, collection progress, profile
   summary, latest pulls, and a peek at the community's live pulls.
 - **Collection**: every card you've pulled with completion stats and an
-  estimated Cardmarket value; search, filter by set, rarity or duplicates,
+  estimated value (Cardmarket, or TCGplayer converted to euros for recent
+  sets that have no Cardmarket price); search, filter by set, rarity or duplicates,
   and sort — all kept in the URL. Tabs for:
   - **Sets**: per-set completion, each opening a **binder** with every card
     of the set in number order and the missing ones greyed out in their slot;

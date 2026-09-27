@@ -8,16 +8,19 @@
 //   SUPABASE_URL=...
 //   SUPABASE_SERVICE_ROLE_KEY=...   (bypasses RLS for bulk writes — admin-only, never expose client-side)
 //   POKEMONTCG_API_KEY=...
+//   USD_TO_EUR=0.86                 (optional: rate for cards priced on TCGplayer only)
 
 import { config } from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { createClient } from '@supabase/supabase-js'
+import { cardPriceEur, DEFAULT_USD_TO_EUR } from '../src/utils/cardPrice.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 config({ path: path.join(__dirname, '.env.local') })
 
 const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, POKEMONTCG_API_KEY } = process.env
+const USD_TO_EUR = Number(process.env.USD_TO_EUR) || DEFAULT_USD_TO_EUR
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error('Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY in scripts/.env.local')
@@ -122,7 +125,7 @@ async function populateCards(startPage = 1) {
       id: card.id,
       name: card.name,
       rarity: card.rarity ?? null,
-      value: card.cardmarket?.prices?.averageSellPrice ?? 0,
+      value: cardPriceEur(card, USD_TO_EUR),
       image_url: card.images.large,
       image_small: card.images.small,
       artist: card.artist ?? null,

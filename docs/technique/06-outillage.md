@@ -91,7 +91,7 @@ le workflow hebdomadaire. Il lit `scripts/.env.local` (non versionné) :
 | Cible | Fait |
 | --- | --- |
 | `sets` | Pages de 250 sets → `upsert` dans `sets` (dont `logo_url`, `symbol_url` fournis par l'API) |
-| `cards [page]` | Pages de 250 cartes → `upsert` dans `cards` (`value` = prix moyen de vente Cardmarket) + un relevé du jour dans `card_price_history` ; puis `link_subsets()` |
+| `cards [page]` | Pages de 250 cartes → `upsert` dans `cards` (`value` = `cardPriceEur()` de `src/utils/cardPrice.js` : moyenne de vente Cardmarket, sinon prix TCGplayer × `USD_TO_EUR`, 0,86 par défaut — les sets récents comme Évolutions Prismatiques ou Méga-Évolution n'ont que TCGplayer) + un relevé du jour dans `card_price_history` ; puis `link_subsets()` |
 | `sync [page]` | `sets` puis `cards` puis `link_subsets()` |
 
 L'API pokemontcg.io est capricieuse : chaque page est retentée 6 fois avec

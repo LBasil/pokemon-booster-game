@@ -70,7 +70,7 @@ Lecture : tout le monde. Écriture client : aucune.
 | `id` | text, PK | `sv3pt5-199`… |
 | `name`, `rarity` | text | Nom, rareté brute (~45 libellés selon les époques) |
 | `rarity_bucket` | text, **générée** | Une des 6 raretés du jeu, calculée par `rarity_bucket(rarity)` (voir plus bas) |
-| `value` | numeric | Prix moyen de vente Cardmarket (€), 0 si inconnu |
+| `value` | numeric | Prix en € : moyenne de vente Cardmarket, sinon prix TCGplayer converti depuis l'USD (sets récents sans Cardmarket, `cardPriceEur`), 0 si inconnu |
 | `image_url`, `image_small` | text | Grande et petite image |
 | `artist`, `supertype`, `subtypes`, `hp`, `types` | … | Métadonnées de la carte (supertype = `Pokémon`, `Trainer`, `Energy`) |
 | `national_pokedex_number` | int | Numéro du Pokédex national (onglet Pokédex, succès) |
