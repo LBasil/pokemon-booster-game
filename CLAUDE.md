@@ -442,9 +442,14 @@ docs/technique/             technical doc (French, user choice): overview, front
 
 ## TODO
 
-- Dashboard steps never confirmed (user): Supabase Auth > URL
-  Configuration redirect URLs (`<site>/game`, `<site>/reset-password`);
-  the three GitHub secrets for `sync-cards.yml` (weekly card/price sync).
+- First scheduled `sync-cards.yml` run: Monday 2026-09-28 04:00 UTC —
+  check it on the Actions tab (public repo: `api.github.com/repos/LBasil/
+  pokemon-booster-game/actions/workflows/sync-cards.yml/runs`, no auth).
+  Confirmed 2026-09-27: the GitHub secrets work (manual run succeeded) and
+  Supabase Auth allows `<site>/game` + `<site>/reset-password` (site =
+  https://pokemon-booster-game.vercel.app). Check without sending an
+  email: `GET /auth/v1/verify?type=recovery&token=fake&redirect_to=<url>`
+  redirects to `<url>` if allowed, else to the site URL.
 - Parked (user, 2026-09-26: "on s'en fiche pour l'instant"): counter-offers,
   real subset pull rates (Classic Collection guessed at 1 pack in 3). Not
   wanted: push notifications (it's a website, not really an app). Not
