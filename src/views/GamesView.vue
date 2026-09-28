@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useGames } from '@/composables/useGames'
 import { useChallengeStore } from '@/stores/challenge'
@@ -29,7 +30,12 @@ onMounted(() => {
 
       <ul class="games-grid" role="list">
         <li v-for="game in games" :key="game.id">
-          <RouterLink :to="{ name: game.route }" class="game-tile" :class="{ off: !game.available }">
+          <component
+            :is="game.soon ? 'div' : RouterLink"
+            :to="game.soon ? undefined : { name: game.route }"
+            class="game-tile"
+            :class="{ off: !game.available, soon: game.soon }"
+          >
             <span class="game-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24"><path :d="game.icon" /></svg>
             </span>
@@ -42,7 +48,7 @@ onMounted(() => {
               </span>
             </span>
             <span v-if="game.available" class="game-cta">{{ game.inProgress ? t('minigame.resume') : t('minigame.play') }}</span>
-          </RouterLink>
+          </component>
         </li>
         <li class="game-more">
           <span>{{ t('games.more') }}</span>
@@ -109,7 +115,7 @@ onMounted(() => {
 }
 
 @media (hover: hover) {
-  .game-tile:hover {
+  .game-tile:not(.soon):hover {
     transform: translateY(-3px);
     border-color: var(--pb-ring);
   }
@@ -117,6 +123,12 @@ onMounted(() => {
 
 .game-tile.off {
   opacity: 0.7;
+}
+
+/* A teaser: not playable yet */
+.game-tile.soon {
+  border-style: dashed;
+  box-shadow: none;
 }
 
 .game-icon {

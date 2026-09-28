@@ -589,6 +589,14 @@
       "super-effective": {
         "title": "Super efficace !",
         "desc": "Quel type est super efficace contre ce Pokémon ?"
+      },
+      "evolution-chain": {
+        "title": "Chaîne d'évolution",
+        "desc": "Remets les stades d'une lignée d'évolution dans l'ordre."
+      },
+      "boss-raid": {
+        "title": "Raid de boss",
+        "desc": "Tous les joueurs contre un Pokémon géant, chaque semaine."
       }
     }
   },

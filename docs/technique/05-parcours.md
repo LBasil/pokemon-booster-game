@@ -472,6 +472,10 @@ repliables (mémorisées par appareil dans `pb-achievements-collapsed`).
 
 ## 8. Les mini-jeux du Défi
 
+Les deux suivants, « Chaîne d'évolution » et « Raid de boss », sont
+annoncés sur la page des jeux (« Bientôt disponible », non cliquables) ;
+rien n'est encore codé côté serveur.
+
 ### « Plus ou moins »
 
 Page : [MinigameView.vue](../../src/views/MinigameView.vue)

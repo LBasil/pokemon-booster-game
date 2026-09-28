@@ -37,7 +37,8 @@ How it works inside (every table, RPC and flow, in French):
   board, cash out any time; points = coins, up to 300 a day — and
   **"Super effective!"**: a Pokémon card shows up (its top half), tap the
   type it's weak to within 10 seconds (the weakness printed on the card;
-  3, then 4, then 6 types to pick from), same pay as "Higher or lower". Packs
+  3, then 4, then 6 types to pick from), same pay as "Higher or lower". Two more are
+  teased as "Coming soon" (**Evolution chain**, **Boss raid**). Packs
   keep the real pull rates (no pity timer), except that 1 booster in 500 is
   a "god pack" (holos and better only). **Trade cards** with other
   trainers (up to 5 for 5, or as a gift; public profiles show their

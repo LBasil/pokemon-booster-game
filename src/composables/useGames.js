@@ -9,6 +9,7 @@ import { GAMES } from '@/utils/games'
  * The challenge mini-games with their status for today, for the games page
  * and the challenge hub. Each game plugs its store in `load` and `statusOf`
  * (`line`: what it still pays today; `record`: its best, '' if none yet).
+ * Teasers (`soon`) have no store: always "Coming soon", not clickable.
  * @returns {{ games: import('vue').ComputedRef<object[]>, load: () => void }}
  */
 export function useGames() {
@@ -46,6 +47,11 @@ export function useGames() {
 
   const games = computed(() =>
     GAMES.map((game) => {
+      const text = {
+        title: t(`games.items.${game.id}.title`),
+        desc: t(`games.items.${game.id}.desc`),
+      }
+      if (game.soon) return { ...game, ...text, available: false, loaded: true, inProgress: false, line: t('games.soon'), record: '' }
       const { store, ...status } = statusOf[game.id]()
       const available = !store.unavailable
       return {
@@ -55,8 +61,7 @@ export function useGames() {
         loaded: store.loaded,
         line: !available ? t('games.soon') : store.loaded ? status.line : '',
         record: available && store.loaded ? status.record : '',
-        title: t(`games.items.${game.id}.title`),
-        desc: t(`games.items.${game.id}.desc`),
+        ...text,
       }
     }),
   )

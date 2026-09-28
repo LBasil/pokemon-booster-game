@@ -496,7 +496,10 @@ docs/technique/             technical doc (French, user choice): overview, front
   email: `GET /auth/v1/verify?type=recovery&token=fake&redirect_to=<url>`
   redirects to `<url>` if allowed, else to the site URL.
 - **Next mini-games** (user picked them 2026-09-28, after "Super
-  effective!"):
+  effective!"). Already teased on the games page and hub tile as
+  `soon: true` entries of `src/utils/games.js` (ids `evolution-chain`,
+  `boss-raid`, EN/FR texts, "Coming soon", not clickable, user liked the
+  teasing): to ship one, drop `soon`, add its route + store in `useGames()`.
   1. **Evolution chain**: put a family's stages back in order (3 shuffled
      cards; later levels blur the art or add an intruder from another
      family). Needs `cards.evolves_from` (pokemontcg.io `evolvesFrom`):

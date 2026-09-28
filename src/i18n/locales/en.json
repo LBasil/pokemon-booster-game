@@ -589,6 +589,14 @@
       "super-effective": {
         "title": "Super effective!",
         "desc": "Which type is this Pokémon weak to?"
+      },
+      "evolution-chain": {
+        "title": "Evolution chain",
+        "desc": "Put the stages of an evolution line back in order."
+      },
+      "boss-raid": {
+        "title": "Boss raid",
+        "desc": "Every player against one giant Pokémon, each week."
       }
     }
   },

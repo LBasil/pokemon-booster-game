@@ -344,3 +344,7 @@ les textes `games.items.<id>`, la route `challenge-game-<id>`, son statut
 dans `useGames()` (`statusOf` : son store, sa ligne « ce qu'il paie encore
 aujourd'hui », son record), ses RPC côté serveur (les gains se décident en SQL,
 comme pour « Plus ou moins »).
+Un jeu annoncé mais pas encore codé : une entrée `soon: true` sans route
+(plus les textes) ; il s'affiche « Bientôt disponible », non cliquable, sur
+la page des jeux et la tuile du hub. Retirer `soon` et ajouter la route
+quand il existe.

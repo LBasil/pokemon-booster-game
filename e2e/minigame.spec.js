@@ -26,6 +26,12 @@ test('the mini-games are one tap away in the challenge, near the top of its hub'
   await expect(page.getByRole('heading', { level: 1, name: 'Mini-games' })).toBeVisible()
   await expect(page.locator('.mode-strip')).toBeVisible() // still in the challenge
   await expect(gamesTab(page)).toHaveAttribute('aria-current', 'page')
+  // The next games are teased, not playable yet
+  for (const name of ['Evolution chain', 'Boss raid']) {
+    const teaser = page.locator('.game-tile').filter({ hasText: name })
+    await expect(teaser).toContainText('Coming soon')
+    await expect(teaser).not.toHaveAttribute('href')
+  }
 
   await page.locator('.game-tile').filter({ hasText: 'Higher or lower' }).click()
   await expect(page).toHaveURL(/\/challenge\/games\/higher-lower$/)

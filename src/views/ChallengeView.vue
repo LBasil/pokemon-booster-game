@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useChallengeStore } from '@/stores/challenge'
 import { useChallengeCollectionStore } from '@/stores/collection'
@@ -223,14 +224,19 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
             <p class="ch-muted">{{ t('games.hubDesc') }}</p>
             <ul class="ch-games-list" role="list">
               <li v-for="game in games" :key="game.id">
-                <RouterLink :to="{ name: game.route }" class="ch-game" :class="{ off: !game.available }">
+                <component
+                  :is="game.soon ? 'div' : RouterLink"
+                  :to="game.soon ? undefined : { name: game.route }"
+                  class="ch-game"
+                  :class="{ off: !game.available, soon: game.soon }"
+                >
                   <span class="ch-game-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path :d="game.icon" /></svg></span>
                   <span class="ch-game-text">
                     <span class="ch-game-title">{{ game.title }}</span>
                     <span v-if="game.line" class="ch-game-status">{{ game.line }}</span>
                   </span>
                   <span v-if="game.available" class="ch-game-cta" aria-hidden="true">→</span>
-                </RouterLink>
+                </component>
               </li>
             </ul>
           </section>
@@ -862,13 +868,17 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 }
 
 @media (hover: hover) {
-  .ch-game:hover {
+  .ch-game:not(.soon):hover {
     border-color: var(--pb-ring);
   }
 }
 
 .ch-game.off {
   opacity: 0.7;
+}
+
+.ch-game.soon {
+  border-style: dashed;
 }
 
 .ch-game-icon {
