@@ -196,6 +196,10 @@ docs/technique/             technical doc (French, user choice): overview, front
   page at phone width; add new pages there. Check 320px too (narrowest
   supported): tab counts, the challenge wallet art and the mode strip
   icon hide below 375px.
+- **Leaderboards** (Community): a Challenge | Unlimited switch
+  (user, 2026-09-28: "ce serait plus propre"), then that mode's boards
+  (`LEADERBOARDS[mode]` in `src/api/social.js`). Opens on `routeMode`,
+  each mode remembers its last board.
 - **Community on desktop** (>= 992px, two columns): the feed panel takes
   the leaderboard's height (`contain: size`) and scrolls inside; board
   rows share columns through `subgrid`; with a mouse (`hover: hover` +

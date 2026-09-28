@@ -376,8 +376,8 @@
       "hit_rate": "Luckiest",
       "best_pull": "Best pull",
       "complete_sets": "Master sets",
-      "challenge_unique": "Challenge: cards",
-      "challenge_value": "Challenge: value"
+      "challenge_unique": "Most cards",
+      "challenge_value": "Collection value"
     },
     "boardDesc": {
       "hit_rate": "Ultra and secret rares per 100 boosters (from 20 boosters opened).",

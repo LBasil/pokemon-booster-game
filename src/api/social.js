@@ -1,7 +1,11 @@
 import { supabase } from '@/lib/supabaseClient'
 
-// The two challenge boards rank the separate challenge collection (migration 0007)
-export const LEADERBOARDS = ['hit_rate', 'best_pull', 'complete_sets', 'challenge_unique', 'challenge_value']
+// Boards per game mode (Community's Challenge | Unlimited switch). The
+// challenge ones rank the separate challenge collection (migration 0007).
+export const LEADERBOARDS = {
+  challenge: ['challenge_unique', 'challenge_value'],
+  unlimited: ['hit_rate', 'best_pull', 'complete_sets'],
+}
 
 /** Luck-based leaderboards over public profiles (see leaderboard() in migration 0004). */
 export async function fetchLeaderboard(kind, limit = 20) {

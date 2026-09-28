@@ -33,13 +33,43 @@ test('every hit in the feed says which mode it was pulled in', async ({ page }) 
   await expect(page.locator('.hub-live-item').nth(1).locator('.hub-live-mode')).toHaveText('Unlimited')
 })
 
+test('the leaderboards switch between the challenge and unlimited boards', async ({ page }) => {
+  await signIn(page)
+  await mockSupabase(page)
+  await page.goto('/community')
+  const modes = page.locator('.board-modes')
+  const boards = page.locator('.board-tabs [role="tab"]')
+  await expect(modes.getByRole('tab', { name: 'Unlimited' })).toHaveAttribute('aria-selected', 'true')
+  await expect(boards).toHaveText(['Luckiest', 'Best pull', 'Master sets'])
+
+  const request = page.waitForRequest((req) => req.url().includes('/rpc/leaderboard') && req.postData()?.includes('challenge_unique'))
+  await modes.getByRole('tab', { name: 'Challenge' }).click()
+  await request
+  await expect(boards).toHaveText(['Most cards', 'Collection value'])
+  await boards.nth(1).click()
+
+  // Each mode keeps the board it was on
+  await modes.getByRole('tab', { name: 'Unlimited' }).click()
+  await expect(boards.nth(0)).toHaveAttribute('aria-selected', 'true')
+  await modes.getByRole('tab', { name: 'Challenge' }).click()
+  await expect(boards.nth(1)).toHaveAttribute('aria-selected', 'true')
+})
+
+test('coming from the challenge, the leaderboards open on its boards', async ({ page }) => {
+  await signIn(page)
+  await mockSupabase(page)
+  await page.goto('/challenge')
+  await page.goto('/community')
+  await expect(page.locator('.board-modes').getByRole('tab', { name: 'Challenge' })).toHaveAttribute('aria-selected', 'true')
+})
+
 test('on a computer every leaderboard tab is reachable (no hidden overflow)', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'phones swipe the tab row')
   await signIn(page)
   await mockSupabase(page)
   await page.goto('/community')
   const tabs = page.locator('.board-tabs')
-  const last = page.getByRole('tab').last()
+  const last = tabs.getByRole('tab').last()
   await expect(last).toBeVisible()
   const [box, lastBox] = await Promise.all([tabs.boundingBox(), last.boundingBox()])
   expect(lastBox.x + lastBox.width).toBeLessThanOrEqual(box.x + box.width + 1)

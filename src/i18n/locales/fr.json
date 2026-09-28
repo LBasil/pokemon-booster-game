@@ -376,8 +376,8 @@
       "hit_rate": "Plus chanceux",
       "best_pull": "Meilleure carte",
       "complete_sets": "Séries complètes",
-      "challenge_unique": "Défi : cartes",
-      "challenge_value": "Défi : valeur"
+      "challenge_unique": "Le plus de cartes",
+      "challenge_value": "Valeur de collection"
     },
     "boardDesc": {
       "hit_rate": "Ultra rares et secrètes pour 100 boosters (à partir de 20 boosters ouverts).",

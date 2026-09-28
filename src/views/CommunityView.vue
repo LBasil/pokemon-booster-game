@@ -53,18 +53,30 @@ onBeforeUnmount(() => {
 
 // ---------- Leaderboards ----------
 
-// Coming from the challenge: open on its leaderboard
-const board = ref(routeMode(route) === 'challenge' ? 'challenge_unique' : LEADERBOARDS[0])
+// Challenge | Unlimited switch, then that mode's boards. Opens on the mode
+// the player came from; each mode remembers its last board.
+const BOARD_MODES = ['challenge', 'unlimited']
+const boardMode = ref(routeMode(route))
+const lastBoard = { challenge: LEADERBOARDS.challenge[0], unlimited: LEADERBOARDS.unlimited[0] }
+const board = ref(lastBoard[boardMode.value])
+function pickBoardMode(next) {
+  if (next === boardMode.value) return
+  lastBoard[boardMode.value] = board.value
+  boardMode.value = next
+  board.value = lastBoard[next]
+}
 const rows = ref([])
 const boardState = ref('loading')
 
 async function loadBoard(kind) {
   boardState.value = 'loading'
   try {
-    rows.value = await fetchLeaderboard(kind, 20)
+    const data = await fetchLeaderboard(kind, 20)
+    if (kind !== board.value) return // switched again meanwhile: a late answer
+    rows.value = data
     boardState.value = 'ready'
   } catch {
-    boardState.value = 'error'
+    if (kind === board.value) boardState.value = 'error'
   }
 }
 watch(board, loadBoard, { immediate: true })
@@ -133,10 +145,26 @@ function scoreLabel(row) {
 
         <!-- ============ Leaderboards ============ -->
         <section class="panel" aria-labelledby="board-title">
-          <h2 id="board-title" class="pb-section-title">{{ t('community.boardsTitle') }}</h2>
+          <div class="board-head">
+            <h2 id="board-title" class="pb-section-title">{{ t('community.boardsTitle') }}</h2>
+            <!-- Separate collections: each mode has its own boards -->
+            <div class="board-modes" role="tablist" :aria-label="t('nav.modeSwitch')">
+              <button
+                v-for="item in BOARD_MODES"
+                :key="item"
+                type="button"
+                role="tab"
+                :aria-selected="boardMode === item"
+                :class="{ active: boardMode === item }"
+                @click="pickBoardMode(item)"
+              >
+                {{ t(item === 'challenge' ? 'nav.modeChallenge' : 'nav.modeUnlimited') }}
+              </button>
+            </div>
+          </div>
           <div class="board-tabs" role="tablist">
             <button
-              v-for="kind in LEADERBOARDS"
+              v-for="kind in LEADERBOARDS[boardMode]"
               :key="kind"
               type="button"
               role="tab"
@@ -312,6 +340,39 @@ function scoreLabel(row) {
 }
 
 /* ---------- Leaderboards ---------- */
+
+.board-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.board-modes {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-input-bg);
+}
+
+.board-modes button {
+  padding: 0.35rem 0.9rem;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--pb-text-muted);
+  font-weight: 700;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.board-modes button.active {
+  background: var(--pb-text);
+  color: var(--pb-bg);
+}
 
 .board-tabs {
   display: flex;

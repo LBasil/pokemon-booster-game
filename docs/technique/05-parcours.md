@@ -582,10 +582,15 @@ Page : [CommunityView.vue](../../src/views/CommunityView.vue)
   Le fil vient de `save_booster_opening` : chaque ultra/secret d'un profil
   public, dans les deux modes (badge « Illimité » ou « Défi » sur chaque
 tirage, ici et dans le bloc « En direct » de l'accueil).
-- **Classements** : `fetchLeaderboard(kind, 20)` à chaque changement
-  d'onglet (5 classements, [détail](04-reference-api.md#leaderboardp_kind-text-p_limit-int--20)).
-  Arriver depuis le Défi ouvre sur « Défi : cartes ». Sa propre ligne est
-  mise en évidence.
+- **Classements** : un sélecteur Défi | Illimité, puis les onglets de ce
+  mode (`LEADERBOARDS` dans `src/api/social.js`) : Défi = « Le plus de
+  cartes », « Valeur de collection » ; Illimité = « Plus chanceux »,
+  « Meilleure carte », « Séries complètes »
+  ([détail](04-reference-api.md#leaderboardp_kind-text-p_limit-int--20)).
+  `fetchLeaderboard(kind, 20)` à chaque changement d'onglet (une réponse
+  arrivée après un nouveau changement est ignorée). Le sélecteur s'ouvre
+  sur le mode d'où vient le joueur, et chaque mode retient son dernier
+  onglet. Sa propre ligne est mise en évidence.
 - **Mise en page** : une colonne sur téléphone ; à partir de 992 px, deux
   colonnes, le fil prend la hauteur du classement et défile à l'intérieur
   (`contain: size`). Avec une souris, les onglets passent à la ligne au
