@@ -1,6 +1,13 @@
-# Weekly import from pokemontcg.io: new sets and cards, fresh prices
-# (Cardmarket, else TCGplayer converted to euros: src/utils/cardPrice.js),
-# and a price-history snapshot (the card detail's price chart).
+# Import from pokemontcg.io at midnight and noon, Paris time: new sets and
+# cards, fresh prices (Cardmarket, else TCGplayer converted to euros:
+# src/utils/cardPrice.js), weaknesses, and a price-history snapshot (the
+# card detail's price chart; one per day, the noon run updates it).
+#
+# Cron runs in UTC, so each run has a summer (CEST, UTC+2) and a winter
+# (CET, UTC+1) slot; the "Paris time" step only lets through the one that
+# matches today's offset. Minute 7, not 0: GitHub delays scheduled runs the
+# most on the hour (the first Monday run at 04:00 UTC only started at
+# 13:55), so the import can still start late.
 #
 # Needs three repository secrets (Settings > Secrets and variables > Actions):
 #   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, POKEMONTCG_API_KEY
@@ -9,7 +16,10 @@ name: Sync card data
 
 on:
   schedule:
-    - cron: '0 4 * * 1' # Mondays 04:00 UTC
+    - cron: '7 22 * * *' # 00:07 Paris in summer (UTC+2)
+    - cron: '7 10 * * *' # 12:07 Paris in summer
+    - cron: '7 23 * * *' # 00:07 Paris in winter (UTC+1)
+    - cron: '7 11 * * *' # 12:07 Paris in winter
   workflow_dispatch:
     inputs:
       start_page:
@@ -17,18 +27,40 @@ on:
         required: false
         default: '1'
 
+# A manual run and a scheduled one never write at the same time
+concurrency:
+  group: sync-cards
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Paris time
+        id: paris
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          offset=$(TZ=Europe/Paris date +%z)
+          case "$SCHEDULE" in
+            '') run=true ;; # started by hand
+            '7 22 * * *'|'7 10 * * *') [ "$offset" = "+0200" ] && run=true || run=false ;;
+            *) [ "$offset" = "+0100" ] && run=true || run=false ;;
+          esac
+          echo "Paris is UTC$offset, schedule '$SCHEDULE': run=$run"
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+      - if: steps.paris.outputs.run == 'true'
+        uses: actions/checkout@v4
+      - if: steps.paris.outputs.run == 'true'
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - if: steps.paris.outputs.run == 'true'
+        run: npm ci
       - name: Import sets, cards and prices
+        if: steps.paris.outputs.run == 'true'
         run: node scripts/populate.mjs sync ${{ github.event.inputs.start_page || '1' }}
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

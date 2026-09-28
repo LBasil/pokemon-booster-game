@@ -162,7 +162,7 @@ function scoreLabel(row) {
               </button>
             </div>
           </div>
-          <div class="board-tabs" role="tablist">
+          <div class="board-tabs" role="tablist" :aria-label="t('community.boardsTitle')">
             <button
               v-for="kind in LEADERBOARDS[boardMode]"
               :key="kind"

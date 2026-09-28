@@ -2,7 +2,7 @@
 // Never bundled into the client app — run manually with:
 //   npm run populate:sets
 //   npm run populate:cards   (also records today's prices in card_price_history)
-//   npm run populate:sync    (sets + cards: the weekly GitHub Action runs this)
+//   npm run populate:sync    (sets + cards: the GitHub Action runs this at midnight and noon)
 //
 // Requires scripts/.env.local (gitignored) with:
 //   SUPABASE_URL=...
@@ -99,7 +99,7 @@ async function populateSets() {
 }
 
 // One Cardmarket price snapshot per card per day (card_price_history,
-// migration 0004): run weekly, it draws each card's price curve.
+// migration 0004): each day's import draws a point of the price curve.
 const today = new Date().toISOString().slice(0, 10)
 let priceHistoryAvailable = true
 
@@ -187,7 +187,7 @@ if (target === 'sets') {
   await populateCards(startPage)
   await linkSubsets()
 } else if (target === 'sync') {
-  // Weekly refresh (see .github/workflows/sync-cards.yml): new sets, new
+  // Twice-daily refresh (see .github/workflows/sync-cards.yml): new sets, new
   // cards, fresh prices, a price-history snapshot and new subsets linked
   await populateSets()
   await populateCards(startPage)

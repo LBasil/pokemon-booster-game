@@ -35,7 +35,9 @@ test('community and profile keep the mode the player came from', async ({ page }
   await expect(page.locator('.mode-strip')).toBeVisible()
   await page.goto('/community')
   await expect(page.locator('.mode-strip')).toBeVisible()
-  await expect(page.getByRole('tab', { selected: true })).toHaveText('Challenge: cards')
+  // The leaderboards open on the challenge's boards
+  await expect(page.getByRole('tablist', { name: 'Game mode' }).getByRole('tab', { selected: true })).toHaveText('Challenge')
+  await expect(page.getByRole('tablist', { name: 'Leaderboards' }).getByRole('tab', { selected: true })).toHaveText('Most cards')
 
   await page.locator('.mode-strip').getByRole('link', { name: /Leave/ }).click()
   await expect(page).toHaveURL(/\/game$/)

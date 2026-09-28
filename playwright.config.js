@@ -28,6 +28,9 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
+      // A production build even when the shell exports NODE_ENV=development
+      // (Vite 8 follows it: import.meta.env.PROD false, no PWA or version check)
+      NODE_ENV: 'production',
       VITE_SUPABASE_URL: 'https://e2e.supabase.test',
       VITE_SUPABASE_ANON_KEY: 'e2e-anon-key',
     },

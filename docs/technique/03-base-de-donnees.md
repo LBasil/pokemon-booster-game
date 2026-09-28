@@ -28,7 +28,7 @@ erDiagram
   SETS ||--o{ CARDS : contient
   SETS ||--o{ SETS : "sous-set de"
   CARDS ||--o{ COLLECTIONS : ""
-  CARDS ||--o{ CARD_PRICE_HISTORY : "prix hebdo"
+  CARDS ||--o{ CARD_PRICE_HISTORY : "prix du jour"
   CARDS ||--o{ WISHLIST : ""
 ```
 

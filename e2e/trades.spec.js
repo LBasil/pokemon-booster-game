@@ -113,7 +113,8 @@ test('the community has challenge leaderboards', async ({ page }) => {
     leaderboard: [{ rank: 1, username: 'Misty', score: 42, packs: 30, card_id: null, card_name: null, image_small: null }],
   })
   await page.goto('/community')
-  await page.getByRole('tab', { name: 'Challenge: cards' }).click()
+  await page.getByRole('tablist', { name: 'Game mode' }).getByRole('tab', { name: 'Challenge' }).click()
+  await page.getByRole('tablist', { name: 'Leaderboards' }).getByRole('tab', { name: 'Most cards' }).click()
   await expect(page.locator('.board-score').first()).toHaveText('42 cards')
   expect(rpcCalls(backend, 'leaderboard').some((c) => JSON.parse(c.body).p_kind === 'challenge_unique')).toBe(true)
 })

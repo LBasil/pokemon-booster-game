@@ -64,7 +64,7 @@ How it works inside (every table, RPC and flow, in French):
     others as silhouettes);
   - **Wishlist**: cards you're hunting (pulling one takes it off the list).
 - **Card detail**: full-size holo card, set and number, rarity, copies,
-  first pull date, illustrator, **price history chart** (weekly Cardmarket
+  first pull date, illustrator, **price history chart** (daily Cardmarket
   snapshots), wishlist toggle for missing cards, and **sharing** a generated
   image of the card.
 - **Last set remembered**: the booster page preselects the set (and the
@@ -142,7 +142,7 @@ e2e/              Playwright tests + a mocked Supabase backend
 supabase/migrations/   SQL to run in the Supabase SQL editor (schema, RLS, RPCs)
 supabase/tests/        migration tests in PGlite (npm run test:db)
 scripts/populate.mjs   admin script importing sets, cards and prices from pokemontcg.io
-.github/workflows/     CI (tests on every push) and the weekly card-data sync
+.github/workflows/     CI (tests on every push) and the card-data sync (twice a day)
 docs/technique/        technical documentation (French): architecture, database, API, flows, tooling
 ```
 
@@ -259,8 +259,9 @@ retries, and `node scripts/populate.mjs cards <page>` resumes a partial run.
 Behind a network that intercepts HTTPS (Node fails with
 `SELF_SIGNED_CERT_IN_CHAIN`), prefix the command with `NODE_USE_SYSTEM_CA=1`.
 
-**Weekly sync.** `.github/workflows/sync-cards.yml` runs
-`npm run populate:sync` (sets + cards + price snapshot) every Monday. Add
+**Card sync.** `.github/workflows/sync-cards.yml` runs
+`npm run populate:sync` (sets + cards + price snapshot) every day at
+midnight and noon, Paris time (GitHub can start scheduled runs late). Add
 three repository secrets in **Settings > Secrets and variables > Actions**:
 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `POKEMONTCG_API_KEY`. It can
 also be run by hand from the Actions tab.
@@ -312,6 +313,6 @@ with a real account.
 | `npm run test:e2e`       | End-to-end tests (Playwright, mocked Supabase)                  |
 | `npm run populate:sets`  | Import the `sets` table from pokemontcg.io                      |
 | `npm run populate:cards` | Import the `cards` table (+ today's price snapshot)             |
-| `npm run populate:sync`  | Sets + cards + prices in one go (what the weekly Action runs)   |
+| `npm run populate:sync`  | Sets + cards + prices in one go (what the sync Action runs)     |
 
 See [CLAUDE.md](./CLAUDE.md) for the full project rules and current state.

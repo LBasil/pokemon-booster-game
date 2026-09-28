@@ -85,7 +85,7 @@ manuelle [docs/manual-testing.md](../manual-testing.md).
 ## 3. Import des cartes
 
 [scripts/populate.mjs](../../scripts/populate.mjs), lancé à la main ou par
-le workflow hebdomadaire. Il lit `scripts/.env.local` (non versionné) :
+le workflow de synchro (minuit et midi). Il lit `scripts/.env.local` (non versionné) :
 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `POKEMONTCG_API_KEY`.
 
 | Cible | Fait |
@@ -99,10 +99,19 @@ un délai croissant, et une pause de 300 ms sépare les pages. Le numéro de
 page optionnel permet de reprendre un import interrompu.
 
 **Workflow** [sync-cards.yml](../../.github/workflows/sync-cards.yml) :
-tous les lundis à 04:00 UTC (ou à la demande, avec une page de départ),
-`populate.mjs sync`. Il faut trois secrets de dépôt : `SUPABASE_URL`,
-`SUPABASE_SERVICE_ROLE_KEY`, `POKEMONTCG_API_KEY`. Deux imports à des
-jours différents sont nécessaires pour qu'une courbe de prix apparaisse.
+tous les jours à minuit et à midi, heure de Paris (ou à la demande, avec
+une page de départ), `populate.mjs sync` (environ 4 minutes). Le cron de
+GitHub est en UTC : chaque passage a un créneau d'été (UTC+2) et un
+d'hiver (UTC+1), et la première étape (« Paris time ») ne laisse passer
+que celui qui correspond au décalage du jour. Minute 7 plutôt que 0 :
+GitHub retarde surtout les tâches programmées à l'heure pile (le premier
+passage du lundi, prévu à 04:00 UTC, n'a démarré qu'à 13:55), le départ
+peut donc quand même avoir du retard. `concurrency` empêche un passage
+manuel et un passage programmé d'écrire en même temps. Il faut trois
+secrets de dépôt : `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+`POKEMONTCG_API_KEY`. Un relevé de prix par jour (celui de midi met à
+jour celui de minuit) : deux jours d'import suffisent pour qu'une courbe
+apparaisse.
 
 ---
 

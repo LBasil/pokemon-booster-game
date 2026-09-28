@@ -39,7 +39,7 @@ e2e/                        Playwright tests; e2e/support/supabase.js mocks the 
 supabase/migrations/        SQL run manually in the Supabase SQL editor (no CLI/MCP access to the DB)
 supabase/tests/             PGlite suites for the migrations (npm run test:db)
 scripts/populate.mjs        admin-only Node script: sets/cards/prices from pokemontcg.io — never bundled to the client
-.github/workflows/          ci.yml (unit + build + e2e) and sync-cards.yml (weekly populate:sync)
+.github/workflows/          ci.yml (unit + build + e2e) and sync-cards.yml (populate:sync at 00:07 + 12:07 Paris)
 docs/manual-testing.md      checklist for a real-account click-through
 docs/technique/             technical doc (French, user choice): overview, front-end, database,
                             API reference (params/responses/errors), flows with diagrams, tooling
@@ -465,12 +465,14 @@ docs/technique/             technical doc (French, user choice): overview, front
 - Tests: `npm test` 143 unit tests, `npm run test:db` 190 database
   checks, `npm run test:e2e` 196 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
-  0 npm audit vulnerabilities. Known failing since 2026-09-28 (not from
-  the mini-games): navigation.spec.js > "community and profile keep the
-  mode" and trades.spec.js > "the community has challenge leaderboards"
-  (the Community page now has two selected tabs: mode switch + board),
-  and navigation.spec.js > "a new version deployed" (times out waiting
-  for `pb:update-ready`).
+  0 npm audit vulnerabilities. Community's two tablists are named
+  ("Game mode", "Leaderboards"): e2e picks tabs through them.
+  `playwright.config.js` builds with `NODE_ENV=production`: this
+  machine's `~/.zshrc` exports `NODE_ENV=development`, and Vite 8 then
+  builds with `import.meta.env.PROD` false (no PWA, no version check, so
+  "a new version deployed" failed locally only). A plain `npm run build`
+  here has the same problem: use `NODE_ENV=production npm run build` to
+  check a real production bundle.
 - Not verified automatically: Realtime (feed and trades — no websocket
   mock in e2e) and anything needing two real accounts; the user checks
   those by hand.
@@ -481,9 +483,13 @@ docs/technique/             technical doc (French, user choice): overview, front
 
 ## TODO
 
-- First scheduled `sync-cards.yml` run: Monday 2026-09-28 04:00 UTC —
-  check it on the Actions tab (public repo: `api.github.com/repos/LBasil/
-  pokemon-booster-game/actions/workflows/sync-cards.yml/runs`, no auth).
+- `sync-cards.yml` runs twice a day since 2026-09-28 (user: midnight and
+  noon): 4 UTC crons (summer + winter slot for each) and a "Paris time"
+  step that lets through the one matching today's offset. The import
+  takes ~4 min, but GitHub starts scheduled runs late (the Monday 04:00
+  UTC run started at 13:55). Check runs on the Actions tab (public repo:
+  `api.github.com/repos/LBasil/pokemon-booster-game/actions/workflows/
+  sync-cards.yml/runs`, no auth).
   Confirmed 2026-09-27: the GitHub secrets work (manual run succeeded) and
   Supabase Auth allows `<site>/game` + `<site>/reset-password` (site =
   https://pokemon-booster-game.vercel.app). Check without sending an
@@ -518,9 +524,9 @@ docs/technique/             technical doc (French, user choice): overview, front
   back to TCGplayer USD x `USD_TO_EUR` (0.86). Without it whole
   collections showed "0 €" (fixed 2026-09-27). The newest sets (me2pt5,
   me3-me5, me55: ~980 cards) have no price at all yet: 0 until the
-  weekly sync finds one.
-- Price charts need at least two `populate:cards` runs on different days;
-  the weekly Action provides that once its secrets are set.
+  sync finds one.
+- Price charts need at least two `populate:cards` runs on different days
+  (one snapshot per day: the noon run updates midnight's).
 - The pokemontcg.io API key in use is the one exposed in this repo's git
   history — rotate it if the repo is ever made public.
 - The collection is fetched in one query; the grids render progressively.

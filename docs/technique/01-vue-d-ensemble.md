@@ -114,7 +114,7 @@ Deux exceptions assumées, documentées dans le code :
    minute, 20 parties de mini-jeu par minute).
 4. **La clé service role ne quitte jamais l'admin.** Elle contourne la RLS
    et ne sert qu'au script d'import (`scripts/.env.local`, non versionné) et
-   au workflow GitHub hebdomadaire (secrets du dépôt). Rien sous `src/`
+   au workflow GitHub de synchro des cartes (secrets du dépôt). Rien sous `src/`
    ne l'importe.
 
 ## Les deux modes, techniquement
@@ -155,6 +155,6 @@ supabase/migrations/     SQL à exécuter dans l'éditeur Supabase, dans l'ordre
 supabase/tests/          tests des migrations dans PGlite
 scripts/populate.mjs     import pokemontcg.io (admin, jamais dans le bundle)
 e2e/                     tests Playwright + faux Supabase (support/supabase.js)
-.github/workflows/       CI + synchro hebdomadaire des cartes
+.github/workflows/       CI + synchro des cartes (minuit et midi)
 docs/                    cette doc + checklist de test manuel
 ```
