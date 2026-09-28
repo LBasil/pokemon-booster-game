@@ -14,6 +14,25 @@ test('community shows the live feed and the leaderboards', async ({ page }) => {
   await expect(page).toHaveURL('/u/Misty')
 })
 
+test('every hit in the feed says which mode it was pulled in', async ({ page }) => {
+  const at = new Date().toISOString()
+  const hit = { card_id: 'sv3pt5-199', card_name: 'Charizard ex', image_small: null, bucket: 'secret', set_id: 'sv3pt5', pulled_at: at }
+  await signIn(page)
+  await mockSupabase(page, {
+    feed: [
+      { ...hit, id: 1, username: 'Misty', mode: 'challenge' },
+      { ...hit, id: 2, username: 'Brock', mode: 'unlimited' },
+    ],
+  })
+  await page.goto('/community')
+  await expect(page.locator('.feed-item').nth(0).locator('.feed-mode')).toHaveText('Challenge')
+  await expect(page.locator('.feed-item').nth(1).locator('.feed-mode')).toHaveText('Unlimited')
+
+  await page.goto('/game')
+  await expect(page.locator('.hub-live-item').nth(0).locator('.hub-live-mode')).toHaveText('Challenge')
+  await expect(page.locator('.hub-live-item').nth(1).locator('.hub-live-mode')).toHaveText('Unlimited')
+})
+
 test('on a computer every leaderboard tab is reachable (no hidden overflow)', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'phones swipe the tab row')
   await signIn(page)

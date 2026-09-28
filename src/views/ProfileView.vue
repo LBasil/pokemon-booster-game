@@ -180,7 +180,9 @@ async function setShowcase(cardId) {
 
 const topCards = computed(() => sortEntries(modeEntries.value, 'rarity').slice(0, 8))
 
-// ---------- Public profile: challenge collection (what you could trade for) ----------
+// ---------- Public profile: the collection of the picked mode ----------
+// Challenge: what you could trade for ("Ask for it"). Unlimited: to look
+// around only, trades are challenge-only.
 
 const CHALLENGE_PAGE = 24
 const challengeEntries = ref([])
@@ -198,9 +200,15 @@ async function loadChallenge(username) {
   }
 }
 
-const challengeMatches = computed(() => searchEntries(challengeEntries.value, challengeQuery.value))
+const unlimitedEntries = computed(() => sortEntries(publicEntries.value, 'rarity'))
+const browsingChallenge = computed(() => mode.value === 'challenge')
+const browseEntries = computed(() => (browsingChallenge.value ? challengeEntries.value : unlimitedEntries.value))
+const browseLoading = computed(() =>
+  browsingChallenge.value ? challengeState.value === 'loading' : publicState.value === 'loading',
+)
+const challengeMatches = computed(() => searchEntries(browseEntries.value, challengeQuery.value))
 const challengeVisible = computed(() => challengeMatches.value.slice(0, challengeShown.value))
-watch(challengeQuery, () => (challengeShown.value = CHALLENGE_PAGE))
+watch([challengeQuery, mode], () => (challengeShown.value = CHALLENGE_PAGE))
 
 // Someone who only ever played unlimited: open on their unlimited numbers
 watch([publicState, challengeState], ([pub, challenge]) => {
@@ -223,7 +231,7 @@ const askRoute = (entry) => ({ name: 'challenge-trades', query: { to: profile.va
 
 // ---------- Card detail (top cards or challenge cards) ----------
 
-const detailSource = ref('top') // top | challenge
+const detailSource = ref('top') // top | challenge (the browsed collection, either mode)
 const detailList = computed(() => (detailSource.value === 'challenge' ? challengeVisible.value : topCards.value))
 const detailIndex = ref(-1)
 const detailEntry = computed(() => detailList.value[detailIndex.value] ?? null)
@@ -519,20 +527,24 @@ async function logout() {
             </ul>
           </section>
 
-          <!-- Someone else's challenge collection: browse it before offering a trade -->
-          <section v-if="!isOwn && (challengeState === 'loading' || challengeEntries.length)" class="panel" aria-labelledby="challenge-coll-title">
+          <!-- Someone else's collection in the picked mode (challenge: browse it before offering a trade) -->
+          <section v-if="!isOwn && (browseLoading || browseEntries.length)" class="panel" aria-labelledby="challenge-coll-title">
             <div class="section-head">
-              <h2 id="challenge-coll-title" class="pb-section-title">{{ t('profile.challengeCollection') }}</h2>
-              <span class="section-count">{{ t('profile.challengeCount', { count: challengeEntries.length }, challengeEntries.length) }}</span>
+              <h2 id="challenge-coll-title" class="pb-section-title">
+                {{ browsingChallenge ? t('profile.challengeCollection') : t('profile.unlimitedCollection') }}
+              </h2>
+              <span class="section-count">{{ t('profile.challengeCount', { count: browseEntries.length }, browseEntries.length) }}</span>
             </div>
-            <p class="challenge-desc">{{ canTrade ? t('profile.challengeTradeHint') : t('profile.challengeDesc') }}</p>
+            <p class="challenge-desc">
+              {{ !browsingChallenge ? t('profile.unlimitedDesc') : canTrade ? t('profile.challengeTradeHint') : t('profile.challengeDesc') }}
+            </p>
 
-            <div v-if="challengeState === 'loading'" class="challenge-grid">
+            <div v-if="browseLoading" class="challenge-grid">
               <div v-for="n in 6" :key="n" class="pb-skeleton" style="aspect-ratio: 63 / 88"></div>
             </div>
             <template v-else>
               <input
-                v-if="challengeEntries.length > CHALLENGE_PAGE"
+                v-if="browseEntries.length > CHALLENGE_PAGE"
                 v-model="challengeQuery"
                 type="search"
                 class="form-control challenge-search"
@@ -547,8 +559,10 @@ async function logout() {
                     <span v-if="entry.quantity > 1" class="challenge-qty">×{{ entry.quantity }}</span>
                   </button>
                   <span class="challenge-name">{{ entry.cards.name }}</span>
-                  <span v-if="entry.tradable === false" class="challenge-locked">{{ t('trades.notForTrade') }}</span>
-                  <RouterLink v-else-if="canTrade" :to="askRoute(entry)" class="challenge-ask">{{ t('profile.askForCard') }}</RouterLink>
+                  <template v-if="browsingChallenge">
+                    <span v-if="entry.tradable === false" class="challenge-locked">{{ t('trades.notForTrade') }}</span>
+                    <RouterLink v-else-if="canTrade" :to="askRoute(entry)" class="challenge-ask">{{ t('profile.askForCard') }}</RouterLink>
+                  </template>
                 </li>
               </ul>
               <button

@@ -169,7 +169,12 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
             <span class="hub-live-text">
               <RouterLink :to="{ name: 'public-profile', params: { username: pull.username } }" class="hub-live-user">{{ pull.username }}</RouterLink>
               <span class="hub-live-card">{{ pull.card_name }}</span>
-              <span class="hub-live-time">{{ timeAgo(pull.pulled_at, locale) }}</span>
+              <span class="hub-live-time">
+                <span class="hub-live-mode" :class="{ challenge: pull.mode === 'challenge' }">{{
+                  pull.mode === 'challenge' ? t('nav.modeChallenge') : t('nav.modeUnlimited')
+                }}</span>
+                · {{ timeAgo(pull.pulled_at, locale) }}
+              </span>
             </span>
           </li>
         </ul>
@@ -549,6 +554,15 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
 
 .hub-live-time {
   color: var(--pb-text-muted);
+}
+
+/* Which mode the hit was pulled in (the feed mixes both) */
+.hub-live-mode {
+  font-weight: 700;
+}
+
+.hub-live-mode.challenge {
+  color: var(--pb-coin);
 }
 
 .hub-recent {

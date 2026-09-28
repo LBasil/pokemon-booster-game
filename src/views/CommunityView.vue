@@ -121,7 +121,7 @@ function scoreLabel(row) {
                 </p>
                 <p class="feed-meta">
                   <span class="feed-chip" :data-bucket="pull.bucket">{{ t(`boosters.bucket.${pull.bucket}`) }}</span>
-                  <span v-if="pull.mode === 'challenge'" class="feed-mode">{{ t('nav.challenge') }}</span>
+                  <span class="feed-mode" :class="{ challenge: pull.mode === 'challenge' }">{{ pull.mode === 'challenge' ? t('nav.modeChallenge') : t('nav.modeUnlimited') }}</span>
                   <span>{{ setsStore.byId[pull.set_id]?.name ?? pull.set_id }}</span>
                   <span aria-hidden="true">·</span>
                   <time :datetime="pull.pulled_at">{{ timeAgo(pull.pulled_at, locale, now) }}</time>
@@ -301,10 +301,14 @@ function scoreLabel(row) {
   padding: 0.05rem 0.5rem;
   border-radius: 999px;
   border: 1px solid var(--pb-border-strong);
-  color: var(--pb-coin);
+  color: var(--pb-text-muted);
   font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.feed-mode.challenge {
+  color: var(--pb-coin);
 }
 
 /* ---------- Leaderboards ---------- */

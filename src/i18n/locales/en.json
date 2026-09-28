@@ -296,6 +296,8 @@
     "challengeDesc": "Cards built up in the challenge mode, with coins.",
     "challengeTradeHint": "Spotted a card you want? Ask for it and pick what you give in return.",
     "askForCard": "Ask for it",
+    "unlimitedCollection": "Unlimited collection",
+    "unlimitedDesc": "Cards from the unlimited boosters. Trades only happen in the challenge mode.",
     "showMore": "Show more ({count})"
   },
   "notFound": {

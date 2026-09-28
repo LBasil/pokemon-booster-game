@@ -67,6 +67,22 @@ test('someone who only played unlimited opens on their unlimited numbers', async
   await expect(page.locator('.stat').filter({ hasText: 'Cards pulled' }).locator('dd')).toHaveText('2')
 })
 
+test('a public profile lists the collection of the picked mode, unlimited included', async ({ page }) => {
+  await signIn(page)
+  await mockSupabase(page, { partners: { misty: [collectionEntry('sv3pt5-4')] } })
+  await page.goto('/u/Misty')
+  const section = (name) => page.locator('section', { has: page.getByRole('heading', { name }) })
+
+  await expect(section('Challenge collection')).toContainText('1 card')
+  await expect(section('Challenge collection').getByRole('link', { name: 'Ask for it' })).toHaveCount(1)
+
+  await page.getByRole('tab', { name: 'Unlimited' }).click()
+  const unlimited = section('Unlimited collection')
+  await expect(unlimited).toContainText('2 cards')
+  await expect(unlimited.locator('.challenge-card', { hasText: 'Charizard ex' })).toBeVisible()
+  await expect(unlimited.getByRole('link', { name: 'Ask for it' })).toHaveCount(0) // trades are challenge-only
+})
+
 test('players who joined during the beta wear the beta tester badge', async ({ page }) => {
   await mockSupabase(page)
   await page.goto('/u/misty')

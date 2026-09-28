@@ -270,7 +270,7 @@ l'Illimité (bug corrigé le 2026-09-27).
 | Meilleures cartes (profil public) | Les 8 premières de `sortEntries(entries, 'rarity')` |
 | **Badge Bêta-testeur** | `isBetaTester(created_at)` (`utils/beta.js`) : tout compte créé avant `BETA_END`. Tant que `BETA_END = null`, tout le monde l'a ; le jour où la bêta se termine, on y met la date et seuls les comptes plus anciens le gardent. Pas de colonne en base |
 | **Carte vitrine** | Toujours la collection **Illimité** : la carte choisie (`showcase_card_id`), sinon la meilleure carte (`bestPull`) |
-| Collection Défi (profil public) | `challenge_collection_of`, triée par rareté, 24 par page, recherche ; bouton « Demander » → `/challenge/trades?to=<pseudo>&want=<id>` ; « Pas à échanger » si verrouillée |
+| Collection du mode choisi (profil public) | Suit le sélecteur Défi \| Illimité. Défi : `challenge_collection_of`, bouton « Demander » → `/challenge/trades?to=<pseudo>&want=<id>`, « Pas à échanger » si verrouillée. Illimité : `public_collection`, consultation seule (les échanges n'existent qu'en Défi). Triée par rareté, 24 par page, recherche |
 
 ### Actions sur son propre profil
 
@@ -580,7 +580,8 @@ Page : [CommunityView.vue](../../src/views/CommunityView.vue)
   sur `pull_feed`). Chaque nouveau tirage s'ajoute en haut (50 au
   maximum), surligné 4 s ; « il y a 3 min » se met à jour toutes les 30 s.
   Le fil vient de `save_booster_opening` : chaque ultra/secret d'un profil
-  public, dans les deux modes (badge « Défi »).
+  public, dans les deux modes (badge « Illimité » ou « Défi » sur chaque
+tirage, ici et dans le bloc « En direct » de l'accueil).
 - **Classements** : `fetchLeaderboard(kind, 20)` à chaque changement
   d'onglet (5 classements, [détail](04-reference-api.md#leaderboardp_kind-text-p_limit-int--20)).
   Arriver depuis le Défi ouvre sur « Défi : cartes ». Sa propre ligne est

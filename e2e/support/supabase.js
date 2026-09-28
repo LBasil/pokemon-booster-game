@@ -75,7 +75,7 @@ export async function mockSupabase(page, options = {}) {
     wishlist: [],
     openings: [],
     feed: options.feed ?? [
-      { id: 1, username: 'Misty', card_id: 'sv3pt5-199', card_name: 'Charizard ex', image_small: byId['sv3pt5-199'].image_small, bucket: 'secret', set_id: 'sv3pt5', pulled_at: new Date().toISOString() },
+      { id: 1, username: 'Misty', card_id: 'sv3pt5-199', card_name: 'Charizard ex', image_small: byId['sv3pt5-199'].image_small, bucket: 'secret', set_id: 'sv3pt5', mode: 'unlimited', pulled_at: new Date().toISOString() },
     ],
     leaderboard: options.leaderboard ?? [
       { rank: 1, username: 'Misty', score: 24.5, packs: 40, card_id: null, card_name: null, image_small: null },

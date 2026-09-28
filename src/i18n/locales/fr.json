@@ -296,6 +296,8 @@
     "challengeDesc": "Les cartes obtenues en mode défi, avec des pièces.",
     "challengeTradeHint": "Une carte te plaît ? Demande-la et choisis ce que tu donnes en échange.",
     "askForCard": "La demander",
+    "unlimitedCollection": "Collection illimitée",
+    "unlimitedDesc": "Les cartes des boosters illimités. Les échanges se font uniquement en mode défi.",
     "showMore": "Voir plus ({count})"
   },
   "notFound": {

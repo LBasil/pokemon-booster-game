@@ -271,8 +271,12 @@ docs/technique/             technical doc (French, user choice): overview, front
   wishlist): a locked card can't be asked for or offered
   (`card_not_for_trade`), and an accept fails if the sender locked an
   offered card since; `challenge_collection_of` returns `tradable`.
-  Public profiles list the challenge collection with "Ask for it" ->
-  `/challenge/trades?to=<name>&want=<card id>`.
+  Public profiles list the collection of the mode picked in their
+  Challenge | Unlimited switch (user, 2026-09-28: "faudrait pouvoir voir
+  les deux"); the challenge one has "Ask for it" ->
+  `/challenge/trades?to=<name>&want=<card id>`, the unlimited one is
+  look-only. Every pull in the feed (community + hub "Live" row) says
+  its mode (Unlimited | Challenge).
   **Mini-games** (user: "I'll add plenty"): `/challenge/games`
   (`GamesView`) lists every game of `src/utils/games.js` (id, route
   `challenge-game-<id>`, icon; EN/FR `games.items.<id>` — `games.test.js`
