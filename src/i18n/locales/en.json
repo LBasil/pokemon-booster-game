@@ -1521,5 +1521,9 @@
       "crafted": "Craft a card | Craft {count} cards",
       "recycled": "Recycle {count} duplicates"
     }
+  },
+  "beta": {
+    "badge": "Beta tester",
+    "why": "Joined during the beta: thanks for helping shape the game!"
   }
 }

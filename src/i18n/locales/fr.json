@@ -1521,5 +1521,9 @@
       "crafted": "Fabrique une carte | Fabrique {count} cartes",
       "recycled": "Recycle {count} doublons"
     }
+  },
+  "beta": {
+    "badge": "Bêta-testeur",
+    "why": "Inscrit pendant la bêta : merci d'avoir aidé à façonner le jeu !"
   }
 }

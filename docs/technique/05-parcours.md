@@ -268,6 +268,7 @@ l'Illimité (bug corrigé le 2026-09-27).
 | Répartition des raretés | `rarityBreakdown(entries)` : cartes uniques par rareté |
 | Succès (progression, « Presque ! ») | `modeAchievements.list` → `achievementProgress`, `nextUp` |
 | Meilleures cartes (profil public) | Les 8 premières de `sortEntries(entries, 'rarity')` |
+| **Badge Bêta-testeur** | `isBetaTester(created_at)` (`utils/beta.js`) : tout compte créé avant `BETA_END`. Tant que `BETA_END = null`, tout le monde l'a ; le jour où la bêta se termine, on y met la date et seuls les comptes plus anciens le gardent. Pas de colonne en base |
 | **Carte vitrine** | Toujours la collection **Illimité** : la carte choisie (`showcase_card_id`), sinon la meilleure carte (`bestPull`) |
 | Collection Défi (profil public) | `challenge_collection_of`, triée par rareté, 24 par page, recherche ; bouton « Demander » → `/challenge/trades?to=<pseudo>&want=<id>` ; « Pas à échanger » si verrouillée |
 

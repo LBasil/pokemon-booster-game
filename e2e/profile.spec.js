@@ -66,3 +66,9 @@ test('someone who only played unlimited opens on their unlimited numbers', async
   await expect(page.getByRole('tab', { name: 'Unlimited' })).toHaveAttribute('aria-selected', 'true')
   await expect(page.locator('.stat').filter({ hasText: 'Cards pulled' }).locator('dd')).toHaveText('2')
 })
+
+test('players who joined during the beta wear the beta tester badge', async ({ page }) => {
+  await mockSupabase(page)
+  await page.goto('/u/misty')
+  await expect(page.locator('.trainer-card .beta-badge')).toContainText('Beta tester')
+})

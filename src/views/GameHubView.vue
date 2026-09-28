@@ -4,7 +4,9 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useCollectionStore } from '@/stores/collection'
 import { completionPercent } from '@/utils/progress'
+import { isBetaTester } from '@/utils/beta'
 import AppHeader from '@/components/AppHeader.vue'
+import BetaBadge from '@/components/BetaBadge.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
 import HoloCard from '@/components/HoloCard.vue'
@@ -36,6 +38,7 @@ onMounted(async () => {
 const formatNumber = (value) => value.toLocaleString(locale.value)
 
 const initial = computed(() => profileStore.displayName.charAt(0).toUpperCase() || '?')
+const betaTester = computed(() => isBetaTester(auth.user?.created_at))
 const memberSince = computed(() =>
   auth.user?.created_at
     ? new Date(auth.user.created_at).toLocaleDateString(locale.value, { month: 'long', year: 'numeric' })
@@ -122,7 +125,10 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
         <RouterLink :to="{ name: 'profile' }" class="hub-tile hub-profile">
           <div class="hub-avatar" aria-hidden="true">{{ initial }}</div>
           <div class="hub-profile-text">
-            <h2 class="hub-tile-title">{{ profileStore.displayName }}</h2>
+            <h2 class="hub-tile-title">
+              {{ profileStore.displayName }}
+              <BetaBadge v-if="betaTester" compact />
+            </h2>
             <p v-if="memberSince" class="hub-tile-desc mb-0">
               {{ t('game.memberSince', { date: memberSince }) }}
             </p>

@@ -226,6 +226,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `trades.js` | Limites des échanges (**miroir** de `propose_trade`), `groupTrades`, `searchEntries` |
 | `sets.js` | URL des logos, sous-sets (`isSubset`, `packSetId`, `subsetsOf`), `groupSetsByYear` |
 | `games.js` | Registre des mini-jeux |
+| `beta.js` | `BETA_END` (null tant que la bêta dure) + `isBetaTester(createdAt)` : inscrit avant la fin de la bêta |
 | `cards.js`, `progress.js`, `time.js`, `tilt.js`, `appVersion.js`, `chunkError.js` | Petits utilitaires (regroupement, pourcentage, « il y a 3 min », inclinaison 3D, détection de build, erreur de chunk) |
 
 ---
@@ -243,6 +244,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `SetPicker` | Grille de sets cherchable, groupée par année (sous-sets masqués) |
 | `PriceChart` | Courbe du prix hebdomadaire d'une carte |
 | `PokedexGrid`, `WishlistGrid`, `ShowcasePicker`, `RecycleDuplicates` | Onglets Pokédex et souhaits, choix de la vitrine, recyclage en un clic |
+| `BetaBadge` | Pastille « Bêta-testeur » (bordure holo + reflet qui passe, coupé sans effets / mouvement réduit), `compact` = juste « β ». Profil et tuile profil du hub |
 | `AchievementTile`, `AchievementToasts` | Tuile d'un succès, notifications « succès débloqué » |
 | `ModeSwitch`, `CoinAmount`, `ScrollTopButton`, `BrandLogo`, `ThemeToggle`, `LanguageSwitcher`, `HeroCardFan`, `AuthPanel`, `PointerFx` | Sélecteur Illimité/Défi, montant en pièces, retour en haut, logo, thème, langue, éventail de l'accueil, formulaire de connexion, effets de pointeur |
 

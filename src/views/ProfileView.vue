@@ -17,8 +17,10 @@ import { useModeAchievements } from '@/composables/useModeAchievements'
 import { USERNAME_MAX, packSummary, rankFor, rarityBreakdown, validateUsername } from '@/utils/profile'
 import { BUCKETS, bestPull, rarityLabelKey, rarityTier } from '@/utils/rarity'
 import { searchEntries } from '@/utils/trades'
+import { isBetaTester } from '@/utils/beta'
 import AchievementTile from '@/components/AchievementTile.vue'
 import AppHeader from '@/components/AppHeader.vue'
+import BetaBadge from '@/components/BetaBadge.vue'
 import BrandLogo from '@/components/BrandLogo.vue'
 import CardDetail from '@/components/CardDetail.vue'
 import HoloCard from '@/components/HoloCard.vue'
@@ -89,10 +91,11 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 const formatEuros = (value) =>
   new Intl.NumberFormat(locale.value, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value)
 
-const memberSince = computed(() => {
-  const date = profile.value?.created_at ?? (isOwn.value ? auth.user?.created_at : null)
-  return date ? new Date(date).toLocaleDateString(locale.value, { month: 'long', year: 'numeric' }) : ''
-})
+const joinedAt = computed(() => profile.value?.created_at ?? (isOwn.value ? auth.user?.created_at : null))
+const memberSince = computed(() =>
+  joinedAt.value ? new Date(joinedAt.value).toLocaleDateString(locale.value, { month: 'long', year: 'numeric' }) : '',
+)
+const betaTester = computed(() => isBetaTester(joinedAt.value))
 
 // ---------- Game mode of the numbers (stats, rarity, level, achievements) ----------
 
@@ -309,9 +312,12 @@ async function logout() {
             <div class="trainer-top">
               <div class="trainer-avatar" aria-hidden="true">{{ displayName.charAt(0).toUpperCase() || '?' }}</div>
               <div class="trainer-id">
-                <span class="trainer-rank" :data-rank="rank.rank.id">
-                  {{ t('profile.level', { level: rank.level }) }} · {{ t(`profile.ranks.${rank.rank.id}`) }}
-                </span>
+                <div class="trainer-badges">
+                  <span class="trainer-rank" :data-rank="rank.rank.id">
+                    {{ t('profile.level', { level: rank.level }) }} · {{ t(`profile.ranks.${rank.rank.id}`) }}
+                  </span>
+                  <BetaBadge v-if="betaTester" />
+                </div>
 
                 <form v-if="editingName" class="name-form" @submit.prevent="saveName" @keydown.esc="editingName = false">
                   <label class="visually-hidden" for="username-input">{{ t('profile.username.label') }}</label>
@@ -794,6 +800,13 @@ async function logout() {
 .trainer-id {
   flex: 1;
   min-width: 0;
+}
+
+.trainer-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
 }
 
 .trainer-rank {

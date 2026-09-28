@@ -231,6 +231,10 @@ docs/technique/             technical doc (French, user choice): overview, front
   someone else's: challenge first, unlimited if their challenge
   collection is empty. It used to read the unlimited collection only, so
   challenge players showed "1 booster, 0 €". Showcase stays unlimited.
+  **Beta tester badge** (`BetaBadge.vue`, profile + hub tile): every
+  account created before `BETA_END` (`src/utils/beta.js`, from
+  `profiles.created_at`, no DB column). `null` while the beta runs; set
+  the date when it ends and later accounts won't get it.
 - **Game modes**: `collections.mode` / `booster_openings.mode`
   ('unlimited' | 'challenge'). The **challenge mode** (migrations 0005 + 0006) has
   its **own separate collection** (user decision) and a coin economy:

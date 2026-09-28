@@ -76,7 +76,8 @@ How it works inside (every table, RPC and flow, in French):
   so they aren't in the set list: their cards turn up in the parent set's
   packs (about 1 pack in 3-4), like in real life.
 - **Profile**: trainer card with a unique username and a rank that grows
-  with the boosters you open, a showcase card, stats, rarity breakdown
+  with the boosters you open, a holo **Beta tester** badge (every account
+  created before the beta ends — `BETA_END` in `src/utils/beta.js`), a showcase card, stats, rarity breakdown
   (level, stats, rarity and achievements per game mode: Challenge | Unlimited),
   public/private switch, sound / vibration / visual effects settings, a
   **booster animations** setting (Auto / Full / Light — Light, the default on
