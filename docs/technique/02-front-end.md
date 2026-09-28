@@ -35,9 +35,7 @@ déploiements (`watchAppVersion()`).
   `/boosters` et `/challenge/boosters` utilisent le même composant mais ne
   doivent pas partager la même instance (état, stores de mode différents) ;
 - monte une fois pour toutes `AchievementToasts` (notifications de succès)
-  et `PointerFx` (effets de pointeur) ;
-- anime une ligne holographique en haut de l'écran à chaque changement de
-  page (`.route-sweep`) ;
+  et `PointerFx` (étincelles au clic / tap) ;
 - pose la classe `pb-fx-off` sur `<html>` quand le joueur coupe les effets
   visuels.
 
@@ -246,7 +244,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `PokedexGrid`, `WishlistGrid`, `ShowcasePicker`, `RecycleDuplicates` | Onglets Pokédex et souhaits, choix de la vitrine, recyclage en un clic |
 | `BetaBadge` | Pastille « Bêta-testeur » (bordure holo + reflet qui passe, coupé sans effets / mouvement réduit), `compact` = juste « β ». Profil et tuile profil du hub |
 | `AchievementTile`, `AchievementToasts` | Tuile d'un succès, notifications « succès débloqué » |
-| `ModeSwitch`, `CoinAmount`, `ScrollTopButton`, `BrandLogo`, `ThemeToggle`, `LanguageSwitcher`, `HeroCardFan`, `AuthPanel`, `PointerFx` | Sélecteur Illimité/Défi, montant en pièces, retour en haut, logo, thème, langue, éventail de l'accueil, formulaire de connexion, effets de pointeur |
+| `ModeSwitch`, `CoinAmount`, `ScrollTopButton`, `BrandLogo`, `ThemeToggle`, `LanguageSwitcher`, `HeroCardFan`, `AuthPanel`, `PointerFx` | Sélecteur Illimité/Défi, montant en pièces, retour en haut, logo, thème, langue, éventail de l'accueil, formulaire de connexion, étincelles au clic |
 
 ---
 
@@ -263,7 +261,12 @@ accents holographiques, actions principales en jaune. Polices Unbounded
 (titres) et Manrope (texte). **Toutes les couleurs sont des tokens
 `--pb-*`**, redéfinis sous `[data-bs-theme='light']` : aucun composant ne
 code une couleur en dur. Briques réutilisables : `.pb-glass`,
-`.pb-holo-text`, `.pb-eyebrow`, `.glow-button`, `.pb-skeleton`. Les effets
+`.pb-holo-text`, `.pb-eyebrow`, `.glow-button`, `.pb-skeleton`. Fond uni
+(plus d'aurora ni de grille de points), pas de pastille au-dessus des
+titres (`.pb-eyebrow` = simple ligne de contexte : paquet 2/5, nom de la
+série), pas de dégradé sur les titres de page, pas de tirets cadratins
+dans les textes : tout ça faisait « site généré par IA » (retour
+utilisateur, 2026-09-28). Les effets
 sont coupés sous `prefers-reduced-motion` ou avec *Profil > Réglages >
 Effets visuels*.
 

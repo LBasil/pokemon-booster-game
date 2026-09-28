@@ -32,7 +32,7 @@
     "games": "Mini-games"
   },
   "home": {
-    "tagline": "Pick any set — or mix them all — open as many packs as you like, and watch your collection grow with every pull.",
+    "tagline": "Every set since the 1999 Base Set, with the pull rates of real packs. Open as many as you like, or try the Challenge mode on a coin budget.",
     "emailLabel": "Email",
     "passwordLabel": "Password",
     "usernameLabel": "Username",
@@ -43,14 +43,10 @@
     "submitSignup": "Create account",
     "signupSuccess": "Account created! Check your email if confirmation is required, otherwise you're logged in.",
     "genericError": "Something went wrong. Please try again.",
-    "eyebrow": "Every set, from 1999 to today",
-    "titleLead": "Rip open boosters.",
-    "titleHighlight": "Collect them all.",
-    "statSets": "sets",
-    "statCards": "cards to collect",
-    "statBoosters": "boosters",
-    "loginIntro": "Welcome back, trainer. Your binder is waiting.",
-    "signupIntro": "Create your free account and open your first booster in seconds.",
+    "title": "Open Pokémon packs and fill your binder",
+    "poolSize": "{sets} sets and {cards} cards so far.",
+    "loginIntro": "Log in to get back to your collection.",
+    "signupIntro": "An email and a password are all it takes. It's free.",
     "emailPlaceholder": "you{'@'}example.com",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
@@ -63,12 +59,10 @@
     "resetSent": "If an account exists for this email, a reset link is on its way. Check your inbox (and spam)."
   },
   "game": {
-    "greeting": "Welcome back, {name}!",
+    "greeting": "Hi {name}",
     "openBoosters": "Open boosters",
-    "openBoostersDesc": "Pick a set — or mix them all — and rip open as many packs as you like.",
+    "openBoostersDesc": "One set or all of them mixed, as many packs as you like.",
     "viewCollection": "My collection",
-    "eyebrow": "Your trainer space",
-    "subtitle": "Ready for your next pull?",
     "featureTag": "Unlimited",
     "openCta": "Open a booster",
     "progressLabel": "Collection completion",
@@ -136,7 +130,6 @@
   },
   "collection": {
     "title": "My collection",
-    "eyebrow": "Your binder",
     "emptyTitle": "Your binder is empty",
     "empty": "You haven't opened any boosters yet.",
     "goOpen": "Open a booster",
@@ -212,7 +205,7 @@
     "wishRemove": "Remove from wishlist",
     "share": "Share",
     "shareText": "{name} pulled {card} on PokéBooster!",
-    "shareDownloaded": "Image downloaded — share it wherever you like.",
+    "shareDownloaded": "Image downloaded. Share it wherever you like.",
     "shareError": "Couldn't create the image."
   },
   "profile": {
@@ -230,7 +223,7 @@
     "username": {
       "label": "Username",
       "edit": "Edit username",
-      "hint": "No username yet — tap the pencil to pick one.",
+      "hint": "No username yet. Tap the pencil to pick one.",
       "tooShort": "At least 2 characters.",
       "tooLong": "24 characters max.",
       "taken": "This username is already taken."
@@ -286,7 +279,7 @@
     "vibrationLabel": "Vibration",
     "vibrationDesc": "A little buzz when you pull a hit (phones that support it).",
     "effectsLabel": "Visual effects",
-    "effectsDesc": "Cursor glow and ring, sparks on tap, page transitions.",
+    "effectsDesc": "Sparks on tap, page fade-in.",
     "historyLink": "My booster history",
     "installLabel": "Install the app",
     "installDesc": "Add PokéBooster to your home screen, like a real app.",
@@ -323,7 +316,7 @@
     },
     "loadError": "Couldn't load this set.",
     "empty": "No card here with this filter.",
-    "missingCard": "No. {number}, {name} — missing",
+    "missingCard": "No. {number}, {name} (missing)",
     "wanted": "On your wishlist",
     "openParent": "Open {name} boosters"
   },
@@ -339,13 +332,12 @@
     "unknown": "#{number}, not caught yet"
   },
   "wishlist": {
-    "intro": "Cards you're hunting. Pulling one takes it off the list — and you'll see a \"Wanted!\" badge when it happens.",
+    "intro": "Cards you're hunting. Pulling one takes it off the list, and you'll see a \"Wanted!\" badge when it happens.",
     "empty": "Nothing on your list yet. Open a set's binder and tap a missing card to add it.",
     "browseSets": "Browse my sets",
     "remove": "Remove {name} from your wishlist"
   },
   "history": {
-    "eyebrow": "Your openings",
     "title": "Booster history",
     "subtitle": "Every pack you've opened, newest first.",
     "empty": "No booster opened yet.",
@@ -369,7 +361,6 @@
     "emptyHits": "No booster with an ultra rare or better yet. Keep opening!"
   },
   "community": {
-    "eyebrow": "Live",
     "title": "Community",
     "feedTitle": "Latest big pulls",
     "pulled": "pulled",
@@ -470,10 +461,10 @@
     "recycleConfirm": "Yes, recycle them",
     "rulesTitle": "How the challenge works",
     "rules": {
-      "start": "You start with {coins} coins and an empty binder — your unlimited collection stays untouched.",
+      "start": "You start with {coins} coins and an empty binder. Your unlimited collection stays untouched.",
       "pack": "A booster costs {coins} coins, from any set.",
       "daily": "The daily reward and missions reset every day at midnight UTC.",
-      "rates": "Same pull rates as real boosters: no pity timer, luck decides — a long run without an ultra rare can happen.",
+      "rates": "Same pull rates as real boosters: no pity timer, luck decides. A long run without an ultra rare can happen.",
       "godPack": "God pack: 1 booster in {odds} is holo rares and better only.",
       "recycle": "Recycling keeps one copy of each card and turns the others into coins. Crafting creates any card, for a lot more.",
       "separate": "Challenge pulls still reach the live feed, marked \"Challenge\".",
@@ -520,7 +511,7 @@
   },
   "trades": {
     "title": "Trades",
-    "subtitle": "Trade cards from your challenge collection with other trainers — up to {max} cards on each side. Offers expire after 7 days.",
+    "subtitle": "Trade cards from your challenge collection with other trainers, up to {max} cards on each side. Offers expire after 7 days.",
     "loadError": "Couldn't load your trades.",
     "received": "Offers for you",
     "sent": "Waiting for an answer",
@@ -529,7 +520,7 @@
     "youGet": "You get",
     "youGive": "You give",
     "youAsk": "You ask {name} for",
-    "gift": "Nothing — a gift",
+    "gift": "Nothing (it's a gift)",
     "accept": "Accept",
     "decline": "Decline",
     "cancel": "Cancel offer",
@@ -576,7 +567,6 @@
     "unlock": "Allow trades for {name}"
   },
   "games": {
-    "eyebrow": "Challenge",
     "title": "Mini-games",
     "subtitle": "Earn coins for your challenge boosters. Each game pays coins up to a daily limit, then you can play as much as you like for the record.",
     "hubDesc": "Earn coins for your boosters by playing.",
@@ -596,7 +586,6 @@
     }
   },
   "minigame": {
-    "eyebrow": "Mini-game",
     "title": "Higher or lower",
     "subtitle": "Two cards, one question: which one is worth more? Earn coins for your challenge boosters.",
     "hubDesc": "Guess which of two cards is worth more to earn coins.",
@@ -636,7 +625,6 @@
     }
   },
   "electrodeFlip": {
-    "eyebrow": "Mini-game",
     "title": "Shiny Electrode Flip",
     "subtitle": "Flip the tiles, multiply your points and dodge the shiny Electrodes. Clear the board to move up a level.",
     "unavailable": "The mini-game is coming soon.",

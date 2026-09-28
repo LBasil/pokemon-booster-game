@@ -152,7 +152,6 @@ function chip(card) {
         <RouterLink :to="{ name: mode === 'challenge' ? 'challenge' : 'profile' }" class="history-back">
           <span aria-hidden="true">←</span> {{ mode === 'challenge' ? t('challenge.backToHub') : t('history.backToProfile') }}
         </RouterLink>
-        <span class="pb-eyebrow">{{ t('history.eyebrow') }}</span>
         <h1 class="history-title">{{ mode === 'challenge' ? t('challenge.historyTitle') : t('history.title') }}</h1>
         <p class="pb-muted">{{ t('history.subtitle') }}</p>
       </header>

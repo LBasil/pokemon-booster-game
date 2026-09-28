@@ -177,12 +177,18 @@ docs/technique/             technical doc (French, user choice): overview, front
   `--pb-bucket-*` (one color per rarity bucket, darker in light theme).
   Site-wide touches: foil scrollbars (`--pb-scroll-thumb`), `::selection`,
   `accent-color`/`caret-color` in `global.css`; `PointerFx.vue` (mounted
-  in `App.vue`) = aurora glow behind the content + holo ring trailing the
-  (kept) native cursor, mouse only, and a spark burst on click/tap. Page
-  changes fade `.pb-page > main` in (opacity only) and sweep a foil line
-  (`.route-sweep`, App.vue). All off under `prefers-reduced-motion` (so
-  also in e2e, which forces it) or with Profile > Settings > Visual
-  effects (`settings.effects` -> `html.pb-fx-off`).
+  in `App.vue`) = a spark burst on click/tap. Page changes fade
+  `.pb-page > main` in (opacity only). Both off under
+  `prefers-reduced-motion` (so also in e2e, which forces it) or with
+  Profile > Settings > Visual effects (`settings.effects` ->
+  `html.pb-fx-off`).
+- **Don't look AI-generated** (user, 2026-09-28: "est-ce que mon site fait
+  IA ?"): removed the aurora + dot-grid backdrop, the cursor glow/ring,
+  the route sweep, pill eyebrows above titles, gradient page titles, the
+  landing's 3-stat strip and every em dash (—) in the locales. Don't
+  bring them back: plain background, `.pb-eyebrow` only for real context
+  (pack 2/5, set name), plain-spoken copy with commas/periods/parentheses
+  instead of em dashes, holo gradients kept for cards and records.
 - **Responsive**: a single-column grid must say `grid-template-columns:
   minmax(0, 1fr)` (and its items `min-width: 0`), or a nowrap/scrolling
   child (tabs, chips) widens the page — it made /community 628px wide on

@@ -89,10 +89,6 @@ function scoreLabel(row) {
 
     <main class="container community">
       <header>
-        <span class="pb-eyebrow">
-          <span class="live-dot" aria-hidden="true"></span>
-          {{ t('community.eyebrow') }}
-        </span>
         <h1 class="community-title">{{ t('community.title') }}</h1>
         <p class="pb-muted">
           <template v-if="profileStore.profile?.is_public === false">{{ t('community.privateNote') }}</template>
@@ -189,26 +185,9 @@ function scoreLabel(row) {
 }
 
 .community-title {
-  margin: 1rem 0 0.5rem;
+  margin: 0 0 0.5rem;
   font-size: clamp(1.8rem, 5vw, 2.6rem);
   font-weight: 800;
-}
-
-.live-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--pb-accent);
-  animation: live-pulse 2.4s ease-out infinite;
-}
-
-@keyframes live-pulse {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--pb-accent) 60%, transparent);
-  }
-  100% {
-    box-shadow: 0 0 0 10px transparent;
-  }
 }
 
 /* minmax(0, 1fr): the leaderboard tabs (nowrap) must scroll, not widen the page */

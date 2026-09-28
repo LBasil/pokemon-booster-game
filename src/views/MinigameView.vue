@@ -186,7 +186,6 @@ const formatPrice = (value) =>
 
     <main class="container mg">
       <header class="mg-head">
-        <span class="pb-eyebrow">{{ t('minigame.eyebrow') }}</span>
         <h1 class="mg-title">{{ t('minigame.title') }}</h1>
         <p class="mg-subtitle">{{ t('minigame.subtitle') }}</p>
       </header>
@@ -322,7 +321,7 @@ const formatPrice = (value) =>
 }
 
 .mg-title {
-  margin: 0.75rem 0 0.5rem;
+  margin: 0 0 0.5rem;
   font-size: clamp(1.8rem, 5vw, 2.8rem);
   font-weight: 800;
 }

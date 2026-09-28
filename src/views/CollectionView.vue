@@ -224,7 +224,6 @@ function rarityChip(card) {
     <main class="container collection">
       <!-- ============ Header ============ -->
       <header class="coll-head">
-        <span class="pb-eyebrow">{{ t('collection.eyebrow') }}</span>
         <h1 class="coll-title">{{ isChallenge ? t('challenge.collectionTitle') : t('collection.title') }}</h1>
 
         <div v-if="isChallenge && entries.length" class="coll-challenge">
@@ -517,7 +516,7 @@ function rarityChip(card) {
 }
 
 .coll-title {
-  margin: 1rem 0 1.5rem;
+  margin: 0 0 1.5rem;
   font-size: clamp(1.8rem, 5vw, 2.8rem);
   font-weight: 800;
 }

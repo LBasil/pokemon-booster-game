@@ -23,7 +23,6 @@ onMounted(() => {
 
     <main class="container games">
       <header class="games-head">
-        <span class="pb-eyebrow">{{ t('games.eyebrow') }}</span>
         <h1 class="games-title">{{ t('games.title') }}</h1>
         <p class="games-subtitle">{{ t('games.subtitle') }}</p>
       </header>
@@ -68,7 +67,7 @@ onMounted(() => {
 }
 
 .games-title {
-  margin: 0.75rem 0 0.5rem;
+  margin: 0 0 0.5rem;
   font-size: clamp(1.8rem, 5vw, 2.8rem);
   font-weight: 800;
 }

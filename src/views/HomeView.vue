@@ -11,7 +11,7 @@ import ThemeToggle from '@/components/ThemeToggle.vue'
 
 const { t, locale } = useI18n()
 
-// Live pool size for the stats strip; purely decorative, so failures just hide it
+// Live pool size under the tagline; purely decorative, so failures just hide it
 const stats = ref(null)
 
 onMounted(async () => {
@@ -38,32 +38,13 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 
     <main class="home-main container">
       <div class="home-copy">
-        <span class="pb-eyebrow">
-          <span class="live-dot" aria-hidden="true"></span>
-          {{ t('home.eyebrow') }}
-        </span>
-
-        <h1 class="home-title">
-          {{ t('home.titleLead') }}
-          <span class="pb-holo-text">{{ t('home.titleHighlight') }}</span>
-        </h1>
+        <h1 class="home-title">{{ t('home.title') }}</h1>
 
         <p class="home-tagline">{{ t('home.tagline') }}</p>
 
-        <dl v-if="stats" class="home-stats">
-          <div>
-            <dt>{{ t('home.statSets') }}</dt>
-            <dd>{{ formatNumber(stats.sets) }}</dd>
-          </div>
-          <div>
-            <dt>{{ t('home.statCards') }}</dt>
-            <dd>{{ formatNumber(stats.cards) }}</dd>
-          </div>
-          <div>
-            <dt>{{ t('home.statBoosters') }}</dt>
-            <dd>∞</dd>
-          </div>
-        </dl>
+        <p v-if="stats" class="home-pool">
+          {{ t('home.poolSize', { sets: formatNumber(stats.sets), cards: formatNumber(stats.cards) }) }}
+        </p>
       </div>
 
       <!-- Cards fan out of the top of the login panel, like a freshly opened booster -->
@@ -143,13 +124,10 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 }
 
 .home-title {
-  margin: 1.25rem 0 1rem;
-  font-size: clamp(2.1rem, 5.2vw, 3.6rem);
+  max-width: 16em;
+  margin: 0 0 1rem;
+  font-size: clamp(1.9rem, 4.2vw, 2.9rem);
   font-weight: 800;
-}
-
-.home-title .pb-holo-text {
-  display: block;
 }
 
 .home-tagline {
@@ -160,47 +138,11 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   color: var(--pb-text-muted);
 }
 
-.live-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--pb-accent);
-  box-shadow: 0 0 0 0 var(--pb-accent);
-  animation: live-pulse 2.4s ease-out infinite;
-}
-
-@keyframes live-pulse {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--pb-accent) 60%, transparent);
-  }
-  100% {
-    box-shadow: 0 0 0 10px transparent;
-  }
-}
-
-.home-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 2rem;
-  margin: 1.75rem 0 0;
-}
-
-.home-stats > div {
-  display: flex;
-  flex-direction: column-reverse;
-}
-
-.home-stats dt {
-  font-size: 0.8rem;
+.home-pool {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--pb-text-muted);
-}
-
-.home-stats dd {
-  margin: 0;
-  font-family: var(--pb-font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
 }
 
 .home-footer {

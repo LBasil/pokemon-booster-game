@@ -62,13 +62,11 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
     <main class="container hub">
       <section class="hub-intro">
         <ModeSwitch class="hub-mode" />
-        <span class="pb-eyebrow">{{ t('game.eyebrow') }}</span>
         <i18n-t keypath="game.greeting" tag="h1" class="hub-title" scope="global">
           <template #name>
-            <span class="pb-holo-text">{{ profileStore.displayName }}</span>
+            {{ profileStore.displayName }}
           </template>
         </i18n-t>
-        <p class="hub-subtitle">{{ t('game.subtitle') }}</p>
       </section>
 
       <div class="hub-grid">
@@ -238,16 +236,10 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
 }
 
 .hub-title {
-  margin: 1rem 0 0.5rem;
+  margin: 0;
   font-size: clamp(1.8rem, 5vw, 3rem);
   font-weight: 800;
   overflow-wrap: anywhere;
-}
-
-.hub-subtitle {
-  margin: 0;
-  color: var(--pb-text-muted);
-  font-size: 1.05rem;
 }
 
 /* ---------- Tiles ---------- */

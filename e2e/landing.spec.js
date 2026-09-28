@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 
 test('landing shows the pitch and the log-in panel', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Rip open boosters.')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Open Pokémon packs and fill your binder')
   await expect(page.getByRole('tab', { name: 'Log in' })).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByLabel('Email')).toBeVisible()
 })
@@ -15,7 +15,7 @@ test('landing shows the pitch and the log-in panel', async ({ page }) => {
 test('language and theme switches persist across reloads', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('button', { name: 'FR', exact: true }).click()
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Déchire des boosters.')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Ouvre des boosters Pokémon et remplis ton classeur')
 
   const toggle = page.locator('.theme-toggle')
   const before = await page.evaluate(() => document.documentElement.dataset.bsTheme)
@@ -24,7 +24,7 @@ test('language and theme switches persist across reloads', async ({ page }) => {
   expect(after).not.toBe(before)
 
   await page.reload()
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Déchire des boosters.')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Ouvre des boosters Pokémon et remplis ton classeur')
   expect(await page.evaluate(() => document.documentElement.dataset.bsTheme)).toBe(after)
 })
 

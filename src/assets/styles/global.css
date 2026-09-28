@@ -44,10 +44,6 @@
   --pb-success-text: #86efac;
   /* Readable holo gradient for text on the page background */
   --pb-holo-text: linear-gradient(100deg, #6ee7f9 0%, #a78bfa 30%, #f472b6 60%, #fcd34d 90%, #6ee7f9 120%);
-  --pb-aurora-1: rgba(56, 189, 248, 0.2);
-  --pb-aurora-2: rgba(167, 139, 250, 0.22);
-  --pb-aurora-3: rgba(244, 114, 182, 0.14);
-  --pb-grid-dot: rgba(255, 255, 255, 0.06);
   --pb-shadow-lg: 0 30px 60px -24px rgba(0, 0, 0, 0.75);
   --pb-shadow-card: 0 18px 40px -14px rgba(0, 0, 0, 0.8);
   /* Selection ring (picked card, active option) */
@@ -98,10 +94,6 @@
   --pb-success-text: #15803d;
   /* Deeper stops so gradient text keeps contrast on a light background */
   --pb-holo-text: linear-gradient(100deg, #0e7490 0%, #6d28d9 30%, #be185d 60%, #b45309 90%, #0e7490 120%);
-  --pb-aurora-1: rgba(56, 189, 248, 0.22);
-  --pb-aurora-2: rgba(167, 139, 250, 0.22);
-  --pb-aurora-3: rgba(244, 114, 182, 0.16);
-  --pb-grid-dot: rgba(17, 22, 51, 0.07);
   --pb-shadow-lg: 0 30px 60px -28px rgba(30, 35, 80, 0.35);
   --pb-shadow-card: 0 18px 40px -16px rgba(30, 35, 80, 0.45);
   --pb-ring: #6d28d9;
@@ -156,30 +148,6 @@ body {
   transition:
     background-color 0.3s,
     color 0.3s;
-}
-
-/* Site-wide aurora + dot grid backdrop, behind all content */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(40rem 30rem at 85% 10%, var(--pb-aurora-2), transparent 70%),
-    radial-gradient(36rem 28rem at 5% 30%, var(--pb-aurora-1), transparent 70%),
-    radial-gradient(30rem 24rem at 60% 100%, var(--pb-aurora-3), transparent 70%);
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: radial-gradient(circle, var(--pb-grid-dot) 1px, transparent 1.5px);
-  background-size: 28px 28px;
-  mask-image: linear-gradient(to bottom, black, transparent 85%);
 }
 
 h1,
@@ -284,17 +252,12 @@ a {
   color: var(--pb-text-muted);
 }
 
+/* Small context line above a title (pack 2/5, set name): plain text, no pill */
 .pb-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
-  border: 1px solid var(--pb-border-strong);
-  background: var(--pb-surface);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--pb-text-muted);
 }
 
 @keyframes pb-shimmer {
@@ -443,51 +406,18 @@ a {
 }
 
 /* Page change: the content fades in (opacity only: a transform here would
-   become the containing block of fixed children) and a foil line sweeps
-   the top edge (App.vue). Both off with Profile > Settings > Visual effects. */
+   become the containing block of fixed children). Off with Profile >
+   Settings > Visual effects. */
 .pb-page > main {
   animation: pb-page-in 0.35s var(--pb-ease-out) both;
 }
 
-.route-sweep {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 9998;
-  height: 2px;
-  pointer-events: none;
-  background: var(--pb-holo);
-  transform-origin: left;
-  animation: pb-sweep 0.7s var(--pb-ease-out) forwards;
-}
-
-.pb-fx-off .pb-page > main,
-.pb-fx-off .route-sweep {
+.pb-fx-off .pb-page > main {
   animation: none;
-}
-
-.pb-fx-off .route-sweep {
-  display: none;
 }
 
 @keyframes pb-page-in {
   from {
-    opacity: 0;
-  }
-}
-
-@keyframes pb-sweep {
-  0% {
-    transform: scaleX(0);
-    opacity: 1;
-  }
-  60% {
-    transform: scaleX(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scaleX(1);
     opacity: 0;
   }
 }

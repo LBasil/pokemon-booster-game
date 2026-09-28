@@ -9,6 +9,6 @@ test('logging in lands on the hub with the username', async ({ page }) => {
   await page.getByRole('button', { name: 'Log in', exact: true }).last().click()
 
   await expect(page).toHaveURL('/game')
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Welcome back, Ash!')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Hi Ash')
   expect(backend.calls.some((c) => c.path === '/auth/v1/token')).toBe(true)
 })

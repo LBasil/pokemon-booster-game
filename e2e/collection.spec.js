@@ -29,7 +29,7 @@ test('binder shows missing slots, and a missing card can be wishlisted', async (
   await expect(page).toHaveURL('/collection/set/sv3pt5')
   await expect(page.locator('.binder-meta')).toContainText('1 / 11 cards')
 
-  await page.getByRole('button', { name: /Mewtwo — missing/ }).click()
+  await page.getByRole('button', { name: /Mewtwo \(missing\)/ }).click()
   await page.getByRole('button', { name: 'Add to wishlist' }).click()
   await expect(page.getByRole('button', { name: 'Remove from wishlist' })).toBeVisible()
   expect(backend.calls.some((c) => c.path === '/rest/v1/wishlist' && c.method === 'POST')).toBe(true)

@@ -32,7 +32,7 @@
     "games": "Mini-jeux"
   },
   "home": {
-    "tagline": "Choisis une série — ou mélange-les toutes —, ouvre autant de paquets que tu veux, et regarde ta collection grandir à chaque tirage.",
+    "tagline": "Toutes les séries depuis le set de base de 1999, avec les taux de tirage des vrais paquets. Ouvre-en autant que tu veux, ou tente le mode Défi avec un budget de pièces.",
     "emailLabel": "Email",
     "passwordLabel": "Mot de passe",
     "usernameLabel": "Pseudo",
@@ -43,14 +43,10 @@
     "submitSignup": "Créer un compte",
     "signupSuccess": "Compte créé ! Vérifie ton email si une confirmation est requise, sinon tu es déjà connecté.",
     "genericError": "Une erreur est survenue. Réessaie.",
-    "eyebrow": "Toutes les séries, de 1999 à aujourd'hui",
-    "titleLead": "Déchire des boosters.",
-    "titleHighlight": "Attrape-les tous.",
-    "statSets": "séries",
-    "statCards": "cartes à collectionner",
-    "statBoosters": "boosters",
-    "loginIntro": "Content de te revoir, dresseur. Ton classeur t'attend.",
-    "signupIntro": "Crée ton compte gratuit et ouvre ton premier booster en quelques secondes.",
+    "title": "Ouvre des boosters Pokémon et remplis ton classeur",
+    "poolSize": "{sets} séries et {cards} cartes pour l'instant.",
+    "loginIntro": "Connecte-toi pour retrouver ta collection.",
+    "signupIntro": "Un email et un mot de passe suffisent. C'est gratuit.",
     "emailPlaceholder": "toi{'@'}exemple.com",
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
@@ -63,12 +59,10 @@
     "resetSent": "Si un compte existe pour cet email, un lien de réinitialisation arrive. Vérifie ta boîte (et les spams)."
   },
   "game": {
-    "greeting": "Content de te revoir, {name} !",
+    "greeting": "Salut {name}",
     "openBoosters": "Ouvrir des boosters",
-    "openBoostersDesc": "Choisis une série — ou mélange-les toutes — et déchire autant de paquets que tu veux.",
+    "openBoostersDesc": "Une série ou toutes mélangées, autant de paquets que tu veux.",
     "viewCollection": "Ma collection",
-    "eyebrow": "Ton espace dresseur",
-    "subtitle": "Prêt pour ton prochain tirage ?",
     "featureTag": "Illimité",
     "openCta": "Ouvrir un booster",
     "progressLabel": "Progression de la collection",
@@ -136,7 +130,6 @@
   },
   "collection": {
     "title": "Ma collection",
-    "eyebrow": "Ton classeur",
     "emptyTitle": "Ton classeur est vide",
     "empty": "Tu n'as encore ouvert aucun booster.",
     "goOpen": "Ouvrir un booster",
@@ -212,7 +205,7 @@
     "wishRemove": "Retirer de ma liste",
     "share": "Partager",
     "shareText": "{name} a tiré {card} sur PokéBooster !",
-    "shareDownloaded": "Image téléchargée — partage-la où tu veux.",
+    "shareDownloaded": "Image téléchargée. Partage-la où tu veux.",
     "shareError": "Impossible de créer l'image."
   },
   "profile": {
@@ -230,7 +223,7 @@
     "username": {
       "label": "Pseudo",
       "edit": "Modifier le pseudo",
-      "hint": "Pas encore de pseudo — touche le crayon pour en choisir un.",
+      "hint": "Pas encore de pseudo. Touche le crayon pour en choisir un.",
       "tooShort": "Au moins 2 caractères.",
       "tooLong": "24 caractères maximum.",
       "taken": "Ce pseudo est déjà pris."
@@ -286,7 +279,7 @@
     "vibrationLabel": "Vibration",
     "vibrationDesc": "Une petite vibration quand tu tires un hit (téléphones compatibles).",
     "effectsLabel": "Effets visuels",
-    "effectsDesc": "Halo et anneau autour du curseur, étincelles au tap, transitions entre les pages.",
+    "effectsDesc": "Étincelles au tap, fondu entre les pages.",
     "historyLink": "Mon historique de boosters",
     "installLabel": "Installer l'application",
     "installDesc": "Ajoute PokéBooster à ton écran d'accueil, comme une vraie app.",
@@ -323,7 +316,7 @@
     },
     "loadError": "Impossible de charger cette série.",
     "empty": "Aucune carte avec ce filtre.",
-    "missingCard": "N° {number}, {name} — manquante",
+    "missingCard": "N° {number}, {name} (manquante)",
     "wanted": "Dans ta liste de souhaits",
     "openParent": "Ouvrir des boosters {name}"
   },
@@ -339,13 +332,12 @@
     "unknown": "N°{number}, pas encore capturé"
   },
   "wishlist": {
-    "intro": "Les cartes que tu chasses. Quand tu en tires une, elle quitte la liste — et un badge « Recherchée ! » s'affiche.",
+    "intro": "Les cartes que tu chasses. Quand tu en tires une, elle quitte la liste et un badge « Recherchée ! » s'affiche.",
     "empty": "Rien dans ta liste pour l'instant. Ouvre le classeur d'une série et touche une carte manquante pour l'ajouter.",
     "browseSets": "Voir mes séries",
     "remove": "Retirer {name} de ta liste"
   },
   "history": {
-    "eyebrow": "Tes ouvertures",
     "title": "Historique des boosters",
     "subtitle": "Tous les paquets que tu as ouverts, du plus récent au plus ancien.",
     "empty": "Aucun booster ouvert pour l'instant.",
@@ -369,7 +361,6 @@
     "emptyHits": "Aucun booster avec une ultra rare ou mieux pour l'instant. Continue d'ouvrir !"
   },
   "community": {
-    "eyebrow": "En direct",
     "title": "Communauté",
     "feedTitle": "Derniers gros tirages",
     "pulled": "a tiré",
@@ -470,10 +461,10 @@
     "recycleConfirm": "Oui, recycler",
     "rulesTitle": "Comment marche le défi",
     "rules": {
-      "start": "Tu commences avec {coins} pièces et un classeur vide — ta collection illimitée n'est pas touchée.",
+      "start": "Tu commences avec {coins} pièces et un classeur vide. Ta collection illimitée n'est pas touchée.",
       "pack": "Un booster coûte {coins} pièces, quelle que soit la série.",
       "daily": "La récompense du jour et les missions se renouvellent chaque jour à minuit UTC.",
-      "rates": "Mêmes taux que les vrais boosters : pas de compteur de pitié, c'est la chance qui décide — une longue série sans ultra rare peut arriver.",
+      "rates": "Mêmes taux que les vrais boosters : pas de compteur de pitié, c'est la chance qui décide. Une longue série sans ultra rare peut arriver.",
       "godPack": "God pack : 1 booster sur {odds} ne contient que des holos et mieux.",
       "recycle": "Recycler garde un exemplaire de chaque carte et transforme les autres en pièces. Fabriquer crée n'importe quelle carte, pour bien plus cher.",
       "separate": "Les belles cartes du défi apparaissent aussi dans le fil en direct, avec la mention « Défi ».",
@@ -520,7 +511,7 @@
   },
   "trades": {
     "title": "Échanges",
-    "subtitle": "Échange des cartes de ta collection Défi avec d'autres dresseurs — jusqu'à {max} cartes de chaque côté. Les offres expirent au bout de 7 jours.",
+    "subtitle": "Échange des cartes de ta collection Défi avec d'autres dresseurs, jusqu'à {max} cartes de chaque côté. Les offres expirent au bout de 7 jours.",
     "loadError": "Impossible de charger tes échanges.",
     "received": "Offres pour toi",
     "sent": "En attente de réponse",
@@ -529,7 +520,7 @@
     "youGet": "Tu reçois",
     "youGive": "Tu donnes",
     "youAsk": "Tu demandes à {name}",
-    "gift": "Rien — un cadeau",
+    "gift": "Rien (c'est un cadeau)",
     "accept": "Accepter",
     "decline": "Refuser",
     "cancel": "Annuler l'offre",
@@ -576,7 +567,6 @@
     "unlock": "Autoriser l’échange de {name}"
   },
   "games": {
-    "eyebrow": "Défi",
     "title": "Mini-jeux",
     "subtitle": "Gagne des pièces pour tes boosters du défi. Chaque jeu rapporte des pièces jusqu'à une limite par jour, ensuite tu joues autant que tu veux pour le record.",
     "hubDesc": "Gagne des pièces pour tes boosters en jouant.",
@@ -596,7 +586,6 @@
     }
   },
   "minigame": {
-    "eyebrow": "Mini-jeu",
     "title": "Plus ou moins",
     "subtitle": "Deux cartes, une question : laquelle vaut le plus cher ? Gagne des pièces pour tes boosters du défi.",
     "hubDesc": "Devine laquelle de deux cartes vaut le plus cher pour gagner des pièces.",
@@ -636,7 +625,6 @@
     }
   },
   "electrodeFlip": {
-    "eyebrow": "Mini-jeu",
     "title": "Électrode Shiny Flip",
     "subtitle": "Retourne les cases, multiplie tes points et évite les Électrode shiny. Vide le plateau pour monter de niveau.",
     "unavailable": "Le mini-jeu arrive bientôt.",

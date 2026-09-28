@@ -187,7 +187,6 @@ const nextLevelLine = computed(() => {
 
     <main class="container ef">
       <header class="ef-head">
-        <span class="pb-eyebrow">{{ t('electrodeFlip.eyebrow') }}</span>
         <h1 class="ef-title">{{ t('electrodeFlip.title') }}</h1>
         <p class="ef-subtitle">{{ t('electrodeFlip.subtitle') }}</p>
       </header>
@@ -360,7 +359,7 @@ const nextLevelLine = computed(() => {
 }
 
 .ef-title {
-  margin: 0.75rem 0 0.5rem;
+  margin: 0 0 0.5rem;
   font-size: clamp(1.8rem, 5vw, 2.8rem);
   font-weight: 800;
 }
