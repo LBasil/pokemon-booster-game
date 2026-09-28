@@ -2,6 +2,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useElectrodeFlipStore } from '@/stores/electrodeFlip'
 import { useMinigameStore } from '@/stores/minigame'
+import { useSuperEffectiveStore } from '@/stores/superEffective'
 import { GAMES } from '@/utils/games'
 
 /**
@@ -14,6 +15,7 @@ export function useGames() {
   const { t } = useI18n()
   const higherLower = useMinigameStore()
   const electrodeFlip = useElectrodeFlipStore()
+  const superEffective = useSuperEffectiveStore()
 
   const statusOf = {
     'higher-lower': () => ({
@@ -31,6 +33,14 @@ export function useGames() {
         ? t('electrodeFlip.coinsLeftLine', { count: electrodeFlip.coinsLeft })
         : t('electrodeFlip.nextFree'),
       record: t('electrodeFlip.levelShort', { level: electrodeFlip.level }),
+    }),
+    'super-effective': () => ({
+      store: superEffective,
+      inProgress: Boolean(superEffective.run),
+      line: superEffective.paidLeft
+        ? t('minigame.nextPaid', { count: superEffective.paidLeft }, superEffective.paidLeft)
+        : t('minigame.nextFree'),
+      record: superEffective.best ? t('minigame.bestShort', { count: superEffective.best }) : '',
     }),
   }
 
@@ -56,6 +66,7 @@ export function useGames() {
     load: () => {
       higherLower.load()
       electrodeFlip.load()
+      superEffective.load()
     },
   }
 }

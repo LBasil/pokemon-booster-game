@@ -23,6 +23,7 @@ erDiagram
   AUTH_USERS ||--o{ ACHIEVEMENT_UNLOCKS : débloque
   AUTH_USERS ||--o{ MINIGAME_RUNS : joue
   AUTH_USERS ||--o{ ELECTRODE_FLIP_BOARDS : joue
+  AUTH_USERS ||--o{ SUPER_EFFECTIVE_RUNS : joue
   PROFILES ||--o{ PULL_FEED : "gros tirages"
   SETS ||--o{ CARDS : contient
   SETS ||--o{ SETS : "sous-set de"
@@ -75,6 +76,7 @@ Lecture : tout le monde. Écriture client : aucune.
 | `image_url`, `image_small` | text | Grande et petite image |
 | `artist`, `supertype`, `subtypes`, `hp`, `types` | … | Métadonnées de la carte (supertype = `Pokémon`, `Trainer`, `Energy`) |
 | `national_pokedex_number` | int | Numéro du Pokédex national (onglet Pokédex, succès) |
+| `weaknesses` | text[] | Types de faiblesse imprimés sur la carte (`{Fire}`), remplis par l'import depuis 0015 ; sert à « Super efficace ! ». `null` tant que l'import n'est pas repassé |
 | `set_id` | text → `sets.id` | Set de la carte |
 
 Index : `(set_id)`, `(set_id, rarity_bucket)` (tirage par rareté).
@@ -203,7 +205,7 @@ onglets de dépenser les mêmes pièces.
 ### `challenge_ledger`
 
 Le journal de **chaque mouvement de pièces** : `kind` (`start`, `daily`,
-`booster`, `recycle`, `craft`, `mission`, `minigame`, `electrode_flip`), `amount` (+ gagné,
+`booster`, `recycle`, `craft`, `mission`, `minigame`, `electrode_flip`, `super_effective`), `amount` (+ gagné,
 − dépensé), `card_id`, `quantity`, `mission`, `game_day`, `created_at`.
 
 Un index unique `(user_id, mission, game_day) where kind = 'mission'`
@@ -254,6 +256,15 @@ Une ligne par plateau d'« Électrode Shiny Flip » : `level` (1 à 5),
 `playing` par joueur (index unique). **Aucun accès client**, même en
 lecture : le plateau ne doit pas fuiter.
 
+### `super_effective_runs`
+
+Une ligne par partie de « Super efficace ! » : `paid`, `streak`, `coins`,
+`card_id` (la carte posée), `answer` (le bon type), `options` (les types
+proposés, réponse comprise), `shown_at`, `status` (`playing`, `lost`,
+`timeout`, `abandoned`), `game_day`. Une seule partie `playing` par
+joueur (index unique). **Aucun accès client** : la réponse ne doit pas
+fuiter.
+
 ---
 
 ## Succès
@@ -290,6 +301,7 @@ elles servent de briques aux RPC décrites dans la
 | `challenge_recycle_value(bucket)`, `challenge_craft_price(bucket)`, `challenge_daily_reward(streak)` | Barème du Défi (**miroir** : `src/utils/challenge.js`) |
 | `owns_challenge_cards`, `move_challenge_cards`, `has_trade_lock`, `trade_ttl` | Vérifications et transfert des échanges |
 | `minigame_rules`, `minigame_min_ratio`, `minigame_pair`, `minigame_card` | Règles et tirage des paires du mini-jeu |
+| `super_effective_rules`, `super_effective_types`, `super_effective_option_count`, `super_effective_ready`, `super_effective_question`, `super_effective_card` | Règles, cartes jouables et tirage des questions de « Super efficace ! » (`card` = la carte sans sa faiblesse) |
 | `electrode_flip_rules`, `electrode_flip_layout`, `electrode_flip_deal`, `electrode_flip_view`, `electrode_flip_today`, `electrode_flip_end` | Règles, distribution et fin des plateaux d'« Électrode Shiny Flip » (`view` = ce que voit le client) |
 | `handle_new_user`, `unique_username`, `profiles_before_update` | Création du profil, pseudo libre, contrôle de la vitrine |
 | `link_subsets`, `guess_subset_parent`, `subset_default_rate` | Relie les nouveaux sous-sets à leur parent (service role, appelé par l'import) |
@@ -317,6 +329,7 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0012 | `trade_preferences` | Refuser les échanges, cartes hors échange |
 | 0013 | `minigame_higher_lower` | Mini-jeu « Plus ou moins » |
 | 0014 | `minigame_electrode_flip` | Mini-jeu « Électrode Shiny Flip » (écrite le 2026-09-27, **à appliquer**) |
+| 0015 | `minigame_super_effective` | Colonne `cards.weaknesses` + mini-jeu « Super efficace ! » (écrite le 2026-09-28, **à appliquer**, puis relancer l'import) |
 
 Les migrations 0001 à 0013 sont appliquées sur le projet réel (vérifié le
 2026-09-27).

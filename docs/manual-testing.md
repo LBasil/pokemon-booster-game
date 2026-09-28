@@ -106,6 +106,21 @@ address** for the sign-up part.
 - [ ] Memo marks (and right click) don't flip anything.
 - [ ] On a 320px phone: the whole board and its hints fit, both themes.
 
+## Super effective! (after migration 0015 + a card import)
+
+- [ ] Right after 0015, before the import: the games page says "Coming
+      soon" for "Super effective!" (no card has its weaknesses yet).
+- [ ] After `npm run populate:cards` (or the "Sync cards" Action): "3 paid
+      runs left today" → Play: the top half of a real card (name, HP,
+      type, art; the printed weakness is cut off) and 3 types.
+- [ ] Tap the right type → "It's super effective!", +5, next card; a
+      wrong one → "Weak to: …" and the run ends. Check a couple of answers
+      against the full card in the collection.
+- [ ] From 5 right answers: 4 types, from 10: 6 types.
+- [ ] Keys 1 to 3 (desktop) answer; 10 s without answering → "Too slow!".
+- [ ] On a 320px phone: card, question, types and feedback fit above the
+      tab bar, both themes.
+
 ## Trades (after migration 0007, two accounts A and B)
 
 - [ ] On B's public profile, A taps "Propose a trade" → the trades page

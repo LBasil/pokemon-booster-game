@@ -114,6 +114,21 @@ async function recordPrices(cards) {
   }
 }
 
+// cards.weaknesses ("Super effective!" mini-game) comes with migration 0015:
+// until it's applied, cards are saved without it rather than not at all
+let weaknessesAvailable = true
+
+async function upsertCards(cards) {
+  const rows = weaknessesAvailable ? cards : cards.map(({ weaknesses: _weaknesses, ...card }) => card)
+  const { error } = await supabase.from('cards').upsert(rows)
+  if (error && weaknessesAvailable && /weaknesses/.test(error.message)) {
+    weaknessesAvailable = false
+    console.warn('Skipping weaknesses (run migration 0015 first?):', error.message)
+    return upsertCards(cards)
+  }
+  return { error }
+}
+
 async function populateCards(startPage = 1) {
   let page = startPage
 
@@ -134,10 +149,11 @@ async function populateCards(startPage = 1) {
       subtypes: card.subtypes ?? null,
       hp: card.hp ?? null,
       types: card.types ?? null,
+      weaknesses: card.weaknesses?.map((weakness) => weakness.type) ?? null,
       set_id: card.set.id,
     }))
 
-    const { error } = await supabase.from('cards').upsert(cards)
+    const { error } = await upsertCards(cards)
     if (error) {
       console.error('Error inserting cards:', error.message)
       return

@@ -431,7 +431,8 @@
       "minigame_unavailable": "No cards to compare right now. Try again later.",
       "invalid_tile": "That tile doesn’t exist.",
       "already_flipped": "That tile is already flipped.",
-      "nothing_to_cash": "Flip at least one tile before cashing out."
+      "nothing_to_cash": "Flip at least one tile before cashing out.",
+      "super_effective_unavailable": "No cards to ask about right now. Try again later."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -584,6 +585,10 @@
       "electrode-flip": {
         "title": "Shiny Electrode Flip",
         "desc": "Flip tiles, multiply your points, dodge the Electrodes."
+      },
+      "super-effective": {
+        "title": "Super effective!",
+        "desc": "Which type is this Pokémon weak to?"
       }
     }
   },
@@ -624,6 +629,22 @@
       "paid": "{runs} paid runs a day: {coins} coins per right answer, for the first {answers} of the run ({max} coins max per run).",
       "free": "After that, play as much as you like for the record, without coins. Paid runs come back at midnight UTC.",
       "harder": "The longer the streak, the closer the prices."
+    }
+  },
+  "superEffective": {
+    "title": "Super effective!",
+    "subtitle": "A Pokémon card shows up: find the type it's weak to before time runs out. Earn coins for your challenge boosters.",
+    "unavailable": "The mini-game is coming soon.",
+    "loadError": "Couldn’t load the mini-game. Try again in a moment.",
+    "question": "What is it weak to?",
+    "keys": "Tap a type (or press 1 to {count}).",
+    "right": "It's super effective!",
+    "wrong": "Not very effective…",
+    "weakTo": "Weak to: {types}",
+    "rules": {
+      "pick": "A Pokémon card shows up: tap the type it's weak to. You have {seconds} seconds.",
+      "weakness": "The answer is the weakness printed on the card itself, so it follows the rules of the card's era.",
+      "harder": "The longer the streak, the more types to pick from: 3, then 4, then 6."
     }
   },
   "electrodeFlip": {

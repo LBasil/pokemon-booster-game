@@ -431,7 +431,8 @@
       "minigame_unavailable": "Aucune carte à comparer pour l'instant. Réessaie plus tard.",
       "invalid_tile": "Cette case n'existe pas.",
       "already_flipped": "Cette case est déjà retournée.",
-      "nothing_to_cash": "Retourne au moins une case avant d'encaisser."
+      "nothing_to_cash": "Retourne au moins une case avant d'encaisser.",
+      "super_effective_unavailable": "Aucune carte à proposer pour l'instant. Réessaie plus tard."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -584,6 +585,10 @@
       "electrode-flip": {
         "title": "Électrode Shiny Flip",
         "desc": "Retourne les cases, multiplie tes points, évite les Électrode."
+      },
+      "super-effective": {
+        "title": "Super efficace !",
+        "desc": "Quel type est super efficace contre ce Pokémon ?"
       }
     }
   },
@@ -624,6 +629,22 @@
       "paid": "{runs} parties récompensées par jour : {coins} pièces par bonne réponse, pour les {answers} premières de la partie ({max} pièces max par partie).",
       "free": "Ensuite, joue autant que tu veux pour le record, sans pièces. Les parties récompensées reviennent à minuit UTC.",
       "harder": "Plus la série est longue, plus les prix sont proches."
+    }
+  },
+  "superEffective": {
+    "title": "Super efficace !",
+    "subtitle": "Une carte Pokémon s'affiche : trouve le type auquel elle est faible avant la fin du temps. Gagne des pièces pour tes boosters du défi.",
+    "unavailable": "Le mini-jeu arrive bientôt.",
+    "loadError": "Impossible de charger le mini-jeu. Réessaie dans un instant.",
+    "question": "Quelle est sa faiblesse ?",
+    "keys": "Touche un type (ou appuie sur 1 à {count}).",
+    "right": "C'est super efficace !",
+    "wrong": "Ce n'est pas très efficace…",
+    "weakTo": "Faiblesse : {types}",
+    "rules": {
+      "pick": "Une carte Pokémon s'affiche : touche le type auquel elle est faible. Tu as {seconds} secondes.",
+      "weakness": "La réponse est la faiblesse imprimée sur la carte elle-même : elle suit les règles de son époque.",
+      "harder": "Plus la série est longue, plus il y a de types au choix : 3, puis 4, puis 6."
     }
   },
   "electrodeFlip": {

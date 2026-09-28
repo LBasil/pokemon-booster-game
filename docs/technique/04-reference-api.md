@@ -420,6 +420,45 @@ Erreurs : `no_game`, `invalid_tile`, `already_flipped`,
 
 ---
 
+## Mini-jeu « Super efficace ! » (Défi, migration 0015)
+
+| RPC | JS | Rôle |
+| --- | --- | --- |
+| `super_effective_state()` | `fetchSuperEffectiveState()` | Règles, `ready` (des cartes ont leurs faiblesses), parties payées restantes, pièces du jour, record, partie en cours. Ferme une partie dont la question a expiré |
+| `super_effective_start()` | `startSuperEffective()` | Abandonne la partie en cours et en démarre une (payée s'il en reste). 20 par minute au maximum (`slow_down`). Renvoie l'état |
+| `super_effective_answer(p_pick)` | `answerSuperEffective(pick)` | Un type parmi `options` (`null` = temps écoulé). Renvoie le résultat, la bonne réponse et l'état suivant |
+
+État (`super_effective_state`) :
+
+```json
+{
+  "paid_runs": 3, "coins_per_answer": 5, "max_paid_answers": 20, "answer_seconds": 10,
+  "ready": true, "coins": 1250, "paid_left": 2, "today_coins": 15, "best": 9,
+  "run": {
+    "paid": true, "streak": 3, "coins": 15, "seconds_left": 8,
+    "card": { "id": "…", "name": "Charmander", "types": ["Fire"], "hp": 70, "image_small": "…", "image_url": "…", "set_id": "…", "set_name": "…" },
+    "options": ["Grass", "Water", "Psychic"]
+  }
+}
+```
+
+Réponse (`super_effective_answer`) :
+
+```json
+{
+  "correct": false, "late": false, "earned": 0, "streak": 3, "run_coins": 15,
+  "answer": "Water", "weaknesses": ["Water"],
+  "state": { "…super_effective_state()…" }
+}
+```
+
+Erreurs : `no_game`, `invalid_pick` (type non proposé), `slow_down`,
+`super_effective_unavailable` (aucune carte avec une faiblesse : l'import
+n'est pas repassé). RPC absente (`PGRST202`) ou `ready: false` → store
+`unavailable`, « Bientôt ».
+
+---
+
 ## Import des cartes (admin)
 
 `scripts/populate.mjs` utilise la clé **service role** et fait des `upsert`

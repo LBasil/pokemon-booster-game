@@ -125,6 +125,13 @@ const router = createRouter({
       meta: { requiresAuth: true, mode: 'challenge' },
     },
     {
+      // "Super effective!" (migration 0015)
+      path: '/challenge/games/super-effective',
+      name: 'challenge-game-super-effective',
+      component: () => import('@/views/SuperEffectiveView.vue'),
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
       path: '/challenge/trades',
       name: 'challenge-trades',
       component: () => import('@/views/TradesView.vue'),

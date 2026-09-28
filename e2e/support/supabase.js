@@ -68,6 +68,13 @@ export const ELECTRODE_BOARD = [
   0, 1, 1, 1, 1,
 ]
 
+// "Super effective!" (migration 0015): the questions the mock asks, in order
+export const SUPER_EFFECTIVE_QUESTIONS = [
+  { card: 'sv3pt5-4', answer: 'Water', options: ['Grass', 'Water', 'Psychic'] }, // Charmander
+  { card: 'sv3pt5-7', answer: 'Lightning', options: ['Lightning', 'Fire', 'Fighting'] }, // Squirtle
+  { card: 'sv3pt5-1', answer: 'Fire', options: ['Water', 'Darkness', 'Fire'] }, // Bulbasaur
+]
+
 export async function mockSupabase(page, options = {}) {
   const state = {
     collection: options.collection ?? [collectionEntry('sv3pt5-4', 2), collectionEntry('base1-4')],
@@ -114,6 +121,10 @@ export async function mockSupabase(page, options = {}) {
     minigame: options.minigame === 'missing' ? 'missing' : { paidUsed: 0, best: 0, todayCoins: 0, run: null, next: 0, ...options.minigame },
     electrodeFlip:
       options.electrodeFlip === 'missing' ? 'missing' : { level: 1, todayCoins: 0, bestPoints: 0, bestLevel: 0, board: null, ...options.electrodeFlip },
+    // "Super effective!" (migration 0015): 'missing' = not applied; ready:
+    // false = no weaknesses loaded yet; questions in SUPER_EFFECTIVE_QUESTIONS order
+    superEffective:
+      options.superEffective === 'missing' ? 'missing' : { ready: true, paidUsed: 0, best: 0, todayCoins: 0, run: null, next: 0, ...options.superEffective },
   }
   const challengeState = () => {
     const c = state.challenge
@@ -302,6 +313,64 @@ export async function mockSupabase(page, options = {}) {
         if (!ef.board.flips) return raise('nothing_to_cash')
         const earned = end('cashed')
         return json({ earned, result: efView(), state: efState() })
+      }
+    }
+    // ---- Super effective! (migration 0015) ----
+    if (path.startsWith('/rest/v1/rpc/super_effective_')) {
+      const se = state.superEffective
+      if (se === 'missing') return json({ code: 'PGRST202', message: `Could not find the function public.${path.split('/').pop()} in the schema cache` }, 404)
+      const seCard = (id) => {
+        const card = byId[id]
+        return { id, name: card.name, types: card.types, hp: card.hp, image_small: card.image_small, image_url: card.image_url, set_id: card.set_id, set_name: SETS.find((set) => set.id === card.set_id)?.name }
+      }
+      const draw = () => SUPER_EFFECTIVE_QUESTIONS[se.next++ % SUPER_EFFECTIVE_QUESTIONS.length]
+      const seState = () => ({
+        paid_runs: 3,
+        coins_per_answer: 5,
+        max_paid_answers: 20,
+        answer_seconds: 10,
+        ready: se.ready,
+        coins: c.coins,
+        paid_left: Math.max(0, 3 - se.paidUsed),
+        today_coins: se.todayCoins,
+        best: se.best,
+        run: se.run && { paid: se.run.paid, streak: se.run.streak, coins: se.run.coins, card: seCard(se.run.question.card), options: se.run.question.options, seconds_left: 10 },
+      })
+      if (path === '/rest/v1/rpc/super_effective_state') return json(seState())
+      if (path === '/rest/v1/rpc/super_effective_start') {
+        if (!se.ready) return raise('super_effective_unavailable')
+        const paid = se.paidUsed < 3
+        if (paid) se.paidUsed++
+        se.run = { paid, streak: 0, coins: 0, question: draw() }
+        return json(seState())
+      }
+      if (path === '/rest/v1/rpc/super_effective_answer') {
+        const run = se.run
+        if (!run) return raise('no_game')
+        const question = run.question
+        const correct = args.p_pick !== null && args.p_pick === question.answer
+        let earned = 0
+        if (correct) {
+          earned = run.paid && run.streak < 20 ? 5 : 0
+          run.streak++
+          run.coins += earned
+          c.coins += earned
+          se.todayCoins += earned
+          se.best = Math.max(se.best, run.streak)
+          run.question = draw()
+        } else {
+          se.run = null
+        }
+        return json({
+          correct,
+          late: args.p_pick === null,
+          earned,
+          streak: run.streak,
+          run_coins: run.coins,
+          answer: question.answer,
+          weaknesses: [question.answer],
+          state: seState(),
+        })
       }
     }
     if (path === '/rest/v1/rpc/claim_daily_reward') {

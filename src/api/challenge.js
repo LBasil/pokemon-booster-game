@@ -28,6 +28,8 @@ export const CHALLENGE_ERRORS = [
   'invalid_tile',
   'already_flipped',
   'nothing_to_cash',
+  // "Super effective!" (migration 0015)
+  'super_effective_unavailable',
 ]
 
 async function call(name, args) {
@@ -152,3 +154,21 @@ export const flipElectrodeTile = (index) => call('electrode_flip_flip', { p_inde
 
 /** Ends the board, keeping its points. @returns {Promise<{ earned: number, result: object, state: object }>} */
 export const cashOutElectrodeFlip = () => call('electrode_flip_cash_out')
+
+// ---------- "Super effective!" mini-game (migration 0015) ----------
+
+/**
+ * Rules, whether cards are ready (weaknesses filled), paid runs left today,
+ * best streak and the run in progress (its card comes without its weakness).
+ */
+export const fetchSuperEffectiveState = () => call('super_effective_state')
+
+/** Starts a run (abandoning the one in progress); returns the state. */
+export const startSuperEffective = () => call('super_effective_start')
+
+/**
+ * @param {string | null} pick - one of the run's options, null = time's up
+ * @returns {Promise<{ correct: boolean, late: boolean, earned: number, streak: number, run_coins: number,
+ *   answer: string, weaknesses: string[], state: object }>}
+ */
+export const answerSuperEffective = (pick) => call('super_effective_answer', { p_pick: pick })

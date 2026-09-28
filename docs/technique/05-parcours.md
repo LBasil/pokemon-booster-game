@@ -569,6 +569,54 @@ sequenceDiagram
   Électrode sont estompées (`lineKind()`).
 - Électrode dessiné en CSS (tokens `--pb-electrode-*`, bleu shiny).
 
+### « Super efficace ! »
+
+Page : [SuperEffectiveView.vue](../../src/views/SuperEffectiveView.vue)
+(`/challenge/games/super-effective`), store `superEffective`, migration 0015.
+
+Une carte Pokémon s'affiche, recadrée sur sa moitié haute (nom, PV, type,
+illustration) : sa faiblesse est imprimée en bas. On touche le type
+auquel elle est faible (ou les touches 1 à 6 au clavier).
+
+```mermaid
+sequenceDiagram
+  actor J as Joueur
+  participant SV as SuperEffectiveView
+  participant DB as Postgres
+
+  SV->>DB: super_effective_state() — ready ? reprend une partie en cours
+  J->>SV: « Jouer »
+  SV->>DB: super_effective_start()
+  DB-->>SV: carte (sans faiblesse) + types proposés
+  loop jusqu'à une erreur
+    J->>SV: touche un type (ou le temps s'écoule : null)
+    SV->>DB: super_effective_answer(type)
+    DB-->>SV: juste ?, bonne réponse, pièces, carte suivante
+  end
+```
+
+- **La réponse** vient de la carte elle-même : `cards.weaknesses`
+  (pokemontcg.io, rempli par `scripts/populate.mjs` depuis 0015). Pas de
+  table des types à maintenir, et la réponse suit les règles de l'époque
+  de la carte. Si une carte a deux faiblesses, l'une est la réponse et
+  l'autre n'est jamais proposée. Incolore n'est jamais proposé.
+- **Règles** (**miroir** : `super_effective_rules()` et
+  `src/utils/superEffective.js`) : 10 s par question (le serveur accepte
+  15 s), 3 types au choix (série 0–4), puis 4 (5–9), puis 6. Mêmes gains
+  que « Plus ou moins » : 3 parties payées par jour, 5 pièces par bonne
+  réponse pour les 20 premières (100 par partie, 300 par jour), ensuite
+  pour le record. Une ligne `super_effective` par réponse payée dans le
+  journal.
+- **Avant l'import** : tant qu'aucune carte n'a de faiblesse,
+  `super_effective_state()` renvoie `ready: false` et le jeu affiche
+  « Bientôt » au lieu d'un bouton qui échouerait.
+- **Anti-triche** : la réponse reste sur le serveur jusqu'au choix.
+  Limite acceptée (comme les prix) : `cards` est public et l'image
+  complète montre la faiblesse, un script pourrait la lire ; le plafond
+  quotidien borne le gain.
+- Pastilles de couleur par type : tokens `--pb-type-*` (une seule série
+  pour les deux thèmes, jamais derrière du texte).
+
 ---
 
 ## 9. Communauté : fil et classements

@@ -323,6 +323,18 @@ docs/technique/             technical doc (French, user choice): overview, front
   Memo marks (and right click = Electrode mark) are client-only. Ledger
   kind `electrode_flip`, one row per paid board. Each game's hub line and
   record come from `statusOf` in `useGames()`.
+  **"Super effective!"** (0015, `/challenge/games/super-effective`,
+  `SuperEffectiveView` + `useSuperEffectiveStore`): a Pokémon card's top
+  half (the weakness is printed at the bottom), tap the type it's weak to
+  within 10 s (server allows 15); 3 types (streak 0-4), 4 (5-9), then 6;
+  same pay as "Higher or lower" (3 paid runs, 5 coins x first 20). The
+  answer is the card's **printed weakness**, `cards.weaknesses` (text[],
+  new in 0015, filled by `populate.mjs`, which skips the column if 0015
+  isn't applied), not a type chart. `super_effective_state().ready` =
+  some card has weaknesses; false -> the store sets `unavailable`
+  ("Coming soon"). Mirror: `src/utils/superEffective.js`. Type dots:
+  `--pb-type-*` tokens (one set for both themes, never behind text).
+  Ledger kind `super_effective`. Keys 1-6 answer on desktop.
 - **Never let a player lose track of the mode** (user priority): every
   challenge page shows AppHeader's `.mode-strip` ("Challenge mode", coins,
   "Leave" → `/game`, phones included); Community and profiles
@@ -432,7 +444,8 @@ docs/technique/             technical doc (French, user choice): overview, front
   collection with "Ask for it"), ~240 achievements per mode (collapsible
   categories, rates, unlock toasts), challenge mode (coins, daily reward,
   daily + weekly missions, recycle, craft, god packs, mini-games "Higher
-  or lower" and "Shiny Electrode Flip" (needs 0014), trades with live
+  or lower", "Shiny Electrode Flip" (needs 0014) and "Super effective!"
+  (needs 0015 + a card import), trades with live
   updates, opt-out and cards kept out of trades), PWA, EN/FR, both themes.
 - What each migration does (details in each file's header comment):
   0001 schema · 0002 first RPCs (unused) · 0003 realistic packs + rarity
@@ -442,14 +455,22 @@ docs/technique/             technical doc (French, user choice): overview, front
   0009 achievements per mode · 0010 subsets + pack stats · 0011 weekly
   missions + realtime trades · 0012 trade preferences · 0013 "Higher or
   lower" mini-game · 0014 "Shiny Electrode Flip" mini-game (**written
-  2026-09-27, not applied yet**: hand it to the user). Every one was
-  verified locally with PGlite before being handed over; 0010-0014 have
+  2026-09-27, not applied yet**: hand it to the user) · 0015
+  `cards.weaknesses` + "Super effective!" mini-game (**written
+  2026-09-28, not applied yet**; after it, re-run the card import to
+  fill the weaknesses). Every one was
+  verified locally with PGlite before being handed over; 0010-0015 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 135 unit tests, `npm run test:db` 148 database
-  checks, `npm run test:e2e` 168 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 143 unit tests, `npm run test:db` 190 database
+  checks, `npm run test:e2e` 196 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
-  0 npm audit vulnerabilities.
+  0 npm audit vulnerabilities. Known failing since 2026-09-28 (not from
+  the mini-games): navigation.spec.js > "community and profile keep the
+  mode" and trades.spec.js > "the community has challenge leaderboards"
+  (the Community page now has two selected tabs: mode switch + board),
+  and navigation.spec.js > "a new version deployed" (times out waiting
+  for `pb:update-ready`).
 - Not verified automatically: Realtime (feed and trades — no websocket
   mock in e2e) and anything needing two real accounts; the user checks
   those by hand.
@@ -468,6 +489,20 @@ docs/technique/             technical doc (French, user choice): overview, front
   https://pokemon-booster-game.vercel.app). Check without sending an
   email: `GET /auth/v1/verify?type=recovery&token=fake&redirect_to=<url>`
   redirects to `<url>` if allowed, else to the site URL.
+- **Next mini-games** (user picked them 2026-09-28, after "Super
+  effective!"):
+  1. **Evolution chain**: put a family's stages back in order (3 shuffled
+     cards; later levels blur the art or add an intruder from another
+     family). Needs `cards.evolves_from` (pokemontcg.io `evolvesFrom`):
+     new migration + populate + a re-import. The Pokédex number isn't
+     enough (Eevee, regional forms).
+  2. **Weekly boss raid**: a giant Pokémon with a shared HP bar, players
+     attack with their challenge cards, everyone rewarded if it falls
+     before Sunday. Rules to settle with the user first: attacks per day,
+     card locked after attacking (day or week?), damage from value / HP /
+     type vs the boss (could reuse `cards.weaknesses`), reward split
+     (flat vs by contribution, a card for the top attacker), HP scaled to
+     active players. Live HP bar through Realtime (not e2e-testable).
 - Parked (user, 2026-09-26: "on s'en fiche pour l'instant"): counter-offers,
   real subset pull rates (Classic Collection guessed at 1 pack in 3). Not
   wanted: push notifications (it's a website, not really an app). Not

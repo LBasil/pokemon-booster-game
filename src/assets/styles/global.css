@@ -72,6 +72,20 @@
   --pb-electrode-top: #4d8dff;
   --pb-electrode-bottom: #f1f4fb;
   --pb-electrode-edge: #0a0d1a;
+
+  /* Energy types (Super effective! mini-game): small dots next to a label,
+     never behind text, so one set works in both themes */
+  --pb-type-grass: #4caf50;
+  --pb-type-fire: #ef5b3c;
+  --pb-type-water: #3d9be9;
+  --pb-type-lightning: #f7c928;
+  --pb-type-psychic: #a855c7;
+  --pb-type-fighting: #c46a34;
+  --pb-type-darkness: #36464f;
+  --pb-type-metal: #9aa5b1;
+  --pb-type-fairy: #ec7fb6;
+  --pb-type-dragon: #b8963a;
+  --pb-type-colorless: #d9d4c7;
 }
 
 [data-bs-theme='light'] {

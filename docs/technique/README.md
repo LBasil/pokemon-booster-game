@@ -51,4 +51,4 @@ code** qu'elle décrit. La règle (aussi écrite dans `CLAUDE.md`) :
 - un comportement de jeu qui change (packs, économie, profil, succès…) → le parcours concerné dans [Parcours détaillés](05-parcours.md) ;
 - un nouvel outil, script ou étape de déploiement → [Outillage](06-outillage.md).
 
-Dernière mise à jour : 2026-09-28 (migrations 0001 à 0014 ; classements par mode).
+Dernière mise à jour : 2026-09-28 (migrations 0001 à 0015 ; classements par mode ; mini-jeu « Super efficace ! »).
