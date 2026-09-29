@@ -91,6 +91,7 @@
     "boosterProgress": "Booster {current} of {total}",
     "loadError": "Could not load booster sets.",
     "openError": "Couldn't open the booster. Please try again.",
+    "rateLimited": "You've opened 60 boosters in the last minute, the limit. Wait a few seconds, then carry on.",
     "eyebrow": "Unlimited boosters",
     "anySetDesc": "A pack from a random set, every time",
     "seriesTitle": "Sets",

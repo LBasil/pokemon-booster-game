@@ -45,6 +45,18 @@ test('"open all at once" skips the animations for every remaining pack', async (
   expect(backend.calls.filter((c) => c.path === '/rest/v1/rpc/open_my_booster')).toHaveLength(3)
 })
 
+test('hitting the 60 packs a minute limit says so and keeps the packs already opened', async ({ page }) => {
+  await mockSupabase(page, { packsBeforeLimit: 1 })
+  await page.goto('/boosters')
+  await page.getByRole('radio', { name: '3', exact: true }).click()
+  await page.getByRole('button', { name: /Open 3 boosters/ }).click()
+  await page.getByRole('button', { name: /Open all 3 at once/ }).click()
+
+  await expect(page.locator('.done-layout')).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('10')
+  await expect(page.getByRole('alert')).toContainText('60 boosters in the last minute')
+})
+
 test('a wishlisted card gets the "Wanted!" badge when pulled', async ({ page }) => {
   const backend = await mockSupabase(page)
   backend.state.wishlist.push({ card_id: 'sv3pt5-199', created_at: '2026-09-20T10:00:00Z', cards: { id: 'sv3pt5-199', name: 'Charizard ex' } })

@@ -3,7 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { fetchSetCover } from '@/api/sets'
-import { openBooster } from '@/api/boosters'
+import { openBooster, RATE_LIMITED } from '@/api/boosters'
 import { fetchOpenings } from '@/api/history'
 import * as sfx from '@/lib/sfx'
 import { shareCard } from '@/lib/shareCard'
@@ -238,7 +238,9 @@ const canAfford = (n) => !isChallenge || challenge.coins >= n * PACK_PRICE
 const cost = computed(() => count.value * PACK_PRICE)
 
 function openErrorFor(err) {
-  return err?.code === 'not_enough_coins' ? t('challenge.errors.not_enough_coins') : t('boosters.openError')
+  if (err?.code === 'not_enough_coins') return t('challenge.errors.not_enough_coins')
+  if (err?.message === RATE_LIMITED) return t('boosters.rateLimited')
+  return t('boosters.openError')
 }
 
 async function startOpening() {

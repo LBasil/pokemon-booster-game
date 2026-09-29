@@ -109,6 +109,8 @@ export async function mockSupabase(page, options = {}) {
     achievementRates: options.achievementRates ?? [],
     recorded: { unlimited: new Set(), challenge: new Set() },
     packs: { unlimited: 0, challenge: 0 },
+    // Packs left before check_booster_rate() refuses (60 per minute)
+    packsBeforeLimit: options.packsBeforeLimit ?? Infinity,
     stats: options.stats ?? {},
     // Trade preferences (migration 0012): my locked card ids, Misty's
     // locked card ids and whether she accepts trades
@@ -169,6 +171,7 @@ export async function mockSupabase(page, options = {}) {
 
     // ---- RPCs ----
     if (path === '/rest/v1/rpc/open_my_booster') {
+      if (state.packsBeforeLimit-- <= 0) return json({ code: 'P0001', message: 'too many boosters opened, slow down a little', details: null, hint: null }, 400)
       for (const c of PACK) {
         const owned = state.collection.find((e) => e.card_id === c.id)
         if (owned) owned.quantity++

@@ -91,6 +91,7 @@
     "boosterProgress": "Booster {current} sur {total}",
     "loadError": "Impossible de charger les types de boosters.",
     "openError": "Impossible d'ouvrir le booster. Réessaie.",
+    "rateLimited": "Tu as ouvert 60 boosters dans la dernière minute, c'est la limite. Attends quelques secondes et continue.",
     "eyebrow": "Boosters illimités",
     "anySetDesc": "Un booster d'une série au hasard, à chaque fois",
     "seriesTitle": "Séries",
