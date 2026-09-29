@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { setCompletion } from '@/utils/collection'
 import { boosterSets, groupSetsByYear, setLogoUrl, subsetsOf } from '@/utils/sets'
 
 // Searchable grid of sets grouped by year, plus the "any set" option.
@@ -9,6 +10,8 @@ import { boosterSets, groupSetsByYear, setLogoUrl, subsetsOf } from '@/utils/set
 const props = defineProps({
   sets: { type: Array, required: true },
   loading: { type: Boolean, default: false },
+  // Distinct cards owned per set id (null = collection not loaded yet)
+  owned: { type: Object, default: null },
 })
 
 const selected = defineModel({ type: String, default: '' })
@@ -16,6 +19,8 @@ const selected = defineModel({ type: String, default: '' })
 const { t } = useI18n()
 const query = ref('')
 const groups = computed(() => groupSetsByYear(boosterSets(props.sets), query.value))
+// Started sets show their completion; complete ones get a badge
+const completion = (set) => (props.owned?.[set.id] && set.total ? setCompletion(props.owned[set.id], set.total) : null)
 const bonusCards = (set) => subsetsOf(set.id, props.sets).reduce((sum, subset) => sum + (subset.total ?? 0), 0)
 
 // Logos missing on the CDN fall back to the set name
@@ -92,6 +97,9 @@ function onLogoError(setId) {
             <span v-if="set.total" class="set-option-meta">
               {{ t('boosters.cardCount', { count: set.total }) }}<template v-if="bonusCards(set)"> · {{ t('boosters.bonusCards', { count: bonusCards(set) }) }}</template>
             </span>
+          </span>
+          <span v-if="completion(set)" class="set-option-completion" :class="{ complete: completion(set).complete }">
+            {{ completion(set).complete ? t('boosters.complete') : `${completion(set).percent}%` }}
           </span>
         </button>
       </section>
@@ -237,6 +245,24 @@ function onLogoError(setId) {
 .set-option-meta {
   font-size: 0.8rem;
   color: var(--pb-text-muted);
+}
+
+.set-option-completion {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--pb-text-muted);
+}
+
+.set-option-completion.complete {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--pb-accent);
+  color: var(--pb-accent-ink);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .set-picker-empty {

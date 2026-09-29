@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { binderSlots, cardNumber, collectionStats, filterEntries, pokedexSlots, setProgress, sortEntries } from './collection'
+import { binderSlots, cardNumber, collectionStats, filterEntries, pokedexSlots, setCompletion, setProgress, sortEntries } from './collection'
 
 const entry = (id, name, rarity, { quantity = 1, acquired_at = '2026-09-01', value = 0 } = {}) => ({
   card_id: id,
@@ -60,6 +60,19 @@ describe('sortEntries', () => {
     const before = ids(ENTRIES)
     expect(ids(sortEntries(ENTRIES, 'quantity')).slice(0, 2)).toEqual(['sv3pt5-25', 'base1-4'])
     expect(ids(ENTRIES)).toEqual(before)
+  })
+})
+
+describe('setCompletion', () => {
+  it('rounds down, so only a full set reads 100%', () => {
+    expect(setCompletion(0, 12)).toEqual({ owned: 0, total: 12, percent: 0, complete: false })
+    expect(setCompletion(206, 207)).toMatchObject({ percent: 99, complete: false })
+    expect(setCompletion(12, 12)).toMatchObject({ percent: 100, complete: true })
+  })
+
+  it('never goes past 100% when the set total is behind the cards', () => {
+    expect(setCompletion(5, 3)).toEqual({ owned: 5, total: 5, percent: 100, complete: true })
+    expect(setCompletion(0, 0)).toMatchObject({ percent: 0, complete: false })
   })
 })
 

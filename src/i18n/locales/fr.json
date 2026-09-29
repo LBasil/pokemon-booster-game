@@ -126,7 +126,10 @@
     "openAll": "Tout ouvrir d'un coup | Ouvrir les {count} d'un coup",
     "subsetOdds": "Contient aussi la série {name} : environ 1 booster sur {every} en a une carte.",
     "subsetIncluded": "Contient aussi la série {name}.",
-    "bonusCards": "+{count} cartes bonus"
+    "bonusCards": "+{count} cartes bonus",
+    "completion": "{owned} / {total} cartes collectionnées ({percent} %)",
+    "completionLabel": "Complétion de la série",
+    "complete": "Complète"
   },
   "collection": {
     "title": "Ma collection",

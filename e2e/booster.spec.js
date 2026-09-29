@@ -105,3 +105,14 @@ test('the history can show only the boosters with a hit', async ({ page }) => {
   await page.getByRole('button', { name: 'All', exact: true }).click()
   await expect(page.locator('.history-item')).toHaveCount(3)
 })
+
+test('the selected set shows its completion, with a badge once complete', async ({ page }) => {
+  await mockSupabase(page, { collection: [collectionEntry('sv3pt5-4', 2), collectionEntry('base1-4'), collectionEntry('base1-58')] })
+  await page.goto('/boosters?set=sv3pt5')
+  await expect(page.locator('.preview-completion')).toContainText('1 / 11 cards collected (9%)')
+  await expect(page.locator('.preview-completion').getByRole('progressbar')).toBeVisible()
+
+  await page.goto('/boosters?set=base1')
+  await expect(page.locator('.preview-completion')).toContainText('2 / 2 cards collected (100%)')
+  await expect(page.locator('.preview-completion-badge')).toHaveText('Complete')
+})

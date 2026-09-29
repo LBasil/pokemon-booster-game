@@ -242,7 +242,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `CardStack` | Pile face cachée : chaque tap retourne la carte suivante ; balayage sur tactile. Les cartes rares « se chargent » 0,55 s avant de se retourner avec un flash |
 | `HoloCard` | Carte avec inclinaison 3D + reflet holographique qui suivent le pointeur |
 | `CardDetail` | Fiche plein écran (flèches, balayage), historique de prix, liste de souhaits, fabrication/recyclage en Défi |
-| `SetPicker` | Grille de sets cherchable, groupée par année (sous-sets masqués) |
+| `SetPicker` | Grille de sets cherchable, groupée par année (sous-sets masqués), avec la complétion de chaque set commencé (prop `owned`) |
 | `PriceChart` | Courbe du prix d'une carte (un relevé par jour d'import) |
 | `PokedexGrid`, `WishlistGrid`, `ShowcasePicker`, `RecycleDuplicates` | Onglets Pokédex et souhaits, choix de la vitrine, recyclage en un clic |
 | `BetaBadge` | Pastille « Bêta-testeur » (bordure holo + reflet qui passe, coupé sans effets / mouvement réduit), `compact` = juste « β ». Profil et tuile profil du hub |

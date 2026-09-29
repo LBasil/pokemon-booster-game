@@ -126,7 +126,10 @@
     "openAll": "Open all at once | Open all {count} at once",
     "subsetOdds": "Also holds the {name}: about 1 pack in {every} has one of its cards.",
     "subsetIncluded": "Also holds the {name}.",
-    "bonusCards": "+{count} bonus cards"
+    "bonusCards": "+{count} bonus cards",
+    "completion": "{owned} / {total} cards collected ({percent}%)",
+    "completionLabel": "Set completion",
+    "complete": "Complete"
   },
   "collection": {
     "title": "My collection",

@@ -87,6 +87,16 @@ export function setProgress(entries, sets) {
     .sort((a, b) => b.percent - a.percent || (b.set.release_date ?? '').localeCompare(a.set.release_date ?? ''))
 }
 
+/**
+ * Completion of one set from the number of distinct cards owned in it.
+ * The percent rounds down, so 100% always means complete.
+ * @returns {{ owned: number, total: number, percent: number, complete: boolean }}
+ */
+export function setCompletion(owned, total) {
+  const size = Math.max(total ?? 0, owned)
+  return { owned, total: size, percent: size ? Math.floor((owned / size) * 100) : 0, complete: size > 0 && owned >= size }
+}
+
 /** Summary numbers for the header. Value is the Cardmarket average price at import time. */
 export function collectionStats(entries) {
   let totalCards = 0

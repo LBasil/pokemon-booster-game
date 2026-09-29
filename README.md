@@ -13,7 +13,8 @@ How it works inside (every table, RPC and flow, in French):
   confirmation and a "forgot password" flow — no plaintext passwords, no
   homemade session logic.
 - **Unlimited boosters, any type**: pick a specific Pokémon set (searchable,
-  grouped by year, each pack shows the set's logo and chase card) or "any
+  grouped by year, each pack shows the set's logo and chase card, and how
+  much of it you've collected in that mode, with a "Complete" badge) or "any
   set" (one random set per pack), and how many boosters to open. Tear each
   pack open, flip or swipe the cards one by one (rarest last, with rarity,
   "New!" and "Wanted!" badges; hits charge up and flash), or open them all

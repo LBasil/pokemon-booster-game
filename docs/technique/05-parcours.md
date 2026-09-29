@@ -110,7 +110,11 @@ sequenceDiagram
 2. **Sélection** : sur ordinateur, `SetPicker` est affiché dans la page ;
    sur téléphone, il s'ouvre dans un `<dialog>` en bas de l'écran.
    Le booster affiché (`BoosterArt`) montre le logo, le symbole et la
-   carte phare du set (`fetchSetCover`, mise en cache). En Défi, le
+   carte phare du set (`fetchSetCover`, mise en cache). La complétion du
+   set dans le mode (cartes distinctes / `sets.total`, `setCompletion()`
+   de `src/utils/collection.js`, arrondie vers le bas) s'affiche sous son
+   nom et dans `SetPicker` (prop `owned`), avec un badge « Complète » à
+   100 % ; elle suit les paquets ouverts pendant la visite. En Défi, le
    bouton affiche le coût (100 pièces par booster) et se désactive si le
    solde est insuffisant.
 3. **`startOpening()`** : retient le set et le nombre, passe en

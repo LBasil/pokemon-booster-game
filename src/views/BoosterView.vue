@@ -16,6 +16,7 @@ import { useSetsStore } from '@/stores/sets'
 import { useSettingsStore } from '@/stores/settings'
 import { useWishlistStore } from '@/stores/wishlist'
 import { groupCardsByQuantity } from '@/utils/cards'
+import { setCompletion } from '@/utils/collection'
 import { PACK_PRICE } from '@/utils/challenge'
 import { bestPull, rarityLabelKey, rarityRank, rarityTier, sortForReveal } from '@/utils/rarity'
 import { packSetId as parentPackOf, setLogoUrl, setSymbolUrl, subsetsOf } from '@/utils/sets'
@@ -110,6 +111,19 @@ watch(
   { immediate: true },
 )
 
+// Distinct cards owned per set (null until the collection is loaded)
+const ownedPerSet = computed(() => {
+  if (!owned.value) return null
+  const counts = {}
+  for (const setId of owned.value.values()) counts[setId] = (counts[setId] ?? 0) + 1
+  return counts
+})
+const selectedCompletion = computed(() =>
+  selectedSet.value && ownedPerSet.value && selectedSet.value.total
+    ? setCompletion(ownedPerSet.value[selectedSet.value.id] ?? 0, selectedSet.value.total)
+    : null,
+)
+
 // Bonus subsets found in the selected set's packs, with their odds
 const selectedSubsets = computed(() =>
   selectedSet.value
@@ -167,8 +181,9 @@ watch(selectedSetId, () => {
   if (!isDesktop.value) closePicker()
 })
 
-// Card ids the user owned before this visit, to flag new pulls (null = unknown)
-let ownedIds = null
+// Card id -> set id of everything owned in this mode, kept up to date pack
+// after pack: flags new pulls and feeds the set completion (null = unknown)
+const owned = ref(null)
 // Wishlisted card ids, to flag pulls the player was hunting
 let wishedIds = new Set()
 
@@ -176,7 +191,7 @@ onMounted(() => {
   desktopQuery.addEventListener('change', onMediaChange)
 
   collectionStore.load().then(() => {
-    if (!collectionStore.error) ownedIds = new Set(collectionStore.entries.map((entry) => entry.card_id))
+    if (!collectionStore.error) owned.value = new Map(collectionStore.entries.map((entry) => [entry.card_id, entry.cards.set_id]))
     // Baseline for the unlock toasts at the end of the opening
     achievements.check(props.mode)
   })
@@ -260,9 +275,9 @@ async function drawPack() {
   }
   collectionStore.invalidate()
   return sortForReveal(cards).map((card, index) => {
-    const isNew = ownedIds ? !ownedIds.has(card.id) : false
+    const isNew = owned.value ? !owned.value.has(card.id) : false
     const isWanted = wishedIds.has(card.id)
-    ownedIds?.add(card.id)
+    owned.value?.set(card.id, card.set_id)
     wishedIds.delete(card.id)
     return { key: `${boosterIndex.value}-${index}-${card.id}`, card, isNew, isWanted }
   })
@@ -504,6 +519,23 @@ async function shareBest() {
               </template>
               <template v-else>{{ t('boosters.anySetDesc') }}</template>
             </p>
+            <div v-if="selectedCompletion" class="preview-completion" :class="{ complete: selectedCompletion.complete }">
+              <span class="preview-completion-text">
+                {{ t('boosters.completion', { owned: selectedCompletion.owned, total: selectedCompletion.total, percent: selectedCompletion.percent }) }}
+              </span>
+              <span v-if="selectedCompletion.complete" class="preview-completion-badge">{{ t('boosters.complete') }}</span>
+              <span
+                v-else
+                class="preview-completion-bar"
+                role="progressbar"
+                :aria-label="t('boosters.completionLabel')"
+                aria-valuemin="0"
+                :aria-valuemax="selectedCompletion.total"
+                :aria-valuenow="selectedCompletion.owned"
+              >
+                <span :style="{ width: `${selectedCompletion.percent}%` }"></span>
+              </span>
+            </div>
             <p v-for="subset in selectedSubsets" :key="subset.name" class="preview-subset">
               {{ subset.every ? t('boosters.subsetOdds', { name: subset.name, every: subset.every }) : t('boosters.subsetIncluded', { name: subset.name }) }}
             </p>
@@ -548,7 +580,7 @@ async function shareBest() {
 
         <aside v-if="isDesktop" class="select-side">
           <h2 class="pb-section-title mb-3">{{ t('boosters.seriesTitle') }}</h2>
-          <SetPicker v-model="selectedSetId" :sets="sets" :loading="setsLoading" @update:model-value="markPicked" />
+          <SetPicker v-model="selectedSetId" :sets="sets" :loading="setsLoading" :owned="ownedPerSet" @update:model-value="markPicked" />
         </aside>
 
         <dialog v-else ref="pickerDialog" class="picker-sheet" @click.self="closePicker">
@@ -559,7 +591,7 @@ async function shareBest() {
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
               </button>
             </div>
-            <SetPicker v-model="selectedSetId" :sets="sets" :loading="setsLoading" @update:model-value="markPicked" />
+            <SetPicker v-model="selectedSetId" :sets="sets" :loading="setsLoading" :owned="ownedPerSet" @update:model-value="markPicked" />
           </div>
         </dialog>
       </section>
@@ -812,6 +844,43 @@ async function shareBest() {
 .preview-meta {
   margin: 0 0 0.5rem;
   color: var(--pb-text-muted);
+}
+
+.preview-completion {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  margin: -0.25rem 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.preview-completion-bar {
+  width: 72px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--pb-border);
+  overflow: hidden;
+}
+
+.preview-completion-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--pb-holo);
+}
+
+.preview-completion-badge {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--pb-accent);
+  color: var(--pb-accent-ink);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .preview-subset {

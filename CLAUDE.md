@@ -141,7 +141,10 @@ docs/technique/             technical doc (French, user choice): overview, front
   preselects `?set=`, else the last set opened in that mode on this device
   (localStorage `pb-last-set:<mode>`, '' = any set), else the set of the
   last pack `booster_openings` logged in that mode (new device). The pack
-  count (1/3/5/10) is remembered too (`pb-last-count:<mode>`).
+  count (1/3/5/10) is remembered too (`pb-last-count:<mode>`). The
+  selected set and every started set in the picker show their completion
+  in that mode (`setCompletion()`, floored, "Complete" badge at 100%),
+  from the reactive `owned` map that also drives "New!".
 - **Rarity**: 6 buckets (common, uncommon, rare, holo, ultra, secret)
   computed in SQL by `rarity_bucket()` (generated column
   `cards.rarity_bucket`) and mirrored in JS by `rarityBucket()` in
@@ -462,8 +465,8 @@ docs/technique/             technical doc (French, user choice): overview, front
   verified locally with PGlite before being handed over; 0010-0015 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 143 unit tests, `npm run test:db` 190 database
-  checks, `npm run test:e2e` 196 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 145 unit tests, `npm run test:db` 190 database
+  checks, `npm run test:e2e` 198 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.
