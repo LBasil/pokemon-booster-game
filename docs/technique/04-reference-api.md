@@ -130,6 +130,7 @@ si l'appel réussit, les cartes sont sauvegardées.
 | --- | --- | --- | --- |
 | `fetchMyProfile(userId)` | `profiles` : `select id, username, is_public, showcase_card_id, created_at, accepts_trades` `id = userId` | connecté | La ligne du joueur (`accepts_trades: true` ajouté si la colonne n'existe pas encore) |
 | `updateMyProfile(userId, fields)` | `update` de ces seules colonnes | connecté, son profil | Ligne mise à jour. Pseudo pris → code Postgres `23505`, traduit en `{ code: 'taken' }` par le store. Vitrine non possédée → `showcase card must be one you own` |
+| `searchUsernames(prefix, { excludeId, limit = 8 })` | `profiles` `ilike '<prefix>%'`, `is_public`, sans `excludeId` (soi), trié par pseudo | connecté | `[{ username, accepts_trades }]` (`accepts_trades` lu à `true` avant 0012). Autocomplétion du partenaire d'échange ; la RLS ne laisse passer que les profils publics |
 | `fetchPublicProfile(username)` | `profiles` `ilike username` (casse ignorée, `_` et `%` échappés) | public | Le profil, ou `null` s'il est privé ou inconnu (la RLS le cache) |
 
 ### `public_collection(p_username text)`

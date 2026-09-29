@@ -178,7 +178,7 @@ de chaque appel (paramètres, réponse, erreurs) est dans la
 | `collection.js` | `fetchCollection(mode)`, `fetchCollectionStats(mode)` |
 | `cards.js` | `fetchSetCards`, `fetchCardsByIds`, `fetchPokedexSize`, `fetchPriceHistory` |
 | `sets.js` | `fetchSets`, `fetchPoolStats`, `fetchSetCover` |
-| `profiles.js` | `fetchMyProfile`, `updateMyProfile`, `fetchPublicProfile`, `fetchPublicCollection` |
+| `profiles.js` | `fetchMyProfile`, `updateMyProfile`, `fetchPublicProfile`, `fetchPublicCollection`, `searchUsernames` |
 | `history.js` | `fetchOpenings({ mode, before, limit, hitsOnly })` |
 | `wishlist.js` | `fetchWishlist`, `addToWishlist`, `removeFromWishlist` |
 | `social.js` | `LEADERBOARDS`, `fetchLeaderboard`, `fetchFeed`, `subscribeToFeed` |
@@ -246,6 +246,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `PriceChart` | Courbe du prix d'une carte (un relevé par jour d'import) |
 | `PokedexGrid`, `WishlistGrid`, `ShowcasePicker`, `RecycleDuplicates` | Onglets Pokédex et souhaits, choix de la vitrine, recyclage en un clic |
 | `BetaBadge` | Pastille « Bêta-testeur » (bordure holo + reflet qui passe, coupé sans effets / mouvement réduit), `compact` = juste « β ». Profil et tuile profil du hub |
+| `UsernameCombobox` | Champ pseudo avec suggestions des dresseurs publics (`searchUsernames`, 200 ms après la frappe, 8 au maximum, flèches + Entrée, Échap). Événement `pick` au choix d'une suggestion. Partenaire d'échange |
 | `AchievementTile`, `AchievementToasts` | Tuile d'un succès, notifications « succès débloqué » |
 | `ModeSwitch`, `CoinAmount`, `ScrollTopButton`, `BrandLogo`, `ThemeToggle`, `LanguageSwitcher`, `HeroCardFan`, `AuthPanel`, `PointerFx` | Sélecteur Illimité/Défi, montant en pièces, retour en haut, logo, thème, langue, éventail de l'accueil, formulaire de connexion, étincelles au clic |
 

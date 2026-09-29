@@ -51,4 +51,4 @@ code** qu'elle décrit. La règle (aussi écrite dans `CLAUDE.md`) :
 - un comportement de jeu qui change (packs, économie, profil, succès…) → le parcours concerné dans [Parcours détaillés](05-parcours.md) ;
 - un nouvel outil, script ou étape de déploiement → [Outillage](06-outillage.md).
 
-Dernière mise à jour : 2026-09-29 (holo des vieux sets dans le fil ; migrations 0001 à 0016 ; complétion des sets dans la sélection de booster ; classements par mode ; mini-jeu « Super efficace ! » ; deux mini-jeux annoncés ; synchro des cartes à minuit et midi).
+Dernière mise à jour : 2026-09-29 (autocomplétion du partenaire d'échange et exemplaires possédés dans les sélecteurs ; holo des vieux sets dans le fil ; migrations 0001 à 0016 ; complétion des sets dans la sélection de booster ; classements par mode ; mini-jeu « Super efficace ! » ; deux mini-jeux annoncés ; synchro des cartes à minuit et midi).

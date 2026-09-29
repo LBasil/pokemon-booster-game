@@ -388,10 +388,14 @@ sequenceDiagram
 ```
 
 - **Préparer une offre** : `?to=<pseudo>` préremplit le partenaire (lien
-  depuis un profil), `?want=<id>` une de ses cartes. La collection du
+  depuis un profil), `?want=<id>` une de ses cartes. Le champ pseudo
+  propose les dresseurs publics qui commencent par ce qui est tapé
+  (`UsernameCombobox`, ceux qui refusent les échanges sont signalés) ;
+  choisir une suggestion charge directement sa collection. La collection du
   partenaire vient de `challenge_collection_of`. Sélecteurs : 5 cartes au
   maximum par côté (`toggleCard`), 60 résultats affichés (la recherche
-  affine).
+  affine). Chaque carte des deux côtés dit combien d'exemplaires on en a
+  dans sa collection Défi (« Tu en as 2 », « Nouvelle pour toi »).
 - **Règles** (serveur) : 1 à 5 cartes offertes, 0 à 5 demandées (0 =
   cadeau), un exemplaire de chaque, 10 offres en attente au maximum,
   expiration après 7 jours, partenaire public qui accepte les échanges.

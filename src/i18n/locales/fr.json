@@ -571,7 +571,10 @@
     "acceptOff": "Personne ne peut t’envoyer d’offre. Celles déjà reçues restent là pour que tu y répondes.",
     "locksTitle": "Aucune carte gardée hors échanges | {count} carte gardée hors échanges | {count} cartes gardées hors échanges",
     "locksHint": "Ouvre une carte de ta collection défi et appuie sur « Ne pas échanger ».",
-    "unlock": "Autoriser l’échange de {name}"
+    "unlock": "Autoriser l’échange de {name}",
+    "owned": "Nouvelle pour toi | Tu en as 1 | Tu en as {count}",
+    "suggestions": "Suggestions",
+    "suggestionClosed": "N’accepte pas les échanges"
   },
   "games": {
     "title": "Mini-jeux",

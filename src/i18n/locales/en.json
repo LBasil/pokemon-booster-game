@@ -571,7 +571,10 @@
     "acceptOff": "Nobody can send you an offer. Offers already waiting stay here for you to answer.",
     "locksTitle": "No card kept out of trades | {count} card kept out of trades | {count} cards kept out of trades",
     "locksHint": "Open a card of your challenge collection and tap “Keep out of trades”.",
-    "unlock": "Allow trades for {name}"
+    "unlock": "Allow trades for {name}",
+    "owned": "New for you | You have 1 | You have {count}",
+    "suggestions": "Suggestions",
+    "suggestionClosed": "Doesn't accept trades"
   },
   "games": {
     "title": "Mini-games",

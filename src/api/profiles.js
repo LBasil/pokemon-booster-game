@@ -38,3 +38,20 @@ export async function fetchPublicCollection(username) {
   if (error) throw error
   return data
 }
+
+/**
+ * Public trainers whose username starts with `prefix` (case-insensitive), for
+ * the trade partner autocomplete: [{ username, accepts_trades }], `excludeId`
+ * (me) left out. RLS only lets public profiles (and mine) through.
+ */
+export async function searchUsernames(prefix, { excludeId, limit = 8 } = {}) {
+  const run = (columns) => {
+    let query = supabase.from('profiles').select(columns).ilike('username', `${exactPattern(prefix)}%`).eq('is_public', true)
+    if (excludeId) query = query.neq('id', excludeId)
+    return query.order('username').limit(limit)
+  }
+  let { data, error } = await run('username, accepts_trades')
+  if (error?.code === MISSING_COLUMN) ({ data, error } = await run('username'))
+  if (error) throw error
+  return data.map((row) => ({ accepts_trades: true, ...row }))
+}

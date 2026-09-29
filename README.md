@@ -42,7 +42,9 @@ How it works inside (every table, RPC and flow, in French):
   teased as "Coming soon" (**Evolution chain**, **Boss raid**). Packs
   keep the real pull rates (no pity timer), except that 1 booster in 500 is
   a "god pack" (holos and better only). **Trade cards** with other
-  trainers (up to 5 for 5, or as a gift; public profiles show their
+  trainers (up to 5 for 5, or as a gift; the trainer field suggests
+  usernames as you type, and every card in the pickers says how many
+  copies you own; public profiles show their
   **challenge collection** with an "Ask for it" button per card; offers
   and answers show up **live**, no reload; you can turn trade offers off,
   or keep chosen cards **out of trades** from their detail), follow your challenge booster history, and climb the two

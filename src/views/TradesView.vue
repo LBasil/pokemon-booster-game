@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { fetchChallengeCollectionOf } from '@/api/challenge'
 import { fetchPublicProfile } from '@/api/profiles'
+import { useAuthStore } from '@/stores/auth'
 import { useChallengeCollectionStore } from '@/stores/collection'
 import { useProfileStore } from '@/stores/profile'
 import { useTradesStore } from '@/stores/trades'
@@ -11,6 +12,7 @@ import { rarityTier } from '@/utils/rarity'
 import { timeAgo } from '@/utils/time'
 import { TRADE_MAX_CARDS, searchEntries, toggleCard } from '@/utils/trades'
 import AppHeader from '@/components/AppHeader.vue'
+import UsernameCombobox from '@/components/UsernameCombobox.vue'
 
 // Trades between players (challenge mode): answer offers, follow the ones
 // you sent, and build a new one (?to=<username> prefills the partner, e.g.
@@ -22,6 +24,7 @@ const trades = useTradesStore()
 const myCollection = useChallengeCollectionStore()
 
 const profileStore = useProfileStore()
+const auth = useAuthStore()
 
 onMounted(() => {
   trades.load({ force: true })
@@ -138,6 +141,15 @@ watch(
 const PICKER_LIMIT = 60
 const giveOptions = computed(() => searchEntries(myCollection.entries, giveQuery.value).slice(0, PICKER_LIMIT))
 const askOptions = computed(() => searchEntries(partner.value?.entries ?? [], askQuery.value).slice(0, PICKER_LIMIT))
+
+// How many copies of each card I own (challenge collection), shown on both
+// pickers: don't give away a last copy, don't ask for one you already have
+const ownedQty = computed(() => {
+  const map = {}
+  for (const entry of myCollection.entries) map[entry.card_id] = entry.quantity
+  return map
+})
+const ownedLabel = (cardId) => t('trades.owned', { count: ownedQty.value[cardId] ?? 0 }, ownedQty.value[cardId] ?? 0)
 
 const cardById = computed(() => {
   const map = {}
@@ -277,13 +289,12 @@ const ago = (iso) => timeAgo(iso, locale.value)
           <form class="composer-find" @submit.prevent="findPartner">
             <label for="trade-partner" class="form-label">{{ t('trades.partnerLabel') }}</label>
             <div class="composer-find-row">
-              <input
+              <UsernameCombobox
                 id="trade-partner"
                 v-model="partnerName"
-                type="text"
-                class="form-control"
-                autocomplete="off"
                 :placeholder="t('trades.partnerPlaceholder')"
+                :exclude-id="auth.user?.id"
+                @pick="findPartner"
               />
               <button type="submit" class="btn btn-outline-secondary" :disabled="!partnerName.trim() || partnerState === 'loading'">
                 {{ t('trades.find') }}
@@ -314,7 +325,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
                   >
                     <img :src="entry.cards.image_small" alt="" loading="lazy" />
                     <span class="picker-name">{{ entry.cards.name }}</span>
-                    <span v-if="entry.quantity > 1" class="picker-qty">x{{ entry.quantity }}</span>
+                    <span class="picker-owned">{{ ownedLabel(entry.card_id) }}</span>
                     <span v-if="trades.isLocked(entry.card_id)" class="picker-locked">{{ t('trades.notForTrade') }}</span>
                   </button>
                 </li>
@@ -340,6 +351,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
                   >
                     <img :src="entry.cards.image_small" alt="" loading="lazy" />
                     <span class="picker-name">{{ entry.cards.name }}</span>
+                    <span class="picker-owned" :data-new="!ownedQty[entry.card_id] || undefined">{{ ownedLabel(entry.card_id) }}</span>
                     <span v-if="entry.tradable === false" class="picker-locked">{{ t('trades.notForTrade') }}</span>
                   </button>
                 </li>
@@ -659,7 +671,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
   position: absolute;
   left: 4px;
   right: 4px;
-  bottom: 22px;
+  bottom: 38px;
   padding: 0.1rem 0.3rem;
   border-radius: 999px;
   background: var(--pb-text);
@@ -763,15 +775,17 @@ const ago = (iso) => timeAgo(iso, locale.value)
   white-space: nowrap;
 }
 
-.picker-qty {
-  position: absolute;
-  top: 0.4rem;
-  right: 0.4rem;
-  padding: 0 0.35rem;
-  border-radius: 999px;
-  background: rgba(10, 13, 26, 0.85);
-  color: #fff;
+.picker-owned {
+  overflow: hidden;
+  color: var(--pb-text-muted);
   font-size: 0.65rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker-owned[data-new] {
+  color: var(--pb-success-text);
   font-weight: 800;
 }
 

@@ -536,7 +536,15 @@ export async function mockSupabase(page, options = {}) {
       }
       const ilike = url.searchParams.get('username')
       if (ilike) {
-        const name = decodeURIComponent(ilike.replace('ilike.', '')).replaceAll('\\', '').toLowerCase()
+        const name = ilike.replace('ilike.', '').replaceAll('\\', '').toLowerCase()
+        // Username autocomplete: prefix search over public trainers
+        if (name.endsWith('%')) {
+          const trainers = [
+            { username: 'Misty', accepts_trades: state.mistyAcceptsTrades },
+            { username: 'Mistral', accepts_trades: false },
+          ]
+          return rows(trainers.filter((row) => row.username.toLowerCase().startsWith(name.slice(0, -1))))
+        }
         if (name === 'misty') {
           return rows([{ id: 'misty-id', username: 'Misty', is_public: true, showcase_card_id: 'sv3pt5-199', created_at: '2026-08-01T00:00:00Z', accepts_trades: state.mistyAcceptsTrades }])
         }

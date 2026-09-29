@@ -470,7 +470,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
 - Tests: `npm test` 145 unit tests, `npm run test:db` 200 database
-  checks, `npm run test:e2e` 202 (desktop + Pixel 7, incl. "no page
+  checks, `npm run test:e2e` 204 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

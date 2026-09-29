@@ -46,6 +46,28 @@ test('a public profile leads to a prefilled offer, which is sent to the server',
   await expect(page.getByRole('heading', { name: 'Past trades' })).toBeVisible()
 })
 
+test('typing a few letters suggests trainers, picking one opens their cards', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4', 2), collectionEntry('base1-4')] })
+  await page.goto('/challenge/trades')
+  await page.getByLabel('Trainer').pressSequentially('mis')
+  const suggestions = page.getByRole('listbox', { name: 'Suggestions' })
+  await expect(suggestions.getByRole('option')).toHaveCount(2)
+  await expect(suggestions.getByRole('option', { name: /Mistral/ })).toContainText("Doesn't accept trades")
+
+  // Keyboard: first suggestion + Enter
+  await page.getByLabel('Trainer').press('ArrowDown')
+  await page.getByLabel('Trainer').press('Enter')
+  await expect(page.getByLabel('Trainer')).toHaveValue('Misty')
+  await expect(suggestions).toBeHidden()
+
+  // Copies I own, on both sides
+  const give = page.getByRole('group', { name: /You give/ })
+  const ask = page.getByRole('group', { name: /You ask Misty for/ })
+  await expect(give.getByRole('button', { name: /Charmander/ })).toContainText('You have 2')
+  await expect(ask.getByRole('button', { name: /Charizard/ })).toContainText('You have 1')
+  await expect(ask.getByRole('button', { name: /Mewtwo/ })).toContainText('New for you')
+})
+
 test('an unknown trainer gets a friendly message', async ({ page }) => {
   await mockSupabase(page)
   await page.goto('/challenge/trades')
