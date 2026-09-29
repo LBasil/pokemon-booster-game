@@ -174,8 +174,10 @@ retirée automatiquement par le serveur.
 
 ### `pull_feed`
 
-Fil public des **gros tirages** (ultra et secret) des profils publics,
-dénormalisé pour s'afficher sans jointure : `user_id`, `username`,
+Fil public des **gros tirages** (ultra et secret) des profils publics ;
+pour un set qui n'a aucune ultra ni secrète (Base, Jungle, Fossil, Neo,
+Gym, DP…), ses holo (depuis 0016, voir `feed_buckets`). Table
+dénormalisée pour s'afficher sans jointure : `user_id`, `username`,
 `card_id`, `card_name`, `image_small`, `bucket`, `set_id`, `mode`,
 `pulled_at`. Publié dans **Supabase Realtime** (fil en direct). Les lignes
 de plus de 30 jours sont purgées de temps en temps (2 % des ouvertures).
@@ -293,7 +295,8 @@ elles servent de briques aux RPC décrites dans la
 | `open_booster(set_id)` | Tire un pack de 10 cartes ([détail](05-parcours.md#le-tirage-côté-serveur-open_booster)) |
 | `pick_booster_card(set, bucket, exclude)` | Une carte d'une rareté, sinon la rareté inférieure qui existe dans le set, sans doublon dans le pack |
 | `pick_subset_card(subset, exclude)` | Une carte de sous-set : surtout holo, parfois ultra (36 %), rarement secret (4 %) |
-| `save_booster_opening(user, mode, cards, god_pack)` | Ajoute les cartes à la collection, journalise le pack, retire de la liste de souhaits (Illimité), publie les hits dans le fil |
+| `save_booster_opening(user, mode, cards, god_pack)` | Ajoute les cartes à la collection, journalise le pack, retire de la liste de souhaits (Illimité), publie les hits dans le fil (raretés données par `feed_buckets`) |
+| `feed_buckets(set_id)` | Raretés publiées dans le fil pour un pack de ce set : `{ultra,secret}`, plus `holo` si le set n'a ni ultra ni secrète (0016) |
 | `check_booster_rate(user)` | Refuse au-delà de 60 packs par minute |
 | `require_player()` | `auth.uid()` ou erreur `not_authenticated` |
 | `lock_challenge_wallet(user)` | Crée le portefeuille si besoin (1000 pièces + ligne `start`), puis le verrouille |
@@ -330,6 +333,7 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0013 | `minigame_higher_lower` | Mini-jeu « Plus ou moins » |
 | 0014 | `minigame_electrode_flip` | Mini-jeu « Électrode Shiny Flip » (écrite le 2026-09-27, **à appliquer**) |
 | 0015 | `minigame_super_effective` | Colonne `cards.weaknesses` + mini-jeu « Super efficace ! » (écrite le 2026-09-28, **à appliquer**, puis relancer l'import) |
+| 0016 | `feed_top_rarity` | Les sets sans ultra ni secrète publient leurs holo dans le fil (écrite le 2026-09-29, **à appliquer**) |
 
 Les migrations 0001 à 0013 sont appliquées sur le projet réel (vérifié le
 2026-09-27).

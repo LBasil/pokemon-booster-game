@@ -104,7 +104,8 @@ How it works inside (every table, RPC and flow, in French):
   achievement shows the **share of players** who have it.
 - **Community**: public profiles at `/u/<username>` (readable signed out,
   so the link can be shared), a **live feed** of the latest ultra/secret
-  pulls (Supabase Realtime), and luck-based **leaderboards** (hit rate, best
+  pulls (holos for old sets that have nothing rarer, like Base Set;
+  Supabase Realtime), and luck-based **leaderboards** (hit rate, best
   pull, complete sets).
 - **Installable PWA**: manifest, icons, and a service worker that keeps the
   app and already-seen card art available offline.
@@ -218,6 +219,10 @@ its **SQL editor** and run, in order:
    Run it after 0014, then re-run the card import (`npm run populate:cards`,
    or the "Sync cards" Action) to fill the weaknesses; until both are done
    the game says "Coming soon".
+16. `supabase/migrations/0016_feed_top_rarity.sql` — sets with no
+   ultra/secret card at all (Base, Jungle, Fossil, Neo, Gym, DP...) post
+   their holos to the live feed. Run it after 0015; until then those sets
+   never show up in the feed.
 
 Then in **Authentication**:
 

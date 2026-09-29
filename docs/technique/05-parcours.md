@@ -166,7 +166,9 @@ et on revient à la sélection, ou au récapitulatif si des cartes ont déjà
    - `INSERT booster_openings` (ids, meilleure carte, nombre de hits) ;
    - retire les cartes tirées de `wishlist` ;
    - si le profil est public, ajoute les ultra/secret à `pull_feed` (que
-     Realtime diffuse aussitôt) ; purge de temps en temps les lignes de
+     Realtime diffuse aussitôt) ; si le set du pack n'a ni ultra ni
+     secrète (Base Set…), ses holo à la place (`feed_buckets`, 0016 ; une
+     carte de sous-set ne compte pas) ; purge de temps en temps les lignes de
      plus de 30 jours.
 5. Renvoie les 10 cartes.
 
@@ -636,7 +638,10 @@ Page : [CommunityView.vue](../../src/views/CommunityView.vue)
   sur `pull_feed`). Chaque nouveau tirage s'ajoute en haut (50 au
   maximum), surligné 4 s ; « il y a 3 min » se met à jour toutes les 30 s.
   Le fil vient de `save_booster_opening` : chaque ultra/secret d'un profil
-  public, dans les deux modes (badge « Illimité » ou « Défi » sur chaque
+  public (ou chaque holo d'un set sans rien de plus rare, comme Base Set :
+  sinon ces sets n'y apparaissaient jamais ; `hits` et le classement
+  « Plus chanceux » restent ultra/secret, sinon il suffirait d'ouvrir du
+  Base Set pour y grimper), dans les deux modes (badge « Illimité » ou « Défi » sur chaque
 tirage, ici et dans le bloc « En direct » de l'accueil).
 - **Classements** : un sélecteur Défi | Illimité, puis les onglets de ce
   mode (`LEADERBOARDS` dans `src/api/social.js`) : Défi = « Le plus de

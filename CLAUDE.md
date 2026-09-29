@@ -149,7 +149,10 @@ docs/technique/             technical doc (French, user choice): overview, front
   computed in SQL by `rarity_bucket()` (generated column
   `cards.rarity_bucket`) and mirrored in JS by `rarityBucket()` in
   `src/utils/rarity.js` — change both together. `rarityTier()` groups them
-  into 3 visual tiers for halos.
+  into 3 visual tiers for halos. The pull feed takes ultra/secret, or
+  the holos of a pack whose set has neither (Base, Neo, DP...:
+  `feed_buckets()`, 0016); `booster_openings.hits` stays ultra/secret
+  (holos come 1 pack in 3: the hit-rate board would be farmable).
 - **Lite animations** (`settings.animations`: auto | full | light,
   `settings.liteAnimations`; auto = light on `(pointer: coarse)`): the full
   tear/flip stuttered on phones (3D flip + preserve-3d, 10 will-change
@@ -461,11 +464,12 @@ docs/technique/             technical doc (French, user choice): overview, front
   2026-09-27, not applied yet**: hand it to the user) · 0015
   `cards.weaknesses` + "Super effective!" mini-game (**written
   2026-09-28, not applied yet**; after it, re-run the card import to
-  fill the weaknesses). Every one was
-  verified locally with PGlite before being handed over; 0010-0015 have
+  fill the weaknesses) · 0016 feed holos for sets with no ultra/secret
+  (**written 2026-09-29, not applied yet**). Every one was
+  verified locally with PGlite before being handed over; 0010-0016 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 145 unit tests, `npm run test:db` 190 database
+- Tests: `npm test` 145 unit tests, `npm run test:db` 200 database
   checks, `npm run test:e2e` 198 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
