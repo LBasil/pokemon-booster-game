@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { SETS, collectionEntry } from './support/data.js'
 import { mockSupabase, signIn } from './support/supabase.js'
 
 test.beforeEach(async ({ page }) => {
@@ -33,4 +34,17 @@ test('binder shows missing slots, and a missing card can be wishlisted', async (
   await page.getByRole('button', { name: 'Add to wishlist' }).click()
   await expect(page.getByRole('button', { name: 'Remove from wishlist' })).toBeVisible()
   expect(backend.calls.some((c) => c.path === '/rest/v1/wishlist' && c.method === 'POST')).toBe(true)
+})
+
+test('a long set name never pushes the "Complete" badge off screen', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 })
+  const sets = SETS.map((set) => (set.id === 'base1' ? { ...set, name: "McDonald's Collection 2021 Anniversary Celebration Edition" } : set))
+  await mockSupabase(page, { sets, collection: [collectionEntry('base1-4'), collectionEntry('base1-58')] })
+  await page.goto('/collection?view=sets')
+
+  const badge = page.locator('.coll-set-complete')
+  await expect(badge).toBeVisible()
+  const box = await badge.boundingBox()
+  const tile = await page.locator('.coll-set.complete').boundingBox()
+  expect(box.x + box.width).toBeLessThanOrEqual(tile.x + tile.width)
 })

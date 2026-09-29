@@ -128,3 +128,23 @@ test('the selected set shows its completion, with a badge once complete', async 
   await expect(page.locator('.preview-completion')).toContainText('2 / 2 cards collected (100%)')
   await expect(page.locator('.preview-completion-badge')).toHaveText('Complete')
 })
+
+test('a long set name never pushes the "Complete" badge off screen', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 })
+  const sets = SETS.map((set) => (set.id === 'base1' ? { ...set, name: "McDonald's Collection 2021 Anniversary Celebration Edition" } : set))
+  await mockSupabase(page, { sets, collection: [collectionEntry('base1-4'), collectionEntry('base1-58')] })
+  await page.goto('/boosters?set=base1')
+
+  const inView = async (locator) => {
+    await expect(locator).toBeVisible()
+    const box = await locator.boundingBox()
+    expect(box.x).toBeGreaterThanOrEqual(0)
+    expect(box.x + box.width).toBeLessThanOrEqual(320)
+  }
+  await inView(page.locator('.preview-completion-badge'))
+
+  if (await page.getByRole('button', { name: 'Change set' }).isVisible()) {
+    await page.getByRole('button', { name: 'Change set' }).click()
+  }
+  await inView(page.locator('.set-option.selected .set-option-completion'))
+})

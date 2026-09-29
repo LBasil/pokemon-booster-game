@@ -430,7 +430,7 @@ function rarityChip(card) {
                 <span class="coll-set-plate"><img :src="setLogoUrl(item.set)" alt="" loading="lazy" /></span>
                 <span class="coll-set-body">
                   <span class="coll-set-name">
-                    {{ item.set.name }}
+                    <span class="coll-set-title">{{ item.set.name }}</span>
                     <span v-if="item.owned >= item.total" class="coll-set-complete">{{ t('collection.complete') }}</span>
                   </span>
                   <span class="coll-set-meta">
@@ -960,6 +960,11 @@ function rarityChip(card) {
   align-items: center;
   gap: 0.5rem;
   font-weight: 700;
+}
+
+/* The name gives way (ellipsis), never the badge: a long name (McDonald's...) pushed it off on phones */
+.coll-set-title {
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
