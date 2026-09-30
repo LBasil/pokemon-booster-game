@@ -659,15 +659,18 @@ sequenceDiagram
 ### « Chaîne d'évolution »
 
 Page : [EvolutionChainView.vue](../../src/views/EvolutionChainView.vue)
-(`/challenge/games/evolution-chain`), store `evolutionChain`, migration 0018.
+(`/challenge/games/evolution-chain`), store `evolutionChain`, migrations
+0018 et 0019.
 
-Trois cartes d'une même lignée arrivent mélangées, recadrées sur leur
+Les 2 ou 3 cartes d'une même lignée arrivent mélangées, recadrées sur leur
 illustration (le stade et le « Évolue de » sont imprimés au-dessus), avec
 leur nom en dessous. On les touche de la carte de base au dernier stade
 (ou touches 1 à 5, Retour arrière pour reprendre la dernière) ; les
 numéros 1, 2, 3 s'affichent sur les cartes et dans trois cases « De base
 / Niveau 1 / Niveau 2 ». Toucher une carte déjà choisie la reprend (avec
-celles choisies après). La troisième carte envoie l'ordre.
+celles choisies après). La dernière carte (2e ou 3e) envoie l'ordre.
+« Arrêter » termine la partie (`evolution_chain_stop()`, 0019) : les
+pièces déjà gagnées restent, la série compte pour le record.
 
 ```mermaid
 sequenceDiagram
@@ -692,6 +695,13 @@ sequenceDiagram
   qu'il nomme et de la carte de base que celui-ci nomme (un stade absent de
   la base = on retire). Le numéro du Pokédex ne suffisait pas (Évoli,
   formes régionales).
+- **Lignées à 2 stades** (0019, demande de l'utilisateur : « ça restreint
+  beaucoup de se limiter à 3 ») : environ 2 lignées sur 5 sont une carte
+  de base et un Niveau 1 dont rien n'évolue (Pikachu → Raichu, Magicarpe
+  → Léviator, Évoli → Aquali…), jamais une lignée à 3 coupée
+  (Salamèche → Reptincel sans Dracaufeu). Si un type ne peut pas être
+  tiré, l'autre l'est. `run.length` dit au client combien de cases
+  afficher.
 - **Intrus** : aucun (série 0–4), 1 (5–9), puis 2 ; des Pokémon d'autres
   lignées (jamais le même nom, le même numéro du Pokédex, ni une évolution
   d'un des stades), du même type d'abord pour qu'ils se fondent dans le lot.

@@ -354,15 +354,21 @@ docs/technique/             technical doc (French, user choice): overview, front
   ("Coming soon"). Mirror: `src/utils/superEffective.js`. Type dots:
   `--pb-type-*` tokens (one set for both themes, never behind text).
   Ledger kind `super_effective`. Keys 1-6 answer on desktop.
-  **"Evolution chain"** (0018, `/challenge/games/evolution-chain`,
-  `EvolutionChainView` + `useEvolutionChainStore`): 3 cards of one line
-  shuffled, tap them Basic -> Stage 1 -> Stage 2 within 15 s (server
-  allows 20); the 3rd tap sends `evolution_chain_answer(order)`, tapping a
+  **"Evolution chain"** (0018 + 0019, `/challenge/games/evolution-chain`,
+  `EvolutionChainView` + `useEvolutionChainStore`): the 2 or 3 cards of
+  one line shuffled, tap them Basic -> Stage 1 (-> Stage 2) within 15 s
+  (server allows 20); the last tap (`run.length`, `chainLength()`) sends
+  `evolution_chain_answer(order)`, tapping a
   picked card takes it back (`togglePick`), keys 1-5 + Backspace. Lines
   come from `cards.evolves_from` (new in 0018, filled by `populate.mjs`,
   which skips the column if 0018 isn't applied: `OPTIONAL_COLUMNS`): a
   random Stage 2 -> a printing of the Stage 1 it names -> of the Basic
-  that one names. Intruders from other lines (never same name, dex number
+  that one names; since 0019 (user, 2026-09-30: "ça restreint beaucoup de
+  se limiter à 3") ~2 lines in 5 are two-stage: a Stage 1 nothing evolves
+  from + its Basic (Pikachu -> Raichu), never a 3-stage line cut short
+  (`evolution_chain_line(stages)`). "Stop" (0019 `evolution_chain_stop()`,
+  status `stopped`, user asked for it) ends the run, coins kept; without
+  the RPC the store ends it on screen only. Intruders from other lines (never same name, dex number
   or evolving from a stage; same type first): 0 (streak 0-4), 1 (5-9),
   then 2. Cards reach the client as id + name + image only; the view crops
   the art window (x 10-90%, y 17-50%) so the printed stage / "Evolves
@@ -516,13 +522,14 @@ docs/technique/             technical doc (French, user choice): overview, front
   fill the weaknesses) · 0016 feed holos for sets with no ultra/secret
   (**written 2026-09-29, not applied yet**) · 0017 trade answers seen +
   `recycle_cards` (**written 2026-09-30, not applied yet**) · 0018
-  `cards.evolves_from` + "Evolution chain" mini-game (**written
-  2026-09-30, not applied yet**; the next card sync fills evolves_from). Every one was
-  verified locally with PGlite before being handed over; 0010-0018 have
+  `cards.evolves_from` + "Evolution chain" mini-game (applied + synced
+  2026-09-30, user: "ÇA MARCHE") · 0019 two-stage lines + Stop for
+  "Evolution chain" (**written 2026-09-30, not applied yet**). Every one was
+  verified locally with PGlite before being handed over; 0010-0019 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 165 unit tests, `npm run test:db` 271 database
-  checks, `npm run test:e2e` 228 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 167 unit tests, `npm run test:db` 291 database
+  checks, `npm run test:e2e` 234 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

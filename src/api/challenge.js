@@ -231,8 +231,14 @@ export const fetchEvolutionChainState = () => call('evolution_chain_state')
 export const startEvolutionChain = () => call('evolution_chain_start')
 
 /**
- * @param {string[] | null} order - 3 of the shown card ids, Basic first; null = time's up
+ * @param {string[] | null} order - `run.length` (2 or 3) of the shown card ids, Basic first; null = time's up
  * @returns {Promise<{ correct: boolean, late: boolean, earned: number, streak: number, run_coins: number,
  *   chain: string[], state: object }>}
  */
 export const answerEvolutionChain = (order) => call('evolution_chain_answer', { p_order: order })
+
+/**
+ * Ends the run in progress (migration 0019): the coins earned stay.
+ * @returns {Promise<{ streak: number, run_coins: number, state: object }>}
+ */
+export const stopEvolutionChain = () => call('evolution_chain_stop')

@@ -40,10 +40,11 @@ How it works inside (every table, RPC and flow, in French):
   **"Super effective!"**: a Pokémon card shows up (its top half), tap the
   type it's weak to within 10 seconds (the weakness printed on the card;
   3, then 4, then 6 types to pick from), same pay as "Higher or lower", and
-  **"Evolution chain"**: three cards of one evolution line show up shuffled
-  (art and names only, the printed stage is hidden), tap them from the Basic
-  to the last stage within 15 seconds; intruders from other lines slip in as
-  the streak grows. The simplest game, so it pays the least: 3 coins per
+  **"Evolution chain"**: the cards of one evolution line (3 stages, or 2
+  like Pikachu and Raichu) show up shuffled (art and names only, the printed
+  stage is hidden), tap them from the Basic to the last stage within 15
+  seconds; intruders from other lines slip in as the streak grows, and
+  "Stop" ends a run keeping its coins. The simplest game, so it pays the least: 3 coins per
   right line (60 per run, 180 a day at most). One more is teased as
   "Coming soon" (**Boss raid**). Packs
   keep the real pull rates (no pity timer), except that 1 booster in 500 is
@@ -255,6 +256,10 @@ its **SQL editor** and run, in order:
    mini-game. Run it after 0017; the next card sync (twice a day, or run the
    "Sync cards" Action / `npm run populate:cards`) fills `evolves_from`;
    until both are done the game says "Coming soon".
+19. `supabase/migrations/0019_evolution_chain_two_stages_stop.sql` —
+   "Evolution chain" also asks two-stage lines (Pikachu, Raichu) and gets
+   a Stop button. Run it after 0018; until then every line has 3 stages
+   and Stop just ends the run on screen.
 
 Then in **Authentication**:
 

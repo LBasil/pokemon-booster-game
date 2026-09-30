@@ -5,14 +5,15 @@ import * as sfx from '@/lib/sfx'
 import { useChallengeStore } from '@/stores/challenge'
 import { useEvolutionChainStore } from '@/stores/evolutionChain'
 import { useSettingsStore } from '@/stores/settings'
-import { ANSWER_SECONDS, CHAIN_LENGTH, COINS_PER_ANSWER, MAX_PAID_ANSWERS, PAID_RUNS, nextAnswerReward, togglePick } from '@/utils/evolutionChain'
+import { ANSWER_SECONDS, COINS_PER_ANSWER, MAX_PAID_ANSWERS, PAID_RUNS, chainLength, nextAnswerReward, togglePick } from '@/utils/evolutionChain'
 import { optionIndexForKey } from '@/utils/superEffective'
 import AppHeader from '@/components/AppHeader.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
 
-// "Evolution chain" (challenge mode, migration 0018): three cards of one
-// evolution line (plus intruders later on), tap them from the Basic to the
-// last stage before the timer runs out. The third pick sends the order. Only
+// "Evolution chain" (challenge mode, migrations 0018 + 0019): the 2 or 3
+// cards of one evolution line (plus intruders later on), tap them from the
+// Basic to the last stage before the timer runs out. The last pick sends the
+// order; "Stop" ends the run, keeping its coins. Only
 // the art shows (the stage and "Evolves from" are printed above it). The
 // server draws the lines, keeps the answer until the pick and pays the paid
 // runs. The cards on screen (`shown`) stay put while the answer shows, even
@@ -28,7 +29,7 @@ const settings = useSettingsStore()
 const shown = ref(null) // the run as on screen: { paid, streak, coins, cards }
 const picks = ref([]) // card ids, in the order tapped
 const reveal = ref(null) // { order, chain, correct, late, earned }
-const over = ref(null) // { streak, coins, paid, late, record }
+const over = ref(null) // { streak, coins, paid, late, stopped, record }
 const busy = ref(false)
 const errorMessage = ref('')
 const secondsLeft = ref(0)
@@ -98,8 +99,9 @@ async function start() {
 
 function pick(id) {
   if (busy.value || reveal.value || !shown.value) return
-  picks.value = togglePick(picks.value, id)
-  if (picks.value.length === CHAIN_LENGTH) answer(picks.value)
+  const length = chainLength(shown.value)
+  picks.value = togglePick(picks.value, id, length)
+  if (picks.value.length === length) answer(picks.value)
   else sfx.flip(settings.sound)
 }
 
@@ -135,6 +137,39 @@ async function answer(order) {
     errorMessage.value = errorFor(err)
     picks.value = []
     // The run is gone server side (closed after a long pause): back to the start
+    if (err?.code === 'no_game') {
+      shown.value = null
+      game.load()
+    }
+  } finally {
+    busy.value = false
+  }
+}
+
+async function stop() {
+  if (busy.value || !shown.value || over.value) return
+  busy.value = true
+  stopTimer()
+  clearTimeout(revealTimer)
+  // What the screen shows, in case the server can't say (before 0019)
+  const { paid } = shown.value
+  const streak = streakNow.value
+  const coins = runCoins.value
+  try {
+    const result = await game.stop()
+    const final = result?.streak ?? streak
+    over.value = {
+      streak: final,
+      coins: result?.run_coins ?? coins,
+      paid,
+      stopped: true,
+      record: final > 0 && final > bestBefore.value,
+    }
+    shown.value = null
+    reveal.value = null
+    picks.value = []
+  } catch (err) {
+    errorMessage.value = errorFor(err)
     if (err?.code === 'no_game') {
       shown.value = null
       game.load()
@@ -188,7 +223,7 @@ const lineNames = computed(() => (reveal.value?.chain ?? []).map(nameOf).join(' 
 // The three stages: what was picked, or the right line once answered
 const slots = computed(() => {
   const ids = reveal.value ? reveal.value.chain : picks.value
-  return STAGES.map((stage, i) => ({ stage, name: ids[i] ? nameOf(ids[i]) : '' }))
+  return STAGES.slice(0, chainLength(shown.value)).map((stage, i) => ({ stage, name: ids[i] ? nameOf(ids[i]) : '' }))
 })
 
 /** Number on a card: its pick, or its place in the line once answered. */
@@ -214,7 +249,7 @@ function cardClass(id) {
 
 function cardLabel(card) {
   const n = picks.value.indexOf(card.id) + 1
-  return n && !reveal.value ? t('evolutionChain.picked', { name: card.name, n }) : card.name
+  return n && !reveal.value ? t('evolutionChain.picked', { name: card.name, n, count: chainLength(shown.value) }) : card.name
 }
 </script>
 
@@ -283,7 +318,7 @@ function cardLabel(card) {
             </button>
           </div>
 
-          <ol class="ec-slots" :aria-label="t('evolutionChain.question')">
+          <ol class="ec-slots" :style="{ '--stages': slots.length }" :aria-label="t('evolutionChain.question')">
             <li v-for="slot in slots" :key="slot.stage" :class="{ filled: slot.name, right: reveal?.correct }">
               <span class="ec-slot-stage">{{ t(`evolutionChain.stages.${slot.stage}`) }}</span>
               <span class="ec-slot-name">{{ slot.name }}</span>
@@ -305,11 +340,15 @@ function cardLabel(card) {
             </template>
             <template v-else>{{ t('evolutionChain.keys', { count: shown.cards.length }) }}</template>
           </p>
+
+          <button v-if="!over" type="button" class="btn btn-outline-secondary btn-sm ec-stop" :disabled="busy" @click="stop">
+            {{ t('evolutionChain.stop') }}
+          </button>
         </section>
 
         <!-- ============ End of a run ============ -->
         <section v-if="over" class="ec-over" aria-labelledby="ec-over-title">
-          <h2 id="ec-over-title" class="ec-over-title">{{ over.late ? t('minigame.overLate') : t('minigame.overTitle') }}</h2>
+          <h2 id="ec-over-title" class="ec-over-title">{{ over.stopped ? t('evolutionChain.stoppedTitle') : over.late ? t('minigame.overLate') : t('minigame.overTitle') }}</h2>
           <p class="ec-over-streak">{{ t('minigame.overStreak', { count: over.streak }, over.streak) }}</p>
           <p v-if="over.record" class="ec-record"><span class="pb-holo-text">{{ t('minigame.record') }}</span></p>
           <p v-if="over.paid" class="ec-over-coins">{{ t('minigame.overCoins') }} <CoinAmount :amount="over.coins" signed /></p>
@@ -347,6 +386,7 @@ function cardLabel(card) {
             <li>{{ t('evolutionChain.rules.pick', { seconds: rules.seconds }) }}</li>
             <li>{{ t('evolutionChain.rules.hidden') }}</li>
             <li>{{ t('minigame.rules.run') }}</li>
+            <li>{{ t('evolutionChain.rules.stop') }}</li>
             <li>{{ t('minigame.rules.paid', { runs: rules.runs, coins: rules.coins, answers: rules.answers, max: rules.coins * rules.answers }) }}</li>
             <li>{{ t('evolutionChain.rules.coins') }}</li>
             <li>{{ t('minigame.rules.free') }}</li>
@@ -643,10 +683,12 @@ function cardLabel(card) {
 
 .ec-slots {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* One column per stage: 2 or 3 */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: 0.35rem;
   width: 100%;
-  max-width: 30rem;
+  max-width: calc(var(--stages, 3) * 10rem);
   margin: 0 auto;
   padding: 0;
   list-style: none;
@@ -709,6 +751,10 @@ function cardLabel(card) {
 }
 
 /* ---------- End + start ---------- */
+
+.ec-stop {
+  align-self: center;
+}
 
 .ec-over {
   padding: 1.25rem;

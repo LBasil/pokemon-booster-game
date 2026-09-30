@@ -135,6 +135,12 @@ address** for the sign-up part.
       run ends.
 - [ ] From 5 right lines: 4 cards (1 intruder, marked "Intruder" at the
       end), from 10: 5 cards. An intruder is never from the same line.
+- [ ] After 0019: about 2 lines in 5 have only 2 stages (Pikachu →
+      Raichu, Magikarp → Gyarados, Eevee → an Eeveelution): 2 boxes, the
+      2nd tap sends; never a 3-stage line cut short (Charmander →
+      Charmeleon alone).
+- [ ] "Stop" mid-run → "Run stopped", the coins earned stay, the games
+      page no longer says "Resume the run".
 - [ ] Keys 1 to 5 and Backspace (desktop); 15 s without answering → "Too
       slow!".
 - [ ] On a 320px phone: cards, slots and feedback fit, both themes.

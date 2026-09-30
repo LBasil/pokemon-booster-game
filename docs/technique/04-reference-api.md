@@ -479,7 +479,8 @@ n'est pas repassé). RPC absente (`PGRST202`) ou `ready: false` → store
 | --- | --- | --- |
 | `evolution_chain_state()` | `fetchEvolutionChainState()` | Règles, `ready` (une lignée complète existe), parties payées restantes, pièces du jour, record, partie en cours. Ferme une partie dont la question a expiré |
 | `evolution_chain_start()` | `startEvolutionChain()` | Abandonne la partie en cours et en démarre une (payée s'il en reste). 20 par minute au maximum (`slow_down`). Renvoie l'état |
-| `evolution_chain_answer(p_order)` | `answerEvolutionChain(order)` | 3 ids distincts parmi `cards`, carte de base en premier (`null` = temps écoulé). Renvoie le résultat, le bon ordre et l'état suivant |
+| `evolution_chain_answer(p_order)` | `answerEvolutionChain(order)` | `run.length` ids distincts parmi `cards` (3 avant 0019), carte de base en premier (`null` = temps écoulé). Renvoie le résultat, le bon ordre et l'état suivant |
+| `evolution_chain_stop()` (0019) | `stopEvolutionChain()` | Termine la partie en cours (`stopped`) : les pièces gagnées restent, la série compte pour le record. Renvoie `{ streak, run_coins, state }` |
 
 État (`evolution_chain_state`) :
 
@@ -488,7 +489,7 @@ n'est pas repassé). RPC absente (`PGRST202`) ou `ready: false` → store
   "paid_runs": 3, "coins_per_answer": 3, "max_paid_answers": 20, "answer_seconds": 15,
   "ready": true, "coins": 1250, "paid_left": 2, "today_coins": 9, "best": 7,
   "run": {
-    "paid": true, "streak": 3, "coins": 9, "seconds_left": 12,
+    "paid": true, "streak": 3, "coins": 9, "seconds_left": 12, "length": 3,
     "cards": [
       { "id": "sv3pt5-6", "name": "Charizard ex", "image_small": "…" },
       { "id": "sv3pt5-4", "name": "Charmander", "image_small": "…" },
@@ -508,8 +509,11 @@ Réponse (`evolution_chain_answer`) :
 }
 ```
 
-Erreurs : `no_game`, `invalid_pick` (pas 3 cartes distinctes parmi celles
-montrées), `slow_down`, `evolution_chain_unavailable` (aucune lignée
+`length` (0019) : nombre de cartes à ordonner, 2 ou 3 (absent avant
+0019 : toujours 3).
+
+Erreurs : `no_game` (aussi pour `stop` sans partie), `invalid_pick` (pas
+`length` cartes distinctes parmi celles montrées), `slow_down`, `evolution_chain_unavailable` (aucune lignée
 complète : l'import n'est pas repassé). RPC absente (`PGRST202`) ou
 `ready: false` → store `unavailable`, « Bientôt ».
 

@@ -75,13 +75,15 @@ export const SUPER_EFFECTIVE_QUESTIONS = [
   { card: 'sv3pt5-1', answer: 'Fire', options: ['Water', 'Darkness', 'Fire'] }, // Bulbasaur
 ]
 
-// "Evolution chain" (migration 0018): the lines the mock asks, in order.
+// "Evolution chain" (migrations 0018 + 0019): the lines the mock asks, in order.
 // `cards` = the order on screen, `chain` = the right order (Basic first).
 const evoCard = (id, name) => ({ id, name, image_small: `https://images.e2e.test/${id}.png` })
 export const EVOLUTION_QUESTIONS = [
   { cards: [evoCard('sv3pt5-6', 'Charizard ex'), evoCard('sv3pt5-4', 'Charmander'), evoCard('sv3pt5-5', 'Charmeleon')], chain: ['sv3pt5-4', 'sv3pt5-5', 'sv3pt5-6'] },
   { cards: [evoCard('sv3pt5-8', 'Wartortle'), evoCard('sv3pt5-9', 'Blastoise'), evoCard('sv3pt5-7', 'Squirtle')], chain: ['sv3pt5-7', 'sv3pt5-8', 'sv3pt5-9'] },
   { cards: [evoCard('sv3pt5-1', 'Bulbasaur'), evoCard('sv3pt5-3', 'Venusaur ex'), evoCard('sv3pt5-2', 'Ivysaur')], chain: ['sv3pt5-1', 'sv3pt5-2', 'sv3pt5-3'] },
+  // A two-stage line (0019)
+  { cards: [evoCard('sv3pt5-26', 'Raichu'), evoCard('sv3pt5-25', 'Pikachu')], chain: ['sv3pt5-25', 'sv3pt5-26'] },
 ]
 
 export async function mockSupabase(page, options = {}) {
@@ -140,6 +142,7 @@ export async function mockSupabase(page, options = {}) {
       options.superEffective === 'missing' ? 'missing' : { ready: true, paidUsed: 0, best: 0, todayCoins: 0, run: null, next: 0, ...options.superEffective },
     // "Evolution chain" (migration 0018): 'missing' = not applied; ready:
     // false = no evolves_from loaded yet; lines in EVOLUTION_QUESTIONS order
+    // (`next` = the first one); noStop: true = before 0019 (no stop RPC)
     evolutionChain:
       options.evolutionChain === 'missing' ? 'missing' : { ready: true, paidUsed: 0, best: 0, todayCoins: 0, run: null, next: 0, ...options.evolutionChain },
   }
@@ -348,7 +351,14 @@ export async function mockSupabase(page, options = {}) {
         paid_left: Math.max(0, 3 - ec.paidUsed),
         today_coins: ec.todayCoins,
         best: ec.best,
-        run: ec.run && { paid: ec.run.paid, streak: ec.run.streak, coins: ec.run.coins, cards: ec.run.question.cards, seconds_left: 15 },
+        run: ec.run && {
+          paid: ec.run.paid,
+          streak: ec.run.streak,
+          coins: ec.run.coins,
+          length: ec.run.question.chain.length,
+          cards: ec.run.question.cards,
+          seconds_left: 15,
+        },
       })
       if (path === '/rest/v1/rpc/evolution_chain_state') return json(ecState())
       if (path === '/rest/v1/rpc/evolution_chain_start') {
@@ -376,6 +386,13 @@ export async function mockSupabase(page, options = {}) {
           ec.run = null
         }
         return json({ correct, late: args.p_order === null, earned, streak: run.streak, run_coins: run.coins, chain: question.chain, state: ecState() })
+      }
+      if (path === '/rest/v1/rpc/evolution_chain_stop') {
+        if (ec.noStop) return json({ code: 'PGRST202', message: 'Could not find the function public.evolution_chain_stop in the schema cache' }, 404)
+        const run = ec.run
+        if (!run) return raise('no_game')
+        ec.run = null
+        return json({ streak: run.streak, run_coins: run.coins, state: ecState() })
       }
     }
     // ---- Super effective! (migration 0015) ----

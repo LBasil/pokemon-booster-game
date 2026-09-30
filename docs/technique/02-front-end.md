@@ -160,7 +160,7 @@ ne recharge pas si c'est déjà chargé (sauf `force`), et expose `loading`,
 | `minigame` | État de « Plus ou moins » | page du jeu, hub des jeux | `unavailable` si la migration 0013 manque ; répercute le solde de pièces dans `challenge` |
 | `electrodeFlip` | État d'« Électrode Shiny Flip » : niveau, pièces restantes, records, plateau en cours | page du jeu, hub des jeux | `flip(index)`, `cashOut()` ; `unavailable` si la migration 0014 manque ; répercute le solde de pièces |
 | `superEffective` | État de « Super efficace ! » : parties payées restantes, record, partie en cours | page du jeu, hub des jeux | `unavailable` si la migration 0015 manque **ou** si aucune carte n'a encore ses faiblesses (`ready: false`) ; répercute le solde de pièces |
-| `evolutionChain` | État de « Chaîne d'évolution » : parties payées restantes, record, partie en cours | page du jeu, hub des jeux | `answer(order)` ; `unavailable` si la migration 0018 manque **ou** si aucune lignée complète n'est encore connue (`ready: false`) ; répercute le solde de pièces |
+| `evolutionChain` | État de « Chaîne d'évolution » : parties payées restantes, record, partie en cours | page du jeu, hub des jeux | `answer(order)`, `stop()` (sans la RPC de 0019 : la partie s'arrête à l'écran et expire côté serveur) ; `unavailable` si la migration 0018 manque **ou** si aucune lignée complète n'est encore connue (`ready: false`) ; répercute le solde de pièces |
 | `achievements` | Toasts, taux par mode, données serveur par mode | `check(mode)` un peu partout | Voir [Parcours > Succès](05-parcours.md#7-succès) |
 | `settings` | `sound`, `vibration`, `effects`, `animations` | — | Par appareil (`localStorage`). `liteAnimations` = animations légères sur écran tactile en mode `auto` |
 | `theme` | `isLight` | `main.js` | Pose `data-bs-theme` sur `<html>` (Bootstrap + tokens suivent) |
@@ -227,7 +227,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `minigame.js` | Règles de « Plus ou moins » (**miroir** de `minigame_rules()`) |
 | `electrodeFlip.js` | Règles d'« Électrode Shiny Flip » (**miroir** de `electrode_flip_rules()` / `electrode_flip_end()`) : points, niveau suivant, pièces, lignes sûres |
 | `superEffective.js` | Règles de « Super efficace ! » (**miroir** de `super_effective_rules()` / `super_effective_types()` / `super_effective_option_count()`) : nombre de choix selon la série, pièces, touches 1 à 6 |
-| `evolutionChain.js` | Règles de « Chaîne d'évolution » (**miroir** de `evolution_chain_rules()` / `evolution_chain_intruders()`) : intrus selon la série, pièces, `togglePick` (choisir / reprendre une carte) |
+| `evolutionChain.js` | Règles de « Chaîne d'évolution » (**miroir** de `evolution_chain_rules()` / `evolution_chain_intruders()`) : intrus selon la série, pièces, `chainLength(run)` (2 ou 3 cartes, 3 avant 0019), `togglePick` (choisir / reprendre une carte) |
 | `cardPrice.js` | `cardPriceEur(card)` : prix en € d'une carte pokemontcg.io (Cardmarket, sinon TCGplayer converti). Utilisé par `scripts/populate.mjs` |
 | `trades.js` | Limites des échanges (**miroir** de `propose_trade`), `groupTrades`, `searchEntries`, `tradeNews` (ce qu'une ligne temps réel signifie pour le joueur) |
 | `sets.js` | URL des logos, sous-sets (`isSubset`, `packSetId`, `subsetsOf`), `groupSetsByYear` |

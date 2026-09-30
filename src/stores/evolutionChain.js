@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { answerEvolutionChain, fetchEvolutionChainState, startEvolutionChain } from '@/api/challenge'
+import { answerEvolutionChain, fetchEvolutionChainState, startEvolutionChain, stopEvolutionChain } from '@/api/challenge'
 import { useAchievementsStore } from '@/stores/achievements'
 import { useChallengeStore } from '@/stores/challenge'
 
@@ -44,13 +44,31 @@ export const useEvolutionChainStore = defineStore('evolutionChain', {
       this.apply(await startEvolutionChain())
     },
 
-    /** @param {string[] | null} order - 3 card ids, Basic first; null = time's up */
+    /** @param {string[] | null} order - `run.length` card ids, Basic first; null = time's up */
     async answer(order) {
       const result = await answerEvolutionChain(order)
       this.apply(result.state)
       // Coins earned count for the economy achievements: toast them when the run ends
       if (!result.correct) useAchievementsStore().check('challenge')
       return result
+    },
+
+    /**
+     * Ends the run in progress, keeping its coins. Returns null before
+     * migration 0019 (no stop RPC): the run then just times out on the
+     * server, which ends it the same way.
+     */
+    async stop() {
+      try {
+        const result = await stopEvolutionChain()
+        this.apply(result.state)
+        useAchievementsStore().check('challenge')
+        return result
+      } catch (err) {
+        if (!isMissingRpc(err)) throw err
+        this.state = { ...this.state, run: null }
+        return null
+      }
     },
 
     apply(state) {

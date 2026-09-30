@@ -8,8 +8,14 @@ export const PAID_RUNS = 3
 export const COINS_PER_ANSWER = 3
 export const MAX_PAID_ANSWERS = 20
 export const ANSWER_SECONDS = 15
-/** Cards to put in order: Basic, Stage 1, Stage 2. */
+/**
+ * Cards to put in order when the run doesn't say (before 0019, every line
+ * had 3 stages). Since 0019 `run.length` is 2 (Basic, Stage 1) or 3.
+ */
 export const CHAIN_LENGTH = 3
+
+/** How many cards the run asks for. */
+export const chainLength = (run) => run?.length ?? CHAIN_LENGTH
 
 /** How many cards from another line are mixed in at a given streak. */
 export function intruderCount(streak) {
@@ -27,9 +33,10 @@ export const nextAnswerReward = (run) =>
  * picked, takes it back along with every pick made after it.
  * @param {string[]} picks - card ids, in the order tapped
  * @param {string} id
+ * @param {number} [length] - how many cards the line has
  */
-export function togglePick(picks, id) {
+export function togglePick(picks, id, length = CHAIN_LENGTH) {
   const index = picks.indexOf(id)
   if (index >= 0) return picks.slice(0, index)
-  return picks.length < CHAIN_LENGTH ? [...picks, id] : picks
+  return picks.length < length ? [...picks, id] : picks
 }

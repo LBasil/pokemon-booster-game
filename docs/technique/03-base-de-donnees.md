@@ -78,7 +78,7 @@ Lecture : tout le monde. Écriture client : aucune.
 | `artist`, `supertype`, `subtypes`, `hp`, `types` | … | Métadonnées de la carte (supertype = `Pokémon`, `Trainer`, `Energy`) |
 | `national_pokedex_number` | int | Numéro du Pokédex national (onglet Pokédex, succès) |
 | `weaknesses` | text[] | Types de faiblesse imprimés sur la carte (`{Fire}`), remplis par l'import depuis 0015 ; sert à « Super efficace ! ». `null` tant que l'import n'est pas repassé |
-| `evolves_from` | text | Nom du stade précédent imprimé sur la carte (`Charmeleon` pour Dracaufeu), rempli par l'import depuis 0018 ; sert à « Chaîne d'évolution » (lignée = Niveau 2 → le Niveau 1 qu'il nomme → la carte de base que celui-ci nomme). Index sur `cards.name` pour suivre les lignées |
+| `evolves_from` | text | Nom du stade précédent imprimé sur la carte (`Charmeleon` pour Dracaufeu), rempli par l'import depuis 0018 ; sert à « Chaîne d'évolution » (lignée = Niveau 2 → le Niveau 1 qu'il nomme → la carte de base que celui-ci nomme). Index sur `cards.name` et `cards.evolves_from` (0019) pour suivre les lignées |
 | `set_id` | text → `sets.id` | Set de la carte |
 
 Index : `(set_id)`, `(set_id, rarity_bucket)` (tirage par rareté).
@@ -273,9 +273,10 @@ fuiter.
 ### `evolution_chain_runs`
 
 Une ligne par partie de « Chaîne d'évolution » : `paid`, `streak`,
-`coins`, `chain` (les 3 ids de la lignée posée, la carte de base en
+`coins`, `chain` (les 2 ou 3 ids de la lignée posée, la carte de base en
 premier), `cards` (les cartes montrées, lignée + intrus, mélangées),
-`shown_at`, `status` (`playing`, `lost`, `timeout`, `abandoned`),
+`shown_at`, `status` (`playing`, `lost`, `timeout`, `abandoned`,
+`stopped` depuis 0019),
 `game_day`. Une seule partie `playing` par joueur (index unique).
 **Aucun accès client** : l'ordre ne doit pas fuiter.
 
@@ -317,7 +318,7 @@ elles servent de briques aux RPC décrites dans la
 | `owns_challenge_cards`, `move_challenge_cards`, `has_trade_lock`, `trade_ttl` | Vérifications et transfert des échanges |
 | `minigame_rules`, `minigame_min_ratio`, `minigame_pair`, `minigame_card` | Règles et tirage des paires du mini-jeu |
 | `super_effective_rules`, `super_effective_types`, `super_effective_option_count`, `super_effective_ready`, `super_effective_question`, `super_effective_card` | Règles, cartes jouables et tirage des questions de « Super efficace ! » (`card` = la carte sans sa faiblesse) |
-| `evolution_chain_rules`, `evolution_chain_intruders`, `evolution_chain_ready`, `evolution_chain_question`, `evolution_chain_cards` | Règles, lignées complètes et tirage des questions de « Chaîne d'évolution » (`cards` = nom + image, sans stade) |
+| `evolution_chain_rules`, `evolution_chain_intruders`, `evolution_chain_ready`, `evolution_chain_line`, `evolution_chain_question`, `evolution_chain_cards` | Règles, lignées complètes et tirage des questions de « Chaîne d'évolution » (`line(2 ou 3)` = une lignée ou `null`, `cards` = nom + image, sans stade) |
 | `electrode_flip_rules`, `electrode_flip_layout`, `electrode_flip_deal`, `electrode_flip_view`, `electrode_flip_today`, `electrode_flip_end` | Règles, distribution et fin des plateaux d'« Électrode Shiny Flip » (`view` = ce que voit le client) |
 | `handle_new_user`, `unique_username`, `profiles_before_update` | Création du profil, pseudo libre, contrôle de la vitrine |
 | `link_subsets`, `guess_subset_parent`, `subset_default_rate` | Relie les nouveaux sous-sets à leur parent (service role, appelé par l'import) |
@@ -348,7 +349,8 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0015 | `minigame_super_effective` | Colonne `cards.weaknesses` + mini-jeu « Super efficace ! » (écrite le 2026-09-28, **à appliquer**, puis relancer l'import) |
 | 0016 | `feed_top_rarity` | Les sets sans ultra ni secrète publient leurs holo dans le fil (écrite le 2026-09-29, **à appliquer**) |
 | 0017 | `trade_answers_recycle_picks` | Réponses aux offres signalées à l'expéditeur (`answer_seen`, badge), recyclage d'une sélection (`recycle_cards`) (écrite le 2026-09-30, **à appliquer**) |
-| 0018 | `minigame_evolution_chain` | Colonne `cards.evolves_from` + mini-jeu « Chaîne d'évolution » (écrite le 2026-09-30, **à appliquer**, puis laisser passer la synchro des cartes) |
+| 0018 | `minigame_evolution_chain` | Colonne `cards.evolves_from` + mini-jeu « Chaîne d'évolution » (écrite le 2026-09-30, appliquée le jour même) |
+| 0019 | `evolution_chain_two_stages_stop` | « Chaîne d'évolution » : lignées à 2 stades, bouton Arrêter (`evolution_chain_stop`) (écrite le 2026-09-30, **à appliquer**) |
 
 Les migrations 0001 à 0013 sont appliquées sur le projet réel (vérifié le
 2026-09-27).

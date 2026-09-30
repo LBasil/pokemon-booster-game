@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { COINS_PER_ANSWER, MAX_PAID_ANSWERS, PAID_RUNS, intruderCount, nextAnswerReward, togglePick } from './evolutionChain'
+import { COINS_PER_ANSWER, MAX_PAID_ANSWERS, PAID_RUNS, chainLength, intruderCount, nextAnswerReward, togglePick } from './evolutionChain'
 import * as superEffective from './superEffective'
 
 describe('intruderCount', () => {
@@ -36,8 +36,22 @@ describe('togglePick', () => {
     expect(togglePick(picks, 'd')).toEqual(['a', 'b', 'c'])
   })
 
+  it('stops at 2 for a two-stage line', () => {
+    expect(togglePick(['a', 'b'], 'c', 2)).toEqual(['a', 'b'])
+    expect(togglePick(['a'], 'b', 2)).toEqual(['a', 'b'])
+  })
+
   it('tapping a picked card takes it back with the picks after it', () => {
     expect(togglePick(['a', 'b'], 'b')).toEqual(['a'])
     expect(togglePick(['a', 'b'], 'a')).toEqual([])
+  })
+})
+
+describe('chainLength', () => {
+  it('follows the run, 3 when it does not say (before migration 0019)', () => {
+    expect(chainLength({ length: 2 })).toBe(2)
+    expect(chainLength({ length: 3 })).toBe(3)
+    expect(chainLength({})).toBe(3)
+    expect(chainLength(null)).toBe(3)
   })
 })

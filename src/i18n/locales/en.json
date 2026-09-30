@@ -717,7 +717,7 @@
   },
   "evolutionChain": {
     "title": "Evolution chain",
-    "subtitle": "Three cards from one evolution line show up shuffled: put them back in order before time runs out. Earn coins for your challenge boosters.",
+    "subtitle": "The cards of one evolution line (2 or 3 stages) show up shuffled: put them back in order before time runs out. Earn coins for your challenge boosters.",
     "unavailable": "The mini-game is coming soon.",
     "loadError": "Couldn’t load the mini-game. Try again in a moment.",
     "question": "Put them in evolution order",
@@ -728,17 +728,20 @@
       "stage1": "Stage 1",
       "stage2": "Stage 2"
     },
-    "picked": "{name}, stage {n} of 3",
+    "picked": "{name}, stage {n} of {count}",
     "intruder": "Intruder",
     "right": "Perfect evolution!",
     "wrong": "That’s not the order…",
     "line": "The line: {names}",
     "rules": {
-      "pick": "Three cards from one evolution line show up shuffled: tap them from the Basic Pokémon to its last evolution. You have {seconds} seconds.",
+      "pick": "The cards of one evolution line show up shuffled: tap them from the Basic Pokémon to its last evolution. Some lines have 3 stages (Charmander, Charmeleon, Charizard), others only 2 (Pikachu, Raichu): the boxes under the cards say how many. You have {seconds} seconds.",
       "hidden": "The stage and the “Evolves from” printed on each card are hidden: go by the names and the art.",
       "harder": "The longer the streak, the more intruders from other lines slip in (1, then 2): leave them out.",
-      "coins": "The simplest of the mini-games, so it pays a bit less than the others."
-    }
+      "coins": "The simplest of the mini-games, so it pays a bit less than the others.",
+      "stop": "Stop whenever you like: the coins you've earned stay, and the streak counts for your record."
+    },
+    "stop": "Stop",
+    "stoppedTitle": "Run stopped"
   },
   "electrodeFlip": {
     "title": "Shiny Electrode Flip",
