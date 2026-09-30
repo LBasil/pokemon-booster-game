@@ -281,6 +281,19 @@ docs/technique/             technical doc (French, user choice): overview, front
   wishlist): a locked card can't be asked for or offered
   (`card_not_for_trade`), and an accept fails if the sender locked an
   offered card since; `challenge_collection_of` returns `tradable`.
+  **Trade news** (0017, user 2026-09-30: notify offers and answers):
+  `trade_offers.answer_seen` (sender saw the end: accepted / declined /
+  failed), `challenge_badge().answers`, `my_trades().unseen`,
+  `mark_trade_answers_seen()` (called by `trades.markSeen()` when
+  TradesView shows them in "New answers", kept on screen for the visit).
+  `challenge.tradeNews` = offers + answers -> Trades links; phones have
+  no Trades tab, so the `.mode-strip` has an icon shortcut (label only
+  >= 576px: the strip overflowed at 412px). Live news (`tradeNews(row,
+  userId)`) pops a toast in `AchievementToasts`' stack (`trades.toasts`).
+  `?give=<id>` preselects my card; CardDetail has "Offer in a trade".
+  **Recycling a pick** (0017 `recycle_cards(ids)`, fallback: one
+  `recycle_duplicates` per card): RecycleDuplicates "Choose…" (checkbox
+  per card, rarity chips, `duplicateGroups`).
   Public profiles list the collection of the mode picked in their
   Challenge | Unlimited switch (user, 2026-09-28: "faudrait pouvoir voir
   les deux"); the challenge one has "Ask for it" ->
@@ -359,7 +372,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   a background `load({ force: true })`). Resetting it once hid the whole
   challenge hub — and unmounted the component that was supposed to
   trigger the reload (Vue drops `emit` from unmounted components).
-- **Achievements** (`src/utils/achievements.js`): ~240 definitions in 16
+- **Achievements** (`src/utils/achievements.js`): ~370 definitions in 22
   categories, **per game mode** (user decision: separate, the challenge
   put first — it's the one that counts). Computed client side from that
   mode's collection + sets in one pass (`collectorStats`), plus the
@@ -374,7 +387,12 @@ docs/technique/             technical doc (French, user choice): overview, front
   recycling, best daily streak) — read as `s.server.*` by the luck /
   streak / economy definitions. `modes: [...]` restricts a definition to
   a mode (economy + god pack = challenge only); `achievementProgress`
-  drops empty categories. Add a
+  drops empty categories. "Own them all" groups (families, legends, gyms
+  = one badge per Kanto/Johto leader, league = Elite Four + champions,
+  rivals, places) are dex lists in `src/utils/pokemonGroups.js`; their
+  EN/FR descriptions name the members (`desc.groups.<id>`, official FR
+  names): change a list, change both texts. No Gen 9 trainers yet (unsure
+  of the FR names). Add a
   definition + its EN/FR title/description (`achievements.items.<id>.title`,
   `achievements.desc.<family>`); `achievements.test.js` fails on any
   missing translation. `hidden` ones show "???" until unlocked. UI:
@@ -465,12 +483,13 @@ docs/technique/             technical doc (French, user choice): overview, front
   `cards.weaknesses` + "Super effective!" mini-game (**written
   2026-09-28, not applied yet**; after it, re-run the card import to
   fill the weaknesses) · 0016 feed holos for sets with no ultra/secret
-  (**written 2026-09-29, not applied yet**). Every one was
-  verified locally with PGlite before being handed over; 0010-0016 have
+  (**written 2026-09-29, not applied yet**) · 0017 trade answers seen +
+  `recycle_cards` (**written 2026-09-30, not applied yet**). Every one was
+  verified locally with PGlite before being handed over; 0010-0017 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 145 unit tests, `npm run test:db` 200 database
-  checks, `npm run test:e2e` 204 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 151 unit tests, `npm run test:db` 223 database
+  checks, `npm run test:e2e` 210 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

@@ -37,3 +37,19 @@ export function searchEntries(entries, query) {
   if (!needle) return entries
   return entries.filter((entry) => normalize(entry.cards.name).includes(needle))
 }
+
+// How an offer I sent can end that I should hear about (cancelled is my own
+// doing, expired is silent)
+export const ANSWERED = ['accepted', 'declined', 'failed']
+
+/**
+ * What a live trade_offers row means for the signed-in player: 'offer' (a new
+ * offer for me), 'accepted' / 'declined' / 'failed' (an answer to my offer I
+ * haven't seen, migration 0017's answer_seen), or null (nothing to tell).
+ */
+export function tradeNews(row, userId) {
+  if (!row?.id || !userId) return null
+  if (row.to_user === userId && row.status === 'pending') return 'offer'
+  if (row.from_user === userId && ANSWERED.includes(row.status) && !row.answer_seen) return row.status
+  return null
+}

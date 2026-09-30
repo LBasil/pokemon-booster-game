@@ -1,13 +1,29 @@
 import { defineStore } from 'pinia'
-import { cancelTrade, fetchTradeLocks, fetchTrades, lockCard, proposeTrade, respondTrade, subscribeToTrades, unlockCard } from '@/api/challenge'
+import {
+  cancelTrade,
+  fetchTradeLocks,
+  fetchTrades,
+  lockCard,
+  markTradeAnswersSeen,
+  proposeTrade,
+  respondTrade,
+  subscribeToTrades,
+  unlockCard,
+} from '@/api/challenge'
 import { useAchievementsStore } from '@/stores/achievements'
 import { useChallengeStore } from '@/stores/challenge'
 import { useChallengeCollectionStore } from '@/stores/collection'
-import { groupTrades } from '@/utils/trades'
+import { groupTrades, tradeNews } from '@/utils/trades'
 
 // The signed-in player's trade offers (challenge mode, migration 0007).
 // The server moves the cards; every action reloads the list, and so does
 // any change pushed by Realtime (live(), started by App.vue once signed in).
+// Live news (a new offer for me, an answer to mine) also pops a toast,
+// shown by AchievementToasts next to the achievement ones.
+const TOAST_MS = 8000
+// Toasted this session (`trade:${id}:${news}`): Realtime can repeat an event
+const toasted = new Set()
+
 export const useTradesStore = defineStore('trades', {
   state: () => ({
     trades: [],
@@ -17,6 +33,7 @@ export const useTradesStore = defineStore('trades', {
     // Challenge cards kept out of trades (migration 0012), by card id
     locks: [],
     locksLoaded: false,
+    toasts: [], // [{ key, news: 'offer' | 'accepted' | 'declined' | 'failed', partner }]
   }),
   getters: {
     groups: (state) => groupTrades(state.trades),
@@ -60,18 +77,45 @@ export const useTradesStore = defineStore('trades', {
 
     /**
      * Follows the player's offers live: the badge always, the list once it
-     * was loaded, and the challenge collection when a swap went through.
+     * was loaded (or to name the partner of some news), the challenge
+     * collection when a swap went through, and a toast for news.
      * Returns the unsubscribe function.
      */
     live(userId) {
-      return subscribeToTrades(userId, (row) => {
+      return subscribeToTrades(userId, async (row) => {
         useChallengeStore().loadBadge({ force: true })
-        if (this.loaded) this.load({ force: true })
+        const news = tradeNews(row, userId)
+        if (this.loaded || news) await this.load({ force: true })
         if (row?.status === 'accepted') {
           useChallengeCollectionStore().invalidate()
           useAchievementsStore().check('challenge') // an offer of ours went through
         }
+        if (news) this.notify(row.id, news)
       })
+    },
+
+    notify(tradeId, news) {
+      const key = `trade:${tradeId}:${news}`
+      if (toasted.has(key)) return
+      toasted.add(key)
+      const partner = this.trades.find((trade) => trade.id === tradeId)?.partner ?? null
+      this.toasts.push({ key, news, partner })
+      setTimeout(() => this.dismiss(key), TOAST_MS)
+    },
+
+    dismiss(key) {
+      this.toasts = this.toasts.filter((toast) => toast.key !== key)
+    },
+
+    /** The trades page shows the answers to my offers: they're seen (badge cleared). */
+    async markSeen() {
+      if (!this.trades.some((trade) => trade.unseen)) return
+      try {
+        await markTradeAnswersSeen()
+      } catch {
+        // offline: the badge stays until the next visit
+      }
+      useChallengeStore().loadBadge({ force: true })
     },
 
     async loadLocks({ force = false } = {}) {

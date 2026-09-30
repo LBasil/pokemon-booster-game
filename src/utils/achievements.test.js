@@ -285,3 +285,28 @@ describe('nextUp', () => {
     expect(nextUp(list, 2).map((i) => i.id)).toEqual(['d', 'b'])
   })
 })
+
+describe('Pokémon groups', () => {
+  const dex = (...numbers) => numbers.map((n) => entry(`base1-${n}`, { national_pokedex_number: n }))
+
+  it('unlocks a gym badge once its whole team is owned', () => {
+    const list = byId(achievements(dex(74), sets))
+    expect(list.boulderBadge).toMatchObject({ unlocked: false, current: 1, target: 2, category: 'gyms' })
+    expect(byId(achievements(dex(74, 95), sets)).boulderBadge.unlocked).toBe(true)
+  })
+
+  it('counts complete groups (badge case, places, evolution lines)', () => {
+    const kanto = [74, 95, 120, 121, 100, 25, 26, 71, 114, 45, 109, 89, 110, 64, 122, 49, 65, 58, 77, 78, 59, 111, 51, 31, 34, 112]
+    const list = byId(achievements(dex(...kanto), sets))
+    expect(list.kantoBadges).toMatchObject({ unlocked: true, target: 8 })
+    expect(list.johtoBadges.current).toBe(0)
+    const lines = byId(achievements(dex(1, 2, 3, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 60, 61), sets))
+    expect(lines.families5.unlocked).toBe(true)
+    expect(lines.families15.current).toBe(5) // Poliwag without Poliwrath
+    expect(lines.route1.current).toBe(1) // Pidgey without Rattata
+  })
+
+  it('keeps Team Rocket a secret until unlocked', () => {
+    expect(byId(achievements([], sets)).teamRocket.hidden).toBe(true)
+  })
+})

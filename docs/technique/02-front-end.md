@@ -155,7 +155,7 @@ ne recharge pas si c'est déjà chargé (sauf `force`), et expose `loading`,
 | `sets` | Les 176 sets, `byId` | presque toutes les vues | Chargé une fois ; les appels simultanés partagent la même requête |
 | `wishlist` | Cartes recherchées (Illimité) | collection, boosters | `toggle(card)` ; le serveur retire la carte quand elle est tirée |
 | `challenge` | `challenge_state()` : pièces, récompense quotidienne, missions ; `badge` | pages du Défi, en-tête | `openBooster`, `claimDaily`, `claimMission`, `recycle`, `craft`. `stale` après un pack (missions à recompter) |
-| `trades` | Offres d'échange, cartes verrouillées | `TradesView`, `App.vue` (direct) | `propose`, `respond`, `cancel`, `toggleLock` (optimiste), `live(userId)` |
+| `trades` | Offres d'échange, cartes verrouillées, toasts d'échange | `TradesView`, `App.vue` (direct), `AchievementToasts` | `propose`, `respond`, `cancel`, `toggleLock` (optimiste), `live(userId)`, `markSeen` |
 | `minigame` | État de « Plus ou moins » | page du jeu, hub des jeux | `unavailable` si la migration 0013 manque ; répercute le solde de pièces dans `challenge` |
 | `electrodeFlip` | État d'« Électrode Shiny Flip » : niveau, pièces restantes, records, plateau en cours | page du jeu, hub des jeux | `flip(index)`, `cashOut()` ; `unavailable` si la migration 0014 manque ; répercute le solde de pièces |
 | `superEffective` | État de « Super efficace ! » : parties payées restantes, record, partie en cours | page du jeu, hub des jeux | `unavailable` si la migration 0015 manque **ou** si aucune carte n'a encore ses faiblesses (`ready: false`) ; répercute le solde de pièces |
@@ -218,13 +218,14 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `rarity.js` | `rarityBucket(label)` (**miroir** de `rarity_bucket()` en SQL), `BUCKETS`, `rarityTier` (3 niveaux visuels), `rarityRank`, `sortForReveal`, `bestPull` |
 | `collection.js` | `filterEntries`, `sortEntries`, `setProgress`, `collectionStats` (cartes, uniques, sets, valeur), `binderSlots`, `pokedexSlots`, `cardNumber` |
 | `profile.js` | `boostersOpened`, `packSummary` (nombre exact de boosters par mode), `RANKS` + `rankFor` (niveau), `rarityBreakdown`, `validateUsername` |
-| `achievements.js` | Les ~240 définitions, `collectorStats` (tout en une passe), `achievements()`, `nextUp`, `achievementProgress`, filtres, taux, tri des toasts |
-| `challenge.js` | Économie du Défi (**miroir** du SQL) : prix, recyclage, fabrication, récompense quotidienne, comptes à rebours UTC |
+| `achievements.js` | Les ~370 définitions, `collectorStats` (tout en une passe), `achievements()`, `nextUp`, `achievementProgress`, filtres, taux, tri des toasts |
+| `pokemonGroups.js` | Listes de numéros du Pokédex des succès « possède-les tous » : lignées, starters, légendaires, fabuleux, Ultra-Chimères, badges d'arène, Conseil 4, Maîtres, rivaux, lieux |
+| `challenge.js` | Économie du Défi (**miroir** du SQL) : prix, recyclage (`recyclePreview` avec sélection, `duplicateGroups`), fabrication, récompense quotidienne, comptes à rebours UTC |
 | `minigame.js` | Règles de « Plus ou moins » (**miroir** de `minigame_rules()`) |
 | `electrodeFlip.js` | Règles d'« Électrode Shiny Flip » (**miroir** de `electrode_flip_rules()` / `electrode_flip_end()`) : points, niveau suivant, pièces, lignes sûres |
 | `superEffective.js` | Règles de « Super efficace ! » (**miroir** de `super_effective_rules()` / `super_effective_types()` / `super_effective_option_count()`) : nombre de choix selon la série, pièces, touches 1 à 6 |
 | `cardPrice.js` | `cardPriceEur(card)` : prix en € d'une carte pokemontcg.io (Cardmarket, sinon TCGplayer converti). Utilisé par `scripts/populate.mjs` |
-| `trades.js` | Limites des échanges (**miroir** de `propose_trade`), `groupTrades`, `searchEntries` |
+| `trades.js` | Limites des échanges (**miroir** de `propose_trade`), `groupTrades`, `searchEntries`, `tradeNews` (ce qu'une ligne temps réel signifie pour le joueur) |
 | `sets.js` | URL des logos, sous-sets (`isSubset`, `packSetId`, `subsetsOf`), `groupSetsByYear` |
 | `games.js` | Registre des mini-jeux |
 | `beta.js` | `BETA_END` (null tant que la bêta dure) + `isBetaTester(createdAt)` : inscrit avant la fin de la bêta |
@@ -244,10 +245,10 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `CardDetail` | Fiche plein écran (flèches, balayage), historique de prix, liste de souhaits, fabrication/recyclage en Défi |
 | `SetPicker` | Grille de sets cherchable, groupée par année (sous-sets masqués), avec la complétion de chaque set commencé (prop `owned`) |
 | `PriceChart` | Courbe du prix d'une carte (un relevé par jour d'import) |
-| `PokedexGrid`, `WishlistGrid`, `ShowcasePicker`, `RecycleDuplicates` | Onglets Pokédex et souhaits, choix de la vitrine, recyclage en un clic |
+| `PokedexGrid`, `WishlistGrid`, `ShowcasePicker`, `RecycleDuplicates` | Onglets Pokédex et souhaits, choix de la vitrine, recyclage (tout, ou « Choisir… » par carte ou par rareté) |
 | `BetaBadge` | Pastille « Bêta-testeur » (bordure holo + reflet qui passe, coupé sans effets / mouvement réduit), `compact` = juste « β ». Profil et tuile profil du hub |
 | `UsernameCombobox` | Champ pseudo avec suggestions des dresseurs publics (`searchUsernames`, 200 ms après la frappe, 8 au maximum, flèches + Entrée, Échap). Événement `pick` au choix d'une suggestion. Partenaire d'échange |
-| `AchievementTile`, `AchievementToasts` | Tuile d'un succès, notifications « succès débloqué » |
+| `AchievementTile`, `AchievementToasts` | Tuile d'un succès, notifications « succès débloqué » (et, dans la même pile, les toasts d'échange du store `trades`) |
 | `ModeSwitch`, `CoinAmount`, `ScrollTopButton`, `BrandLogo`, `ThemeToggle`, `LanguageSwitcher`, `HeroCardFan`, `AuthPanel`, `PointerFx` | Sélecteur Illimité/Défi, montant en pièces, retour en haut, logo, thème, langue, éventail de l'accueil, formulaire de connexion, étincelles au clic |
 
 ---

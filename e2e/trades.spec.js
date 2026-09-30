@@ -198,3 +198,38 @@ test('trade offers can be turned off from the trades page', async ({ page }) => 
   await expect(page.getByText('Nobody can send you an offer.', { exact: false })).toBeVisible()
   expect(backend.state.profile.accepts_trades).toBe(false)
 })
+
+test('answers to my offers show first, with a badge until they are seen', async ({ page }, info) => {
+  const backend = await mockSupabase(page, {
+    badge: { answers: 1 },
+    trades: [received({ id: 8, direction: 'sent', status: 'accepted', unseen: true, resolved_at: new Date().toISOString() })],
+  })
+  await page.goto('/challenge')
+  await expect(page.locator('.ch-waiting')).toContainText('1 answer to your offers')
+  // The Trades link carries the badge: the mode strip's shortcut on phones, the nav on desktop
+  const tradesLink = info.project.name === 'mobile' ? page.locator('.mode-strip-trades') : page.locator('.app-header-nav').getByRole('link', { name: /Trades/ })
+  await expect(tradesLink).toContainText('1')
+
+  await tradesLink.click()
+  await expect(page).toHaveURL(/\/challenge\/trades$/)
+  await expect(page.getByRole('heading', { name: /New answers to your offers/ })).toBeVisible()
+  await expect(page.locator('.trade-answer')).toContainText('Misty accepted your offer')
+  await expect.poll(() => backend.state.answersMarked).toBe(1)
+  await expect(tradesLink.locator('.nav-badge, .tab-badge')).toHaveCount(0)
+  // Still on screen for this visit, and not repeated in the history
+  await expect(page.locator('.trade-answer')).toHaveCount(1)
+  await expect(page.getByRole('heading', { name: 'Past trades' })).toHaveCount(0)
+})
+
+test('a card of my challenge collection can be offered in a trade from its detail', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4', 2), collectionEntry('sv3pt5-7')] })
+  await page.goto('/challenge/collection')
+  await page.locator('.coll-card', { hasText: 'Charmander' }).click()
+  await page.getByRole('link', { name: 'Offer in a trade' }).click()
+  await expect(page).toHaveURL(/\/challenge\/trades\?give=sv3pt5-4/)
+  await page.getByLabel('Trainer').fill('Misty')
+  await page.getByRole('button', { name: 'Find' }).click()
+  const give = page.getByRole('group', { name: /You give/ })
+  await expect(give.getByText('1/5')).toBeVisible()
+  await expect(give.getByRole('button', { name: /Charmander/ })).toHaveAttribute('aria-pressed', 'true')
+})

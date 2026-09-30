@@ -258,6 +258,14 @@ function onPointerUp(event) {
               {{ t('challenge.recycleCard', { count: duplicates }, duplicates) }}
               <span class="detail-price"><CoinAmount :amount="recycleGain" signed /></span>
             </button>
+            <RouterLink
+              v-if="!trades.isLocked(card.id)"
+              :to="{ name: 'challenge-trades', query: { give: card.id } }"
+              class="btn btn-outline-secondary"
+            >
+              <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h15l-4-4M20 16H5l4 4" /></svg>
+              {{ t('trades.offerThis') }}
+            </RouterLink>
             <button type="button" class="btn btn-outline-secondary" :disabled="sharing" @click="share">
               <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 14v5h14v-5" /></svg>
               {{ t('collection.share') }}

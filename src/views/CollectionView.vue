@@ -500,7 +500,13 @@ function rarityChip(card) {
 }
 
 .coll-recycle {
-  flex: 1;
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+/* Choosing what to recycle: the list takes the whole row */
+.coll-recycle.is-choosing {
+  flex-basis: 100%;
 }
 
 .coll-recycle-notice {

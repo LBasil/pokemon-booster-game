@@ -97,6 +97,32 @@ test('recycling duplicates keeps one copy and pays coins', async ({ page }) => {
   expect(rpcCalls(backend, 'recycle_duplicates')).toHaveLength(1)
 })
 
+test('the duplicates to recycle can be picked one by one or by rarity', async ({ page }) => {
+  const backend = await mockSupabase(page, {
+    challengeCollection: [collectionEntry('sv3pt5-4', 4), collectionEntry('sv3pt5-199', 2), collectionEntry('base1-4')],
+  })
+  await page.goto('/challenge/collection')
+  await page.getByRole('button', { name: 'Choose…' }).click()
+  const pick = page.getByRole('group', { name: 'Choose the duplicates to recycle' })
+  await expect(pick.getByRole('checkbox')).toHaveCount(2) // only cards with duplicates
+  await expect(pick.getByRole('button', { name: 'Recycle', exact: true })).toBeDisabled()
+
+  // A rarity chip ticks all of that rarity
+  await pick.getByRole('button', { name: /Secret rares/ }).click()
+  await expect(pick.getByRole('checkbox', { name: /Charizard/ })).toBeChecked()
+  await pick.getByRole('button', { name: /Secret rares/ }).click()
+  await expect(pick.getByRole('checkbox', { name: /Charizard/ })).not.toBeChecked()
+
+  await pick.getByRole('checkbox', { name: /Charmander/ }).check()
+  await expect(pick.getByText('3 duplicates picked')).toBeVisible()
+  await pick.getByRole('button', { name: 'Recycle 3 duplicates' }).click()
+  await expect(page.getByText('3 duplicates recycled: +3 coins')).toBeVisible()
+  expect(JSON.parse(rpcCalls(backend, 'recycle_cards')[0].body)).toEqual({ p_card_ids: ['sv3pt5-4'] })
+  // The secret rare's duplicate is still there
+  await expect(page.getByText('1 duplicate to recycle')).toBeVisible()
+  await expect(page.locator('.coll-balance')).toContainText('1,003')
+})
+
 test('a missing card can be crafted from the binder', async ({ page }) => {
   const backend = await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4')] })
   await page.goto('/challenge/collection/set/sv3pt5')

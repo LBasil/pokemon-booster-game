@@ -336,6 +336,7 @@ mini-jeux ; un minuteur recharge l'état juste après 00:00 UTC.
 | Récompense quotidienne | `challenge.claimDaily()` → `claim_daily_reward` | Série +1 si réclamée hier, sinon 1 ; 200 + 50 × (série − 1), plafond 500 ; journal `daily` |
 | Réclamer une mission | `challenge.claimMission(id)` → `claim_mission` | Vérifie progression ≥ objectif et pas déjà réclamée (index unique du journal) ; crédite ; journal `mission` |
 | Recycler les doublons | `challenge.recycle(cardId?)` → `recycle_duplicates` | Ramène chaque carte à 1 exemplaire ; crédite selon la rareté ; journal `recycle` avec la quantité (compte pour la mission) |
+| Recycler une sélection | « Choisir… » dans `RecycleDuplicates` (cases par carte, puces par rareté, `duplicateGroups`) → `challenge.recycle([ids])` → `recycle_cards` (0017) | Pareil, pour les cartes cochées seulement |
 | Fabriquer une carte | `challenge.craft(card)` → `craft_card` | Débite le prix de la rareté ; +1 exemplaire ; journal `craft` |
 
 Après chaque action, le store remplace l'état par celui renvoyé par le
@@ -355,8 +356,12 @@ serveur, rafraîchit le badge (`loadBadge`) et appelle
 | `week_daily` | récompense quotidienne réclamée 5 jours | 300 | |
 
 **Badge** : `challenge_badge()` compte ce qui attend le joueur
-(récompense du jour, missions finies non réclamées, offres reçues). Il
-s'affiche sur les liens du Défi, et chaque badge a sa raison visible sur
+(récompense du jour, missions finies non réclamées, offres reçues,
+réponses à ses offres pas encore vues). Récompenses sur les liens du Défi,
+offres + réponses (`challenge.tradeNews`) sur les liens Échanges (sur
+téléphone : le raccourci ⇄ de la bande « Mode Défi », il n'y a pas
+d'onglet Échanges) ; hors du Défi tout s'additionne sur Défi / Accueil. Il
+s'affiche et chaque badge a sa raison visible sur
 la page où il mène (encadré `.ch-waiting` en haut de `/challenge`).
 
 ---
@@ -409,14 +414,30 @@ sequenceDiagram
 - **Temps réel** : `App.vue` lance `trades.live(userId)` dès la connexion.
   À chaque changement : badge rafraîchi, liste rechargée si elle était
   chargée ; si l'offre est acceptée, collection Défi invalidée et
-  vérification des succès.
+  vérification des succès. Une **nouvelle offre reçue** ou une **réponse à
+  une de mes offres** (`tradeNews(row, userId)` : acceptée, refusée,
+  échouée, `answer_seen` faux) affiche un toast (dans la pile des toasts de
+  succès, 8 s, une fois par offre et par session) qui mène aux échanges.
+- **Réponses vues** : en ouvrant `/challenge/trades`, les offres `unseen`
+  passent en tête (« Nouvelles réponses à tes offres », gardées pendant la
+  visite) et `trades.markSeen()` appelle `mark_trade_answers_seen` : le
+  badge disparaît, sur tous les appareils.
+- **Raccourcis** : `?give=<id>` précoche une de mes cartes ; la fiche d'une
+  carte de ma collection Défi a « Proposer en échange » (sauf carte
+  verrouillée).
 
 ---
 
 ## 7. Succès
 
 Définitions : [src/utils/achievements.js](../../src/utils/achievements.js)
-(~240, 16 catégories). **Calculés dans le navigateur, par mode.** Le
+(~370, 22 catégories). Les groupes de Pokémon (lignées d'évolution,
+légendaires et fabuleux, équipes des champions d'arène de Kanto et Johto,
+Conseil 4, Maîtres de la Ligue, rivaux et héros, lieux et leurs Pokémon
+sauvages) sont des listes de numéros du Pokédex dans
+[src/utils/pokemonGroups.js](../../src/utils/pokemonGroups.js) ; leur
+description nomme les membres (`achievements.desc.groups.<id>`), donc
+changer une liste = changer ses deux textes. **Calculés dans le navigateur, par mode.** Le
 Défi est mis en avant, c'est celui qui compte.
 
 ### Calcul

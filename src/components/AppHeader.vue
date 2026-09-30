@@ -21,20 +21,22 @@ const auth = useAuthStore()
 
 const inChallenge = computed(() => auth.isLoggedIn && routeMode(route) === 'challenge')
 
-// Rewards to claim + trade offers to answer, shown on the Challenge links
+// What's waiting: rewards to claim on the Challenge links; offers to answer
+// and answers to read (challenge.tradeNews) on the Trades links. Outside the
+// challenge, it all adds up on Challenge (desktop) / Home (phones, it holds
+// the challenge tile).
 const challenge = useChallengeStore()
 onMounted(() => {
   if (auth.isLoggedIn) challenge.loadBadge()
 })
 const badges = computed(() => ({
-  challenge: challenge.badge.rewards + (inChallenge.value ? 0 : challenge.badge.trades),
-  'challenge-trades': challenge.badge.trades,
+  challenge: inChallenge.value ? challenge.badge.rewards : challenge.waiting,
+  'challenge-trades': challenge.tradeNews,
 }))
-// The tab bar has no Trades tab: everything shows on Challenge, or on Home
-// (which holds the challenge tile) outside the challenge
+// The tab bar has no Trades tab: the mode strip has the Trades shortcut
 const tabBadge = (name) => {
-  const total = challenge.badge.rewards + challenge.badge.trades
-  return name === 'challenge' || (name === 'game' && !inChallenge.value) ? total : 0
+  if (inChallenge.value) return name === 'challenge' ? challenge.badge.rewards : 0
+  return name === 'game' ? challenge.waiting : 0
 }
 
 const ICONS = {
@@ -45,6 +47,7 @@ const ICONS = {
   profile: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0',
   challenge: 'M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6',
   games: 'M7 8h10a5 5 0 0 1 0 10c-1.6 0-2.4-.8-3-2h-4c-.6 1.2-1.4 2-3 2A5 5 0 0 1 7 8zM8 11v4M6 13h4M15.5 12.5h.01M17.5 14.5h.01',
+  trades: 'M4 8h15l-4-4M20 16H5l4 4',
 }
 
 const NAV = computed(() =>
@@ -90,7 +93,7 @@ const TABS = computed(() =>
 
 // Pages without their own link light up their parent: binders their
 // collection, histories and achievements the profile / challenge. The tab bar has no Trades
-// tab, so trades count as the challenge there.
+// tab, so trades count as the challenge there (and light up the strip's shortcut).
 const PARENTS = {
   binder: 'collection',
   'challenge-binder': 'challenge-collection',
@@ -155,6 +158,19 @@ const isActive = (name, inTabBar = false) =>
         {{ t('nav.challengeMode') }}
       </RouterLink>
       <CoinAmount v-if="challenge.state" class="mode-strip-coins" :amount="challenge.coins" />
+      <!-- Phones and tablets: Trades one tap away (desktop has its nav link) -->
+      <RouterLink
+        :to="{ name: 'challenge-trades' }"
+        class="mode-strip-trades"
+        :class="{ active: route.name === 'challenge-trades' }"
+        :aria-current="route.name === 'challenge-trades' ? 'page' : undefined"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path :d="ICONS.trades" /></svg>
+        <span class="mode-strip-trades-label">{{ t('nav.trades') }}</span>
+        <span v-if="challenge.tradeNews" class="tab-badge mode-strip-badge">
+          {{ challenge.tradeNews }}<span class="visually-hidden"> {{ t('nav.pending', challenge.tradeNews) }}</span>
+        </span>
+      </RouterLink>
       <RouterLink :to="{ name: 'game' }" class="mode-strip-leave">
         {{ t('nav.leaveChallenge') }} <span aria-hidden="true">→</span>
       </RouterLink>
@@ -299,6 +315,40 @@ const isActive = (name, inTabBar = false) =>
   font-weight: 800;
 }
 
+.mode-strip-trades {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: var(--pb-surface);
+  color: var(--pb-text);
+  white-space: nowrap;
+}
+
+.mode-strip-trades.active {
+  background: var(--pb-selected);
+}
+
+.mode-strip-trades svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mode-strip-badge {
+  position: absolute;
+  top: -7px;
+  right: -6px;
+  left: auto;
+}
+
 .mode-strip-leave {
   margin-left: auto;
   padding: 0.25rem 0.75rem;
@@ -333,6 +383,36 @@ const isActive = (name, inTabBar = false) =>
 .mode-strip-leave:hover {
   color: var(--pb-text);
   background: var(--pb-surface-hover);
+}
+
+@media (hover: hover) {
+  .mode-strip-trades:hover {
+    color: var(--pb-text);
+    background: var(--pb-surface-hover);
+  }
+}
+
+/* Phones: the shortcut is an icon (its label stays for screen readers) */
+@media (max-width: 575.98px) {
+  .mode-strip-trades {
+    padding: 0.25rem 0.55rem;
+  }
+
+  .mode-strip-trades-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+/* The Trades shortcut takes the free space; "Leave" sits right after it */
+@media (max-width: 991.98px) {
+  .mode-strip-trades + .mode-strip-leave {
+    margin-left: 0;
+  }
 }
 
 /* Fixed bottom tab bar on phones; pages add .pb-page to leave room for it */
@@ -409,6 +489,10 @@ const isActive = (name, inTabBar = false) =>
   }
 
   .app-tabbar {
+    display: none;
+  }
+
+  .mode-strip-trades {
     display: none;
   }
 }

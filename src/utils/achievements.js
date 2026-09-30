@@ -1,6 +1,23 @@
 import { rarityBucket } from '@/utils/rarity'
 import { CARDS_PER_BOOSTER } from '@/utils/profile'
 import { subsetKind } from '@/utils/sets'
+import {
+  CHAMPIONS,
+  ELITE_FOUR,
+  FAMILIES,
+  JOHTO_GYMS,
+  KANTO_GYMS,
+  LEGENDARIES,
+  LEGENDS,
+  MYTHICALS,
+  PLACES,
+  PSEUDO_LEGENDS,
+  RIVALS,
+  STARTER_FINALS,
+  STARTER_TRIOS,
+  STARTERS,
+  ULTRA_BEASTS,
+} from '@/utils/pokemonGroups'
 
 // Achievements are computed from the (unlimited) collection alone, so they
 // work on public profiles too, and a newly added achievement unlocks at once
@@ -24,6 +41,12 @@ export const CATEGORIES = [
   'sets',
   'pokedex',
   'teams',
+  'families',
+  'legends',
+  'gyms',
+  'league',
+  'rivals',
+  'places',
   'types',
   'trainers',
   'mechanics',
@@ -276,6 +299,49 @@ for (const [id, list] of Object.entries(TEAMS)) {
   DEFINITIONS.push({ id, category: 'teams', metric: owns(list), target: list.length, desc: `teams.${id}` })
 }
 
+// "Own them all" groups of src/utils/pokemonGroups.js (texts: desc.groups.<id>)
+function groups(category, map, extra = {}) {
+  for (const [id, list] of Object.entries(map)) {
+    DEFINITIONS.push({ id, category, metric: owns(list), target: list.length, desc: `groups.${id}`, ...(extra[id] ?? {}) })
+  }
+}
+/** How many groups of `map` are complete. */
+const complete = (map) => (s) => Object.values(map).filter((list) => list.every((number) => s.dex.has(number))).length
+
+groups('teams', STARTER_TRIOS)
+
+// Evolution lines
+groups('families', FAMILIES)
+tiers('families', 'families', complete(FAMILIES), [5, 15, 30])
+one('families', 'allStarters', owns(STARTERS), STARTERS.length)
+one('families', 'starterFinals', owns(STARTER_FINALS), STARTER_FINALS.length)
+DEFINITIONS.push({ id: 'pseudoLegends', category: 'families', metric: owns(PSEUDO_LEGENDS), target: PSEUDO_LEGENDS.length, desc: 'groups.pseudoLegends' })
+
+// Legends
+tiers('legends', 'legendaries', owns(LEGENDARIES), [3, 10, 25, 50])
+tiers('legends', 'mythicals', owns(MYTHICALS), [1, 5, 10, 20])
+groups('legends', LEGENDS)
+one('legends', 'ultraBeasts', owns(ULTRA_BEASTS), ULTRA_BEASTS.length)
+
+// Gym leaders (one badge per team), then the whole region
+groups('gyms', KANTO_GYMS)
+groups('gyms', JOHTO_GYMS)
+one('gyms', 'kantoBadges', complete(KANTO_GYMS), Object.keys(KANTO_GYMS).length)
+one('gyms', 'johtoBadges', complete(JOHTO_GYMS), Object.keys(JOHTO_GYMS).length)
+
+// Pokémon League: Elite Four, champions
+groups('league', ELITE_FOUR)
+one('league', 'eliteFour', complete(ELITE_FOUR), Object.keys(ELITE_FOUR).length)
+groups('league', CHAMPIONS)
+tiers('league', 'champions', complete(CHAMPIONS), [1, 4, 8])
+
+// Rivals and famous trainers
+groups('rivals', RIVALS, { teamRocket: { hidden: true } })
+
+// Places and their wild Pokémon
+groups('places', PLACES)
+tiers('places', 'places', complete(PLACES), [3, 7, 14])
+
 // Types
 one('types', 'allTypes', (s) => TYPES.filter((type) => s.perType.has(type)).length, TYPES.length)
 one('types', 'dualType', (s) => s.dualType)
@@ -454,7 +520,30 @@ export function rateOf(item, rates, mine = false) {
 }
 
 // Most exciting first when rates don't say which is rarer
-const TOAST_PRIORITY = ['luck', 'pulls', 'fun', 'teams', 'treasure', 'sets', 'pokedex', 'mechanics', 'types', 'history', 'artists', 'economy', 'trainers', 'collection', 'packs', 'dedication']
+const TOAST_PRIORITY = [
+  'luck',
+  'pulls',
+  'fun',
+  'legends',
+  'league',
+  'rivals',
+  'teams',
+  'gyms',
+  'families',
+  'places',
+  'treasure',
+  'sets',
+  'pokedex',
+  'mechanics',
+  'types',
+  'history',
+  'artists',
+  'economy',
+  'trainers',
+  'collection',
+  'packs',
+  'dedication',
+]
 
 /**
  * Order for a batch of unlock toasts: rarest first, then TOAST_PRIORITY, then

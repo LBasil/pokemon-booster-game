@@ -2,15 +2,20 @@
 import { useI18n } from 'vue-i18n'
 import { useAchievementText } from '@/composables/useAchievementText'
 import { useAchievementsStore } from '@/stores/achievements'
+import { useTradesStore } from '@/stores/trades'
 import { modeRoutes } from '@/router/modes'
 import { rateOf } from '@/utils/achievements'
 
 // "Achievement unlocked" pop-ups, Steam style: bottom right on desktop, at
 // the top on phones (the tab bar owns the bottom). Mounted once in App.vue;
-// the achievements store decides what to show.
+// the achievements store decides what to show. Live trade news (a new
+// offer, an answer to mine: the trades store) shares the same stack.
 const { t } = useI18n()
 const store = useAchievementsStore()
+const trades = useTradesStore()
 const text = useAchievementText()
+
+const partnerOf = (toast) => toast.partner ?? t('trades.toast.someone')
 
 // The challenge says so: its achievements are the ones that count
 const eyebrow = (toast) => {
@@ -22,6 +27,21 @@ const eyebrow = (toast) => {
 <template>
   <div class="ach-toasts" aria-live="polite">
     <TransitionGroup name="ach-toast">
+      <div v-for="toast in trades.toasts" :key="toast.key" class="ach-toast" :data-news="toast.news" role="status">
+        <RouterLink :to="{ name: 'challenge-trades' }" class="ach-toast-link" @click="trades.dismiss(toast.key)">
+          <span class="ach-toast-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 8h15l-4-4M20 16H5l4 4" /></svg>
+          </span>
+          <span class="ach-toast-body">
+            <span class="ach-toast-eyebrow">{{ t(`trades.toast.${toast.news}.eyebrow`) }}</span>
+            <span class="ach-toast-title">{{ t(`trades.toast.${toast.news}.title`, { name: partnerOf(toast) }) }}</span>
+            <span class="ach-toast-desc">{{ t(`trades.toast.${toast.news}.desc`) }}</span>
+          </span>
+        </RouterLink>
+        <button type="button" class="ach-toast-close" :aria-label="t('achievements.ui.dismiss')" @click="trades.dismiss(toast.key)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
       <div v-for="toast in store.toasts" :key="toast.key" class="ach-toast" role="status">
         <RouterLink
           :to="{ name: modeRoutes(toast.mode).achievements, query: toast.item ? { cat: toast.item.category } : { status: 'unlocked' } }"
@@ -132,6 +152,17 @@ const eyebrow = (toast) => {
   border-radius: 14px;
   background: var(--pb-holo);
   color: var(--pb-accent-ink);
+}
+
+/* Trade news: a plain accent tile, the holo stays for achievements */
+.ach-toast[data-news] .ach-toast-icon {
+  background: var(--pb-accent);
+}
+
+.ach-toast[data-news='declined'] .ach-toast-icon,
+.ach-toast[data-news='failed'] .ach-toast-icon {
+  background: var(--pb-surface-hover);
+  color: var(--pb-text);
 }
 
 .ach-toast-icon svg {

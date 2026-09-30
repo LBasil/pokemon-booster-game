@@ -102,7 +102,9 @@ export async function mockSupabase(page, options = {}) {
     // Trades (migration 0007): my_trades() rows, and challenge collections by lowercased username
     trades: options.trades ?? [],
     partners: options.partners ?? { misty: [collectionEntry('base1-4'), collectionEntry('sv3pt5-150')] },
-    badge: options.badge ?? { rewards: 0, trades: 0 },
+    badge: { rewards: 0, trades: 0, answers: 0, ...options.badge },
+    // Trades page views that marked answers as seen (migration 0017)
+    answersMarked: 0,
     nextTradeId: 100,
     // Achievements (migrations 0008 + 0009): achievement_rates() rows (with an
     // optional mode), or 'missing' = not applied; recorded ids and packs per mode
@@ -420,6 +422,20 @@ export async function mockSupabase(page, options = {}) {
       c.progress.recycle += recycled
       return json({ recycled, gained, coins: c.coins })
     }
+    if (path === '/rest/v1/rpc/recycle_cards') {
+      let recycled = 0
+      let gained = 0
+      for (const entry of state.challengeCollection) {
+        if (entry.quantity > 1 && args.p_card_ids.includes(entry.card_id)) {
+          recycled += entry.quantity - 1
+          gained += (entry.quantity - 1) * RECYCLE[entry.cards.rarity_bucket]
+          entry.quantity = 1
+        }
+      }
+      c.coins += gained
+      c.progress.recycle += recycled
+      return json({ recycled, gained, coins: c.coins })
+    }
     if (path === '/rest/v1/rpc/craft_card') {
       const card = byId[args.p_card_id]
       const price = CRAFT[card.rarity_bucket]
@@ -433,6 +449,13 @@ export async function mockSupabase(page, options = {}) {
 
     if (path === '/rest/v1/rpc/challenge_badge') return json(state.badge)
     if (path === '/rest/v1/rpc/my_trades') return json(state.trades)
+    if (path === '/rest/v1/rpc/mark_trade_answers_seen') {
+      const unseen = state.trades.filter((x) => x.unseen)
+      for (const trade of unseen) trade.unseen = false
+      state.badge.answers = 0
+      state.answersMarked++
+      return json(unseen.length)
+    }
     if (path === '/rest/v1/rpc/challenge_collection_of') {
       const name = args.p_username.trim().toLowerCase()
       const locked = name === 'misty' ? state.mistyLocks : []

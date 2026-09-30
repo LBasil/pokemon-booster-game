@@ -144,13 +144,16 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
             <h2 class="hub-tile-title mt-2">{{ t('game.challengeTitle') }}</h2>
             <p class="hub-tile-desc mb-0">{{ t('game.challengeDesc') }}</p>
           </div>
-          <div v-if="challenge.state || challenge.badge.rewards || challenge.badge.trades" class="hub-challenge-side">
+          <div v-if="challenge.state || challenge.waiting" class="hub-challenge-side">
             <CoinAmount v-if="challenge.state" class="hub-challenge-coins" :amount="challenge.coins" />
             <span v-if="challenge.badge.rewards" class="hub-challenge-pending">
               {{ t('game.challengePending', { count: challenge.badge.rewards }, challenge.badge.rewards) }}
             </span>
             <span v-if="challenge.badge.trades" class="hub-challenge-pending">
               {{ t('challenge.tradesWaiting', { count: challenge.badge.trades }, challenge.badge.trades) }}
+            </span>
+            <span v-if="challenge.badge.answers" class="hub-challenge-pending">
+              {{ t('challenge.tradeAnswers', { count: challenge.badge.answers }, challenge.badge.answers) }}
             </span>
           </div>
           <span class="hub-tile-arrow" aria-hidden="true">→</span>

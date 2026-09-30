@@ -290,6 +290,16 @@ premier, d'une carte ou de toutes (`null`). Barème par rareté : 1, 2, 5,
 { "recycled": 12, "gained": 47, "coins": 1197 }
 ```
 
+### `recycle_cards(p_card_ids text[])` (0017)
+
+JS : `recycleCards(cardIds)` (via `challenge.recycle([ids])`). Même chose
+que `recycle_duplicates`, mais seulement pour les cartes choisies (un
+exemplaire de chacune est gardé ; ids inconnus, non possédés ou sans
+doublon ignorés ; `null` ou `{}` = rien). Une ligne `recycle` au journal
+(avec l'id de la carte si une seule). Même réponse. Avant 0017
+(`PGRST202`), le client appelle `recycle_duplicates` carte par carte et
+additionne.
+
 ### `craft_card(p_card_id text)`
 
 JS : `craftCard(cardId)`. Achète un exemplaire d'une carte. Prix par
@@ -305,8 +315,9 @@ Erreurs : `unknown_card`, `not_enough_coins`.
 
 JS : `fetchChallengeBadge()`. Ce qui attend le joueur, pour le badge de
 navigation, **sans créer de portefeuille** :
-`{ "rewards": 2, "trades": 1 }` (récompense quotidienne + missions finies
-non réclamées ; offres reçues en attente).
+`{ "rewards": 2, "trades": 1, "answers": 1 }` (récompense quotidienne +
+missions finies non réclamées ; offres reçues en attente ; réponses à mes
+offres pas encore vues, depuis 0017, 0 avant côté client).
 
 ---
 
@@ -318,16 +329,18 @@ non réclamées ; offres reçues en attente).
 | `respond_trade(p_trade_id, p_accept bool)` | `respondTrade(id, accept)` | `{ "status": "accepted" \| "declined" \| "failed" }`. `failed` = une carte n'est plus possédée, ou l'expéditeur a verrouillé une carte offerte entre-temps | `trade_not_found` (pas le destinataire), `trade_closed`, `trade_expired` (7 jours) |
 | `cancel_trade(p_trade_id)` | `cancelTrade(id)` | — | réservé à l'expéditeur, offre en attente |
 | `my_trades()` | `fetchTrades()` | Les 50 dernières offres, dans les deux sens (voir ci-dessous) | — |
+| `mark_trade_answers_seen()` (0017) | `markTradeAnswersSeen()` | Nombre de réponses marquées vues (celles des offres du joueur). 0 si la migration manque | `not_authenticated` |
 
 ```json
 [{
   "id": 42, "direction": "received", "partner": "Misty",
   "offer": [ "…cartes données par l'expéditeur…" ], "request": [ "…cartes demandées…" ],
-  "status": "pending", "created_at": "…", "resolved_at": null
+  "status": "pending", "unseen": false, "created_at": "…", "resolved_at": null
 }]
 ```
 
 `status` vaut `expired` pour une offre en attente de plus de 7 jours.
+`unseen` (0017) : une réponse à une de mes offres que je n'ai pas encore vue.
 
 **Verrous** (table `trade_locks`, écrite par le client) :
 `fetchTradeLocks()` → `select card_id` ; `lockCard(id)` → `insert` ;

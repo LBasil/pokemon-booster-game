@@ -179,7 +179,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
         </p>
         <div v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
 
-        <ul v-if="state.daily_available || finishedMissions.length || challenge.badge.trades" class="ch-waiting" role="list">
+        <ul v-if="state.daily_available || finishedMissions.length || challenge.tradeNews" class="ch-waiting" role="list">
           <li v-if="state.daily_available">
             <span>{{ t('challenge.waitingDaily') }}</span>
             <button type="button" class="btn btn-primary btn-sm ch-claim" :disabled="busy === 'daily'" @click="claimDaily">
@@ -193,6 +193,10 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
           <li v-if="challenge.badge.trades">
             <span>{{ t('challenge.tradesWaiting', { count: challenge.badge.trades }, challenge.badge.trades) }}</span>
             <RouterLink :to="{ name: 'challenge-trades' }" class="btn btn-outline-secondary btn-sm">{{ t('challenge.tradesCta') }}</RouterLink>
+          </li>
+          <li v-if="challenge.badge.answers">
+            <span>{{ t('challenge.tradeAnswers', { count: challenge.badge.answers }, challenge.badge.answers) }}</span>
+            <RouterLink :to="{ name: 'challenge-trades' }" class="btn btn-outline-secondary btn-sm">{{ t('challenge.seeAnswers') }}</RouterLink>
           </li>
         </ul>
 
@@ -345,6 +349,9 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
               <h2 id="ch-trades-title" class="ch-tile-title">{{ t('trades.title') }}</h2>
               <span v-if="challenge.badge.trades" class="ch-trades-count">
                 {{ t('challenge.tradesWaiting', { count: challenge.badge.trades }, challenge.badge.trades) }}
+              </span>
+              <span v-if="challenge.badge.answers" class="ch-trades-count">
+                {{ t('challenge.tradeAnswers', { count: challenge.badge.answers }, challenge.badge.answers) }}
               </span>
             </div>
             <p class="ch-muted">{{ t('challenge.tradesDesc') }}</p>
@@ -834,6 +841,18 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 .ch-trades {
   display: flex;
   flex-direction: column;
+}
+
+/* Offers waiting + answers to read: the pills wrap under the title */
+.ch-trades .ch-tile-head {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ch-trades .ch-tile-title {
+  margin-right: auto;
 }
 
 .ch-trades-count {

@@ -514,7 +514,25 @@
     "waitingMissions": "{count} mission terminée | {count} missions terminées",
     "seeMissions": "Voir les missions",
     "weeklyTitle": "Cette semaine",
-    "inDays": "{days} j {hours} h"
+    "inDays": "{days} j {hours} h",
+    "tradeAnswers": "{count} réponse à tes offres | {count} réponses à tes offres",
+    "seeAnswers": "Voir les réponses",
+    "pick": {
+      "choose": "Choisir…",
+      "title": "Choisis les doublons à recycler",
+      "hint": "Coche les cartes à recycler : leurs copies en trop partent, un exemplaire de chaque reste toujours dans ta collection.",
+      "buckets": {
+        "common": "Communes",
+        "uncommon": "Peu communes",
+        "rare": "Rares",
+        "holo": "Holos",
+        "ultra": "Ultra rares",
+        "secret": "Secrètes"
+      },
+      "extra": "{count} copie en trop | {count} copies en trop",
+      "total": "Rien de coché | {count} doublon coché | {count} doublons cochés",
+      "recycle": "Recycler | Recycler {count} doublon | Recycler {count} doublons"
+    }
   },
   "trades": {
     "title": "Échanges",
@@ -574,7 +592,41 @@
     "unlock": "Autoriser l’échange de {name}",
     "owned": "Nouvelle pour toi | Tu en as 1 | Tu en as {count}",
     "suggestions": "Suggestions",
-    "suggestionClosed": "N’accepte pas les échanges"
+    "suggestionClosed": "N’accepte pas les échanges",
+    "answers": "Nouvelles réponses à tes offres",
+    "answer": {
+      "accepted": "{name} a accepté ton offre",
+      "declined": "{name} a refusé ton offre",
+      "failed": "Ton offre à {name} n’a pas pu se faire (une carte n’était plus là)"
+    },
+    "youGave": "Tu as donné",
+    "youGot": "Tu as reçu",
+    "youOffered": "Tu proposais",
+    "youAsked": "Tu demandais",
+    "offerThis": "Proposer en échange",
+    "toast": {
+      "someone": "Un dresseur",
+      "offer": {
+        "eyebrow": "Nouvelle offre d’échange",
+        "title": "{name} te propose un échange",
+        "desc": "Touche pour la voir et répondre."
+      },
+      "accepted": {
+        "eyebrow": "Échange fait",
+        "title": "{name} a accepté ton offre",
+        "desc": "Les cartes sont dans ta collection Défi."
+      },
+      "declined": {
+        "eyebrow": "Offre refusée",
+        "title": "{name} a refusé ton offre",
+        "desc": "Tes cartes restent chez toi."
+      },
+      "failed": {
+        "eyebrow": "Échange raté",
+        "title": "Ton offre à {name} n’a pas pu se faire",
+        "desc": "Une carte n’était plus là, rien n’a bougé."
+      }
+    }
   },
   "games": {
     "title": "Mini-jeux",
@@ -775,7 +827,13 @@
       "fun": "Curiosités",
       "dedication": "Assiduité",
       "luck": "Chance",
-      "economy": "Pièces & échanges"
+      "economy": "Pièces & échanges",
+      "families": "Lignées d’évolution",
+      "legends": "Légendes",
+      "gyms": "Badges d’arène",
+      "league": "Ligue Pokémon",
+      "rivals": "Rivaux et héros",
+      "places": "Lieux"
     },
     "regions": {
       "kanto": "Kanto",
@@ -1450,6 +1508,405 @@
       },
       "recycled1000": {
         "title": "Zéro déchet"
+      },
+      "bulbasaurLine": {
+        "title": "Lignée de Florizarre"
+      },
+      "squirtleLine": {
+        "title": "Lignée de Tortank"
+      },
+      "caterpieLine": {
+        "title": "Lignée de Papilusion"
+      },
+      "weedleLine": {
+        "title": "Lignée de Dardargnan"
+      },
+      "pidgeyLine": {
+        "title": "Lignée de Roucarnage"
+      },
+      "poliwagLine": {
+        "title": "Lignée de Tartard"
+      },
+      "abraLine": {
+        "title": "Lignée de Alakazam"
+      },
+      "machopLine": {
+        "title": "Lignée de Mackogneur"
+      },
+      "geodudeLine": {
+        "title": "Lignée de Grolem"
+      },
+      "dratiniLine": {
+        "title": "Lignée de Dracolosse"
+      },
+      "chikoritaLine": {
+        "title": "Lignée de Méganium"
+      },
+      "cyndaquilLine": {
+        "title": "Lignée de Typhlosion"
+      },
+      "totodileLine": {
+        "title": "Lignée de Aligatueur"
+      },
+      "mareepLine": {
+        "title": "Lignée de Pharamp"
+      },
+      "larvitarLine": {
+        "title": "Lignée de Tyranocif"
+      },
+      "treeckoLine": {
+        "title": "Lignée de Jungko"
+      },
+      "torchicLine": {
+        "title": "Lignée de Braségali"
+      },
+      "mudkipLine": {
+        "title": "Lignée de Laggron"
+      },
+      "raltsLine": {
+        "title": "Lignée de Gardevoir"
+      },
+      "aronLine": {
+        "title": "Lignée de Galeking"
+      },
+      "bagonLine": {
+        "title": "Lignée de Drattak"
+      },
+      "beldumLine": {
+        "title": "Lignée de Métalosse"
+      },
+      "turtwigLine": {
+        "title": "Lignée de Torterra"
+      },
+      "chimcharLine": {
+        "title": "Lignée de Simiabraz"
+      },
+      "piplupLine": {
+        "title": "Lignée de Pingoléon"
+      },
+      "gibleLine": {
+        "title": "Lignée de Carchacrok"
+      },
+      "rioluLine": {
+        "title": "Lignée de Lucario"
+      },
+      "snivyLine": {
+        "title": "Lignée de Majaspic"
+      },
+      "tepigLine": {
+        "title": "Lignée de Roitiflam"
+      },
+      "oshawottLine": {
+        "title": "Lignée de Clamiral"
+      },
+      "deinoLine": {
+        "title": "Lignée de Trioxhydre"
+      },
+      "chespinLine": {
+        "title": "Lignée de Blindépique"
+      },
+      "fennekinLine": {
+        "title": "Lignée de Goupelin"
+      },
+      "froakieLine": {
+        "title": "Lignée de Amphinobi"
+      },
+      "goomyLine": {
+        "title": "Lignée de Muplodocus"
+      },
+      "rowletLine": {
+        "title": "Lignée de Archéduc"
+      },
+      "littenLine": {
+        "title": "Lignée de Félinferno"
+      },
+      "popplioLine": {
+        "title": "Lignée de Oratoria"
+      },
+      "jangmooLine": {
+        "title": "Lignée de Ékaïser"
+      },
+      "grookeyLine": {
+        "title": "Lignée de Gorythmic"
+      },
+      "scorbunnyLine": {
+        "title": "Lignée de Pyrobut"
+      },
+      "sobbleLine": {
+        "title": "Lignée de Lézargus"
+      },
+      "dreepyLine": {
+        "title": "Lignée de Lanssorien"
+      },
+      "sprigatitoLine": {
+        "title": "Lignée de Miascarade"
+      },
+      "fuecocoLine": {
+        "title": "Lignée de Flâmigator"
+      },
+      "quaxlyLine": {
+        "title": "Lignée de Palmaval"
+      },
+      "frigibaxLine": {
+        "title": "Lignée de Glaivodo"
+      },
+      "pseudoLegends": {
+        "title": "Pseudo-légendaires"
+      },
+      "unovaStarters": {
+        "title": "Starters d’Unys"
+      },
+      "kalosStarters": {
+        "title": "Starters de Kalos"
+      },
+      "alolaStarters": {
+        "title": "Starters d’Alola"
+      },
+      "galarStarters": {
+        "title": "Starters de Galar"
+      },
+      "paldeaStarters": {
+        "title": "Starters de Paldea"
+      },
+      "regiTrio": {
+        "title": "Golems légendaires"
+      },
+      "allRegis": {
+        "title": "Les six Regi"
+      },
+      "lunarDuo": {
+        "title": "Duo lunaire"
+      },
+      "forcesOfNature": {
+        "title": "Forces de la Nature"
+      },
+      "tapus": {
+        "title": "Gardiens des îles"
+      },
+      "alolaLegends": {
+        "title": "Soleil et Lune"
+      },
+      "galarHeroes": {
+        "title": "Héros de Galar"
+      },
+      "galarSteeds": {
+        "title": "Le roi et ses destriers"
+      },
+      "treasuresOfRuin": {
+        "title": "Les quatre trésors"
+      },
+      "paldeaLegends": {
+        "title": "Montures légendaires"
+      },
+      "boulderBadge": {
+        "title": "Badge Roche"
+      },
+      "cascadeBadge": {
+        "title": "Badge Cascade"
+      },
+      "thunderBadge": {
+        "title": "Badge Foudre"
+      },
+      "rainbowBadge": {
+        "title": "Badge Prisme"
+      },
+      "soulBadge": {
+        "title": "Badge Âme"
+      },
+      "marshBadge": {
+        "title": "Badge Marais"
+      },
+      "volcanoBadge": {
+        "title": "Badge Volcan"
+      },
+      "earthBadge": {
+        "title": "Badge Terre"
+      },
+      "zephyrBadge": {
+        "title": "Badge Zéphyr"
+      },
+      "hiveBadge": {
+        "title": "Badge Essaim"
+      },
+      "plainBadge": {
+        "title": "Badge Plaine"
+      },
+      "fogBadge": {
+        "title": "Badge Brume"
+      },
+      "stormBadge": {
+        "title": "Badge Choc"
+      },
+      "mineralBadge": {
+        "title": "Badge Minéral"
+      },
+      "glacierBadge": {
+        "title": "Badge Glacier"
+      },
+      "risingBadge": {
+        "title": "Badge Lever"
+      },
+      "lorelei": {
+        "title": "Olga"
+      },
+      "bruno": {
+        "title": "Aldo"
+      },
+      "agatha": {
+        "title": "Agatha"
+      },
+      "lance": {
+        "title": "Peter"
+      },
+      "blue": {
+        "title": "Maître Blue"
+      },
+      "steven": {
+        "title": "Maître Pierre Rochard"
+      },
+      "wallace": {
+        "title": "Maître Marc"
+      },
+      "cynthia": {
+        "title": "Maîtresse Cynthia"
+      },
+      "alder": {
+        "title": "Maître Goyah"
+      },
+      "iris": {
+        "title": "Maîtresse Iris"
+      },
+      "diantha": {
+        "title": "Maîtresse Dianthéa"
+      },
+      "leon": {
+        "title": "Maître Tarak"
+      },
+      "red": {
+        "title": "Red au Mont Argenté"
+      },
+      "silver": {
+        "title": "Silver, le rival"
+      },
+      "ashKanto": {
+        "title": "Attrapez-les tous"
+      },
+      "ashChampion": {
+        "title": "Champion du monde"
+      },
+      "teamRocket": {
+        "title": "Vers d’autres cieux"
+      },
+      "route1": {
+        "title": "Route 1"
+      },
+      "viridianForest": {
+        "title": "Forêt de Jade"
+      },
+      "mtMoon": {
+        "title": "Mont Sélénite"
+      },
+      "pokemonTower": {
+        "title": "Tour Pokémon"
+      },
+      "safariZone": {
+        "title": "Parc Safari"
+      },
+      "powerPlant": {
+        "title": "Centrale"
+      },
+      "seafoamIslands": {
+        "title": "Îles Écume"
+      },
+      "pokemonMansion": {
+        "title": "Manoir Pokémon"
+      },
+      "ceruleanCave": {
+        "title": "Caverne Azurée"
+      },
+      "victoryRoad": {
+        "title": "Route Victoire"
+      },
+      "nationalPark": {
+        "title": "Parc Naturel"
+      },
+      "petalburgWoods": {
+        "title": "Bois Clémenti"
+      },
+      "meteorFalls": {
+        "title": "Cascade Météore"
+      },
+      "route119": {
+        "title": "Route 119"
+      },
+      "families5": {
+        "title": "Réunion de famille"
+      },
+      "families15": {
+        "title": "Expert en évolution"
+      },
+      "families30": {
+        "title": "Arbre généalogique"
+      },
+      "allStarters": {
+        "title": "Labo du Professeur"
+      },
+      "starterFinals": {
+        "title": "Évolution finale"
+      },
+      "legendaries3": {
+        "title": "Frôler la légende"
+      },
+      "legendaries10": {
+        "title": "Chasseur de légendes"
+      },
+      "legendaries25": {
+        "title": "Coffre légendaire"
+      },
+      "legendaries50": {
+        "title": "Panthéon des légendes"
+      },
+      "mythicals1": {
+        "title": "Rencontre fabuleuse"
+      },
+      "mythicals5": {
+        "title": "Habitué des événements"
+      },
+      "mythicals10": {
+        "title": "Mythologue"
+      },
+      "mythicals20": {
+        "title": "Au-delà du mythe"
+      },
+      "ultraBeasts": {
+        "title": "Ultra-Brèche"
+      },
+      "kantoBadges": {
+        "title": "Boîte à badges de Kanto"
+      },
+      "johtoBadges": {
+        "title": "Boîte à badges de Johto"
+      },
+      "eliteFour": {
+        "title": "Plateau Indigo"
+      },
+      "champions1": {
+        "title": "Challenger de la Ligue"
+      },
+      "champions4": {
+        "title": "Panthéon"
+      },
+      "champions8": {
+        "title": "Maître des Maîtres"
+      },
+      "places3": {
+        "title": "Explorateur"
+      },
+      "places7": {
+        "title": "Globe-trotteur"
+      },
+      "places14": {
+        "title": "Carte complète"
       }
     },
     "desc": {
@@ -1545,7 +2002,130 @@
       "trades": "Termine un échange | Termine {count} échanges",
       "gifts": "Offre des cartes à un autre joueur | Offre des cartes à d’autres joueurs {count} fois",
       "crafted": "Fabrique une carte | Fabrique {count} cartes",
-      "recycled": "Recycle {count} doublons"
+      "recycled": "Recycle {count} doublons",
+      "groups": {
+        "bulbasaurLine": "Possède toute la lignée : Bulbizarre, Herbizarre et Florizarre",
+        "squirtleLine": "Possède toute la lignée : Carapuce, Carabaffe et Tortank",
+        "caterpieLine": "Possède toute la lignée : Chenipan, Chrysacier et Papilusion",
+        "weedleLine": "Possède toute la lignée : Aspicot, Coconfort et Dardargnan",
+        "pidgeyLine": "Possède toute la lignée : Roucool, Roucoups et Roucarnage",
+        "poliwagLine": "Possède toute la lignée : Ptitard, Têtarte et Tartard",
+        "abraLine": "Possède toute la lignée : Abra, Kadabra et Alakazam",
+        "machopLine": "Possède toute la lignée : Machoc, Machopeur et Mackogneur",
+        "geodudeLine": "Possède toute la lignée : Racaillou, Gravalanch et Grolem",
+        "dratiniLine": "Possède toute la lignée : Minidraco, Draco et Dracolosse",
+        "chikoritaLine": "Possède toute la lignée : Germignon, Macronium et Méganium",
+        "cyndaquilLine": "Possède toute la lignée : Héricendre, Feurisson et Typhlosion",
+        "totodileLine": "Possède toute la lignée : Kaiminus, Crocrodil et Aligatueur",
+        "mareepLine": "Possède toute la lignée : Wattouat, Lainergie et Pharamp",
+        "larvitarLine": "Possède toute la lignée : Embrylex, Ymphect et Tyranocif",
+        "treeckoLine": "Possède toute la lignée : Arcko, Massko et Jungko",
+        "torchicLine": "Possède toute la lignée : Poussifeu, Galifeu et Braségali",
+        "mudkipLine": "Possède toute la lignée : Gobou, Flobio et Laggron",
+        "raltsLine": "Possède toute la lignée : Tarsal, Kirlia et Gardevoir",
+        "aronLine": "Possède toute la lignée : Galekid, Galegon et Galeking",
+        "bagonLine": "Possède toute la lignée : Draby, Drackhaus et Drattak",
+        "beldumLine": "Possède toute la lignée : Terhal, Métang et Métalosse",
+        "turtwigLine": "Possède toute la lignée : Tortipouss, Boskara et Torterra",
+        "chimcharLine": "Possède toute la lignée : Ouisticram, Chimpenfeu et Simiabraz",
+        "piplupLine": "Possède toute la lignée : Tiplouf, Prinplouf et Pingoléon",
+        "gibleLine": "Possède toute la lignée : Griknot, Carmache et Carchacrok",
+        "rioluLine": "Possède toute la lignée : Riolu et Lucario",
+        "snivyLine": "Possède toute la lignée : Vipélierre, Lianaja et Majaspic",
+        "tepigLine": "Possède toute la lignée : Gruikui, Grotichon et Roitiflam",
+        "oshawottLine": "Possède toute la lignée : Moustillon, Mateloutre et Clamiral",
+        "deinoLine": "Possède toute la lignée : Solochi, Diamat et Trioxhydre",
+        "chespinLine": "Possède toute la lignée : Marisson, Boguérisse et Blindépique",
+        "fennekinLine": "Possède toute la lignée : Feunnec, Roussil et Goupelin",
+        "froakieLine": "Possède toute la lignée : Grenousse, Croâporal et Amphinobi",
+        "goomyLine": "Possède toute la lignée : Mucuscule, Colimucus et Muplodocus",
+        "rowletLine": "Possède toute la lignée : Brindibou, Efflèche et Archéduc",
+        "littenLine": "Possède toute la lignée : Flamiaou, Matoufeu et Félinferno",
+        "popplioLine": "Possède toute la lignée : Otaquin, Otarlette et Oratoria",
+        "jangmooLine": "Possède toute la lignée : Bébécaille, Écaïd et Ékaïser",
+        "grookeyLine": "Possède toute la lignée : Ouistempo, Badabouin et Gorythmic",
+        "scorbunnyLine": "Possède toute la lignée : Flambino, Lapyro et Pyrobut",
+        "sobbleLine": "Possède toute la lignée : Larméléon, Arrozard et Lézargus",
+        "dreepyLine": "Possède toute la lignée : Fantyrm, Dispareptil et Lanssorien",
+        "sprigatitoLine": "Possède toute la lignée : Poussacha, Matourgeon et Miascarade",
+        "fuecocoLine": "Possède toute la lignée : Chochodile, Crocogril et Flâmigator",
+        "quaxlyLine": "Possède toute la lignée : Coiffeton, Canarbello et Palmaval",
+        "frigibaxLine": "Possède toute la lignée : Frigodo, Cryodo et Glaivodo",
+        "pseudoLegends": "Possède les 10 pseudo-légendaires : Dracolosse, Tyranocif, Drattak, Métalosse, Carchacrok, Trioxhydre, Muplodocus, Ékaïser, Lanssorien et Glaivodo",
+        "unovaStarters": "Possède Vipélierre, Gruikui et Moustillon",
+        "kalosStarters": "Possède Marisson, Feunnec et Grenousse",
+        "alolaStarters": "Possède Brindibou, Flamiaou et Otaquin",
+        "galarStarters": "Possède Ouistempo, Flambino et Larméléon",
+        "paldeaStarters": "Possède Poussacha, Chochodile et Coiffeton",
+        "regiTrio": "Possède Regirock, Regice et Registeel",
+        "allRegis": "Possède Regirock, Regice, Registeel, Regigigas, Regieleki et Regidrago",
+        "lunarDuo": "Possède Cresselia et Darkrai",
+        "forcesOfNature": "Possède Boréas, Fulguris, Démétéros et Amovénus",
+        "tapus": "Possède Tokorico, Tokopiyon, Tokotoro et Tokopisco",
+        "alolaLegends": "Possède Solgaleo, Lunala et Necrozma",
+        "galarHeroes": "Possède Zacian et Zamazenta",
+        "galarSteeds": "Possède Blizzeval, Spectreval et Sylveroy",
+        "treasuresOfRuin": "Possède Chongjian, Baojian, Dinglu et Yuyu",
+        "paldeaLegends": "Possède Koraidon et Miraidon",
+        "boulderBadge": "L’équipe de Pierre, champion d’arène : possède Racaillou et Onix",
+        "cascadeBadge": "L’équipe d’Ondine, championne d’arène : possède Stari et Staross",
+        "thunderBadge": "L’équipe du Major Bob, champion d’arène : possède Voltorbe, Pikachu et Raichu",
+        "rainbowBadge": "L’équipe d’Érika, championne d’arène : possède Empiflor, Saquedeneu et Rafflesia",
+        "soulBadge": "L’équipe de Koga, champion d’arène : possède Smogo, Grotadmorv et Smogogo",
+        "marshBadge": "L’équipe de Morgane, championne d’arène : possède Kadabra, M. Mime, Aéromite et Alakazam",
+        "volcanoBadge": "L’équipe d’Auguste, champion d’arène : possède Caninos, Ponyta, Galopa et Arcanin",
+        "earthBadge": "L’équipe de Giovanni, champion d’arène : possède Rhinocorne, Triopikeur, Nidoqueen, Nidoking et Rhinoféros",
+        "zephyrBadge": "L’équipe d’Albert, champion d’arène : possède Roucool et Roucoups",
+        "hiveBadge": "L’équipe d’Hector, champion d’arène : possède Chrysacier, Coconfort et Insécateur",
+        "plainBadge": "L’équipe de Blanche, championne d’arène : possède Mélofée et Écrémeuh",
+        "fogBadge": "L’équipe de Mortimer, champion d’arène : possède Fantominus, Spectrum et Ectoplasma",
+        "stormBadge": "L’équipe de Chuck, champion d’arène : possède Colossinge et Tartard",
+        "mineralBadge": "L’équipe de Jasmine, championne d’arène : possède Magnéti et Steelix",
+        "glacierBadge": "L’équipe de Frédo, champion d’arène : possède Otaria, Lamantine et Cochignon",
+        "risingBadge": "L’équipe de Sandra, championne d’arène : possède Draco et Hyporoi",
+        "lorelei": "L’équipe d’Olga, membre du Conseil 4 : possède Lamantine, Crustabri, Flagadoss, Lippoutou et Lokhlass",
+        "bruno": "L’équipe d’Aldo, membre du Conseil 4 : possède Onix, Tygnon, Kicklee et Mackogneur",
+        "agatha": "L’équipe d’Agatha, membre du Conseil 4 : possède Ectoplasma, Nosferalto, Spectrum et Arbok",
+        "lance": "L’équipe de Peter, membre du Conseil 4 : possède Léviator, Draco, Ptéra et Dracolosse",
+        "blue": "L’équipe de Blue, maître de la Ligue (Or HeartGold et Argent SoulSilver) : possède Roucarnage, Alakazam, Rhinoféros, Léviator, Arcanin et Noadkoko",
+        "steven": "L’équipe de Pierre Rochard, maître de la Ligue (Rubis et Saphir) : possède Airmure, Kaorine, Galeking, Vacilys, Armaldo et Métalosse",
+        "wallace": "L’équipe de Marc, maître de la Ligue (Émeraude) : possède Wailord, Tentacruel, Ludicolo, Barbicha, Léviator et Milobellus",
+        "cynthia": "L’équipe de Cynthia, maîtresse de la Ligue (Diamant et Perle) : possède Spiritomb, Roserade, Tritosor, Lucario, Milobellus et Carchacrok",
+        "alder": "L’équipe de Goyah, maître de la Ligue (Noir et Blanc) : possède Limaspeed, Frison, Drakkarmin, Sorbouboul, Lançargot et Pyrax",
+        "iris": "L’équipe d’Iris, maîtresse de la Ligue (Noir 2 et Blanc 2) : possède Trioxhydre, Drakkarmin, Galeking, Aéroptéryx, Lokhlass et Tranchodon",
+        "diantha": "L’équipe de Dianthéa, maîtresse de la Ligue (X et Y) : possède Brutalibré, Rexillius, Amagara, Banshitrouye, Muplodocus et Gardevoir",
+        "leon": "L’équipe de Tarak, maître de la Ligue (Épée et Bouclier) : possède Exagide, Lanssorien, Tranchodon et Dracaufeu",
+        "red": "L’équipe de Red au Mont Argenté : possède Pikachu, Mentali, Ronflex, Florizarre, Dracaufeu et Tortank",
+        "silver": "L’équipe de Silver : possède Farfuret, Nostenfer, Magnéton, Ectoplasma et Alakazam",
+        "ashKanto": "La première équipe de Sacha : possède Pikachu, Papilusion, Roucoups, Bulbizarre, Dracaufeu et Carapuce",
+        "ashChampion": "L’équipe de Sacha, champion du monde : possède Pikachu, Lucario, Dracolosse, Ectoplasma, Palarticho et Hydragon",
+        "teamRocket": "Les Pokémon de Jessie, James et Miaouss : possède Abo, Smogo, Miaouss, Arbok, Smogogo et Qulbutoké",
+        "route1": "Possède les Pokémon qu’on y trouve : Roucool et Rattata",
+        "viridianForest": "Possède les Pokémon qu’on y trouve : Chenipan, Chrysacier, Aspicot, Coconfort et Pikachu",
+        "mtMoon": "Possède les Pokémon qu’on y trouve : Nosferapti, Racaillou, Paras et Mélofée",
+        "pokemonTower": "Possède les Pokémon qu’on y trouve : Fantominus, Spectrum et Osselait",
+        "safariZone": "Possède les Pokémon qu’on y trouve : Leveinard, Kangourex, Insécateur, Scarabrute, Tauros, Rhinocorne, Noeunoeuf et Minidraco",
+        "powerPlant": "Possède les Pokémon qu’on y trouve : Voltorbe, Magnéti, Pikachu, Élektek et Électhor",
+        "seafoamIslands": "Possède les Pokémon qu’on y trouve : Otaria, Ramoloss, Psykokwak, Kokiyas et Artikodin",
+        "pokemonMansion": "Possède les Pokémon qu’on y trouve : Tadmorv, Smogo, Ponyta, Magmar et Métamorph",
+        "ceruleanCave": "Possède les Pokémon qu’on y trouve : Mewtwo, Métamorph, Rhinoféros et Kadabra",
+        "victoryRoad": "Possède les Pokémon qu’on y trouve : Machopeur, Onix, Gravalanch, Nosferalto, Ossatueur et Sulfura",
+        "nationalPark": "Possède les Pokémon qu’on y trouve : Insécateur, Scarabrute, Papilusion, Dardargnan, Mimitoss et Paras",
+        "petalburgWoods": "Possède les Pokémon qu’on y trouve : Chenipotte, Balignon et Parecool",
+        "meteorFalls": "Possède les Pokémon qu’on y trouve : Séléroc, Solaroc et Draby",
+        "route119": "Possède les Pokémon qu’on y trouve : Barpau et Milobellus"
+      },
+      "families": "Complète {count} lignée d’évolution | Complète {count} lignées d’évolution",
+      "allStarters": "Possède les {count} Pokémon de départ, de Kanto à Paldea",
+      "starterFinals": "Possède les {count} évolutions finales des starters",
+      "legendaries": "Possède {count} Pokémon légendaire | Possède {count} Pokémon légendaires différents",
+      "mythicals": "Possède {count} Pokémon fabuleux | Possède {count} Pokémon fabuleux différents",
+      "ultraBeasts": "Possède les {count} Ultra-Chimères",
+      "kantoBadges": "Complète les équipes des {count} champions d’arène de Kanto",
+      "johtoBadges": "Complète les équipes des {count} champions d’arène de Johto",
+      "eliteFour": "Complète les équipes du Conseil 4 de Kanto",
+      "champions": "Complète l’équipe de {count} Maître | Complète les équipes de {count} Maîtres",
+      "places": "Possède tous les Pokémon de {count} lieu | Possède tous les Pokémon de {count} lieux"
     }
   },
   "beta": {

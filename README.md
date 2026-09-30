@@ -26,7 +26,8 @@ How it works inside (every table, RPC and flow, in French):
   with coins. Start with 1,000 coins, pay 100 per booster, earn more with a
   daily reward that grows over a 7-day streak, three daily missions and
   four **weekly missions** (reset Monday 00:00 UTC, bigger rewards),
-  recycle duplicates into coins and craft the cards you're missing. Earn
+  recycle duplicates into coins (all of them, or **pick which ones**, card by
+  card or a whole rarity at once) and craft the cards you're missing. Earn
   coins with the **mini-games** (`/challenge/games`, their own tab in the
   challenge and a tile near the top of its hub), starting with
   **"Higher or lower"**:
@@ -46,10 +47,14 @@ How it works inside (every table, RPC and flow, in French):
   usernames as you type, and every card in the pickers says how many
   copies you own; public profiles show their
   **challenge collection** with an "Ask for it" button per card; offers
-  and answers show up **live**, no reload; you can turn trade offers off,
+  and answers show up **live**, no reload, with a pop-up for a new offer and
+  for an answer to yours (accepted, declined or failed); answers you haven't
+  seen yet get a badge and open the trades page; any card's detail has
+  "Offer in a trade"; you can turn trade offers off,
   or keep chosen cards **out of trades** from their detail), follow your challenge booster history, and climb the two
-  challenge leaderboards. Badges in the navigation show rewards to claim
-  and offers to answer. Every coin and card moves server-side, and the
+  challenge leaderboards. Badges in the navigation show rewards to claim,
+  offers to answer and answers to read; on phones the challenge strip has a
+  Trades shortcut. Every coin and card moves server-side, and the
   unlimited collection is never touched.
 - **Two modes, never mixed up**: an "Unlimited | Challenge" switch on both
   hubs, and a "Challenge mode" strip (coins + "Leave") on every challenge
@@ -91,8 +96,11 @@ How it works inside (every table, RPC and flow, in French):
   touch screens, drops the 3D flip and the glow layers that stuttered on
   phones), and an
   "install the app" button.
-- **Achievements**: ~240 of them in 16 categories (boosters, luck, pulls, sets,
-  Pokédex regions, famous teams, types, mechanics, treasure, illustrators,
+- **Achievements**: ~370 of them in 22 categories (boosters, luck, pulls, sets,
+  Pokédex regions, famous teams, evolution lines, legends and mythicals,
+  gym badges (each Kanto/Johto gym leader's team), the Pokémon League
+  (Elite Four, champions), rivals & heroes (Red, Silver, Ash, Team Rocket),
+  places (Viridian Forest, Safari Zone...), types, mechanics, treasure, illustrators,
   subsets, daily streaks, a challenge-only "coins & trades" one, a few
   secret ones…), **in each game mode** — the challenge ones are the
   ones that count (every pack costs coins), and stay unlocked even after
@@ -225,6 +233,11 @@ its **SQL editor** and run, in order:
    ultra/secret card at all (Base, Jungle, Fossil, Neo, Gym, DP...) post
    their holos to the live feed. Run it after 0015; until then those sets
    never show up in the feed.
+17. `supabase/migrations/0017_trade_answers_recycle_picks.sql` — answers to
+   your trade offers get a badge until you open the trades page, and
+   recycling a pick of duplicates in one call. Run it after 0016; until
+   then answers only pop up live (no badge) and a pick is recycled one
+   card at a time.
 
 Then in **Authentication**:
 

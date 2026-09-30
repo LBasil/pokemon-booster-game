@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { TRADE_MAX_CARDS, groupTrades, searchEntries, toggleCard } from './trades'
+import { TRADE_MAX_CARDS, groupTrades, searchEntries, toggleCard, tradeNews } from './trades'
 
 describe('trades', () => {
   it('toggles cards in a selection, up to the limit', () => {
@@ -29,5 +29,22 @@ describe('trades', () => {
     expect(searchEntries(entries, 'flabebe')).toHaveLength(1)
     expect(searchEntries(entries, '  PIKA ')).toEqual([entries[1]])
     expect(searchEntries(entries, '')).toBe(entries)
+  })
+
+  it('tells a new offer for me and unseen answers to mine, nothing else', () => {
+    const me = 'u1'
+    const row = (fields) => ({ id: 7, from_user: 'u2', to_user: me, status: 'pending', answer_seen: false, ...fields })
+    expect(tradeNews(row({}), me)).toBe('offer')
+    expect(tradeNews(row({ status: 'accepted' }), me)).toBe(null) // I answered it myself
+    const mine = (fields) => row({ from_user: me, to_user: 'u2', ...fields })
+    expect(tradeNews(mine({}), me)).toBe(null) // my own offer, still waiting
+    expect(tradeNews(mine({ status: 'accepted' }), me)).toBe('accepted')
+    expect(tradeNews(mine({ status: 'declined' }), me)).toBe('declined')
+    expect(tradeNews(mine({ status: 'failed' }), me)).toBe('failed')
+    expect(tradeNews(mine({ status: 'declined', answer_seen: true }), me)).toBe(null) // already seen
+    expect(tradeNews(mine({ status: 'accepted', answer_seen: undefined }), me)).toBe('accepted') // before 0017
+    expect(tradeNews(mine({ status: 'cancelled' }), me)).toBe(null)
+    expect(tradeNews(null, me)).toBe(null)
+    expect(tradeNews(row({}), null)).toBe(null)
   })
 })

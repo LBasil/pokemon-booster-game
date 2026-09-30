@@ -3,7 +3,7 @@
 // and 0006_challenge_no_pity.sql (open_challenge_booster) — change both
 // together. Packs use the real pull rates (no pity timer). The server stays
 // the authority: these values only drive labels and previews.
-import { rarityLabelKey } from '@/utils/rarity'
+import { BUCKETS, rarityLabelKey } from '@/utils/rarity'
 
 export const START_COINS = 1000
 export const PACK_PRICE = 100
@@ -23,13 +23,15 @@ export const affordablePacks = (coins) => Math.max(0, Math.floor((coins ?? 0) / 
 
 /**
  * What recycling would give: every copy beyond the first.
- * @param {{ quantity: number, cards: object }[]} entries - collection rows
+ * @param {{ card_id: string, quantity: number, cards: object }[]} entries - collection rows
+ * @param {Set<string> | null} [picked] - only these card ids (recycle_cards, migration 0017)
  * @returns {{ cards: number, coins: number }}
  */
-export function recyclePreview(entries) {
+export function recyclePreview(entries, picked = null) {
   let cards = 0
   let coins = 0
   for (const entry of entries) {
+    if (picked && !picked.has(entry.card_id)) continue
     const extra = entry.quantity - 1
     if (extra > 0) {
       cards += extra
@@ -37,6 +39,21 @@ export function recyclePreview(entries) {
     }
   }
   return { cards, coins }
+}
+
+/**
+ * The cards that have duplicates, grouped by rarity bucket (commons first,
+ * the cheapest to let go), each group by name: the "Choose" recycle list.
+ * @returns {{ bucket: string, entries: object[] }[]} only non-empty buckets
+ */
+export function duplicateGroups(entries) {
+  const groups = new Map(BUCKETS.map((bucket) => [bucket, []]))
+  for (const entry of entries) {
+    if (entry.quantity > 1) groups.get(rarityLabelKey(entry.cards) ?? 'common')?.push(entry)
+  }
+  return [...groups]
+    .filter(([, list]) => list.length)
+    .map(([bucket, list]) => ({ bucket, entries: list.sort((a, b) => a.cards.name.localeCompare(b.cards.name) || a.card_id.localeCompare(b.card_id)) }))
 }
 
 /** Milliseconds until missions and the daily reward reset (00:00 UTC). */

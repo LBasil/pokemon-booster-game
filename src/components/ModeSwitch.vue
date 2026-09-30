@@ -15,7 +15,7 @@ const MODES = [
   { mode: 'unlimited', to: 'game', label: 'nav.modeUnlimited' },
   { mode: 'challenge', to: 'challenge', label: 'nav.modeChallenge' },
 ]
-const waiting = computed(() => challenge.badge.rewards + challenge.badge.trades)
+const waiting = computed(() => challenge.waiting)
 </script>
 
 <template>

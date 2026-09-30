@@ -16,8 +16,10 @@ import UsernameCombobox from '@/components/UsernameCombobox.vue'
 
 // Trades between players (challenge mode): answer offers, follow the ones
 // you sent, and build a new one (?to=<username> prefills the partner, e.g.
-// from a public profile, and ?want=<card id> one of their cards). The
-// server checks and swaps the cards.
+// from a public profile, ?want=<card id> one of their cards, ?give=<card
+// id> one of mine, e.g. from a card's detail). The server checks and swaps
+// the cards. Answers to my offers I hadn't seen (migration 0017) come first,
+// then count as seen: the badge clears.
 const { t, locale } = useI18n()
 const route = useRoute()
 const trades = useTradesStore()
@@ -54,8 +56,26 @@ const lockedCards = computed(() =>
 )
 const unlock = (cardId) => trades.toggleLock(cardId).catch(showError)
 
-const groups = computed(() => trades.groups)
 const firstLoad = computed(() => !trades.loaded && !trades.error)
+
+// Answers new on this visit: kept on top until the page is left, even once
+// the server has them as seen (a live reload clears `unseen`)
+const freshIds = ref(new Set())
+watch(
+  () => trades.trades,
+  (list) => {
+    const fresh = list.filter((trade) => trade.unseen)
+    if (!fresh.length) return
+    freshIds.value = new Set([...freshIds.value, ...fresh.map((trade) => trade.id)])
+    trades.markSeen()
+  },
+  { immediate: true },
+)
+const answers = computed(() => trades.trades.filter((trade) => freshIds.value.has(trade.id)))
+const groups = computed(() => {
+  const { received, sent, history } = trades.groups
+  return { received, sent, history: history.filter((trade) => !freshIds.value.has(trade.id)) }
+})
 
 // ---------- Feedback ----------
 
@@ -157,6 +177,17 @@ const cardById = computed(() => {
   return map
 })
 
+// ?give=<card id> (a card's detail, "Propose in a trade"): already picked,
+// once my collection says I have it
+watch(
+  () => [route.query.give, myCollection.entries],
+  ([give]) => {
+    if (typeof give !== 'string' || giving.value.includes(give)) return
+    if (myCollection.entries.some((entry) => entry.card_id === give) && !trades.isLocked(give)) giving.value = toggleCard(giving.value, give)
+  },
+  { immediate: true },
+)
+
 const canSend = computed(() => partner.value && giving.value.length > 0 && !sending.value)
 
 async function send() {
@@ -201,6 +232,48 @@ const ago = (iso) => timeAgo(iso, locale.value)
       </div>
 
       <template v-else>
+        <!-- ============ Answers to my offers (new) ============ -->
+        <section v-if="answers.length" aria-labelledby="trades-answers">
+          <h2 id="trades-answers" class="pb-section-title">
+            {{ t('trades.answers') }} <span class="trades-count">{{ answers.length }}</span>
+          </h2>
+          <ul class="trades-list" role="list">
+            <li v-for="trade in answers" :key="trade.id" class="trade trade-answer" :data-status="trade.status">
+              <p class="trade-head">
+                <span class="trade-answer-text">
+                  <span class="history-status" :data-status="trade.status">{{ statusLabel(trade.status) }}</span>
+                  <i18n-t :keypath="`trades.answer.${trade.status}`" tag="span" scope="global">
+                    <template #name>
+                      <RouterLink :to="{ name: 'public-profile', params: { username: trade.partner } }" class="trade-partner">{{ trade.partner }}</RouterLink>
+                    </template>
+                  </i18n-t>
+                </span>
+                <span class="trade-time">{{ ago(trade.resolved_at ?? trade.created_at) }}</span>
+              </p>
+              <div class="trade-sides">
+                <div class="trade-side">
+                  <span class="trade-side-label">{{ trade.status === 'accepted' ? t('trades.youGave') : t('trades.youOffered') }}</span>
+                  <ul class="trade-cards" role="list">
+                    <li v-for="card in trade.offer" :key="card.id" :data-tier="rarityTier(card)">
+                      <img :src="card.image_small" :alt="card.name" :title="card.name" loading="lazy" />
+                    </li>
+                  </ul>
+                </div>
+                <span class="trade-arrow" aria-hidden="true">⇄</span>
+                <div class="trade-side">
+                  <span class="trade-side-label">{{ trade.status === 'accepted' ? t('trades.youGot') : t('trades.youAsked') }}</span>
+                  <ul v-if="trade.request.length" class="trade-cards" role="list">
+                    <li v-for="card in trade.request" :key="card.id" :data-tier="rarityTier(card)">
+                      <img :src="card.image_small" :alt="card.name" :title="card.name" loading="lazy" />
+                    </li>
+                  </ul>
+                  <p v-else class="trade-gift">{{ t('trades.gift') }}</p>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </section>
+
         <!-- ============ Received ============ -->
         <section v-if="groups.received.length" aria-labelledby="trades-received">
           <h2 id="trades-received" class="pb-section-title">
@@ -804,6 +877,21 @@ const ago = (iso) => timeAgo(iso, locale.value)
   margin: 0;
   font-weight: 600;
   font-size: 0.9rem;
+}
+
+/* ---------- Answers to my offers ---------- */
+
+.trade-answer[data-status='accepted'] {
+  border-color: color-mix(in srgb, var(--pb-success-text) 45%, var(--pb-border));
+}
+
+.trade-answer-text {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  font-weight: 600;
 }
 
 /* ---------- History ---------- */

@@ -514,7 +514,25 @@
     "waitingMissions": "{count} mission finished | {count} missions finished",
     "seeMissions": "See missions",
     "weeklyTitle": "This week",
-    "inDays": "{days} d {hours} h"
+    "inDays": "{days} d {hours} h",
+    "tradeAnswers": "{count} answer to your offers | {count} answers to your offers",
+    "seeAnswers": "See answers",
+    "pick": {
+      "choose": "Choose…",
+      "title": "Choose the duplicates to recycle",
+      "hint": "Tick the cards to recycle: every extra copy goes, one of each always stays in your collection.",
+      "buckets": {
+        "common": "Commons",
+        "uncommon": "Uncommons",
+        "rare": "Rares",
+        "holo": "Holos",
+        "ultra": "Ultra rares",
+        "secret": "Secret rares"
+      },
+      "extra": "{count} extra copy | {count} extra copies",
+      "total": "Nothing picked | {count} duplicate picked | {count} duplicates picked",
+      "recycle": "Recycle | Recycle {count} duplicate | Recycle {count} duplicates"
+    }
   },
   "trades": {
     "title": "Trades",
@@ -574,7 +592,41 @@
     "unlock": "Allow trades for {name}",
     "owned": "New for you | You have 1 | You have {count}",
     "suggestions": "Suggestions",
-    "suggestionClosed": "Doesn't accept trades"
+    "suggestionClosed": "Doesn't accept trades",
+    "answers": "New answers to your offers",
+    "answer": {
+      "accepted": "{name} accepted your offer",
+      "declined": "{name} declined your offer",
+      "failed": "Your offer to {name} couldn’t happen (a card was gone)"
+    },
+    "youGave": "You gave",
+    "youGot": "You got",
+    "youOffered": "You offered",
+    "youAsked": "You asked for",
+    "offerThis": "Offer in a trade",
+    "toast": {
+      "someone": "A trainer",
+      "offer": {
+        "eyebrow": "New trade offer",
+        "title": "{name} sent you an offer",
+        "desc": "Tap to see it and answer."
+      },
+      "accepted": {
+        "eyebrow": "Trade done",
+        "title": "{name} accepted your offer",
+        "desc": "The cards are in your challenge collection."
+      },
+      "declined": {
+        "eyebrow": "Offer declined",
+        "title": "{name} declined your offer",
+        "desc": "Your cards stay with you."
+      },
+      "failed": {
+        "eyebrow": "Trade failed",
+        "title": "Your offer to {name} couldn’t happen",
+        "desc": "A card was no longer there, nothing moved."
+      }
+    }
   },
   "games": {
     "title": "Mini-games",
@@ -775,7 +827,13 @@
       "fun": "Oddities",
       "dedication": "Dedication",
       "luck": "Luck",
-      "economy": "Coins & trades"
+      "economy": "Coins & trades",
+      "families": "Evolution lines",
+      "legends": "Legends",
+      "gyms": "Gym badges",
+      "league": "Pokémon League",
+      "rivals": "Rivals & heroes",
+      "places": "Places"
     },
     "regions": {
       "kanto": "Kanto",
@@ -1450,6 +1508,405 @@
       },
       "recycled1000": {
         "title": "Zero waste"
+      },
+      "bulbasaurLine": {
+        "title": "Venusaur line"
+      },
+      "squirtleLine": {
+        "title": "Blastoise line"
+      },
+      "caterpieLine": {
+        "title": "Butterfree line"
+      },
+      "weedleLine": {
+        "title": "Beedrill line"
+      },
+      "pidgeyLine": {
+        "title": "Pidgeot line"
+      },
+      "poliwagLine": {
+        "title": "Poliwrath line"
+      },
+      "abraLine": {
+        "title": "Alakazam line"
+      },
+      "machopLine": {
+        "title": "Machamp line"
+      },
+      "geodudeLine": {
+        "title": "Golem line"
+      },
+      "dratiniLine": {
+        "title": "Dragonite line"
+      },
+      "chikoritaLine": {
+        "title": "Meganium line"
+      },
+      "cyndaquilLine": {
+        "title": "Typhlosion line"
+      },
+      "totodileLine": {
+        "title": "Feraligatr line"
+      },
+      "mareepLine": {
+        "title": "Ampharos line"
+      },
+      "larvitarLine": {
+        "title": "Tyranitar line"
+      },
+      "treeckoLine": {
+        "title": "Sceptile line"
+      },
+      "torchicLine": {
+        "title": "Blaziken line"
+      },
+      "mudkipLine": {
+        "title": "Swampert line"
+      },
+      "raltsLine": {
+        "title": "Gardevoir line"
+      },
+      "aronLine": {
+        "title": "Aggron line"
+      },
+      "bagonLine": {
+        "title": "Salamence line"
+      },
+      "beldumLine": {
+        "title": "Metagross line"
+      },
+      "turtwigLine": {
+        "title": "Torterra line"
+      },
+      "chimcharLine": {
+        "title": "Infernape line"
+      },
+      "piplupLine": {
+        "title": "Empoleon line"
+      },
+      "gibleLine": {
+        "title": "Garchomp line"
+      },
+      "rioluLine": {
+        "title": "Lucario line"
+      },
+      "snivyLine": {
+        "title": "Serperior line"
+      },
+      "tepigLine": {
+        "title": "Emboar line"
+      },
+      "oshawottLine": {
+        "title": "Samurott line"
+      },
+      "deinoLine": {
+        "title": "Hydreigon line"
+      },
+      "chespinLine": {
+        "title": "Chesnaught line"
+      },
+      "fennekinLine": {
+        "title": "Delphox line"
+      },
+      "froakieLine": {
+        "title": "Greninja line"
+      },
+      "goomyLine": {
+        "title": "Goodra line"
+      },
+      "rowletLine": {
+        "title": "Decidueye line"
+      },
+      "littenLine": {
+        "title": "Incineroar line"
+      },
+      "popplioLine": {
+        "title": "Primarina line"
+      },
+      "jangmooLine": {
+        "title": "Kommo-o line"
+      },
+      "grookeyLine": {
+        "title": "Rillaboom line"
+      },
+      "scorbunnyLine": {
+        "title": "Cinderace line"
+      },
+      "sobbleLine": {
+        "title": "Inteleon line"
+      },
+      "dreepyLine": {
+        "title": "Dragapult line"
+      },
+      "sprigatitoLine": {
+        "title": "Meowscarada line"
+      },
+      "fuecocoLine": {
+        "title": "Skeledirge line"
+      },
+      "quaxlyLine": {
+        "title": "Quaquaval line"
+      },
+      "frigibaxLine": {
+        "title": "Baxcalibur line"
+      },
+      "pseudoLegends": {
+        "title": "Pseudo-legends"
+      },
+      "unovaStarters": {
+        "title": "Unova starters"
+      },
+      "kalosStarters": {
+        "title": "Kalos starters"
+      },
+      "alolaStarters": {
+        "title": "Alola starters"
+      },
+      "galarStarters": {
+        "title": "Galar starters"
+      },
+      "paldeaStarters": {
+        "title": "Paldea starters"
+      },
+      "regiTrio": {
+        "title": "Legendary golems"
+      },
+      "allRegis": {
+        "title": "The six Regis"
+      },
+      "lunarDuo": {
+        "title": "Lunar duo"
+      },
+      "forcesOfNature": {
+        "title": "Forces of Nature"
+      },
+      "tapus": {
+        "title": "Island guardians"
+      },
+      "alolaLegends": {
+        "title": "Sun and Moon"
+      },
+      "galarHeroes": {
+        "title": "Heroes of Galar"
+      },
+      "galarSteeds": {
+        "title": "The king and his steeds"
+      },
+      "treasuresOfRuin": {
+        "title": "Four treasures"
+      },
+      "paldeaLegends": {
+        "title": "Legendary rides"
+      },
+      "boulderBadge": {
+        "title": "Boulder Badge"
+      },
+      "cascadeBadge": {
+        "title": "Cascade Badge"
+      },
+      "thunderBadge": {
+        "title": "Thunder Badge"
+      },
+      "rainbowBadge": {
+        "title": "Rainbow Badge"
+      },
+      "soulBadge": {
+        "title": "Soul Badge"
+      },
+      "marshBadge": {
+        "title": "Marsh Badge"
+      },
+      "volcanoBadge": {
+        "title": "Volcano Badge"
+      },
+      "earthBadge": {
+        "title": "Earth Badge"
+      },
+      "zephyrBadge": {
+        "title": "Zephyr Badge"
+      },
+      "hiveBadge": {
+        "title": "Hive Badge"
+      },
+      "plainBadge": {
+        "title": "Plain Badge"
+      },
+      "fogBadge": {
+        "title": "Fog Badge"
+      },
+      "stormBadge": {
+        "title": "Storm Badge"
+      },
+      "mineralBadge": {
+        "title": "Mineral Badge"
+      },
+      "glacierBadge": {
+        "title": "Glacier Badge"
+      },
+      "risingBadge": {
+        "title": "Rising Badge"
+      },
+      "lorelei": {
+        "title": "Lorelei"
+      },
+      "bruno": {
+        "title": "Bruno"
+      },
+      "agatha": {
+        "title": "Agatha"
+      },
+      "lance": {
+        "title": "Lance"
+      },
+      "blue": {
+        "title": "Champion Blue"
+      },
+      "steven": {
+        "title": "Champion Steven"
+      },
+      "wallace": {
+        "title": "Champion Wallace"
+      },
+      "cynthia": {
+        "title": "Champion Cynthia"
+      },
+      "alder": {
+        "title": "Champion Alder"
+      },
+      "iris": {
+        "title": "Champion Iris"
+      },
+      "diantha": {
+        "title": "Champion Diantha"
+      },
+      "leon": {
+        "title": "Champion Leon"
+      },
+      "red": {
+        "title": "Red at Mt. Silver"
+      },
+      "silver": {
+        "title": "Rival Silver"
+      },
+      "ashKanto": {
+        "title": "Gotta catch ’em all"
+      },
+      "ashChampion": {
+        "title": "World champion"
+      },
+      "teamRocket": {
+        "title": "Blasting off again"
+      },
+      "route1": {
+        "title": "Route 1"
+      },
+      "viridianForest": {
+        "title": "Viridian Forest"
+      },
+      "mtMoon": {
+        "title": "Mt. Moon"
+      },
+      "pokemonTower": {
+        "title": "Pokémon Tower"
+      },
+      "safariZone": {
+        "title": "Safari Zone"
+      },
+      "powerPlant": {
+        "title": "Power Plant"
+      },
+      "seafoamIslands": {
+        "title": "Seafoam Islands"
+      },
+      "pokemonMansion": {
+        "title": "Pokémon Mansion"
+      },
+      "ceruleanCave": {
+        "title": "Cerulean Cave"
+      },
+      "victoryRoad": {
+        "title": "Victory Road"
+      },
+      "nationalPark": {
+        "title": "National Park"
+      },
+      "petalburgWoods": {
+        "title": "Petalburg Woods"
+      },
+      "meteorFalls": {
+        "title": "Meteor Falls"
+      },
+      "route119": {
+        "title": "Route 119"
+      },
+      "families5": {
+        "title": "Family reunion"
+      },
+      "families15": {
+        "title": "Evolution expert"
+      },
+      "families30": {
+        "title": "Family tree"
+      },
+      "allStarters": {
+        "title": "Professor’s lab"
+      },
+      "starterFinals": {
+        "title": "Fully evolved"
+      },
+      "legendaries3": {
+        "title": "Brush with legend"
+      },
+      "legendaries10": {
+        "title": "Legend hunter"
+      },
+      "legendaries25": {
+        "title": "Legendary vault"
+      },
+      "legendaries50": {
+        "title": "Hall of legends"
+      },
+      "mythicals1": {
+        "title": "Mythical encounter"
+      },
+      "mythicals5": {
+        "title": "Event regular"
+      },
+      "mythicals10": {
+        "title": "Mythologist"
+      },
+      "mythicals20": {
+        "title": "Beyond myth"
+      },
+      "ultraBeasts": {
+        "title": "Ultra Wormhole"
+      },
+      "kantoBadges": {
+        "title": "Kanto badge case"
+      },
+      "johtoBadges": {
+        "title": "Johto badge case"
+      },
+      "eliteFour": {
+        "title": "Indigo Plateau"
+      },
+      "champions1": {
+        "title": "Champion challenger"
+      },
+      "champions4": {
+        "title": "Hall of Fame"
+      },
+      "champions8": {
+        "title": "Champion of champions"
+      },
+      "places3": {
+        "title": "Explorer"
+      },
+      "places7": {
+        "title": "Globetrotter"
+      },
+      "places14": {
+        "title": "Town Map complete"
       }
     },
     "desc": {
@@ -1545,7 +2002,130 @@
       "trades": "Complete a trade | Complete {count} trades",
       "gifts": "Give cards to another player | Give cards to other players {count} times",
       "crafted": "Craft a card | Craft {count} cards",
-      "recycled": "Recycle {count} duplicates"
+      "recycled": "Recycle {count} duplicates",
+      "groups": {
+        "bulbasaurLine": "Own the whole line: Bulbasaur, Ivysaur and Venusaur",
+        "squirtleLine": "Own the whole line: Squirtle, Wartortle and Blastoise",
+        "caterpieLine": "Own the whole line: Caterpie, Metapod and Butterfree",
+        "weedleLine": "Own the whole line: Weedle, Kakuna and Beedrill",
+        "pidgeyLine": "Own the whole line: Pidgey, Pidgeotto and Pidgeot",
+        "poliwagLine": "Own the whole line: Poliwag, Poliwhirl and Poliwrath",
+        "abraLine": "Own the whole line: Abra, Kadabra and Alakazam",
+        "machopLine": "Own the whole line: Machop, Machoke and Machamp",
+        "geodudeLine": "Own the whole line: Geodude, Graveler and Golem",
+        "dratiniLine": "Own the whole line: Dratini, Dragonair and Dragonite",
+        "chikoritaLine": "Own the whole line: Chikorita, Bayleef and Meganium",
+        "cyndaquilLine": "Own the whole line: Cyndaquil, Quilava and Typhlosion",
+        "totodileLine": "Own the whole line: Totodile, Croconaw and Feraligatr",
+        "mareepLine": "Own the whole line: Mareep, Flaaffy and Ampharos",
+        "larvitarLine": "Own the whole line: Larvitar, Pupitar and Tyranitar",
+        "treeckoLine": "Own the whole line: Treecko, Grovyle and Sceptile",
+        "torchicLine": "Own the whole line: Torchic, Combusken and Blaziken",
+        "mudkipLine": "Own the whole line: Mudkip, Marshtomp and Swampert",
+        "raltsLine": "Own the whole line: Ralts, Kirlia and Gardevoir",
+        "aronLine": "Own the whole line: Aron, Lairon and Aggron",
+        "bagonLine": "Own the whole line: Bagon, Shelgon and Salamence",
+        "beldumLine": "Own the whole line: Beldum, Metang and Metagross",
+        "turtwigLine": "Own the whole line: Turtwig, Grotle and Torterra",
+        "chimcharLine": "Own the whole line: Chimchar, Monferno and Infernape",
+        "piplupLine": "Own the whole line: Piplup, Prinplup and Empoleon",
+        "gibleLine": "Own the whole line: Gible, Gabite and Garchomp",
+        "rioluLine": "Own the whole line: Riolu and Lucario",
+        "snivyLine": "Own the whole line: Snivy, Servine and Serperior",
+        "tepigLine": "Own the whole line: Tepig, Pignite and Emboar",
+        "oshawottLine": "Own the whole line: Oshawott, Dewott and Samurott",
+        "deinoLine": "Own the whole line: Deino, Zweilous and Hydreigon",
+        "chespinLine": "Own the whole line: Chespin, Quilladin and Chesnaught",
+        "fennekinLine": "Own the whole line: Fennekin, Braixen and Delphox",
+        "froakieLine": "Own the whole line: Froakie, Frogadier and Greninja",
+        "goomyLine": "Own the whole line: Goomy, Sliggoo and Goodra",
+        "rowletLine": "Own the whole line: Rowlet, Dartrix and Decidueye",
+        "littenLine": "Own the whole line: Litten, Torracat and Incineroar",
+        "popplioLine": "Own the whole line: Popplio, Brionne and Primarina",
+        "jangmooLine": "Own the whole line: Jangmo-o, Hakamo-o and Kommo-o",
+        "grookeyLine": "Own the whole line: Grookey, Thwackey and Rillaboom",
+        "scorbunnyLine": "Own the whole line: Scorbunny, Raboot and Cinderace",
+        "sobbleLine": "Own the whole line: Sobble, Drizzile and Inteleon",
+        "dreepyLine": "Own the whole line: Dreepy, Drakloak and Dragapult",
+        "sprigatitoLine": "Own the whole line: Sprigatito, Floragato and Meowscarada",
+        "fuecocoLine": "Own the whole line: Fuecoco, Crocalor and Skeledirge",
+        "quaxlyLine": "Own the whole line: Quaxly, Quaxwell and Quaquaval",
+        "frigibaxLine": "Own the whole line: Frigibax, Arctibax and Baxcalibur",
+        "pseudoLegends": "Own the 10 pseudo-legendary Pokémon: Dragonite, Tyranitar, Salamence, Metagross, Garchomp, Hydreigon, Goodra, Kommo-o, Dragapult and Baxcalibur",
+        "unovaStarters": "Own Snivy, Tepig and Oshawott",
+        "kalosStarters": "Own Chespin, Fennekin and Froakie",
+        "alolaStarters": "Own Rowlet, Litten and Popplio",
+        "galarStarters": "Own Grookey, Scorbunny and Sobble",
+        "paldeaStarters": "Own Sprigatito, Fuecoco and Quaxly",
+        "regiTrio": "Own Regirock, Regice and Registeel",
+        "allRegis": "Own Regirock, Regice, Registeel, Regigigas, Regieleki and Regidrago",
+        "lunarDuo": "Own Cresselia and Darkrai",
+        "forcesOfNature": "Own Tornadus, Thundurus, Landorus and Enamorus",
+        "tapus": "Own Tapu Koko, Tapu Lele, Tapu Bulu and Tapu Fini",
+        "alolaLegends": "Own Solgaleo, Lunala and Necrozma",
+        "galarHeroes": "Own Zacian and Zamazenta",
+        "galarSteeds": "Own Glastrier, Spectrier and Calyrex",
+        "treasuresOfRuin": "Own Wo-Chien, Chien-Pao, Ting-Lu and Chi-Yu",
+        "paldeaLegends": "Own Koraidon and Miraidon",
+        "boulderBadge": "Gym leader Brock’s team: own Geodude and Onix",
+        "cascadeBadge": "Gym leader Misty’s team: own Staryu and Starmie",
+        "thunderBadge": "Gym leader Lt. Surge’s team: own Voltorb, Pikachu and Raichu",
+        "rainbowBadge": "Gym leader Erika’s team: own Victreebel, Tangela and Vileplume",
+        "soulBadge": "Gym leader Koga’s team: own Koffing, Muk and Weezing",
+        "marshBadge": "Gym leader Sabrina’s team: own Kadabra, Mr. Mime, Venomoth and Alakazam",
+        "volcanoBadge": "Gym leader Blaine’s team: own Growlithe, Ponyta, Rapidash and Arcanine",
+        "earthBadge": "Gym leader Giovanni’s team: own Rhyhorn, Dugtrio, Nidoqueen, Nidoking and Rhydon",
+        "zephyrBadge": "Gym leader Falkner’s team: own Pidgey and Pidgeotto",
+        "hiveBadge": "Gym leader Bugsy’s team: own Metapod, Kakuna and Scyther",
+        "plainBadge": "Gym leader Whitney’s team: own Clefairy and Miltank",
+        "fogBadge": "Gym leader Morty’s team: own Gastly, Haunter and Gengar",
+        "stormBadge": "Gym leader Chuck’s team: own Primeape and Poliwrath",
+        "mineralBadge": "Gym leader Jasmine’s team: own Magnemite and Steelix",
+        "glacierBadge": "Gym leader Pryce’s team: own Seel, Dewgong and Piloswine",
+        "risingBadge": "Gym leader Clair’s team: own Dragonair and Kingdra",
+        "lorelei": "Elite Four Lorelei’s team: own Dewgong, Cloyster, Slowbro, Jynx and Lapras",
+        "bruno": "Elite Four Bruno’s team: own Onix, Hitmonchan, Hitmonlee and Machamp",
+        "agatha": "Elite Four Agatha’s team: own Gengar, Golbat, Haunter and Arbok",
+        "lance": "Elite Four Lance’s team: own Gyarados, Dragonair, Aerodactyl and Dragonite",
+        "blue": "Blue’s team as champion (HeartGold and SoulSilver): own Pidgeot, Alakazam, Rhydon, Gyarados, Arcanine and Exeggutor",
+        "steven": "Steven’s team as champion (Ruby and Sapphire): own Skarmory, Claydol, Aggron, Cradily, Armaldo and Metagross",
+        "wallace": "Wallace’s team as champion (Emerald): own Wailord, Tentacruel, Ludicolo, Whiscash, Gyarados and Milotic",
+        "cynthia": "Cynthia’s team as champion (Diamond and Pearl): own Spiritomb, Roserade, Gastrodon, Lucario, Milotic and Garchomp",
+        "alder": "Alder’s team as champion (Black and White): own Accelgor, Bouffalant, Druddigon, Vanilluxe, Escavalier and Volcarona",
+        "iris": "Iris’s team as champion (Black 2 and White 2): own Hydreigon, Druddigon, Aggron, Archeops, Lapras and Haxorus",
+        "diantha": "Diantha’s team as champion (X and Y): own Hawlucha, Tyrantrum, Aurorus, Gourgeist, Goodra and Gardevoir",
+        "leon": "Leon’s team as champion (Sword and Shield): own Aegislash, Dragapult, Haxorus and Charizard",
+        "red": "Red’s team on Mt. Silver: own Pikachu, Espeon, Snorlax, Venusaur, Charizard and Blastoise",
+        "silver": "Silver’s team: own Sneasel, Crobat, Magneton, Gengar and Alakazam",
+        "ashKanto": "Ash’s first team: own Pikachu, Butterfree, Pidgeotto, Bulbasaur, Charizard and Squirtle",
+        "ashChampion": "Ash’s world champion team: own Pikachu, Lucario, Dragonite, Gengar, Sirfetch'd and Dracovish",
+        "teamRocket": "Jessie, James and Meowth’s Pokémon: own Ekans, Koffing, Meowth, Arbok, Weezing and Wobbuffet",
+        "route1": "Own the Pokémon found there: Pidgey and Rattata",
+        "viridianForest": "Own the Pokémon found there: Caterpie, Metapod, Weedle, Kakuna and Pikachu",
+        "mtMoon": "Own the Pokémon found there: Zubat, Geodude, Paras and Clefairy",
+        "pokemonTower": "Own the Pokémon found there: Gastly, Haunter and Cubone",
+        "safariZone": "Own the Pokémon found there: Chansey, Kangaskhan, Scyther, Pinsir, Tauros, Rhyhorn, Exeggcute and Dratini",
+        "powerPlant": "Own the Pokémon found there: Voltorb, Magnemite, Pikachu, Electabuzz and Zapdos",
+        "seafoamIslands": "Own the Pokémon found there: Seel, Slowpoke, Psyduck, Shellder and Articuno",
+        "pokemonMansion": "Own the Pokémon found there: Grimer, Koffing, Ponyta, Magmar and Ditto",
+        "ceruleanCave": "Own the Pokémon found there: Mewtwo, Ditto, Rhydon and Kadabra",
+        "victoryRoad": "Own the Pokémon found there: Machoke, Onix, Graveler, Golbat, Marowak and Moltres",
+        "nationalPark": "Own the Pokémon found there: Scyther, Pinsir, Butterfree, Beedrill, Venonat and Paras",
+        "petalburgWoods": "Own the Pokémon found there: Wurmple, Shroomish and Slakoth",
+        "meteorFalls": "Own the Pokémon found there: Lunatone, Solrock and Bagon",
+        "route119": "Own the Pokémon found there: Feebas and Milotic"
+      },
+      "families": "Complete {count} evolution line | Complete {count} evolution lines",
+      "allStarters": "Own the {count} starter Pokémon, Kanto to Paldea",
+      "starterFinals": "Own the {count} starters’ final evolutions",
+      "legendaries": "Own {count} legendary Pokémon | Own {count} different legendary Pokémon",
+      "mythicals": "Own {count} mythical Pokémon | Own {count} different mythical Pokémon",
+      "ultraBeasts": "Own the {count} Ultra Beasts",
+      "kantoBadges": "Complete the teams of Kanto’s {count} gym leaders",
+      "johtoBadges": "Complete the teams of Johto’s {count} gym leaders",
+      "eliteFour": "Complete the teams of Kanto’s Elite Four",
+      "champions": "Complete {count} champion’s team | Complete {count} champions’ teams",
+      "places": "Own every Pokémon of {count} place | Own every Pokémon of {count} places"
     }
   },
   "beta": {

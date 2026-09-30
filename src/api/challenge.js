@@ -32,6 +32,9 @@ export const CHALLENGE_ERRORS = [
   'super_effective_unavailable',
 ]
 
+// PostgREST's answer for an RPC that doesn't exist yet
+const MISSING_FUNCTION = 'PGRST202'
+
 async function call(name, args) {
   const { data, error } = await supabase.rpc(name, args)
   if (error) {
@@ -57,14 +60,45 @@ export const openChallengeBooster = (setId) => call('open_challenge_booster', { 
 /** Recycles every duplicate of one card, or of every card when `cardId` is null. */
 export const recycleDuplicates = (cardId = null) => call('recycle_duplicates', { p_card_id: cardId })
 
+/**
+ * Recycles every duplicate of the picked cards only (migration 0017).
+ * Before 0017, one recycle_duplicates() call per card, added up.
+ * @returns {Promise<{ recycled: number, gained: number, coins: number }>}
+ */
+export async function recycleCards(cardIds) {
+  try {
+    return await call('recycle_cards', { p_card_ids: cardIds })
+  } catch (err) {
+    if (err?.code !== MISSING_FUNCTION) throw err
+  }
+  const total = { recycled: 0, gained: 0, coins: null }
+  for (const cardId of cardIds) {
+    const result = await recycleDuplicates(cardId)
+    total.recycled += result.recycled
+    total.gained += result.gained
+    total.coins = result.coins
+  }
+  return total
+}
+
 export const craftCard = (cardId) => call('craft_card', { p_card_id: cardId })
 
-/** What's waiting: { rewards, trades } (never creates a wallet). */
-export const fetchChallengeBadge = () => call('challenge_badge')
+/**
+ * What's waiting (never creates a wallet): { rewards, trades, answers }.
+ * answers = my offers answered since I last looked (migration 0017, 0 before).
+ */
+export async function fetchChallengeBadge() {
+  const badge = await call('challenge_badge')
+  return { rewards: 0, trades: 0, answers: 0, ...badge }
+}
 
 // ---------- Trades (migration 0007) ----------
 
-/** The player's 50 latest offers: { id, direction, partner, offer, request, status, created_at, resolved_at }. */
+/**
+ * The player's 50 latest offers: { id, direction, partner, offer, request,
+ * status, unseen, created_at, resolved_at }. unseen (migration 0017) = an
+ * answer to one of my offers I haven't seen yet.
+ */
 export const fetchTrades = () => call('my_trades')
 
 /** A public player's challenge collection, same shape as fetchCollection() rows. */
@@ -78,6 +112,16 @@ export const proposeTrade = (username, offerIds, requestIds) =>
 export const respondTrade = (tradeId, accept) => call('respond_trade', { p_trade_id: tradeId, p_accept: accept })
 
 export const cancelTrade = (tradeId) => call('cancel_trade', { p_trade_id: tradeId })
+
+/** The trades page was opened: every answer to my offers is seen (0 before migration 0017). */
+export async function markTradeAnswersSeen() {
+  try {
+    return await call('mark_trade_answers_seen')
+  } catch (err) {
+    if (err?.code === MISSING_FUNCTION) return 0
+    throw err
+  }
+}
 
 /**
  * Live changes to the player's offers (migration 0011 puts trade_offers in

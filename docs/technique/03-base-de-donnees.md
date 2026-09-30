@@ -229,6 +229,7 @@ hebdomadaires le lundi à 00:00 UTC (`challenge_week_start()`).
 | `request_cards` | 0 à 5 ids demandés (0 = cadeau) |
 | `status` | `pending`, `accepted`, `declined`, `cancelled`, `failed` |
 | `created_at`, `resolved_at` | Une offre en attente expire après 7 jours (`trade_ttl()`) |
+| `answer_seen` | L'expéditeur a vu la fin de son offre (acceptée, refusée, échouée) ; `false` jusqu'à sa visite de la page des échanges (0017). Les offres déjà finies à l'ajout de la colonne comptent comme vues |
 
 Lecture : les deux joueurs concernés. Écriture client : aucune. Publiée
 dans Realtime (la RLS s'applique : chacun ne reçoit que ses offres).
@@ -334,6 +335,7 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0014 | `minigame_electrode_flip` | Mini-jeu « Électrode Shiny Flip » (écrite le 2026-09-27, **à appliquer**) |
 | 0015 | `minigame_super_effective` | Colonne `cards.weaknesses` + mini-jeu « Super efficace ! » (écrite le 2026-09-28, **à appliquer**, puis relancer l'import) |
 | 0016 | `feed_top_rarity` | Les sets sans ultra ni secrète publient leurs holo dans le fil (écrite le 2026-09-29, **à appliquer**) |
+| 0017 | `trade_answers_recycle_picks` | Réponses aux offres signalées à l'expéditeur (`answer_seen`, badge), recyclage d'une sélection (`recycle_cards`) (écrite le 2026-09-30, **à appliquer**) |
 
 Les migrations 0001 à 0013 sont appliquées sur le projet réel (vérifié le
 2026-09-27).

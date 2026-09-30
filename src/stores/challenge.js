@@ -6,6 +6,7 @@ import {
   fetchChallengeBadge,
   fetchChallengeState,
   openChallengeBooster,
+  recycleCards,
   recycleDuplicates,
 } from '@/api/challenge'
 import { useAchievementsStore } from '@/stores/achievements'
@@ -15,7 +16,8 @@ import { affordablePacks } from '@/utils/challenge'
 // The signed-in player's challenge wallet: coins, daily reward
 // and today's + this week's missions (weekly: migration 0011, empty
 // before). Every change comes back from the server.
-// `badge` = what's waiting (rewards + incoming trades) for the navigation.
+// `badge` = what's waiting for the navigation: rewards, incoming trade
+// offers, and answers to my offers I haven't seen (migration 0017).
 const BADGE_TTL = 60_000
 export const useChallengeStore = defineStore('challenge', {
   state: () => ({
@@ -27,7 +29,7 @@ export const useChallengeStore = defineStore('challenge', {
     // loading skeleton while it's false.
     stale: false,
     error: null,
-    badge: { rewards: 0, trades: 0 },
+    badge: { rewards: 0, trades: 0, answers: 0 },
     badgeAt: 0,
   }),
   getters: {
@@ -35,6 +37,10 @@ export const useChallengeStore = defineStore('challenge', {
     missions: (s) => s.state?.missions ?? [],
     weekly: (s) => s.state?.weekly ?? [],
     affordable: (s) => affordablePacks(s.state?.coins),
+    // Trade news: offers to answer + answers to read (the Trades links)
+    tradeNews: (s) => s.badge.trades + s.badge.answers,
+    // Everything waiting (the Challenge links outside the challenge)
+    waiting: (s) => s.badge.rewards + s.badge.trades + s.badge.answers,
     // Missions done but not yet claimed + the daily reward: drives the hub badge
     pendingRewards: (s) =>
       (s.state?.daily_available ? 1 : 0) +
@@ -100,10 +106,14 @@ export const useChallengeStore = defineStore('challenge', {
       return result
     },
 
-    /** @returns {Promise<{ recycled: number, gained: number }>} */
-    async recycle(cardId = null) {
-      const result = await recycleDuplicates(cardId)
-      if (this.state) this.state = { ...this.state, coins: result.coins }
+    /**
+     * Every duplicate (no argument), those of one card (an id) or of a pick
+     * of cards (an array of ids).
+     * @returns {Promise<{ recycled: number, gained: number }>}
+     */
+    async recycle(cards = null) {
+      const result = Array.isArray(cards) ? await recycleCards(cards) : await recycleDuplicates(cards)
+      if (this.state && result.coins != null) this.state = { ...this.state, coins: result.coins }
       if (result.recycled) {
         // The "recycle" mission moved: refresh in the background
         this.load({ force: true })
