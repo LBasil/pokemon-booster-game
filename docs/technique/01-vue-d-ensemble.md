@@ -15,7 +15,7 @@ jeu**, avec chacun sa collection :
   joueurs.
 
 Autour des deux modes : profils publics, fil des gros tirages en direct,
-classements, ~370 succès par mode, liste de souhaits, historique des
+classements, ~470 succès par mode, liste de souhaits, historique des
 ouvertures, application installable (PWA), français/anglais, thème clair
 ou sombre.
 
@@ -80,7 +80,7 @@ serveur**. Le navigateur ne fait qu'afficher et demander.
 | --- | --- |
 | Les 10 cartes d'un booster (taux de tirage réels) | L'ordre de révélation (communes d'abord, meilleure carte à la fin) |
 | L'ajout des cartes à la collection | Les statistiques affichées (total, valeur, raretés, niveau) |
-| Le solde de pièces, les récompenses, les missions | Les succès (~370 définitions en JS) |
+| Le solde de pièces, les récompenses, les missions | Les succès (~470 définitions en JS) |
 | Les échanges (vérification + transfert atomique) | Les filtres, tris, recherches |
 | Les réponses du mini-jeu et ses gains | Les animations, sons, vibrations |
 | Le fil public et les classements | Le thème, la langue, les réglages |
@@ -92,7 +92,7 @@ Deux exceptions assumées, documentées dans le code :
   (`trade_locks`), et certaines colonnes de son propre profil (pseudo,
   public/privé, carte vitrine, accepte les échanges).
 - **Les succès débloqués** sont déclarés par le client
-  (`record_achievements`), car le serveur ne peut pas recalculer ~370
+  (`record_achievements`), car le serveur ne peut pas recalculer ~470
   définitions écrites en JS. Ça ne sert qu'à afficher un pourcentage
   anonyme (« 12 % des joueurs »), que rien ne classe ni ne récompense.
 

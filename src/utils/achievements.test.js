@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import en from '@/i18n/locales/en.json'
 import fr from '@/i18n/locales/fr.json'
-import { CATEGORIES, DEFINITIONS, achievementProgress, achievements, collectorStats, filterAchievements, MAX_TOASTS, newlyUnlocked, nextUp, rateOf, sortForToasts, toastBatch } from './achievements'
+import { CATEGORIES, DEFINITIONS, achievementProgress, achievements, collectorStats, filterAchievements, MAX_TOASTS, newlyUnlocked, nextUp, rateOf, sortForToasts, tagsOf, TAGS, toastBatch } from './achievements'
+import { KANTO_EXTRAS, KANTO_LINES } from './kanto'
+import { LEGENDS } from './pokemonGroups'
 
 const card = (id, fields = {}) => ({
   id,
@@ -50,6 +52,19 @@ describe('definitions', () => {
       expect(typeof lookup(`desc.${item.desc}`), item.id).toBe('string')
     }
     for (const category of CATEGORIES) expect(typeof messages.achievements.categories[category]).toBe('string')
+    for (const sub of new Set(DEFINITIONS.map((d) => d.sub).filter(Boolean))) expect(typeof messages.achievements.subs[sub], sub).toBe('string')
+  })
+
+  it('have known region tags', () => {
+    expect(DEFINITIONS.every((d) => (d.tags ?? []).every((tag) => TAGS.includes(tag))), 'tags').toBe(true)
+  })
+
+  it('keep each subcategory in one block (one heading per subcategory)', () => {
+    for (const category of CATEGORIES) {
+      const subs = DEFINITIONS.filter((d) => d.category === category).map((d) => d.sub ?? null)
+      const blocks = subs.filter((sub, i) => sub !== subs[i - 1])
+      expect(new Set(blocks).size, category).toBe(blocks.length)
+    }
   })
 })
 
@@ -217,7 +232,7 @@ describe('achievements per mode', () => {
 
   it('challenge: the server count wins (recycling, crafting)', () => {
     const s = collectorStats(entries, sets, { mode: 'challenge', packs: 12 })
-    expect([s.boosters, s.pulled, s.total]).toEqual([12, 120, 30])
+    expect([s.boosters, s.total]).toEqual([12, 30])
     expect(collectorStats(entries, sets, { mode: 'challenge' }).boosters).toBe(3) // unknown: fallback
   })
 
@@ -234,19 +249,19 @@ describe('pack stats and subsets (migration 0010)', () => {
   const stats = { packs: 40, hit_packs: 10, secrets: 1, max_hits: 2, god_packs: 1, sets: 5, days: 10, best_day: 25, best_streak: 7, top_set_packs: 25 }
 
   it('reads the server stats, all locked without them', () => {
-    const a = byId(achievements([], sets, { mode: 'challenge', packs: 40, stats }))
+    const a = byId(achievements([], sets, { mode: 'challenge', packs: 40, stats: { ...stats, secrets: 5 } }))
     expect(a.hitPacks10.unlocked).toBe(true)
+    expect(a.secretPulls5.unlocked).toBe(true)
     expect(a.hitPacks50).toMatchObject({ unlocked: false, current: 10 })
     expect(a.doubleHit.unlocked).toBe(true)
     expect(a.tripleHit.unlocked).toBe(false)
     expect(a.godPack.unlocked).toBe(true)
     expect(a.bigDay25.unlocked).toBe(true)
     expect(a.packStreak7.unlocked).toBe(true)
-    expect(a.setsOpened5.unlocked).toBe(true)
     expect(a.loyal25.unlocked).toBe(true)
     expect(a.packDays10.unlocked).toBe(true)
     const none = byId(achievements([], sets, { mode: 'challenge' }))
-    expect(['hitPacks1', 'doubleHit', 'bigDay10', 'packStreak3'].every((id) => !none[id].unlocked)).toBe(true)
+    expect(['hitPacks10', 'doubleHit', 'bigDay10', 'packStreak3'].every((id) => !none[id].unlocked)).toBe(true)
   })
 
   it('keeps challenge-only achievements out of the unlimited mode', () => {
@@ -291,7 +306,7 @@ describe('Pokémon groups', () => {
 
   it('unlocks a gym badge once its whole team is owned', () => {
     const list = byId(achievements(dex(74), sets))
-    expect(list.boulderBadge).toMatchObject({ unlocked: false, current: 1, target: 2, category: 'gyms' })
+    expect(list.boulderBadge).toMatchObject({ unlocked: false, current: 1, target: 2, category: 'people', sub: 'kantoGyms', icon: 'gyms' })
     expect(byId(achievements(dex(74, 95), sets)).boulderBadge.unlocked).toBe(true)
   })
 
@@ -308,5 +323,99 @@ describe('Pokémon groups', () => {
 
   it('keeps Team Rocket a secret until unlocked', () => {
     expect(byId(achievements([], sets)).teamRocket.hidden).toBe(true)
+  })
+})
+
+describe('no duplicates', () => {
+  // The same Pokémon behind two achievements of different meaning, kept on
+  // purpose: Morty's and Misty's teams are one evolution line each, and
+  // Diglett's Cave only has the Diglett line
+  const SAME_MEMBERS_OK = [
+    ['ghostLine', 'fogBadge'],
+    ['staryuLine', 'cascadeBadge'],
+    ['diglettLine', 'diglettsCave'],
+  ].map((pair) => pair.sort().join('+'))
+
+  it('no two "own them all" groups ask for the same Pokémon', () => {
+    const groups = DEFINITIONS.filter((d) => d.desc.startsWith('groups.') || d.desc.startsWith('teams.'))
+    const byMembers = new Map()
+    for (const d of groups) {
+      const s = collectorStats([], sets) // members are what the metric counts: probe them one by one
+      const members = []
+      for (let dex = 1; dex <= 1025; dex++) {
+        s.dex = new Set([dex])
+        if (d.metric(s) > 0) members.push(dex)
+      }
+      const key = members.join(',')
+      if (byMembers.has(key)) {
+        const pair = [byMembers.get(key), d.id].sort().join('+')
+        expect(SAME_MEMBERS_OK, pair).toContain(pair)
+      } else byMembers.set(key, d.id)
+    }
+  })
+
+  it('split every Kanto Pokémon into lines, loners and legends', () => {
+    const lines = Object.values(KANTO_LINES).flat()
+    const kantoLegends = [...LEGENDS.legendaryBirds, ...LEGENDS.mewDuo]
+    const all = [...lines, ...KANTO_EXTRAS.kantoSolos, ...kantoLegends].sort((a, b) => a - b)
+    expect(all).toEqual(Array.from({ length: 151 }, (_, i) => i + 1))
+  })
+})
+
+describe('Kanto', () => {
+  const dex = (...numbers) => numbers.map((n) => entry(`base1-${n}`, { national_pokedex_number: n }))
+  const named = (...names) => names.map((name, i) => entry(`gym1-${i}`, { name }))
+
+  it('counts complete Kanto lines and routes', () => {
+    const a = byId(achievements(dex(19, 20, 21, 22, 16), sets))
+    expect(a.rattataLine.unlocked).toBe(true)
+    expect(a.kantoLines10.current).toBe(2)
+    expect(a.route1.unlocked).toBe(true)
+    expect(a.route3.current).toBe(2) // no Jigglypuff
+    expect(a.kantoDex25.current).toBe(5)
+    expect(a.families5.current).toBe(2)
+  })
+
+  it('reads trainers’ and cities’ cards from their names', () => {
+    const cards = named(
+      "Brock's Onix",
+      "Brock's Grit",
+      'Brock',
+      "Brock's Pewter City Gym",
+      'Misty & Lorelei',
+      "Team Rocket's Giovanni",
+      'Lavender Town',
+      'Loudred', // not Red
+      'Red & Blue',
+      'Imposter Professor Oak', // not Oak himself
+      'Professor Oak',
+    )
+    const a = byId(achievements(cards, sets))
+    expect(a.tc_brock.current).toBe(4)
+    expect(a.tc_gymLeaders.current).toBe(3) // Brock, Misty, Giovanni
+    expect(a.tc_eliteFour.current).toBe(1) // Lorelei
+    expect(a.tc_redBlue.unlocked).toBe(true)
+    expect(a.tc_oak.current).toBe(1)
+    expect(a.tc_teamRocket.current).toBe(1)
+    expect(a.impostor).toMatchObject({ unlocked: true, hidden: true })
+    expect(a.pewterCity.unlocked).toBe(true)
+    expect(a.lavenderTown.unlocked).toBe(true)
+    expect(a.ceruleanCity.unlocked).toBe(false)
+    expect(a.kantoCities.current).toBe(2)
+  })
+
+  it('counts regional forms whatever the card’s mechanic', () => {
+    const a = byId(achievements(named('Alolan Vulpix', 'Alolan Ninetales-GX', 'Alolan Raichu V', 'Alolan Exeggutor'), sets))
+    expect(a.alolanForms).toMatchObject({ current: 4, target: 18 })
+  })
+
+  it('filters by region tag', () => {
+    const list = achievements([], sets)
+    expect(tagsOf(list)[0]).toBe('kanto')
+    const kanto = filterAchievements(list, { tag: 'kanto' })
+    expect(kanto.length).toBeGreaterThan(100)
+    expect(kanto.every((a) => a.tags.includes('kanto'))).toBe(true)
+    expect(kanto.some((a) => a.category === 'people' && a.sub === 'trainerCards')).toBe(true)
+    expect(filterAchievements(list, { tag: 'johto' }).map((a) => a.id)).toContain('mtSilver')
   })
 })

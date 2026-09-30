@@ -6,14 +6,14 @@ import { routeMode } from '@/router/modes'
 import { useAuthStore } from '@/stores/auth'
 import { useAchievementText } from '@/composables/useAchievementText'
 import { useModeAchievements } from '@/composables/useModeAchievements'
-import { CATEGORIES, STATUSES, filterAchievements } from '@/utils/achievements'
+import { CATEGORIES, STATUSES, TAGS, filterAchievements, tagsOf } from '@/utils/achievements'
 import AchievementTile from '@/components/AchievementTile.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import ScrollTopButton from '@/components/ScrollTopButton.vue'
 import BrandLogo from '@/components/BrandLogo.vue'
 
-// Every achievement of one game mode, by category, with search +
-// category/status filters (synced to the URL) and an Unlimited | Challenge
+// Every achievement of one game mode, by category (and subcategory), with
+// search + category/status/region filters (synced to the URL) and an Unlimited | Challenge
 // switch. Serves /achievements and /challenge/achievements (own, `mode`
 // prop) and /u/:username/achievements (public, works signed out; mode in
 // ?mode=, else the mode the viewer came from).
@@ -38,10 +38,11 @@ const mode = computed(() => {
 const { list, progress, rate, hasRates, firstLoad, failed, missing, publicName } = useModeAchievements(mode, () => props.username)
 const percent = (part, total) => Math.round((part / (total || 1)) * 100)
 
-// ---------- Filters (URL-synced: ?cat=&status=&q=) ----------
+// ---------- Filters (URL-synced: ?cat=&status=&region=&q=) ----------
 
 const category = ref('all')
 const status = ref('all')
+const tag = ref('all')
 const query = ref('')
 
 let syncingFromRoute = false
@@ -49,41 +50,63 @@ function readQuery(q) {
   syncingFromRoute = true
   category.value = CATEGORIES.includes(q.cat) ? q.cat : 'all'
   status.value = STATUSES.includes(q.status) ? q.status : 'all'
+  tag.value = TAGS.includes(q.region) ? q.region : 'all'
   query.value = typeof q.q === 'string' ? q.q : ''
   nextTick(() => (syncingFromRoute = false))
 }
 readQuery(route.query)
 watch(() => route.query, readQuery)
 
-watch([category, status, query], () => {
+watch([category, status, tag, query], () => {
   if (syncingFromRoute) return
   router.replace({
     query: {
       ...(route.query.mode && { mode: route.query.mode }),
       ...(category.value !== 'all' && { cat: category.value }),
       ...(status.value !== 'all' && { status: status.value }),
+      ...(tag.value !== 'all' && { region: tag.value }),
       ...(query.value && { q: query.value }),
     },
   })
 })
 
-const isFiltered = computed(() => category.value !== 'all' || status.value !== 'all' || query.value)
+const isFiltered = computed(() => category.value !== 'all' || status.value !== 'all' || tag.value !== 'all' || query.value)
 function resetFilters() {
   category.value = 'all'
   status.value = 'all'
+  tag.value = 'all'
   query.value = ''
 }
+
+// Regions some achievement of this mode belongs to (Pokédex order)
+const regions = computed(() => tagsOf(list.value))
 
 const pickCategory = (name) => (category.value = category.value === name ? 'all' : name)
 
 const results = computed(() =>
-  filterAchievements(list.value, { category: category.value, status: status.value, query: query.value }, (item) => `${text.title(item)} ${text.desc(item)}`),
+  filterAchievements(
+    list.value,
+    { category: category.value, status: status.value, tag: tag.value, query: query.value },
+    (item) => `${text.title(item)} ${text.desc(item)}`,
+  ),
 )
 
-// Results grouped by category, in category order
+// Results grouped by category, in category order, then by subcategory
+// (definition order; a heading only where the category has subcategories)
+function bySub(items) {
+  const subs = []
+  for (const item of items) {
+    if (subs.at(-1)?.sub !== item.sub) subs.push({ sub: item.sub, items: [] })
+    subs.at(-1).items.push(item)
+  }
+  return subs
+}
 const groups = computed(() =>
   progress.value.categories
-    .map((summary) => ({ ...summary, items: results.value.filter((item) => item.category === summary.category) }))
+    .map((summary) => {
+      const items = results.value.filter((item) => item.category === summary.category)
+      return { ...summary, items, subs: bySub(items) }
+    })
     .filter((group) => group.items.length),
 )
 
@@ -252,6 +275,19 @@ const back = computed(() => {
               {{ t(`achievements.ui.status.${option}`) }}
             </button>
           </div>
+          <div v-if="regions.length" class="ach-status ach-regions" role="group" :aria-label="t('achievements.ui.regionLabel')">
+            <button
+              v-for="option in ['all', ...regions]"
+              :key="option"
+              type="button"
+              class="ach-chip"
+              :class="{ active: tag === option }"
+              :aria-pressed="tag === option"
+              @click="tag = option"
+            >
+              {{ option === 'all' ? t('achievements.ui.allRegions') : t(`achievements.regions.${option}`) }}
+            </button>
+          </div>
         </div>
 
         <div class="ach-results-head">
@@ -281,9 +317,17 @@ const back = computed(() => {
               <svg class="ach-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
             </button>
           </h2>
-          <ul v-show="isOpen(group.category)" :id="`ach-list-${group.category}`" class="ach-grid" role="list">
-            <AchievementTile v-for="item in group.items" :key="item.id" :item="item" :rate="rate(item)" />
-          </ul>
+          <div v-show="isOpen(group.category)" :id="`ach-list-${group.category}`" class="ach-subs">
+            <section v-for="part in group.subs" :key="part.sub ?? 'none'" :aria-label="part.sub ? t(`achievements.subs.${part.sub}`) : undefined">
+              <h3 v-if="part.sub" class="ach-sub-title">
+                {{ t(`achievements.subs.${part.sub}`) }}
+                <span class="ach-sub-count">{{ part.items.filter((item) => item.unlocked).length }} / {{ part.items.length }}</span>
+              </h3>
+              <ul class="ach-grid" role="list">
+                <AchievementTile v-for="item in part.items" :key="item.id" :item="item" :rate="rate(item)" />
+              </ul>
+            </section>
+          </div>
         </section>
       </template>
     </main>
@@ -661,6 +705,42 @@ const back = computed(() => {
 @media (max-width: 374.98px) {
   .ach-group-bar {
     display: none;
+  }
+}
+
+.ach-subs {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ach-sub-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pb-text-muted);
+}
+
+.ach-sub-count {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* Its own line under the search + status row */
+.ach-regions {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+/* With a mouse, a hidden scroll row would leave the last regions out of reach */
+@media (hover: hover) and (pointer: fine) {
+  .ach-regions {
+    flex-wrap: wrap;
   }
 }
 

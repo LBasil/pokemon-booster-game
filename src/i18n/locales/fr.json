@@ -809,31 +809,31 @@
       "hubTitle": "Succès du Défi",
       "hubCta": "Voir les succès",
       "collapseAll": "Tout replier",
-      "expandAll": "Tout déplier"
+      "expandAll": "Tout déplier",
+      "regionLabel": "Région",
+      "allRegions": "Toutes les régions"
     },
     "categories": {
       "packs": "Boosters",
+      "luck": "Chance",
       "collection": "Collection",
       "pulls": "Tirages",
       "sets": "Séries",
       "pokedex": "Pokédex",
-      "teams": "Équipes célèbres",
+      "starters": "Starters",
+      "families": "Lignées d’évolution",
+      "legends": "Légendes",
+      "people": "Dresseurs célèbres",
+      "places": "Lieux",
       "types": "Types",
-      "trainers": "Dresseurs et Énergies",
+      "trainers": "Cartes Dresseur et Énergies",
       "mechanics": "Mécaniques",
       "treasure": "Trésor",
       "history": "Histoire",
       "artists": "Illustrateurs",
       "fun": "Curiosités",
       "dedication": "Assiduité",
-      "luck": "Chance",
-      "economy": "Pièces & échanges",
-      "families": "Lignées d’évolution",
-      "legends": "Légendes",
-      "gyms": "Badges d’arène",
-      "league": "Ligue Pokémon",
-      "rivals": "Rivaux et héros",
-      "places": "Lieux"
+      "economy": "Pièces & échanges"
     },
     "regions": {
       "kanto": "Kanto",
@@ -905,27 +905,6 @@
       },
       "unique10000": {
         "title": "Collectionneur ultime"
-      },
-      "cards100": {
-        "title": "Une poignée"
-      },
-      "cards500": {
-        "title": "Une pile"
-      },
-      "cards1000": {
-        "title": "Montagne de cartes"
-      },
-      "cards5000": {
-        "title": "Avalanche de cartes"
-      },
-      "cards10000": {
-        "title": "Océan de cartes"
-      },
-      "cards25000": {
-        "title": "Galaxie de cartes"
-      },
-      "cards50000": {
-        "title": "Univers de cartes"
       },
       "holo1": {
         "title": "Ça brille !"
@@ -1227,9 +1206,6 @@
       "days30": {
         "title": "Dévoué"
       },
-      "days100": {
-        "title": "À vie"
-      },
       "mech_pokemonEx": {
         "title": "EX-traordinaire"
       },
@@ -1356,15 +1332,6 @@
       "bigDay100": {
         "title": "Cent en un jour"
       },
-      "setsOpened5": {
-        "title": "Lèche-vitrine"
-      },
-      "setsOpened25": {
-        "title": "Touche-à-tout"
-      },
-      "setsOpened75": {
-        "title": "Tout vu, tout ouvert"
-      },
       "loyal25": {
         "title": "Habitué"
       },
@@ -1374,9 +1341,6 @@
       "loyal250": {
         "title": "Une série pour les gouverner tous"
       },
-      "hitPacks1": {
-        "title": "Premier hit"
-      },
       "hitPacks10": {
         "title": "En veine"
       },
@@ -1385,9 +1349,6 @@
       },
       "hitPacks150": {
         "title": "La chance, ça se travaille"
-      },
-      "secretPulls1": {
-        "title": "Pull secret"
       },
       "secretPulls5": {
         "title": "Gardien des secrets"
@@ -1907,12 +1868,329 @@
       },
       "places14": {
         "title": "Carte complète"
+      },
+      "rattataLine": {
+        "title": "Lignée de Rattatac"
+      },
+      "spearowLine": {
+        "title": "Lignée de Rapasdepic"
+      },
+      "ekansLine": {
+        "title": "Lignée de Arbok"
+      },
+      "sandshrewLine": {
+        "title": "Lignée de Sablaireau"
+      },
+      "nidoranFLine": {
+        "title": "Lignée de Nidoqueen"
+      },
+      "nidoranMLine": {
+        "title": "Lignée de Nidoking"
+      },
+      "clefairyLine": {
+        "title": "Lignée de Mélodelfe"
+      },
+      "vulpixLine": {
+        "title": "Lignée de Feunard"
+      },
+      "jigglypuffLine": {
+        "title": "Lignée de Grodoudou"
+      },
+      "zubatLine": {
+        "title": "Lignée de Nosferalto"
+      },
+      "oddishLine": {
+        "title": "Lignée de Rafflesia"
+      },
+      "parasLine": {
+        "title": "Lignée de Parasect"
+      },
+      "venonatLine": {
+        "title": "Lignée de Aéromite"
+      },
+      "diglettLine": {
+        "title": "Lignée de Triopikeur"
+      },
+      "meowthLine": {
+        "title": "Lignée de Persian"
+      },
+      "psyduckLine": {
+        "title": "Lignée de Akwakwak"
+      },
+      "mankeyLine": {
+        "title": "Lignée de Colossinge"
+      },
+      "growlitheLine": {
+        "title": "Lignée de Arcanin"
+      },
+      "bellsproutLine": {
+        "title": "Lignée de Empiflor"
+      },
+      "tentacoolLine": {
+        "title": "Lignée de Tentacruel"
+      },
+      "ponytaLine": {
+        "title": "Lignée de Galopa"
+      },
+      "slowpokeLine": {
+        "title": "Lignée de Flagadoss"
+      },
+      "magnemiteLine": {
+        "title": "Lignée de Magnéton"
+      },
+      "doduoLine": {
+        "title": "Lignée de Dodrio"
+      },
+      "seelLine": {
+        "title": "Lignée de Lamantine"
+      },
+      "grimerLine": {
+        "title": "Lignée de Grotadmorv"
+      },
+      "shellderLine": {
+        "title": "Lignée de Crustabri"
+      },
+      "drowzeeLine": {
+        "title": "Lignée de Hypnomade"
+      },
+      "krabbyLine": {
+        "title": "Lignée de Krabboss"
+      },
+      "voltorbLine": {
+        "title": "Lignée de Électrode"
+      },
+      "exeggcuteLine": {
+        "title": "Lignée de Noadkoko"
+      },
+      "cuboneLine": {
+        "title": "Lignée de Ossatueur"
+      },
+      "koffingLine": {
+        "title": "Lignée de Smogogo"
+      },
+      "rhyhornLine": {
+        "title": "Lignée de Rhinoféros"
+      },
+      "horseaLine": {
+        "title": "Lignée de Hypocéan"
+      },
+      "goldeenLine": {
+        "title": "Lignée de Poissoroy"
+      },
+      "staryuLine": {
+        "title": "Lignée de Staross"
+      },
+      "eeveeLine": {
+        "title": "Évolitions de Kanto"
+      },
+      "omanyteLine": {
+        "title": "Lignée de Amonistar"
+      },
+      "kabutoLine": {
+        "title": "Lignée de Kabutops"
+      },
+      "kantoLines10": {
+        "title": "Album de famille de Kanto"
+      },
+      "kantoLines25": {
+        "title": "Chercheur en évolution"
+      },
+      "kantoLines54": {
+        "title": "Toutes les lignées de Kanto"
+      },
+      "families60": {
+        "title": "Encyclopédie des évolutions"
+      },
+      "kantoSolos": {
+        "title": "Solitaires"
+      },
+      "kantoBabies": {
+        "title": "Pouponnière de Kanto"
+      },
+      "kantoNewEvolutions": {
+        "title": "Évolutions tardives"
+      },
+      "alolanForms": {
+        "title": "Vacances à Alola"
+      },
+      "galarianForms": {
+        "title": "Cousins de Galar"
+      },
+      "hisuiPaldeaForms": {
+        "title": "Parents éloignés"
+      },
+      "kantoDex25": {
+        "title": "Débutant de Kanto"
+      },
+      "kantoDex50": {
+        "title": "Dresseur de Kanto"
+      },
+      "kantoDex100": {
+        "title": "As de Kanto"
+      },
+      "route2": {
+        "title": "Route 2"
+      },
+      "route3": {
+        "title": "Route 3"
+      },
+      "route4and9": {
+        "title": "Routes 4 et 9"
+      },
+      "route5": {
+        "title": "Route 5"
+      },
+      "route6": {
+        "title": "Route 6"
+      },
+      "route7": {
+        "title": "Route 7"
+      },
+      "route8": {
+        "title": "Route 8"
+      },
+      "route10": {
+        "title": "Route 10"
+      },
+      "route11": {
+        "title": "Route 11"
+      },
+      "route12": {
+        "title": "Route 12"
+      },
+      "route13": {
+        "title": "Route 13"
+      },
+      "route14and15": {
+        "title": "Routes 14 et 15"
+      },
+      "route16": {
+        "title": "Route 16"
+      },
+      "route17and18": {
+        "title": "Routes 17 et 18"
+      },
+      "route19and20": {
+        "title": "Routes 19 et 20"
+      },
+      "route21": {
+        "title": "Route 21"
+      },
+      "route22": {
+        "title": "Route 22"
+      },
+      "route23": {
+        "title": "Route 23"
+      },
+      "route24and25": {
+        "title": "Routes 24 et 25"
+      },
+      "rockTunnel": {
+        "title": "Grotte"
+      },
+      "diglettsCave": {
+        "title": "Cave Taupiqueur"
+      },
+      "mtSilver": {
+        "title": "Mont Argenté"
+      },
+      "kantoRoutes": {
+        "title": "Toutes les routes de Kanto"
+      },
+      "kantoLandmarks": {
+        "title": "Spéléologue de Kanto"
+      },
+      "places25": {
+        "title": "Grand voyageur"
+      },
+      "viridianCity": {
+        "title": "Jadielle"
+      },
+      "pewterCity": {
+        "title": "Argenta"
+      },
+      "ceruleanCity": {
+        "title": "Azuria"
+      },
+      "vermilionCity": {
+        "title": "Carmin sur Mer"
+      },
+      "lavenderTown": {
+        "title": "Lavanville"
+      },
+      "celadonCity": {
+        "title": "Céladopole"
+      },
+      "fuchsiaCity": {
+        "title": "Parmanie"
+      },
+      "saffronCity": {
+        "title": "Safrania"
+      },
+      "cinnabarIsland": {
+        "title": "Cramois’Île"
+      },
+      "indigoPlateau": {
+        "title": "En route pour la Ligue"
+      },
+      "kantoCities": {
+        "title": "Tour de Kanto"
+      },
+      "kantoPlaceCards": {
+        "title": "Kanto en cartes"
+      },
+      "tc_gymLeaders": {
+        "title": "Champions dans le classeur"
+      },
+      "tc_brock": {
+        "title": "Fan-club de Pierre"
+      },
+      "tc_misty": {
+        "title": "Fan-club d’Ondine"
+      },
+      "tc_ltSurge": {
+        "title": "Fan-club de Major Bob"
+      },
+      "tc_erika": {
+        "title": "Fan-club d’Érika"
+      },
+      "tc_koga": {
+        "title": "Fan-club de Koga"
+      },
+      "tc_sabrina": {
+        "title": "Fan-club de Morgane"
+      },
+      "tc_blaine": {
+        "title": "Fan-club d’Auguste"
+      },
+      "tc_giovanni": {
+        "title": "Fan-club de Giovanni"
+      },
+      "tc_eliteFour": {
+        "title": "Le Conseil 4 en cartes"
+      },
+      "tc_redBlue": {
+        "title": "Red contre Blue"
+      },
+      "tc_oak": {
+        "title": "Recherches du Prof. Chen"
+      },
+      "tc_bill": {
+        "title": "Le PC de Léo"
+      },
+      "tc_teamRocket": {
+        "title": "Butin de la Team Rocket"
+      },
+      "originalSets": {
+        "title": "La première vague"
+      },
+      "impostor": {
+        "title": "Ce n’est pas Chen !"
       }
     },
     "desc": {
       "boosters": "Ouvre {count} booster | Ouvre {count} boosters",
       "unique": "Possède {count} cartes différentes",
-      "cards": "Tire {count} cartes au total",
       "holo": "Possède une carte holo ou mieux | Possède {count} cartes holo ou mieux différentes",
       "ultra": "Possède une ultra rare ou mieux | Possède {count} ultra rares ou mieux différentes",
       "secret": "Possède une rare secrète | Possède {count} rares secrètes différentes",
@@ -1959,31 +2237,7 @@
       "unown": "Possède 5 cartes Zarbi différentes",
       "arceus": "Possède une carte Arceus",
       "featherweight": "Possède un Pokémon de 30 PV ou moins",
-      "teams": {
-        "kantoStarters": "Possède Bulbizarre, Salamèche et Carapuce",
-        "johtoStarters": "Possède Germignon, Héricendre et Kaiminus",
-        "hoennStarters": "Possède Arcko, Poussifeu et Gobou",
-        "sinnohStarters": "Possède Tortipouss, Ouisticram et Tiplouf",
-        "charizardLine": "Possède Salamèche, Reptincel et Dracaufeu",
-        "pikachuLine": "Possède Pichu, Pikachu et Raichu",
-        "legendaryBirds": "Possède Artikodin, Électhor et Sulfura",
-        "legendaryBeasts": "Possède Raikou, Entei et Suicune",
-        "towerDuo": "Possède Lugia et Ho-Oh",
-        "eonDuo": "Possède Latias et Latios",
-        "weatherTrio": "Possède Kyogre, Groudon et Rayquaza",
-        "lakeGuardians": "Possède Créhelf, Créfollet et Créfadet",
-        "creationTrio": "Possède Dialga, Palkia et Giratina",
-        "swordsOfJustice": "Possède Cobaltium, Terrakium et Viridium",
-        "taoTrio": "Possède Reshiram, Zekrom et Kyurem",
-        "kalosLegends": "Possède Xerneas, Yveltal et Zygarde",
-        "mewDuo": "Possède Mewtwo et Mew",
-        "eeveelutions": "Possède Évoli et ses 8 évolutions",
-        "kantoFossils": "Possède Amonita, Kabuto et Ptéra",
-        "ghostLine": "Possède Fantominus, Spectrum et Ectoplasma",
-        "magikarpLine": "Possède Magicarpe et Léviator"
-      },
       "bigDay": "Ouvre {count} boosters en une seule journée",
-      "setsOpened": "Ouvre des boosters de {count} séries différentes",
       "loyal": "Ouvre {count} boosters de la même série",
       "hitPacks": "Ouvre un booster avec une ultra rare ou mieux | Ouvre {count} boosters avec une ultra rare ou mieux",
       "secretPulls": "Tire une rare secrète (doublons compris) | Tire {count} rares secrètes (doublons compris)",
@@ -2100,20 +2354,106 @@
         "ashKanto": "La première équipe de Sacha : possède Pikachu, Papilusion, Roucoups, Bulbizarre, Dracaufeu et Carapuce",
         "ashChampion": "L’équipe de Sacha, champion du monde : possède Pikachu, Lucario, Dracolosse, Ectoplasma, Palarticho et Hydragon",
         "teamRocket": "Les Pokémon de Jessie, James et Miaouss : possède Abo, Smogo, Miaouss, Arbok, Smogogo et Qulbutoké",
-        "route1": "Possède les Pokémon qu’on y trouve : Roucool et Rattata",
-        "viridianForest": "Possède les Pokémon qu’on y trouve : Chenipan, Chrysacier, Aspicot, Coconfort et Pikachu",
-        "mtMoon": "Possède les Pokémon qu’on y trouve : Nosferapti, Racaillou, Paras et Mélofée",
-        "pokemonTower": "Possède les Pokémon qu’on y trouve : Fantominus, Spectrum et Osselait",
-        "safariZone": "Possède les Pokémon qu’on y trouve : Leveinard, Kangourex, Insécateur, Scarabrute, Tauros, Rhinocorne, Noeunoeuf et Minidraco",
-        "powerPlant": "Possède les Pokémon qu’on y trouve : Voltorbe, Magnéti, Pikachu, Élektek et Électhor",
-        "seafoamIslands": "Possède les Pokémon qu’on y trouve : Otaria, Ramoloss, Psykokwak, Kokiyas et Artikodin",
-        "pokemonMansion": "Possède les Pokémon qu’on y trouve : Tadmorv, Smogo, Ponyta, Magmar et Métamorph",
-        "ceruleanCave": "Possède les Pokémon qu’on y trouve : Mewtwo, Métamorph, Rhinoféros et Kadabra",
-        "victoryRoad": "Possède les Pokémon qu’on y trouve : Machopeur, Onix, Gravalanch, Nosferalto, Ossatueur et Sulfura",
+        "route1": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Roucool et Rattata",
+        "viridianForest": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Chenipan, Chrysacier, Aspicot, Coconfort et Pikachu",
+        "mtMoon": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Mélofée, Nosferapti, Paras et Racaillou",
+        "pokemonTower": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Fantominus, Spectrum et Osselait",
+        "safariZone": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Nidoran♀, Nidorina, Nidoran♂, Nidorino, Paras, Parasect, Mimitoss, Aéromite, Psykokwak, Ramoloss, Doduo, Krabby, Noeunoeuf, Rhinocorne, Leveinard, Kangourex, Insécateur, Scarabrute, Tauros et Minidraco",
+        "powerPlant": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Pikachu, Raichu, Magnéti, Magnéton, Voltorbe, Électrode, Élektek et Électhor",
+        "seafoamIslands": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Nosferapti, Nosferalto, Psykokwak, Akwakwak, Ramoloss, Flagadoss, Otaria, Lamantine, Kokiyas, Krabby, Krabboss, Hypotrempe, Hypocéan, Poissirène, Stari et Artikodin",
+        "pokemonMansion": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Goupix, Caninos, Ponyta, Tadmorv, Grotadmorv, Smogo, Smogogo et Magmar",
+        "ceruleanCave": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Arbok, Raichu, Sablaireau, Grodoudou, Nosferalto, Parasect, Aéromite, Kadabra, Flagadoss, Magnéton, Dodrio, Hypnomade, Krabboss, Électrode, Ossatueur, Rhinoféros, Leveinard, Hypocéan, Poissoroy, Métamorph et Mewtwo",
+        "victoryRoad": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Nosferapti, Nosferalto, Aéromite, Machoc, Machopeur, Racaillou, Gravalanch, Onix, Ossatueur et Sulfura",
         "nationalPark": "Possède les Pokémon qu’on y trouve : Insécateur, Scarabrute, Papilusion, Dardargnan, Mimitoss et Paras",
         "petalburgWoods": "Possède les Pokémon qu’on y trouve : Chenipotte, Balignon et Parecool",
         "meteorFalls": "Possède les Pokémon qu’on y trouve : Séléroc, Solaroc et Draby",
-        "route119": "Possède les Pokémon qu’on y trouve : Barpau et Milobellus"
+        "route119": "Possède les Pokémon qu’on y trouve : Barpau et Milobellus",
+        "kantoStarters": "Possède Bulbizarre, Salamèche et Carapuce",
+        "johtoStarters": "Possède Germignon, Héricendre et Kaiminus",
+        "hoennStarters": "Possède Arcko, Poussifeu et Gobou",
+        "sinnohStarters": "Possède Tortipouss, Ouisticram et Tiplouf",
+        "charizardLine": "Possède toute la lignée : Salamèche, Reptincel et Dracaufeu",
+        "pikachuLine": "Possède toute la lignée : Pikachu et Raichu",
+        "legendaryBirds": "Possède Artikodin, Électhor et Sulfura",
+        "legendaryBeasts": "Possède Raikou, Entei et Suicune",
+        "towerDuo": "Possède Lugia et Ho-Oh",
+        "eonDuo": "Possède Latias et Latios",
+        "weatherTrio": "Possède Kyogre, Groudon et Rayquaza",
+        "lakeGuardians": "Possède Créhelf, Créfollet et Créfadet",
+        "creationTrio": "Possède Dialga, Palkia et Giratina",
+        "swordsOfJustice": "Possède Cobaltium, Terrakium et Viridium",
+        "taoTrio": "Possède Reshiram, Zekrom et Kyurem",
+        "kalosLegends": "Possède Xerneas, Yveltal et Zygarde",
+        "mewDuo": "Possède Mewtwo et Mew",
+        "eeveelutions": "Possède Évoli et ses 8 évolutions",
+        "kantoFossils": "Possède Amonita, Kabuto et Ptéra",
+        "ghostLine": "Possède toute la lignée : Fantominus, Spectrum et Ectoplasma",
+        "magikarpLine": "Possède toute la lignée : Magicarpe et Léviator",
+        "rattataLine": "Possède toute la lignée : Rattata et Rattatac",
+        "spearowLine": "Possède toute la lignée : Piafabec et Rapasdepic",
+        "ekansLine": "Possède toute la lignée : Abo et Arbok",
+        "sandshrewLine": "Possède toute la lignée : Sabelette et Sablaireau",
+        "nidoranFLine": "Possède toute la lignée : Nidoran♀, Nidorina et Nidoqueen",
+        "nidoranMLine": "Possède toute la lignée : Nidoran♂, Nidorino et Nidoking",
+        "clefairyLine": "Possède toute la lignée : Mélofée et Mélodelfe",
+        "vulpixLine": "Possède toute la lignée : Goupix et Feunard",
+        "jigglypuffLine": "Possède toute la lignée : Rondoudou et Grodoudou",
+        "zubatLine": "Possède toute la lignée : Nosferapti et Nosferalto",
+        "oddishLine": "Possède toute la lignée : Mystherbe, Ortide et Rafflesia",
+        "parasLine": "Possède toute la lignée : Paras et Parasect",
+        "venonatLine": "Possède toute la lignée : Mimitoss et Aéromite",
+        "diglettLine": "Possède toute la lignée : Taupiqueur et Triopikeur",
+        "meowthLine": "Possède toute la lignée : Miaouss et Persian",
+        "psyduckLine": "Possède toute la lignée : Psykokwak et Akwakwak",
+        "mankeyLine": "Possède toute la lignée : Férosinge et Colossinge",
+        "growlitheLine": "Possède toute la lignée : Caninos et Arcanin",
+        "bellsproutLine": "Possède toute la lignée : Chétiflor, Boustiflor et Empiflor",
+        "tentacoolLine": "Possède toute la lignée : Tentacool et Tentacruel",
+        "ponytaLine": "Possède toute la lignée : Ponyta et Galopa",
+        "slowpokeLine": "Possède toute la lignée : Ramoloss et Flagadoss",
+        "magnemiteLine": "Possède toute la lignée : Magnéti et Magnéton",
+        "doduoLine": "Possède toute la lignée : Doduo et Dodrio",
+        "seelLine": "Possède toute la lignée : Otaria et Lamantine",
+        "grimerLine": "Possède toute la lignée : Tadmorv et Grotadmorv",
+        "shellderLine": "Possède toute la lignée : Kokiyas et Crustabri",
+        "drowzeeLine": "Possède toute la lignée : Soporifik et Hypnomade",
+        "krabbyLine": "Possède toute la lignée : Krabby et Krabboss",
+        "voltorbLine": "Possède toute la lignée : Voltorbe et Électrode",
+        "exeggcuteLine": "Possède toute la lignée : Noeunoeuf et Noadkoko",
+        "cuboneLine": "Possède toute la lignée : Osselait et Ossatueur",
+        "koffingLine": "Possède toute la lignée : Smogo et Smogogo",
+        "rhyhornLine": "Possède toute la lignée : Rhinocorne et Rhinoféros",
+        "horseaLine": "Possède toute la lignée : Hypotrempe et Hypocéan",
+        "goldeenLine": "Possède toute la lignée : Poissirène et Poissoroy",
+        "staryuLine": "Possède toute la lignée : Stari et Staross",
+        "eeveeLine": "Possède Évoli et ses évolutions de Kanto : Aquali, Voltali et Pyroli",
+        "omanyteLine": "Possède toute la lignée : Amonita et Amonistar",
+        "kabutoLine": "Possède toute la lignée : Kabuto et Kabutops",
+        "kantoSolos": "Possède les 20 Pokémon de Kanto qui n’évoluent pas dans Rouge et Bleu, légendaires à part : Canarticho, Onix, Kicklee, Tygnon, Excelangue, Leveinard, Saquedeneu, Kangourex, M. Mime, Insécateur, Lippoutou, Élektek, Magmar, Scarabrute, Tauros, Lokhlass, Métamorph, Porygon, Ptéra et Ronflex",
+        "kantoBabies": "Possède les bébés ajoutés plus tard aux lignées de Kanto : Pichu, Mélo, Toudoudou, Debugant, Lippouti, Élekid, Magby, Mime Jr., Ptiravi et Goinfrex",
+        "kantoNewEvolutions": "Possède les évolutions que les jeux suivants ont données aux Pokémon de Kanto : Nostenfer, Joliflor, Tarpaud, Roigada, Steelix, Cizayox, Hyporoi, Porygon2, Leuphorie, Magnézone, Coudlangue, Rhinastoc, Bouldeneu, Élekable, Maganon, Porygon-Z, Berserkatt, Palarticho, M. Glaquette, Hachécateur et Courrousinge",
+        "route2": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Chenipan, Aspicot, Roucool et Rattata",
+        "route3": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Roucool, Piafabec et Rondoudou",
+        "route4and9": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Rattata, Piafabec, Abo et Sabelette",
+        "route5": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Roucool, Mystherbe, Miaouss, Férosinge et Chétiflor",
+        "route6": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Roucool, Mystherbe, Miaouss, Férosinge, Chétiflor, Kokiyas et Krabby",
+        "route7": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Roucool, Goupix, Mystherbe, Miaouss, Férosinge, Caninos et Chétiflor",
+        "route8": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Roucool, Abo, Sabelette, Goupix, Miaouss, Férosinge et Caninos",
+        "route10": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Piafabec, Abo, Sabelette, Têtarte, Ramoloss et Voltorbe",
+        "route11": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Piafabec, Abo, Sabelette, Kokiyas, Soporifik et Krabby",
+        "route12": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Roucool, Mystherbe, Ortide, Mimitoss, Chétiflor, Boustiflor, Tentacool, Krabby, Poissirène, Magicarpe et Ronflex",
+        "route13": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Roucool, Mystherbe, Ortide, Mimitoss, Chétiflor, Boustiflor, Tentacool, Krabby, Poissirène, Magicarpe et Métamorph",
+        "route14and15": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Roucool, Roucoups, Mystherbe, Ortide, Mimitoss, Chétiflor, Boustiflor et Métamorph",
+        "route16": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Rattata, Rattatac, Piafabec, Doduo et Ronflex",
+        "route17and18": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Rattatac, Piafabec, Rapasdepic, Tentacool, Doduo, Krabby, Poissirène et Magicarpe",
+        "route19and20": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Tentacool, Kokiyas, Hypotrempe, Poissirène et Stari",
+        "route21": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Roucool, Roucoups, Rattata, Rattatac, Tentacool, Kokiyas, Saquedeneu, Hypotrempe, Poissirène et Stari",
+        "route22": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Rattata, Piafabec, Nidoran♀, Nidoran♂, Ptitard et Poissirène",
+        "route23": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Piafabec, Rapasdepic, Abo, Arbok, Sabelette, Sablaireau, Flagadoss, Krabboss, Hypocéan, Poissoroy et Métamorph",
+        "route24and25": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Chenipan, Chrysacier, Aspicot, Coconfort, Roucool, Mystherbe, Psykokwak, Abra, Chétiflor, Krabby et Poissirène",
+        "rockTunnel": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Nosferapti, Machoc, Racaillou et Onix",
+        "diglettsCave": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Taupiqueur et Triopikeur",
+        "mtSilver": "Possède les Pokémon qu’on y trouve dans Or et Argent : Nosferalto, Akwakwak, Ptitard, Têtarte, Gravalanch, Ponyta, Galopa, Doduo, Dodrio, Onix, Saquedeneu, Poissirène, Poissoroy, Magicarpe, Maraiste, Feuforêve, Farfuret, Ursaring, Donphan et Embrylex"
       },
       "families": "Complète {count} lignée d’évolution | Complète {count} lignées d’évolution",
       "allStarters": "Possède les {count} Pokémon de départ, de Kanto à Paldea",
@@ -2125,7 +2465,58 @@
       "johtoBadges": "Complète les équipes des {count} champions d’arène de Johto",
       "eliteFour": "Complète les équipes du Conseil 4 de Kanto",
       "champions": "Complète l’équipe de {count} Maître | Complète les équipes de {count} Maîtres",
-      "places": "Possède tous les Pokémon de {count} lieu | Possède tous les Pokémon de {count} lieux"
+      "places": "Possède tous les Pokémon de {count} lieu | Possède tous les Pokémon de {count} lieux",
+      "kantoLines": "Complète {count} lignées d’évolution de Kanto",
+      "alolanForms": "Possède les 18 formes d’Alola de Pokémon de Kanto : Rattata, Rattatac, Raichu, Sabelette, Sablaireau, Goupix, Feunard, Taupiqueur, Triopikeur, Miaouss, Persian, Racaillou, Gravalanch, Grolem, Tadmorv, Grotadmorv, Noadkoko et Ossatueur",
+      "galarianForms": "Possède les 11 formes de Galar de Pokémon de Kanto : Miaouss, Ponyta, Galopa, Ramoloss, Flagadoss, Canarticho, Smogogo, M. Mime, Artikodin, Électhor et Sulfura",
+      "hisuiPaldeaForms": "Possède les formes de Hisui de Caninos, Arcanin, Voltorbe et Électrode, et Tauros de Paldea",
+      "kantoDex": "Possède {count} Pokémon différents de Kanto (n° 1 à 151)",
+      "kantoRoutes": "Possède tous les Pokémon de toutes les routes de Kanto, de la route 1 à la route 25",
+      "kantoLandmarks": "Possède tous les Pokémon des grottes, forêts et bâtiments de Kanto, Mont Argenté compris",
+      "viridianCity": "Possède une carte de Jadielle (Stade de la ville ou de son arène)",
+      "pewterCity": "Possède une carte d’Argenta (Stade de la ville ou de son arène)",
+      "ceruleanCity": "Possède une carte d’Azuria (Stade de la ville ou de son arène)",
+      "vermilionCity": "Possède une carte de Carmin sur Mer (Stade de la ville ou de son arène)",
+      "lavenderTown": "Possède une carte de Lavanville (Stade de la ville ou de son arène)",
+      "celadonCity": "Possède une carte de Céladopole (Stade de la ville ou de son arène)",
+      "fuchsiaCity": "Possède une carte de Parmanie (Stade de la ville ou de son arène)",
+      "saffronCity": "Possède une carte de Safrania (Stade de la ville ou de son arène)",
+      "cinnabarIsland": "Possède une carte de Cramois’Île (Stade de la ville ou de son arène)",
+      "indigoPlateau": "Possède une carte de Plateau Indigo (Stade de la ville ou de son arène)",
+      "kantoCities": "Possède une carte de chaque ville de Kanto qui en a une : Jadielle, Argenta, Azuria, Carmin sur Mer, Lavanville, Céladopole, Parmanie, Safrania, Cramois’Île et Plateau Indigo (Bourg Palette n’en a pas)",
+      "kantoPlaceCards": "Possède les lieux de Kanto imprimés en cartes Stade : Forêt de Jade, Mont Sélénite, Centrale, Tour Pokémon, Piste Cyclable et le repaire de la Team Rocket",
+      "tc_gymLeaders": "Possède une carte de chacun des 8 champions d’arène de Kanto : Pierre, Ondine, Major Bob, Érika, Koga, Morgane, Auguste et Giovanni",
+      "tc_brock": "Possède {count} cartes différentes au nom de Pierre, comme Onix de Pierre",
+      "tc_misty": "Possède {count} cartes différentes au nom d’Ondine, comme Psykokwak d’Ondine",
+      "tc_ltSurge": "Possède {count} cartes différentes au nom de Major Bob, comme Raichu de Major Bob",
+      "tc_erika": "Possède {count} cartes différentes au nom d’Érika, comme Mystherbe d’Érika",
+      "tc_koga": "Possède {count} cartes différentes au nom de Koga, comme Smogo de Koga",
+      "tc_sabrina": "Possède {count} cartes différentes au nom de Morgane, comme Abra de Morgane",
+      "tc_blaine": "Possède {count} cartes différentes au nom d’Auguste, comme Caninos d’Auguste",
+      "tc_giovanni": "Possède {count} cartes différentes au nom de Giovanni, comme Persian de Giovanni",
+      "tc_eliteFour": "Possède une carte de chaque membre du Conseil 4 : Olga, Aldo, Agatha et Peter",
+      "tc_redBlue": "Possède une carte de Red et une de Blue (Défi de Red, Tactique de Blue, Red et Blue…)",
+      "tc_oak": "Possède {count} cartes différentes du Professeur Chen",
+      "tc_bill": "Possède une carte de Léo, le Pokémaniac de la route 25",
+      "tc_teamRocket": "Possède {count} cartes différentes de la Team Rocket (leurs Pokémon, leurs admins, leurs coups tordus)",
+      "originalSets": "Possède une carte de chacune des premières séries : Set de Base, Jungle, Fossile, Team Rocket, Gym Heroes et Gym Challenge",
+      "impostor": "Possède une carte Imposteur Professeur Chen"
+    },
+    "subs": {
+      "allLines": "Toutes régions",
+      "kantoLines": "Lignées de Kanto (Rouge et Bleu)",
+      "kantoMore": "Kanto, au-delà des lignées",
+      "otherLines": "Autres régions",
+      "kantoGyms": "Arènes de Kanto",
+      "johtoGyms": "Arènes de Johto",
+      "league": "Ligue Pokémon",
+      "rivals": "Rivaux et héros",
+      "trainerCards": "Dresseurs de Kanto en cartes",
+      "allPlaces": "Tous les lieux",
+      "kantoRoutes": "Routes de Kanto (Rouge et Bleu)",
+      "kantoLandmarks": "Grottes, forêts et bâtiments de Kanto",
+      "kantoCities": "Villes de Kanto en cartes",
+      "otherPlaces": "Autres régions"
     }
   },
   "beta": {

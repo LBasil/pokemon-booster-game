@@ -2,7 +2,8 @@
 import { useI18n } from 'vue-i18n'
 import { useAchievementText } from '@/composables/useAchievementText'
 
-// One achievement: category icon, title, description, progress while locked.
+// One achievement: its icon (item.icon: its category's, or its subcategory's
+// like gyms), title, description, progress while locked.
 // Unlocked ones get the foil border; secret ones stay "???" until unlocked.
 // `rate`: share of players who have it (%), null when unknown.
 defineProps({
@@ -19,7 +20,8 @@ const ICONS = {
   pulls: 'M12 3l2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2z',
   sets: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
   pokedex: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h6M15 12h6M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
-  teams: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 7.5M18 14a6 6 0 0 1 4 7',
+  starters: 'M12 21v-8M12 13c0-4.4 3.1-7.5 8-7.5 0 4.4-3.1 7.5-8 7.5zM12 15.5c0-3.6-2.6-6-6.5-6 0 3.6 2.6 6 6.5 6z',
+  people: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 7.5M18 14a6 6 0 0 1 4 7',
   families: 'M3 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM10 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM17 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM7 12h3M14 12h3',
   legends: 'M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z',
   gyms: 'M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM8.5 14L7 21l5-3 5 3-1.5-7',
@@ -43,7 +45,7 @@ const ICONS = {
 <template>
   <li class="achv" :class="{ unlocked: item.unlocked, secret: text.secret(item) }">
     <span class="achv-icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><path :d="ICONS[text.secret(item) ? 'secret' : item.category]" /></svg>
+      <svg viewBox="0 0 24 24"><path :d="ICONS[text.secret(item) ? 'secret' : item.icon] ?? ICONS[item.category]" /></svg>
     </span>
     <span class="achv-body">
       <span class="achv-title">{{ text.title(item) }}</span>

@@ -48,6 +48,27 @@ test('achievements can be searched and filtered, in sync with the URL', async ({
   await expect(page.locator('.achv.secret').first()).toContainText('Secret achievement')
 })
 
+test('achievements can be narrowed to a region, and big categories have subcategories', async ({ page }) => {
+  await signIn(page)
+  await mockSupabase(page)
+  await page.goto('/achievements')
+
+  await page.getByRole('group', { name: 'Region' }).getByRole('button', { name: 'Kanto' }).click()
+  await expect(page).toHaveURL(/region=kanto/)
+  await page.locator('.ach-cats').getByRole('button', { name: /Evolution lines/ }).click()
+  await expect(page.getByRole('heading', { name: /Kanto lines \(Red and Blue\)/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Other regions/ })).toHaveCount(0) // not Kanto
+  await expect(page.locator('.achv').filter({ hasText: 'Fire evolution' })).toContainText('Charmander, Charmeleon and Charizard')
+
+  // Kanto's trainers and cities on their own cards
+  await page.locator('.ach-cats').getByRole('button', { name: /Famous trainers/ }).click()
+  await expect(page.getByRole('heading', { name: /Kanto trainers on cards/ })).toBeVisible()
+  await expect(page.locator('.achv').filter({ hasText: 'Brock fan club' })).toBeVisible()
+
+  await page.reload()
+  await expect(page.getByRole('group', { name: 'Region' }).getByRole('button', { name: 'Kanto' })).toHaveAttribute('aria-pressed', 'true')
+})
+
 test('public achievements are readable signed out', async ({ page }) => {
   await mockSupabase(page)
   await page.goto('/u/misty')

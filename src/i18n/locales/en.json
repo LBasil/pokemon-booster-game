@@ -809,31 +809,31 @@
       "hubTitle": "Challenge achievements",
       "hubCta": "See the achievements",
       "collapseAll": "Collapse all",
-      "expandAll": "Expand all"
+      "expandAll": "Expand all",
+      "regionLabel": "Region",
+      "allRegions": "All regions"
     },
     "categories": {
       "packs": "Boosters",
+      "luck": "Luck",
       "collection": "Collection",
       "pulls": "Pulls",
       "sets": "Sets",
       "pokedex": "Pokédex",
-      "teams": "Famous teams",
+      "starters": "Starters",
+      "families": "Evolution lines",
+      "legends": "Legends",
+      "people": "Famous trainers",
+      "places": "Places",
       "types": "Types",
-      "trainers": "Trainers & Energy",
+      "trainers": "Trainer cards & Energy",
       "mechanics": "Mechanics",
       "treasure": "Treasure",
       "history": "History",
       "artists": "Illustrators",
       "fun": "Oddities",
       "dedication": "Dedication",
-      "luck": "Luck",
-      "economy": "Coins & trades",
-      "families": "Evolution lines",
-      "legends": "Legends",
-      "gyms": "Gym badges",
-      "league": "Pokémon League",
-      "rivals": "Rivals & heroes",
-      "places": "Places"
+      "economy": "Coins & trades"
     },
     "regions": {
       "kanto": "Kanto",
@@ -905,27 +905,6 @@
       },
       "unique10000": {
         "title": "Collector of collectors"
-      },
-      "cards100": {
-        "title": "A handful"
-      },
-      "cards500": {
-        "title": "A stack"
-      },
-      "cards1000": {
-        "title": "Card mountain"
-      },
-      "cards5000": {
-        "title": "Card avalanche"
-      },
-      "cards10000": {
-        "title": "Card ocean"
-      },
-      "cards25000": {
-        "title": "Card galaxy"
-      },
-      "cards50000": {
-        "title": "Card universe"
       },
       "holo1": {
         "title": "Shiny!"
@@ -1227,9 +1206,6 @@
       "days30": {
         "title": "Devoted"
       },
-      "days100": {
-        "title": "Lifer"
-      },
       "mech_pokemonEx": {
         "title": "EX-traordinary"
       },
@@ -1356,15 +1332,6 @@
       "bigDay100": {
         "title": "Hundred in a day"
       },
-      "setsOpened5": {
-        "title": "Window shopper"
-      },
-      "setsOpened25": {
-        "title": "Set hopper"
-      },
-      "setsOpened75": {
-        "title": "Seen it all"
-      },
       "loyal25": {
         "title": "Regular customer"
       },
@@ -1374,9 +1341,6 @@
       "loyal250": {
         "title": "One set to rule them all"
       },
-      "hitPacks1": {
-        "title": "First hit"
-      },
       "hitPacks10": {
         "title": "Lucky streak"
       },
@@ -1385,9 +1349,6 @@
       },
       "hitPacks150": {
         "title": "Luck is a skill"
-      },
-      "secretPulls1": {
-        "title": "Secret pull"
       },
       "secretPulls5": {
         "title": "Secret keeper"
@@ -1907,12 +1868,329 @@
       },
       "places14": {
         "title": "Town Map complete"
+      },
+      "rattataLine": {
+        "title": "Raticate line"
+      },
+      "spearowLine": {
+        "title": "Fearow line"
+      },
+      "ekansLine": {
+        "title": "Arbok line"
+      },
+      "sandshrewLine": {
+        "title": "Sandslash line"
+      },
+      "nidoranFLine": {
+        "title": "Nidoqueen line"
+      },
+      "nidoranMLine": {
+        "title": "Nidoking line"
+      },
+      "clefairyLine": {
+        "title": "Clefable line"
+      },
+      "vulpixLine": {
+        "title": "Ninetales line"
+      },
+      "jigglypuffLine": {
+        "title": "Wigglytuff line"
+      },
+      "zubatLine": {
+        "title": "Golbat line"
+      },
+      "oddishLine": {
+        "title": "Vileplume line"
+      },
+      "parasLine": {
+        "title": "Parasect line"
+      },
+      "venonatLine": {
+        "title": "Venomoth line"
+      },
+      "diglettLine": {
+        "title": "Dugtrio line"
+      },
+      "meowthLine": {
+        "title": "Persian line"
+      },
+      "psyduckLine": {
+        "title": "Golduck line"
+      },
+      "mankeyLine": {
+        "title": "Primeape line"
+      },
+      "growlitheLine": {
+        "title": "Arcanine line"
+      },
+      "bellsproutLine": {
+        "title": "Victreebel line"
+      },
+      "tentacoolLine": {
+        "title": "Tentacruel line"
+      },
+      "ponytaLine": {
+        "title": "Rapidash line"
+      },
+      "slowpokeLine": {
+        "title": "Slowbro line"
+      },
+      "magnemiteLine": {
+        "title": "Magneton line"
+      },
+      "doduoLine": {
+        "title": "Dodrio line"
+      },
+      "seelLine": {
+        "title": "Dewgong line"
+      },
+      "grimerLine": {
+        "title": "Muk line"
+      },
+      "shellderLine": {
+        "title": "Cloyster line"
+      },
+      "drowzeeLine": {
+        "title": "Hypno line"
+      },
+      "krabbyLine": {
+        "title": "Kingler line"
+      },
+      "voltorbLine": {
+        "title": "Electrode line"
+      },
+      "exeggcuteLine": {
+        "title": "Exeggutor line"
+      },
+      "cuboneLine": {
+        "title": "Marowak line"
+      },
+      "koffingLine": {
+        "title": "Weezing line"
+      },
+      "rhyhornLine": {
+        "title": "Rhydon line"
+      },
+      "horseaLine": {
+        "title": "Seadra line"
+      },
+      "goldeenLine": {
+        "title": "Seaking line"
+      },
+      "staryuLine": {
+        "title": "Starmie line"
+      },
+      "eeveeLine": {
+        "title": "Kanto Eeveelutions"
+      },
+      "omanyteLine": {
+        "title": "Omastar line"
+      },
+      "kabutoLine": {
+        "title": "Kabutops line"
+      },
+      "kantoLines10": {
+        "title": "Kanto family album"
+      },
+      "kantoLines25": {
+        "title": "Evolution researcher"
+      },
+      "kantoLines54": {
+        "title": "Every Kanto line"
+      },
+      "families60": {
+        "title": "Evolution encyclopedia"
+      },
+      "kantoSolos": {
+        "title": "Loners"
+      },
+      "kantoBabies": {
+        "title": "Kanto nursery"
+      },
+      "kantoNewEvolutions": {
+        "title": "Late bloomers"
+      },
+      "alolanForms": {
+        "title": "Alolan holidays"
+      },
+      "galarianForms": {
+        "title": "Galarian cousins"
+      },
+      "hisuiPaldeaForms": {
+        "title": "Distant relatives"
+      },
+      "kantoDex25": {
+        "title": "Kanto rookie"
+      },
+      "kantoDex50": {
+        "title": "Kanto trainer"
+      },
+      "kantoDex100": {
+        "title": "Kanto ace"
+      },
+      "route2": {
+        "title": "Route 2"
+      },
+      "route3": {
+        "title": "Route 3"
+      },
+      "route4and9": {
+        "title": "Routes 4 and 9"
+      },
+      "route5": {
+        "title": "Route 5"
+      },
+      "route6": {
+        "title": "Route 6"
+      },
+      "route7": {
+        "title": "Route 7"
+      },
+      "route8": {
+        "title": "Route 8"
+      },
+      "route10": {
+        "title": "Route 10"
+      },
+      "route11": {
+        "title": "Route 11"
+      },
+      "route12": {
+        "title": "Route 12"
+      },
+      "route13": {
+        "title": "Route 13"
+      },
+      "route14and15": {
+        "title": "Routes 14 and 15"
+      },
+      "route16": {
+        "title": "Route 16"
+      },
+      "route17and18": {
+        "title": "Routes 17 and 18"
+      },
+      "route19and20": {
+        "title": "Routes 19 and 20"
+      },
+      "route21": {
+        "title": "Route 21"
+      },
+      "route22": {
+        "title": "Route 22"
+      },
+      "route23": {
+        "title": "Route 23"
+      },
+      "route24and25": {
+        "title": "Routes 24 and 25"
+      },
+      "rockTunnel": {
+        "title": "Rock Tunnel"
+      },
+      "diglettsCave": {
+        "title": "Diglett’s Cave"
+      },
+      "mtSilver": {
+        "title": "Mt. Silver"
+      },
+      "kantoRoutes": {
+        "title": "Every Kanto route"
+      },
+      "kantoLandmarks": {
+        "title": "Kanto spelunker"
+      },
+      "places25": {
+        "title": "World traveler"
+      },
+      "viridianCity": {
+        "title": "Viridian City"
+      },
+      "pewterCity": {
+        "title": "Pewter City"
+      },
+      "ceruleanCity": {
+        "title": "Cerulean City"
+      },
+      "vermilionCity": {
+        "title": "Vermilion City"
+      },
+      "lavenderTown": {
+        "title": "Lavender Town"
+      },
+      "celadonCity": {
+        "title": "Celadon City"
+      },
+      "fuchsiaCity": {
+        "title": "Fuchsia City"
+      },
+      "saffronCity": {
+        "title": "Saffron City"
+      },
+      "cinnabarIsland": {
+        "title": "Cinnabar Island"
+      },
+      "indigoPlateau": {
+        "title": "Road to the League"
+      },
+      "kantoCities": {
+        "title": "Kanto tour"
+      },
+      "kantoPlaceCards": {
+        "title": "Kanto on cards"
+      },
+      "tc_gymLeaders": {
+        "title": "Leaders in the binder"
+      },
+      "tc_brock": {
+        "title": "Brock fan club"
+      },
+      "tc_misty": {
+        "title": "Misty fan club"
+      },
+      "tc_ltSurge": {
+        "title": "Lt. Surge fan club"
+      },
+      "tc_erika": {
+        "title": "Erika fan club"
+      },
+      "tc_koga": {
+        "title": "Koga fan club"
+      },
+      "tc_sabrina": {
+        "title": "Sabrina fan club"
+      },
+      "tc_blaine": {
+        "title": "Blaine fan club"
+      },
+      "tc_giovanni": {
+        "title": "Giovanni fan club"
+      },
+      "tc_eliteFour": {
+        "title": "The Elite Four on cards"
+      },
+      "tc_redBlue": {
+        "title": "Red versus Blue"
+      },
+      "tc_oak": {
+        "title": "Oak’s research"
+      },
+      "tc_bill": {
+        "title": "Bill’s PC"
+      },
+      "tc_teamRocket": {
+        "title": "Rocket loot"
+      },
+      "originalSets": {
+        "title": "The first wave"
+      },
+      "impostor": {
+        "title": "That’s not Oak!"
       }
     },
     "desc": {
       "boosters": "Open {count} booster | Open {count} boosters",
       "unique": "Own {count} different cards",
-      "cards": "Pull {count} cards in total",
       "holo": "Own a holo card or better | Own {count} different holo cards or better",
       "ultra": "Own an ultra rare or better | Own {count} different ultra rares or better",
       "secret": "Own a secret rare | Own {count} different secret rares",
@@ -1959,31 +2237,7 @@
       "unown": "Own 5 different Unown cards",
       "arceus": "Own an Arceus card",
       "featherweight": "Own a Pokémon with 30 HP or less",
-      "teams": {
-        "kantoStarters": "Own Bulbasaur, Charmander and Squirtle",
-        "johtoStarters": "Own Chikorita, Cyndaquil and Totodile",
-        "hoennStarters": "Own Treecko, Torchic and Mudkip",
-        "sinnohStarters": "Own Turtwig, Chimchar and Piplup",
-        "charizardLine": "Own Charmander, Charmeleon and Charizard",
-        "pikachuLine": "Own Pichu, Pikachu and Raichu",
-        "legendaryBirds": "Own Articuno, Zapdos and Moltres",
-        "legendaryBeasts": "Own Raikou, Entei and Suicune",
-        "towerDuo": "Own Lugia and Ho-Oh",
-        "eonDuo": "Own Latias and Latios",
-        "weatherTrio": "Own Kyogre, Groudon and Rayquaza",
-        "lakeGuardians": "Own Uxie, Mesprit and Azelf",
-        "creationTrio": "Own Dialga, Palkia and Giratina",
-        "swordsOfJustice": "Own Cobalion, Terrakion and Virizion",
-        "taoTrio": "Own Reshiram, Zekrom and Kyurem",
-        "kalosLegends": "Own Xerneas, Yveltal and Zygarde",
-        "mewDuo": "Own Mewtwo and Mew",
-        "eeveelutions": "Own Eevee and its 8 evolutions",
-        "kantoFossils": "Own Omanyte, Kabuto and Aerodactyl",
-        "ghostLine": "Own Gastly, Haunter and Gengar",
-        "magikarpLine": "Own Magikarp and Gyarados"
-      },
       "bigDay": "Open {count} boosters in a single day",
-      "setsOpened": "Open boosters from {count} different sets",
       "loyal": "Open {count} boosters of the same set",
       "hitPacks": "Open a booster with an ultra rare or better | Open {count} boosters with an ultra rare or better",
       "secretPulls": "Pull a secret rare (duplicates count) | Pull {count} secret rares (duplicates count)",
@@ -2100,20 +2354,106 @@
         "ashKanto": "Ash’s first team: own Pikachu, Butterfree, Pidgeotto, Bulbasaur, Charizard and Squirtle",
         "ashChampion": "Ash’s world champion team: own Pikachu, Lucario, Dragonite, Gengar, Sirfetch'd and Dracovish",
         "teamRocket": "Jessie, James and Meowth’s Pokémon: own Ekans, Koffing, Meowth, Arbok, Weezing and Wobbuffet",
-        "route1": "Own the Pokémon found there: Pidgey and Rattata",
-        "viridianForest": "Own the Pokémon found there: Caterpie, Metapod, Weedle, Kakuna and Pikachu",
-        "mtMoon": "Own the Pokémon found there: Zubat, Geodude, Paras and Clefairy",
-        "pokemonTower": "Own the Pokémon found there: Gastly, Haunter and Cubone",
-        "safariZone": "Own the Pokémon found there: Chansey, Kangaskhan, Scyther, Pinsir, Tauros, Rhyhorn, Exeggcute and Dratini",
-        "powerPlant": "Own the Pokémon found there: Voltorb, Magnemite, Pikachu, Electabuzz and Zapdos",
-        "seafoamIslands": "Own the Pokémon found there: Seel, Slowpoke, Psyduck, Shellder and Articuno",
-        "pokemonMansion": "Own the Pokémon found there: Grimer, Koffing, Ponyta, Magmar and Ditto",
-        "ceruleanCave": "Own the Pokémon found there: Mewtwo, Ditto, Rhydon and Kadabra",
-        "victoryRoad": "Own the Pokémon found there: Machoke, Onix, Graveler, Golbat, Marowak and Moltres",
+        "route1": "Own the Pokémon found there in Red and Blue: Pidgey and Rattata",
+        "viridianForest": "Own the Pokémon found there in Red and Blue: Caterpie, Metapod, Weedle, Kakuna and Pikachu",
+        "mtMoon": "Own the Pokémon found there in Red and Blue: Clefairy, Zubat, Paras and Geodude",
+        "pokemonTower": "Own the Pokémon found there in Red and Blue: Gastly, Haunter and Cubone",
+        "safariZone": "Own the Pokémon found there in Red and Blue: Nidoran♀, Nidorina, Nidoran♂, Nidorino, Paras, Parasect, Venonat, Venomoth, Psyduck, Slowpoke, Doduo, Krabby, Exeggcute, Rhyhorn, Chansey, Kangaskhan, Scyther, Pinsir, Tauros and Dratini",
+        "powerPlant": "Own the Pokémon found there in Red and Blue: Pikachu, Raichu, Magnemite, Magneton, Voltorb, Electrode, Electabuzz and Zapdos",
+        "seafoamIslands": "Own the Pokémon found there in Red and Blue: Zubat, Golbat, Psyduck, Golduck, Slowpoke, Slowbro, Seel, Dewgong, Shellder, Krabby, Kingler, Horsea, Seadra, Goldeen, Staryu and Articuno",
+        "pokemonMansion": "Own the Pokémon found there in Red and Blue: Vulpix, Growlithe, Ponyta, Grimer, Muk, Koffing, Weezing and Magmar",
+        "ceruleanCave": "Own the Pokémon found there in Red and Blue: Arbok, Raichu, Sandslash, Wigglytuff, Golbat, Parasect, Venomoth, Kadabra, Slowbro, Magneton, Dodrio, Hypno, Kingler, Electrode, Marowak, Rhydon, Chansey, Seadra, Seaking, Ditto and Mewtwo",
+        "victoryRoad": "Own the Pokémon found there in Red and Blue: Zubat, Golbat, Venomoth, Machop, Machoke, Geodude, Graveler, Onix, Marowak and Moltres",
         "nationalPark": "Own the Pokémon found there: Scyther, Pinsir, Butterfree, Beedrill, Venonat and Paras",
         "petalburgWoods": "Own the Pokémon found there: Wurmple, Shroomish and Slakoth",
         "meteorFalls": "Own the Pokémon found there: Lunatone, Solrock and Bagon",
-        "route119": "Own the Pokémon found there: Feebas and Milotic"
+        "route119": "Own the Pokémon found there: Feebas and Milotic",
+        "kantoStarters": "Own Bulbasaur, Charmander and Squirtle",
+        "johtoStarters": "Own Chikorita, Cyndaquil and Totodile",
+        "hoennStarters": "Own Treecko, Torchic and Mudkip",
+        "sinnohStarters": "Own Turtwig, Chimchar and Piplup",
+        "charizardLine": "Own the whole line: Charmander, Charmeleon and Charizard",
+        "pikachuLine": "Own the whole line: Pikachu and Raichu",
+        "legendaryBirds": "Own Articuno, Zapdos and Moltres",
+        "legendaryBeasts": "Own Raikou, Entei and Suicune",
+        "towerDuo": "Own Lugia and Ho-Oh",
+        "eonDuo": "Own Latias and Latios",
+        "weatherTrio": "Own Kyogre, Groudon and Rayquaza",
+        "lakeGuardians": "Own Uxie, Mesprit and Azelf",
+        "creationTrio": "Own Dialga, Palkia and Giratina",
+        "swordsOfJustice": "Own Cobalion, Terrakion and Virizion",
+        "taoTrio": "Own Reshiram, Zekrom and Kyurem",
+        "kalosLegends": "Own Xerneas, Yveltal and Zygarde",
+        "mewDuo": "Own Mewtwo and Mew",
+        "eeveelutions": "Own Eevee and its 8 evolutions",
+        "kantoFossils": "Own Omanyte, Kabuto and Aerodactyl",
+        "ghostLine": "Own the whole line: Gastly, Haunter and Gengar",
+        "magikarpLine": "Own the whole line: Magikarp and Gyarados",
+        "rattataLine": "Own the whole line: Rattata and Raticate",
+        "spearowLine": "Own the whole line: Spearow and Fearow",
+        "ekansLine": "Own the whole line: Ekans and Arbok",
+        "sandshrewLine": "Own the whole line: Sandshrew and Sandslash",
+        "nidoranFLine": "Own the whole line: Nidoran♀, Nidorina and Nidoqueen",
+        "nidoranMLine": "Own the whole line: Nidoran♂, Nidorino and Nidoking",
+        "clefairyLine": "Own the whole line: Clefairy and Clefable",
+        "vulpixLine": "Own the whole line: Vulpix and Ninetales",
+        "jigglypuffLine": "Own the whole line: Jigglypuff and Wigglytuff",
+        "zubatLine": "Own the whole line: Zubat and Golbat",
+        "oddishLine": "Own the whole line: Oddish, Gloom and Vileplume",
+        "parasLine": "Own the whole line: Paras and Parasect",
+        "venonatLine": "Own the whole line: Venonat and Venomoth",
+        "diglettLine": "Own the whole line: Diglett and Dugtrio",
+        "meowthLine": "Own the whole line: Meowth and Persian",
+        "psyduckLine": "Own the whole line: Psyduck and Golduck",
+        "mankeyLine": "Own the whole line: Mankey and Primeape",
+        "growlitheLine": "Own the whole line: Growlithe and Arcanine",
+        "bellsproutLine": "Own the whole line: Bellsprout, Weepinbell and Victreebel",
+        "tentacoolLine": "Own the whole line: Tentacool and Tentacruel",
+        "ponytaLine": "Own the whole line: Ponyta and Rapidash",
+        "slowpokeLine": "Own the whole line: Slowpoke and Slowbro",
+        "magnemiteLine": "Own the whole line: Magnemite and Magneton",
+        "doduoLine": "Own the whole line: Doduo and Dodrio",
+        "seelLine": "Own the whole line: Seel and Dewgong",
+        "grimerLine": "Own the whole line: Grimer and Muk",
+        "shellderLine": "Own the whole line: Shellder and Cloyster",
+        "drowzeeLine": "Own the whole line: Drowzee and Hypno",
+        "krabbyLine": "Own the whole line: Krabby and Kingler",
+        "voltorbLine": "Own the whole line: Voltorb and Electrode",
+        "exeggcuteLine": "Own the whole line: Exeggcute and Exeggutor",
+        "cuboneLine": "Own the whole line: Cubone and Marowak",
+        "koffingLine": "Own the whole line: Koffing and Weezing",
+        "rhyhornLine": "Own the whole line: Rhyhorn and Rhydon",
+        "horseaLine": "Own the whole line: Horsea and Seadra",
+        "goldeenLine": "Own the whole line: Goldeen and Seaking",
+        "staryuLine": "Own the whole line: Staryu and Starmie",
+        "eeveeLine": "Own Eevee and its Kanto evolutions: Vaporeon, Jolteon and Flareon",
+        "omanyteLine": "Own the whole line: Omanyte and Omastar",
+        "kabutoLine": "Own the whole line: Kabuto and Kabutops",
+        "kantoSolos": "Own the 20 Kanto Pokémon that don’t evolve in Red and Blue, legendaries aside: Farfetch’d, Onix, Hitmonlee, Hitmonchan, Lickitung, Chansey, Tangela, Kangaskhan, Mr. Mime, Scyther, Jynx, Electabuzz, Magmar, Pinsir, Tauros, Lapras, Ditto, Porygon, Aerodactyl and Snorlax",
+        "kantoBabies": "Own the babies later added to Kanto lines: Pichu, Cleffa, Igglybuff, Tyrogue, Smoochum, Elekid, Magby, Mime Jr., Happiny and Munchlax",
+        "kantoNewEvolutions": "Own the evolutions later games gave Kanto Pokémon: Crobat, Bellossom, Politoed, Slowking, Steelix, Scizor, Kingdra, Porygon2, Blissey, Magnezone, Lickilicky, Rhyperior, Tangrowth, Electivire, Magmortar, Porygon-Z, Perrserker, Sirfetch’d, Mr. Rime, Kleavor and Annihilape",
+        "route2": "Own the Pokémon found there in Red and Blue: Caterpie, Weedle, Pidgey and Rattata",
+        "route3": "Own the Pokémon found there in Red and Blue: Pidgey, Spearow and Jigglypuff",
+        "route4and9": "Own the Pokémon found there in Red and Blue: Rattata, Spearow, Ekans and Sandshrew",
+        "route5": "Own the Pokémon found there in Red and Blue: Pidgey, Oddish, Meowth, Mankey and Bellsprout",
+        "route6": "Own the Pokémon found there in Red and Blue: Pidgey, Oddish, Meowth, Mankey, Bellsprout, Shellder and Krabby",
+        "route7": "Own the Pokémon found there in Red and Blue: Pidgey, Vulpix, Oddish, Meowth, Mankey, Growlithe and Bellsprout",
+        "route8": "Own the Pokémon found there in Red and Blue: Pidgey, Ekans, Sandshrew, Vulpix, Meowth, Mankey and Growlithe",
+        "route10": "Own the Pokémon found there in Red and Blue: Spearow, Ekans, Sandshrew, Poliwhirl, Slowpoke and Voltorb",
+        "route11": "Own the Pokémon found there in Red and Blue: Spearow, Ekans, Sandshrew, Shellder, Drowzee and Krabby",
+        "route12": "Own the Pokémon found there in Red and Blue: Pidgey, Oddish, Gloom, Venonat, Bellsprout, Weepinbell, Tentacool, Krabby, Goldeen, Magikarp and Snorlax",
+        "route13": "Own the Pokémon found there in Red and Blue: Pidgey, Oddish, Gloom, Venonat, Bellsprout, Weepinbell, Tentacool, Krabby, Goldeen, Magikarp and Ditto",
+        "route14and15": "Own the Pokémon found there in Red and Blue: Pidgey, Pidgeotto, Oddish, Gloom, Venonat, Bellsprout, Weepinbell and Ditto",
+        "route16": "Own the Pokémon found there in Red and Blue: Rattata, Raticate, Spearow, Doduo and Snorlax",
+        "route17and18": "Own the Pokémon found there in Red and Blue: Raticate, Spearow, Fearow, Tentacool, Doduo, Krabby, Goldeen and Magikarp",
+        "route19and20": "Own the Pokémon found there in Red and Blue: Tentacool, Shellder, Horsea, Goldeen and Staryu",
+        "route21": "Own the Pokémon found there in Red and Blue: Pidgey, Pidgeotto, Rattata, Raticate, Tentacool, Shellder, Tangela, Horsea, Goldeen and Staryu",
+        "route22": "Own the Pokémon found there in Red and Blue: Rattata, Spearow, Nidoran♀, Nidoran♂, Poliwag and Goldeen",
+        "route23": "Own the Pokémon found there in Red and Blue: Spearow, Fearow, Ekans, Arbok, Sandshrew, Sandslash, Slowbro, Kingler, Seadra, Seaking and Ditto",
+        "route24and25": "Own the Pokémon found there in Red and Blue: Caterpie, Metapod, Weedle, Kakuna, Pidgey, Oddish, Psyduck, Abra, Bellsprout, Krabby and Goldeen",
+        "rockTunnel": "Own the Pokémon found there in Red and Blue: Zubat, Machop, Geodude and Onix",
+        "diglettsCave": "Own the Pokémon found there in Red and Blue: Diglett and Dugtrio",
+        "mtSilver": "Own the Pokémon found there in Gold and Silver: Golbat, Golduck, Poliwag, Poliwhirl, Graveler, Ponyta, Rapidash, Doduo, Dodrio, Onix, Tangela, Goldeen, Seaking, Magikarp, Quagsire, Misdreavus, Sneasel, Ursaring, Donphan and Larvitar"
       },
       "families": "Complete {count} evolution line | Complete {count} evolution lines",
       "allStarters": "Own the {count} starter Pokémon, Kanto to Paldea",
@@ -2125,7 +2465,58 @@
       "johtoBadges": "Complete the teams of Johto’s {count} gym leaders",
       "eliteFour": "Complete the teams of Kanto’s Elite Four",
       "champions": "Complete {count} champion’s team | Complete {count} champions’ teams",
-      "places": "Own every Pokémon of {count} place | Own every Pokémon of {count} places"
+      "places": "Own every Pokémon of {count} place | Own every Pokémon of {count} places",
+      "kantoLines": "Complete {count} evolution lines of Kanto",
+      "alolanForms": "Own the 18 Alolan forms of Kanto Pokémon: Rattata, Raticate, Raichu, Sandshrew, Sandslash, Vulpix, Ninetales, Diglett, Dugtrio, Meowth, Persian, Geodude, Graveler, Golem, Grimer, Muk, Exeggutor and Marowak",
+      "galarianForms": "Own the 11 Galarian forms of Kanto Pokémon: Meowth, Ponyta, Rapidash, Slowpoke, Slowbro, Farfetch’d, Weezing, Mr. Mime, Articuno, Zapdos and Moltres",
+      "hisuiPaldeaForms": "Own the Hisuian forms of Growlithe, Arcanine, Voltorb and Electrode, and Paldean Tauros",
+      "kantoDex": "Own {count} different Pokémon of Kanto (#1 to #151)",
+      "kantoRoutes": "Own every Pokémon of every Kanto route, from Route 1 to Route 25",
+      "kantoLandmarks": "Own every Pokémon of Kanto’s caves, forests and buildings, Mt. Silver included",
+      "viridianCity": "Own a card of Viridian City (Stadium: Viridian City Gym)",
+      "pewterCity": "Own a card of Pewter City (Stadium: Pewter City Gym, Brock’s Pewter City Gym)",
+      "ceruleanCity": "Own a card of Cerulean City (Stadium: Cerulean City Gym, Misty’s Cerulean City Gym)",
+      "vermilionCity": "Own a card of Vermilion City (Stadium: Vermilion City Gym)",
+      "lavenderTown": "Own a card of Lavender Town (Stadium: Lavender Town)",
+      "celadonCity": "Own a card of Celadon City (Stadium: Celadon City Gym)",
+      "fuchsiaCity": "Own a card of Fuchsia City (Stadium: Fuchsia City Gym)",
+      "saffronCity": "Own a card of Saffron City (Stadium: Saffron City Gym)",
+      "cinnabarIsland": "Own a card of Cinnabar Island (Stadium: Cinnabar City Gym)",
+      "indigoPlateau": "Own a card of Indigo Plateau (Stadium: Indigo Plateau)",
+      "kantoCities": "Own a card of every Kanto city that has one: Viridian City, Pewter City, Cerulean City, Vermilion City, Lavender Town, Celadon City, Fuchsia City, Saffron City, Cinnabar Island and Indigo Plateau (Pallet Town has none)",
+      "kantoPlaceCards": "Own the Kanto places printed as Stadium cards: Viridian Forest, Mt. Moon, Power Plant, Pokémon Tower, Cycling Road and Rocket’s Hideout",
+      "tc_gymLeaders": "Own a card of each of Kanto’s 8 gym leaders: Brock, Misty, Lt. Surge, Erika, Koga, Sabrina, Blaine and Giovanni",
+      "tc_brock": "Own {count} different cards bearing Brock’s name, like Brock’s Onix",
+      "tc_misty": "Own {count} different cards bearing Misty’s name, like Misty’s Psyduck",
+      "tc_ltSurge": "Own {count} different cards bearing Lt. Surge’s name, like Lt. Surge’s Raichu",
+      "tc_erika": "Own {count} different cards bearing Erika’s name, like Erika’s Oddish",
+      "tc_koga": "Own {count} different cards bearing Koga’s name, like Koga’s Koffing",
+      "tc_sabrina": "Own {count} different cards bearing Sabrina’s name, like Sabrina’s Abra",
+      "tc_blaine": "Own {count} different cards bearing Blaine’s name, like Blaine’s Growlithe",
+      "tc_giovanni": "Own {count} different cards bearing Giovanni’s name, like Giovanni’s Persian",
+      "tc_eliteFour": "Own a card of each Elite Four member: Lorelei, Bruno, Agatha and Lance",
+      "tc_redBlue": "Own a card of Red and one of Blue (Red’s Challenge, Blue’s Tactics, Red & Blue…)",
+      "tc_oak": "Own {count} different Professor Oak cards",
+      "tc_bill": "Own a card of Bill, the Pokémaniac of Route 25",
+      "tc_teamRocket": "Own {count} different Team Rocket cards (their Pokémon, admins and schemes)",
+      "originalSets": "Own a card from each of the first sets: Base Set, Jungle, Fossil, Team Rocket, Gym Heroes and Gym Challenge",
+      "impostor": "Own an Impostor Professor Oak card"
+    },
+    "subs": {
+      "allLines": "All regions",
+      "kantoLines": "Kanto lines (Red and Blue)",
+      "kantoMore": "Kanto, beyond the lines",
+      "otherLines": "Other regions",
+      "kantoGyms": "Kanto gyms",
+      "johtoGyms": "Johto gyms",
+      "league": "Pokémon League",
+      "rivals": "Rivals and heroes",
+      "trainerCards": "Kanto trainers on cards",
+      "allPlaces": "All places",
+      "kantoRoutes": "Kanto routes (Red and Blue)",
+      "kantoLandmarks": "Kanto caves, forests and buildings",
+      "kantoCities": "Kanto cities on cards",
+      "otherPlaces": "Other regions"
     }
   },
   "beta": {

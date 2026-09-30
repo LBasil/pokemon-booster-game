@@ -3,18 +3,8 @@
 // (achievements.items.<id>.title) and description naming the members
 // (achievements.desc.groups.<id>): change the list, change both texts.
 
-// Whole evolution lines (first stage to last)
+// Whole evolution lines (first stage to last) outside Kanto (Kanto: KANTO_LINES in kanto.js)
 export const FAMILIES = {
-  bulbasaurLine: [1, 2, 3],
-  squirtleLine: [7, 8, 9],
-  caterpieLine: [10, 11, 12],
-  weedleLine: [13, 14, 15],
-  pidgeyLine: [16, 17, 18],
-  poliwagLine: [60, 61, 62],
-  abraLine: [63, 64, 65],
-  machopLine: [66, 67, 68],
-  geodudeLine: [74, 75, 76],
-  dratiniLine: [147, 148, 149],
   chikoritaLine: [152, 153, 154],
   cyndaquilLine: [155, 156, 157],
   totodileLine: [158, 159, 160],
@@ -59,8 +49,12 @@ export const STARTERS = [1, 4, 7, 152, 155, 158, 252, 255, 258, 387, 390, 393, 4
 export const STARTER_FINALS = STARTERS.map((number) => number + 2)
 export const PSEUDO_LEGENDS = [149, 248, 373, 376, 445, 635, 706, 784, 887, 998]
 
-// The starter trios Kanto-Sinnoh are in TEAMS (achievements.js) already
+// Each region's starter trio (first stage)
 export const STARTER_TRIOS = {
+  kantoStarters: [1, 4, 7],
+  johtoStarters: [152, 155, 158],
+  hoennStarters: [252, 255, 258],
+  sinnohStarters: [387, 390, 393],
   unovaStarters: [495, 498, 501],
   kalosStarters: [650, 653, 656],
   alolaStarters: [722, 725, 728],
@@ -77,12 +71,23 @@ export const LEGENDARIES = [
 export const MYTHICALS = [151, 251, 385, 386, 489, 490, 491, 492, 493, 494, 647, 648, 649, 719, 720, 721, 801, 802, 807, 808, 809, 893, 1025]
 export const ULTRA_BEASTS = [793, 794, 795, 796, 797, 798, 799, 803, 804, 805, 806]
 
-// Legendary groups not already in TEAMS (birds, beasts, weather trio...)
+// Legendary groups, region by region
 export const LEGENDS = {
+  legendaryBirds: [144, 145, 146],
+  mewDuo: [150, 151],
+  legendaryBeasts: [243, 244, 245],
+  towerDuo: [249, 250],
   regiTrio: [377, 378, 379],
   allRegis: [377, 378, 379, 486, 894, 895],
+  eonDuo: [380, 381],
+  weatherTrio: [382, 383, 384],
+  lakeGuardians: [480, 481, 482],
+  creationTrio: [483, 484, 487],
   lunarDuo: [488, 491],
+  swordsOfJustice: [638, 639, 640],
   forcesOfNature: [641, 642, 645, 905],
+  taoTrio: [643, 644, 646],
+  kalosLegends: [716, 717, 718],
   tapus: [785, 786, 787, 788],
   alolaLegends: [791, 792, 800],
   galarHeroes: [888, 889],
@@ -140,18 +145,9 @@ export const RIVALS = {
   teamRocket: [23, 109, 52, 24, 110, 202], // Jessie, James and Meowth
 }
 
-// Places and their wild Pokémon (Red/Blue, Gold/Silver, Ruby/Sapphire)
+// Places outside Kanto and their wild Pokémon (Gold/Silver, Ruby/Sapphire).
+// Kanto's: KANTO_ROUTES and KANTO_LANDMARKS in kanto.js
 export const PLACES = {
-  route1: [16, 19],
-  viridianForest: [10, 11, 13, 14, 25],
-  mtMoon: [41, 74, 46, 35],
-  pokemonTower: [92, 93, 104],
-  safariZone: [113, 115, 123, 127, 128, 111, 102, 147],
-  powerPlant: [100, 81, 25, 125, 145],
-  seafoamIslands: [86, 79, 54, 90, 144],
-  pokemonMansion: [88, 109, 77, 126, 132],
-  ceruleanCave: [150, 132, 112, 64],
-  victoryRoad: [67, 95, 75, 42, 105, 146],
   nationalPark: [123, 127, 12, 15, 48, 46],
   petalburgWoods: [265, 285, 287],
   meteorFalls: [337, 338, 371],

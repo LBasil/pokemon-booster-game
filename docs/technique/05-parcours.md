@@ -431,11 +431,15 @@ sequenceDiagram
 ## 7. Succès
 
 Définitions : [src/utils/achievements.js](../../src/utils/achievements.js)
-(~370, 22 catégories). Les groupes de Pokémon (lignées d'évolution,
+(~470, 20 catégories, sous-catégories `sub` dans les grosses, tags de
+région `tags` pour le filtre « Région », `?region=`). Les groupes de Pokémon (lignées d'évolution,
 légendaires et fabuleux, équipes des champions d'arène de Kanto et Johto,
 Conseil 4, Maîtres de la Ligue, rivaux et héros, lieux et leurs Pokémon
 sauvages) sont des listes de numéros du Pokédex dans
-[src/utils/pokemonGroups.js](../../src/utils/pokemonGroups.js) ; leur
+[src/utils/pokemonGroups.js](../../src/utils/pokemonGroups.js), et tout
+Kanto (lignées de Rouge/Bleu, routes, lieux, villes et dresseurs sur leurs
+cartes, reconnus par le nom de la carte) dans
+[src/utils/kanto.js](../../src/utils/kanto.js) ; leur
 description nomme les membres (`achievements.desc.groups.<id>`), donc
 changer une liste = changer ses deux textes. **Calculés dans le navigateur, par mode.** Le
 Défi est mis en avant, c'est celui qui compte.
@@ -447,7 +451,7 @@ Défi est mis en avant, c'est celui qui compte.
 1. `collectorStats` parcourt la collection **une seule fois** et en tire
    tout ce dont les définitions ont besoin : uniques, total, valeur,
    raretés, sets (et pourcentage de complétion), Pokédex, types, sous-types
-   (EX, GX, V…), artistes, années, etc. Plus les statistiques serveur
+   (EX, GX, V…), artistes, noms de cartes, années, etc. Plus les statistiques serveur
    (`stats` de `player_achievements`) : packs avec hit, meilleure journée,
    séries, sets ouverts ; en Défi, échanges, cadeaux, pièces gagnées,
    missions, fabrications, recyclage.

@@ -18,6 +18,23 @@ import {
   STARTERS,
   ULTRA_BEASTS,
 } from '@/utils/pokemonGroups'
+import {
+  BILL_CARDS,
+  ELITE_FOUR_CARDS,
+  GYM_LEADER_CARDS,
+  IMPOSTOR_OAK,
+  KANTO_CITIES,
+  KANTO_EXTRAS,
+  KANTO_LANDMARKS,
+  KANTO_LINES,
+  KANTO_PLACE_CARDS,
+  KANTO_ROUTES,
+  OAK_CARDS,
+  ORIGINAL_SETS,
+  REGIONAL_FORMS,
+  RIVAL_CARDS,
+  TEAM_ROCKET_CARDS,
+} from '@/utils/kanto'
 
 // Achievements are computed from the (unlimited) collection alone, so they
 // work on public profiles too, and a newly added achievement unlocks at once
@@ -26,8 +43,10 @@ import {
 // Each definition: { id, category, metric(stats) -> number, target,
 // title?/desc? i18n keys under achievements.* (default items.<id>.title and
 // desc.<family>), params? for those messages, hidden? (shown as "???" until
-// unlocked), modes? (only in those game modes) }. Messages get { count:
-// target } unless params says otherwise.
+// unlocked), modes? (only in those game modes), sub? (subcategory: a heading
+// inside the category, achievements.subs.<sub>), tags? (regions it belongs
+// to: the region filter), icon? (AchievementTile icon, default the
+// category's) }. Messages get { count: target } unless params says otherwise.
 //
 // Pack-based achievements (luck, streaks, best day...) read the server's
 // stats (player_achievements().stats, migration 0010): they stay locked
@@ -40,12 +59,10 @@ export const CATEGORIES = [
   'pulls',
   'sets',
   'pokedex',
-  'teams',
+  'starters',
   'families',
   'legends',
-  'gyms',
-  'league',
-  'rivals',
+  'people',
   'places',
   'types',
   'trainers',
@@ -65,7 +82,7 @@ const serverStats = (stats) => Object.fromEntries([...PACK_STATS, ...CHALLENGE_S
 
 export const TYPES = ['Grass', 'Fire', 'Water', 'Lightning', 'Psychic', 'Fighting', 'Darkness', 'Metal', 'Dragon', 'Fairy', 'Colorless']
 
-// National Pokédex ranges per region (games' generations)
+// National Pokédex ranges per region (games' generations), also the tags of the region filter
 export const REGIONS = [
   ['kanto', 1, 151],
   ['johto', 152, 251],
@@ -78,30 +95,6 @@ export const REGIONS = [
   ['paldea', 906, 1025],
 ]
 
-// Famous groups, by Pokédex number
-export const TEAMS = {
-  kantoStarters: [1, 4, 7],
-  johtoStarters: [152, 155, 158],
-  hoennStarters: [252, 255, 258],
-  sinnohStarters: [387, 390, 393],
-  charizardLine: [4, 5, 6],
-  pikachuLine: [172, 25, 26],
-  legendaryBirds: [144, 145, 146],
-  legendaryBeasts: [243, 244, 245],
-  towerDuo: [249, 250],
-  eonDuo: [380, 381],
-  weatherTrio: [382, 383, 384],
-  lakeGuardians: [480, 481, 482],
-  creationTrio: [483, 484, 487],
-  swordsOfJustice: [638, 639, 640],
-  taoTrio: [643, 644, 646],
-  kalosLegends: [716, 717, 718],
-  mewDuo: [150, 151],
-  eeveelutions: [133, 134, 135, 136, 196, 197, 470, 471, 700],
-  kantoFossils: [138, 140, 142],
-  ghostLine: [92, 93, 94],
-  magikarpLine: [129, 130],
-}
 
 // Card subtypes from pokemontcg.io, as printed on the cards (not translated)
 export const MECHANICS = {
@@ -163,6 +156,7 @@ export function collectorStats(entries, sets, { mode = 'unlimited', packs = null
     supertypes: new Map(),
     subtypes: new Map(),
     artists: new Map(),
+    names: new Map(), // unique cards per card name (trainers', cities' cards...)
     maxQuantity: 0,
     maxHp: 0,
     minHp: Infinity,
@@ -184,6 +178,7 @@ export function collectorStats(entries, sets, { mode = 'unlimited', packs = null
     if (card.supertype) inc(s.supertypes, card.supertype)
     for (const subtype of card.subtypes ?? []) inc(s.subtypes, subtype)
     if (card.artist) inc(s.artists, card.artist)
+    if (card.name) inc(s.names, card.name)
     const letter = card.name?.normalize('NFD')[0]?.toUpperCase()
     if (letter >= 'A' && letter <= 'Z') s.letters.add(letter)
     if (entry.acquired_at) s.days.add(entry.acquired_at.slice(0, 10))
@@ -217,10 +212,8 @@ export function collectorStats(entries, sets, { mode = 'unlimited', packs = null
   const fromCards = Math.floor(s.total / CARDS_PER_BOOSTER)
   if (mode === 'challenge' && packs !== null) {
     s.boosters = packs
-    s.pulled = packs * CARDS_PER_BOOSTER
   } else {
     s.boosters = Math.max(fromCards, packs ?? 0)
-    s.pulled = s.total
   }
   return s
 }
@@ -244,22 +237,53 @@ const owns = (list) => (s) => list.filter((number) => s.dex.has(number)).length
 const sub = (name) => (s) => s.subtypes.get(name) ?? 0
 const superOf = (name) => (s) => s.supertypes.get(name) ?? 0
 
+// Card names (for trainers', cities' and regional forms' cards)
+const namedCount = (pattern) => (s) => {
+  let count = 0
+  for (const [name, cards] of s.names) if (pattern.test(name)) count += cards
+  return count
+}
+const hasNamed = (s, pattern) => [...s.names.keys()].some((name) => pattern.test(name))
+/** How many of `patterns` at least one owned card matches. */
+const covered = (patterns) => (s) => patterns.filter((pattern) => hasNamed(s, pattern)).length
+// "Alolan Vulpix" also covers "Alolan Vulpix-GX" and "Alolan Vulpix VSTAR"
+const formsOwned = (forms) => (s) =>
+  forms.filter((form) => [...s.names.keys()].some((name) => name === form || name.startsWith(`${form} `) || name.startsWith(`${form}-`))).length
+
+/** The region a Pokédex number belongs to (its generation). */
+const regionOf = (number) => REGIONS.find(([, from, to]) => number >= from && number <= to)?.[0]
+
+/**
+ * "Own them all" groups of pokemonGroups.js / kanto.js (texts:
+ * desc.groups.<id>). Tagged with the region of their first member unless
+ * `tags` says otherwise; `perId` adds fields to single groups.
+ */
+function groups(category, map, { perId = {}, ...extra } = {}) {
+  for (const [id, list] of Object.entries(map)) {
+    const tags = extra.tags ?? [regionOf(list[0])]
+    DEFINITIONS.push({ id, category, metric: owns(list), target: list.length, desc: `groups.${id}`, ...extra, tags, ...perId[id] })
+  }
+}
+/** How many groups of `map` are complete. */
+const complete = (map) => (s) => Object.values(map).filter((list) => list.every((number) => s.dex.has(number))).length
+
+const kanto = { tags: ['kanto'] }
+
 // Packs
 tiers('packs', 'boosters', (s) => s.boosters, [1, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000])
 tiers('packs', 'bigDay', (s) => s.server.best_day, [10, 25, 50, 100])
-tiers('packs', 'setsOpened', (s) => s.server.sets, [5, 25, 75])
 tiers('packs', 'loyal', (s) => s.server.top_set_packs, [25, 100, 250])
 
-// Luck (packs, not unique cards: duplicates count here)
-tiers('luck', 'hitPacks', (s) => s.server.hit_packs, [1, 10, 50, 150])
-tiers('luck', 'secretPulls', (s) => s.server.secrets, [1, 5, 20])
+// Luck (packs, not unique cards: duplicates count here). No first tier:
+// the first hit / secret is already pulls' ultra1 / secret1
+tiers('luck', 'hitPacks', (s) => s.server.hit_packs, [10, 50, 150])
+tiers('luck', 'secretPulls', (s) => s.server.secrets, [5, 20])
 one('luck', 'doubleHit', (s) => s.server.max_hits, 2)
 one('luck', 'tripleHit', (s) => s.server.max_hits, 3, { hidden: true })
 one('luck', 'godPack', (s) => s.server.god_packs, 1, { hidden: true, modes: ['challenge'] })
 
-// Collection
+// Collection (cards pulled in total = boosters x 10: the boosters tiers already say it)
 tiers('collection', 'unique', (s) => s.unique, [10, 50, 100, 250, 500, 1000, 2500, 5000, 10000])
-tiers('collection', 'cards', (s) => s.pulled, [100, 500, 1000, 5000, 10000, 25000, 50000])
 
 // Pulls (unique cards per rarity)
 tiers('pulls', 'holo', (s) => s.hits, [1, 10, 50, 200])
@@ -267,7 +291,7 @@ tiers('pulls', 'ultra', (s) => s.ultraPlus, [1, 10, 50, 150])
 tiers('pulls', 'secret', (s) => s.buckets.secret, [1, 5, 25, 75])
 one('pulls', 'rainbow', (s) => Object.values(s.buckets).filter(Boolean).length, 6)
 
-// Sets
+// Sets (sets opened ~ sets started: only the started ones are counted)
 tiers('sets', 'setsStarted', (s) => s.perSet.size, [5, 10, 25, 50, 100])
 one('sets', 'setHalf', (s) => Math.floor(s.bestSetPercent), 50, { percent: true })
 one('sets', 'setThreeQuarters', (s) => Math.floor(s.bestSetPercent), 75, { percent: true })
@@ -280,67 +304,82 @@ one('sets', 'vault', (s) => s.subsets.get('vault') ?? 0)
 one('sets', 'classic', (s) => s.subsets.get('classic') ?? 0)
 
 // Pokédex
+const range = (from, to) => Array.from({ length: to - from + 1 }, (_, i) => from + i)
 tiers('pokedex', 'dex', (s) => s.dex.size, [10, 50, 151, 251, 386, 500, 750, 1025])
+tiers('pokedex', 'kantoDex', owns(range(1, 151)), [25, 50, 100], kanto)
 for (const [region, from, to] of REGIONS) {
-  const numbers = Array.from({ length: to - from + 1 }, (_, i) => from + i)
   DEFINITIONS.push({
     id: `region_${region}`,
     category: 'pokedex',
-    metric: owns(numbers),
-    target: numbers.length,
+    metric: owns(range(from, to)),
+    target: to - from + 1,
     title: 'regionTitle',
     desc: 'region',
     params: { region, from, to },
+    tags: [region],
   })
 }
 
-// Teams
-for (const [id, list] of Object.entries(TEAMS)) {
-  DEFINITIONS.push({ id, category: 'teams', metric: owns(list), target: list.length, desc: `teams.${id}` })
+// Starters
+groups('starters', STARTER_TRIOS)
+one('starters', 'allStarters', owns(STARTERS), STARTERS.length)
+one('starters', 'starterFinals', owns(STARTER_FINALS), STARTER_FINALS.length)
+
+// Evolution lines: all regions, then Kanto's (every line of Red and Blue and
+// what surrounds them), then the other regions'
+const ALL_LINES = { ...KANTO_LINES, ...FAMILIES }
+tiers('families', 'families', complete(ALL_LINES), [5, 15, 30, 60], { sub: 'allLines' })
+DEFINITIONS.push({ id: 'pseudoLegends', category: 'families', metric: owns(PSEUDO_LEGENDS), target: PSEUDO_LEGENDS.length, desc: 'groups.pseudoLegends', sub: 'allLines' })
+groups('families', KANTO_LINES, { sub: 'kantoLines', ...kanto })
+tiers('families', 'kantoLines', complete(KANTO_LINES), [10, 25, Object.keys(KANTO_LINES).length], { sub: 'kantoLines', ...kanto })
+groups('families', KANTO_EXTRAS, { sub: 'kantoMore', ...kanto })
+const formTags = { alolanForms: ['kanto', 'alola'], galarianForms: ['kanto', 'galar'], hisuiPaldeaForms: ['kanto', 'paldea'] }
+for (const [id, forms] of Object.entries(REGIONAL_FORMS)) {
+  one('families', id, formsOwned(forms), forms.length, { sub: 'kantoMore', tags: formTags[id] })
 }
-
-// "Own them all" groups of src/utils/pokemonGroups.js (texts: desc.groups.<id>)
-function groups(category, map, extra = {}) {
-  for (const [id, list] of Object.entries(map)) {
-    DEFINITIONS.push({ id, category, metric: owns(list), target: list.length, desc: `groups.${id}`, ...(extra[id] ?? {}) })
-  }
-}
-/** How many groups of `map` are complete. */
-const complete = (map) => (s) => Object.values(map).filter((list) => list.every((number) => s.dex.has(number))).length
-
-groups('teams', STARTER_TRIOS)
-
-// Evolution lines
-groups('families', FAMILIES)
-tiers('families', 'families', complete(FAMILIES), [5, 15, 30])
-one('families', 'allStarters', owns(STARTERS), STARTERS.length)
-one('families', 'starterFinals', owns(STARTER_FINALS), STARTER_FINALS.length)
-DEFINITIONS.push({ id: 'pseudoLegends', category: 'families', metric: owns(PSEUDO_LEGENDS), target: PSEUDO_LEGENDS.length, desc: 'groups.pseudoLegends' })
+groups('families', FAMILIES, { sub: 'otherLines' })
 
 // Legends
 tiers('legends', 'legendaries', owns(LEGENDARIES), [3, 10, 25, 50])
 tiers('legends', 'mythicals', owns(MYTHICALS), [1, 5, 10, 20])
 groups('legends', LEGENDS)
-one('legends', 'ultraBeasts', owns(ULTRA_BEASTS), ULTRA_BEASTS.length)
+one('legends', 'ultraBeasts', owns(ULTRA_BEASTS), ULTRA_BEASTS.length, { tags: ['alola'] })
 
-// Gym leaders (one badge per team), then the whole region
-groups('gyms', KANTO_GYMS)
-groups('gyms', JOHTO_GYMS)
-one('gyms', 'kantoBadges', complete(KANTO_GYMS), Object.keys(KANTO_GYMS).length)
-one('gyms', 'johtoBadges', complete(JOHTO_GYMS), Object.keys(JOHTO_GYMS).length)
+// Famous trainers: gym leaders (one badge per team, then the region), the
+// League, rivals, then Kanto's trainers on their own cards
+groups('people', KANTO_GYMS, { sub: 'kantoGyms', icon: 'gyms', ...kanto })
+one('people', 'kantoBadges', complete(KANTO_GYMS), Object.keys(KANTO_GYMS).length, { sub: 'kantoGyms', icon: 'gyms', ...kanto })
+groups('people', JOHTO_GYMS, { sub: 'johtoGyms', icon: 'gyms', tags: ['johto'] })
+one('people', 'johtoBadges', complete(JOHTO_GYMS), Object.keys(JOHTO_GYMS).length, { sub: 'johtoGyms', icon: 'gyms', tags: ['johto'] })
+const league = { sub: 'league', icon: 'league' }
+groups('people', ELITE_FOUR, { ...league, ...kanto })
+one('people', 'eliteFour', complete(ELITE_FOUR), Object.keys(ELITE_FOUR).length, { ...league, ...kanto })
+const championRegions = { blue: 'kanto', steven: 'hoenn', wallace: 'hoenn', cynthia: 'sinnoh', alder: 'unova', iris: 'unova', diantha: 'kalos', leon: 'galar' }
+groups('people', CHAMPIONS, { ...league, perId: Object.fromEntries(Object.entries(championRegions).map(([id, region]) => [id, { tags: [region] }])) })
+tiers('people', 'champions', complete(CHAMPIONS), [1, 4, 8], league)
+groups('people', RIVALS, { sub: 'rivals', icon: 'rivals', perId: { teamRocket: { hidden: true }, ashChampion: { tags: [] } } })
+const trainerCards = { sub: 'trainerCards', icon: 'trainers', ...kanto }
+one('people', 'tc_gymLeaders', covered(Object.values(GYM_LEADER_CARDS)), Object.keys(GYM_LEADER_CARDS).length, trainerCards)
+for (const [leader, pattern] of Object.entries(GYM_LEADER_CARDS)) one('people', `tc_${leader}`, namedCount(pattern), 10, trainerCards)
+one('people', 'tc_eliteFour', covered(ELITE_FOUR_CARDS), ELITE_FOUR_CARDS.length, trainerCards)
+one('people', 'tc_redBlue', covered(RIVAL_CARDS), RIVAL_CARDS.length, trainerCards)
+one('people', 'tc_oak', namedCount(OAK_CARDS), 3, trainerCards)
+one('people', 'tc_bill', namedCount(BILL_CARDS), 1, trainerCards)
+one('people', 'tc_teamRocket', namedCount(TEAM_ROCKET_CARDS), 25, trainerCards)
 
-// Pokémon League: Elite Four, champions
-groups('league', ELITE_FOUR)
-one('league', 'eliteFour', complete(ELITE_FOUR), Object.keys(ELITE_FOUR).length)
-groups('league', CHAMPIONS)
-tiers('league', 'champions', complete(CHAMPIONS), [1, 4, 8])
-
-// Rivals and famous trainers
-groups('rivals', RIVALS, { teamRocket: { hidden: true } })
-
-// Places and their wild Pokémon
-groups('places', PLACES)
-tiers('places', 'places', complete(PLACES), [3, 7, 14])
+// Places and their wild Pokémon: all of them, Kanto (routes, caves and
+// buildings, cities on cards), then the other regions
+const ALL_PLACES = { ...KANTO_ROUTES, ...KANTO_LANDMARKS, ...PLACES }
+tiers('places', 'places', complete(ALL_PLACES), [3, 7, 14, 25], { sub: 'allPlaces' })
+groups('places', KANTO_ROUTES, { sub: 'kantoRoutes', ...kanto })
+one('places', 'kantoRoutes', complete(KANTO_ROUTES), Object.keys(KANTO_ROUTES).length, { sub: 'kantoRoutes', ...kanto })
+groups('places', KANTO_LANDMARKS, { sub: 'kantoLandmarks', ...kanto, perId: { mtSilver: { tags: ['kanto', 'johto'] } } })
+one('places', 'kantoLandmarks', complete(KANTO_LANDMARKS), Object.keys(KANTO_LANDMARKS).length, { sub: 'kantoLandmarks', ...kanto })
+const cityCards = { sub: 'kantoCities', ...kanto }
+for (const [city, pattern] of Object.entries(KANTO_CITIES)) one('places', city, namedCount(pattern), 1, cityCards)
+one('places', 'kantoCities', covered(Object.values(KANTO_CITIES)), Object.keys(KANTO_CITIES).length, cityCards)
+one('places', 'kantoPlaceCards', covered(KANTO_PLACE_CARDS), KANTO_PLACE_CARDS.length, cityCards)
+groups('places', PLACES, { sub: 'otherPlaces', perId: { nationalPark: { tags: ['johto'] } } })
 
 // Types
 one('types', 'allTypes', (s) => TYPES.filter((type) => s.perType.has(type)).length, TYPES.length)
@@ -357,7 +396,7 @@ for (const type of TYPES) {
   })
 }
 
-// Trainers & energy
+// Trainer cards & energy
 tiers('trainers', 'trainers', superOf('Trainer'), [10, 50, 150])
 tiers('trainers', 'supporters', sub('Supporter'), [10, 50])
 tiers('trainers', 'items', sub('Item'), [10, 50])
@@ -378,7 +417,8 @@ tiers('treasure', 'value', (s) => Math.floor(s.value), [10, 100, 500, 1000, 5000
 tiers('treasure', 'bestCard', (s) => Math.floor(s.bestCard), [20, 100, 250, 500, 1000], { money: true, single: true })
 
 // History (set release dates)
-one('history', 'baseSet', (s) => s.perSet.get('base1') ?? 0)
+one('history', 'baseSet', (s) => s.perSet.get('base1') ?? 0, 1, kanto)
+one('history', 'originalSets', (s) => ORIGINAL_SETS.filter((id) => s.perSet.has(id)).length, ORIGINAL_SETS.length, kanto)
 one('history', 'wotc', (s) => (s.oldestYear < 2003 ? 1 : 0))
 one('history', 'decade2000', (s) => (s.decades.has(2000) ? 1 : 0))
 one('history', 'decade2010', (s) => (s.decades.has(2010) ? 1 : 0))
@@ -393,19 +433,21 @@ tiers('artists', 'artistFan', (s) => max(s.artists), [10, 50])
 // Fun (some hidden until unlocked)
 tiers('fun', 'copies', (s) => s.maxQuantity, [10, 50, 200])
 tiers('fun', 'sameDex', (s) => max(s.perDex), [10, 25])
-one('fun', 'pikachu', (s) => s.perDex.get(DEX.pikachu) ?? 0, 10)
-one('fun', 'charizard', (s) => s.perDex.get(DEX.charizard) ?? 0)
-one('fun', 'charizardHunter', (s) => s.perDex.get(DEX.charizard) ?? 0, 10)
+one('fun', 'pikachu', (s) => s.perDex.get(DEX.pikachu) ?? 0, 10, kanto)
+one('fun', 'charizard', (s) => s.perDex.get(DEX.charizard) ?? 0, 1, kanto)
+one('fun', 'charizardHunter', (s) => s.perDex.get(DEX.charizard) ?? 0, 10, kanto)
 one('fun', 'heavyweight', (s) => (s.maxHp >= 300 ? 1 : 0))
 one('fun', 'alphabet', (s) => s.letters.size, 26)
-one('fun', 'magikarp', (s) => s.perDex.get(DEX.magikarp) ?? 0, 5, { hidden: true })
-one('fun', 'ditto', (s) => s.perDex.get(DEX.ditto) ?? 0, 1, { hidden: true })
-one('fun', 'unown', (s) => s.perDex.get(DEX.unown) ?? 0, 5, { hidden: true })
-one('fun', 'arceus', (s) => s.perDex.get(DEX.arceus) ?? 0, 1, { hidden: true })
+one('fun', 'magikarp', (s) => s.perDex.get(DEX.magikarp) ?? 0, 5, { hidden: true, ...kanto })
+one('fun', 'ditto', (s) => s.perDex.get(DEX.ditto) ?? 0, 1, { hidden: true, ...kanto })
+one('fun', 'impostor', namedCount(IMPOSTOR_OAK), 1, { hidden: true, ...kanto })
+one('fun', 'unown', (s) => s.perDex.get(DEX.unown) ?? 0, 5, { hidden: true, tags: ['johto'] })
+one('fun', 'arceus', (s) => s.perDex.get(DEX.arceus) ?? 0, 1, { hidden: true, tags: ['sinnoh'] })
 one('fun', 'featherweight', (s) => (s.minHp <= 30 ? 1 : 0), 1, { hidden: true })
 
-// Dedication (days with new cards: acquired_at is each card's first pull)
-tiers('dedication', 'days', (s) => s.days.size, [3, 7, 30, 100])
+// Dedication (days with new cards: acquired_at is each card's first pull;
+// from 100 days on, packDays says the same)
+tiers('dedication', 'days', (s) => s.days.size, [3, 7, 30])
 tiers('dedication', 'packStreak', (s) => s.server.best_streak, [3, 7, 14, 30])
 tiers('dedication', 'packDays', (s) => s.server.days, [10, 50, 100, 365])
 
@@ -430,7 +472,7 @@ export const definitionsFor = (mode) => DEFINITIONS.filter((definition) => !defi
  * @param {{ mode?: string, packs?: number|null, unlocked?: Iterable<string> }} [server] -
  *   see collectorStats; `unlocked` = ids the server already recorded: once
  *   unlocked, an achievement stays unlocked even if the collection shrinks
- * @returns {{ id, category, title, desc, params, money, single, hidden, current, target, unlocked, ratio }[]}
+ * @returns {{ id, category, sub, tags, icon, title, desc, params, money, single, hidden, current, target, unlocked, ratio }[]}
  *   in display order (category, then definition order)
  */
 export function achievements(entries, sets, server = {}) {
@@ -447,6 +489,9 @@ export function achievements(entries, sets, server = {}) {
       percent: false,
       single: false,
       hidden: false,
+      sub: null,
+      tags: [],
+      icon: definition.category,
       ...definition,
       current,
       unlocked: value >= definition.target,
@@ -477,6 +522,10 @@ export function achievementProgress(list) {
 
 export const STATUSES = ['all', 'unlocked', 'progress', 'locked']
 
+// Region filter: the regions that some achievement of `list` is tagged with, in Pokédex order
+export const TAGS = REGIONS.map(([region]) => region)
+export const tagsOf = (list) => TAGS.filter((tag) => list.some((item) => item.tags.includes(tag)))
+
 // Lowercase, no accents: "pokemon" finds "Pokémon"
 const normalize = (text) =>
   (text ?? '')
@@ -487,14 +536,15 @@ const normalize = (text) =>
 
 /**
  * @param {object[]} list - from achievements()
- * @param {{ category?: string, status?: string, query?: string }} filters
+ * @param {{ category?: string, status?: string, tag?: string, query?: string }} filters
  * @param {(item) => string} [textOf] - the item's visible title + description,
  *   for the search (hidden, locked items have none: they never match a search)
  */
-export function filterAchievements(list, { category = 'all', status = 'all', query = '' } = {}, textOf = () => '') {
+export function filterAchievements(list, { category = 'all', status = 'all', tag = 'all', query = '' } = {}, textOf = () => '') {
   const needle = normalize(query)
   return list.filter((item) => {
     if (category !== 'all' && item.category !== category) return false
+    if (tag !== 'all' && !item.tags?.includes(tag)) return false
     if (status === 'unlocked' && !item.unlocked) return false
     if (status === 'locked' && item.unlocked) return false
     // In progress: started but not there yet
@@ -525,10 +575,8 @@ const TOAST_PRIORITY = [
   'pulls',
   'fun',
   'legends',
-  'league',
-  'rivals',
-  'teams',
-  'gyms',
+  'people',
+  'starters',
   'families',
   'places',
   'treasure',

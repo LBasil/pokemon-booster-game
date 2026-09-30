@@ -96,19 +96,26 @@ How it works inside (every table, RPC and flow, in French):
   touch screens, drops the 3D flip and the glow layers that stuttered on
   phones), and an
   "install the app" button.
-- **Achievements**: ~370 of them in 22 categories (boosters, luck, pulls, sets,
-  Pokédex regions, famous teams, evolution lines, legends and mythicals,
-  gym badges (each Kanto/Johto gym leader's team), the Pokémon League
-  (Elite Four, champions), rivals & heroes (Red, Silver, Ash, Team Rocket),
-  places (Viridian Forest, Safari Zone...), types, mechanics, treasure, illustrators,
+- **Achievements**: ~470 of them in 20 categories (boosters, luck, pulls, sets,
+  Pokédex regions, starters, evolution lines, legends and mythicals,
+  famous trainers (gym badges = each Kanto/Johto gym leader's team, the
+  Pokémon League, rivals & heroes, Kanto's trainers on their own cards),
+  places, types, mechanics, treasure, illustrators,
   subsets, daily streaks, a challenge-only "coins & trades" one, a few
   secret ones…), **in each game mode** — the challenge ones are the
   ones that count (every pack costs coins), and stay unlocked even after
   recycling or trading. At `/challenge/achievements` and `/achievements`
   (and `/u/<username>/achievements?mode=…`), with an Unlimited | Challenge
   switch,
-  with search, category/status filters, progress bars per category and
+  with search, category/status/**region** filters, subcategories inside the
+  big categories, progress bars per category and
   overall, and **collapsible categories** (remembered on the device). Computed from the collection, so new ones unlock retroactively.
+  **Kanto (Gen 1) in depth**: every Red/Blue evolution line (and all of
+  them), the Pokémon that don't evolve, babies, later evolutions and
+  regional forms of Kanto Pokémon, every route and cave (Pokémon found
+  there in Red/Blue, Mt. Silver in Gold/Silver), the cities that have a
+  card, and cards of Kanto's trainers (gym leaders, Elite Four, Red & Blue,
+  Oak, Bill, Team Rocket).
   A Steam-style **"Achievement unlocked" pop-up** (with a chime) shows at the
   end of an opening — never mid-reveal, so nothing is spoiled — and each
   achievement shows the **share of players** who have it.

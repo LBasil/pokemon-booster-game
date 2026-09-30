@@ -218,8 +218,9 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `rarity.js` | `rarityBucket(label)` (**miroir** de `rarity_bucket()` en SQL), `BUCKETS`, `rarityTier` (3 niveaux visuels), `rarityRank`, `sortForReveal`, `bestPull` |
 | `collection.js` | `filterEntries`, `sortEntries`, `setProgress`, `collectionStats` (cartes, uniques, sets, valeur), `binderSlots`, `pokedexSlots`, `cardNumber` |
 | `profile.js` | `boostersOpened`, `packSummary` (nombre exact de boosters par mode), `RANKS` + `rankFor` (niveau), `rarityBreakdown`, `validateUsername` |
-| `achievements.js` | Les ~370 définitions, `collectorStats` (tout en une passe), `achievements()`, `nextUp`, `achievementProgress`, filtres, taux, tri des toasts |
-| `pokemonGroups.js` | Listes de numéros du Pokédex des succès « possède-les tous » : lignées, starters, légendaires, fabuleux, Ultra-Chimères, badges d'arène, Conseil 4, Maîtres, rivaux, lieux |
+| `achievements.js` | Les ~470 définitions (catégorie, `sub` = sous-catégorie, `tags` = régions du filtre), `collectorStats` (tout en une passe), `achievements()`, `nextUp`, `achievementProgress`, filtres, taux, tri des toasts |
+| `pokemonGroups.js` | Listes de numéros du Pokédex des succès « possède-les tous » : lignées, starters, légendaires, fabuleux, Ultra-Chimères, badges d'arène, Conseil 4, Maîtres, rivaux, lieux hors Kanto |
+| `kanto.js` | Données Gen 1 : lignées de Rouge/Bleu, solitaires, bébés, évolutions tardives, formes régionales (noms de cartes), routes et lieux (Pokémon sauvages, PokéAPI), villes et dresseurs (motifs sur les noms de cartes), premières séries |
 | `challenge.js` | Économie du Défi (**miroir** du SQL) : prix, recyclage (`recyclePreview` avec sélection, `duplicateGroups`), fabrication, récompense quotidienne, comptes à rebours UTC |
 | `minigame.js` | Règles de « Plus ou moins » (**miroir** de `minigame_rules()`) |
 | `electrodeFlip.js` | Règles d'« Électrode Shiny Flip » (**miroir** de `electrode_flip_rules()` / `electrode_flip_end()`) : points, niveau suivant, pièces, lignes sûres |
@@ -337,8 +338,9 @@ partage natif (ou télécharge l'image).
 
 **Un succès** : une définition dans `utils/achievements.js` + son titre et
 sa description EN/FR (`achievements.items.<id>.title`,
-`achievements.desc.<famille>`). `achievements.test.js` échoue s'il manque
-une traduction. Il se débloque rétroactivement pour tous ceux qui
+`achievements.desc.<famille>`), éventuellement `sub` (titre
+`achievements.subs.<sub>`) et `tags` (régions). `achievements.test.js` échoue s'il manque
+une traduction, ou si deux groupes demandent exactement les mêmes Pokémon. Il se débloque rétroactivement pour tous ceux qui
 remplissent déjà la condition.
 
 **Un mini-jeu** : une entrée dans `utils/games.js` (id, route, icône),
