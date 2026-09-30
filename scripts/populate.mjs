@@ -114,16 +114,21 @@ async function recordPrices(cards) {
   }
 }
 
-// cards.weaknesses ("Super effective!" mini-game) comes with migration 0015:
-// until it's applied, cards are saved without it rather than not at all
-let weaknessesAvailable = true
+// Columns that came with later migrations: cards.weaknesses ("Super
+// effective!", 0015) and cards.evolves_from ("Evolution chain", 0018). Until
+// one is applied, cards are saved without it rather than not at all
+const OPTIONAL_COLUMNS = { weaknesses: '0015', evolves_from: '0018' }
+const missingColumns = new Set()
 
 async function upsertCards(cards) {
-  const rows = weaknessesAvailable ? cards : cards.map(({ weaknesses: _weaknesses, ...card }) => card)
+  const rows = missingColumns.size
+    ? cards.map((card) => Object.fromEntries(Object.entries(card).filter(([key]) => !missingColumns.has(key))))
+    : cards
   const { error } = await supabase.from('cards').upsert(rows)
-  if (error && weaknessesAvailable && /weaknesses/.test(error.message)) {
-    weaknessesAvailable = false
-    console.warn('Skipping weaknesses (run migration 0015 first?):', error.message)
+  const column = error && Object.keys(OPTIONAL_COLUMNS).find((key) => !missingColumns.has(key) && error.message.includes(key))
+  if (column) {
+    missingColumns.add(column)
+    console.warn(`Skipping ${column} (run migration ${OPTIONAL_COLUMNS[column]} first?):`, error.message)
     return upsertCards(cards)
   }
   return { error }
@@ -150,6 +155,7 @@ async function populateCards(startPage = 1) {
       hp: card.hp ?? null,
       types: card.types ?? null,
       weaknesses: card.weaknesses?.map((weakness) => weakness.type) ?? null,
+      evolves_from: card.evolvesFrom ?? null,
       set_id: card.set.id,
     }))
 

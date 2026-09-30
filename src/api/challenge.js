@@ -30,6 +30,8 @@ export const CHALLENGE_ERRORS = [
   'nothing_to_cash',
   // "Super effective!" (migration 0015)
   'super_effective_unavailable',
+  // "Evolution chain" (migration 0018)
+  'evolution_chain_unavailable',
 ]
 
 // PostgREST's answer for an RPC that doesn't exist yet
@@ -216,3 +218,21 @@ export const startSuperEffective = () => call('super_effective_start')
  *   answer: string, weaknesses: string[], state: object }>}
  */
 export const answerSuperEffective = (pick) => call('super_effective_answer', { p_pick: pick })
+
+// ---------- "Evolution chain" mini-game (migration 0018) ----------
+
+/**
+ * Rules, whether lines are ready (evolves_from filled), paid runs left today,
+ * best streak and the run in progress (its cards come without their stages).
+ */
+export const fetchEvolutionChainState = () => call('evolution_chain_state')
+
+/** Starts a run (abandoning the one in progress); returns the state. */
+export const startEvolutionChain = () => call('evolution_chain_start')
+
+/**
+ * @param {string[] | null} order - 3 of the shown card ids, Basic first; null = time's up
+ * @returns {Promise<{ correct: boolean, late: boolean, earned: number, streak: number, run_coins: number,
+ *   chain: string[], state: object }>}
+ */
+export const answerEvolutionChain = (order) => call('evolution_chain_answer', { p_order: order })

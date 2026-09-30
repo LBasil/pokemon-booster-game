@@ -354,6 +354,22 @@ docs/technique/             technical doc (French, user choice): overview, front
   ("Coming soon"). Mirror: `src/utils/superEffective.js`. Type dots:
   `--pb-type-*` tokens (one set for both themes, never behind text).
   Ledger kind `super_effective`. Keys 1-6 answer on desktop.
+  **"Evolution chain"** (0018, `/challenge/games/evolution-chain`,
+  `EvolutionChainView` + `useEvolutionChainStore`): 3 cards of one line
+  shuffled, tap them Basic -> Stage 1 -> Stage 2 within 15 s (server
+  allows 20); the 3rd tap sends `evolution_chain_answer(order)`, tapping a
+  picked card takes it back (`togglePick`), keys 1-5 + Backspace. Lines
+  come from `cards.evolves_from` (new in 0018, filled by `populate.mjs`,
+  which skips the column if 0018 isn't applied: `OPTIONAL_COLUMNS`): a
+  random Stage 2 -> a printing of the Stage 1 it names -> of the Basic
+  that one names. Intruders from other lines (never same name, dex number
+  or evolving from a stage; same type first): 0 (streak 0-4), 1 (5-9),
+  then 2. Cards reach the client as id + name + image only; the view crops
+  the art window (x 10-90%, y 17-50%) so the printed stage / "Evolves
+  from" don't show. **Pays the least** (user, 2026-09-30: it's the simple
+  one): 3 paid runs, 3 coins x first 20 = 180 a day max vs 300 for the
+  others. `ready` false -> "Coming soon". Mirror:
+  `src/utils/evolutionChain.js`. Ledger kind `evolution_chain`.
 - **Never let a player lose track of the mode** (user priority): every
   challenge page shows AppHeader's `.mode-strip` ("Challenge mode", coins,
   "Leave" → `/game`, phones included); Community and profiles
@@ -482,8 +498,9 @@ docs/technique/             technical doc (French, user choice): overview, front
   collection with "Ask for it"), ~470 achievements per mode (collapsible, region filter, Kanto focus,
   categories, rates, unlock toasts), challenge mode (coins, daily reward,
   daily + weekly missions, recycle, craft, god packs, mini-games "Higher
-  or lower", "Shiny Electrode Flip" (needs 0014) and "Super effective!"
-  (needs 0015 + a card import), trades with live
+  or lower", "Shiny Electrode Flip" (needs 0014), "Super effective!"
+  (needs 0015 + a card import) and "Evolution chain" (needs 0018 + a
+  card import), trades with live
   updates, opt-out and cards kept out of trades), PWA, EN/FR, both themes.
 - What each migration does (details in each file's header comment):
   0001 schema · 0002 first RPCs (unused) · 0003 realistic packs + rarity
@@ -498,12 +515,14 @@ docs/technique/             technical doc (French, user choice): overview, front
   2026-09-28, not applied yet**; after it, re-run the card import to
   fill the weaknesses) · 0016 feed holos for sets with no ultra/secret
   (**written 2026-09-29, not applied yet**) · 0017 trade answers seen +
-  `recycle_cards` (**written 2026-09-30, not applied yet**). Every one was
-  verified locally with PGlite before being handed over; 0010-0017 have
+  `recycle_cards` (**written 2026-09-30, not applied yet**) · 0018
+  `cards.evolves_from` + "Evolution chain" mini-game (**written
+  2026-09-30, not applied yet**; the next card sync fills evolves_from). Every one was
+  verified locally with PGlite before being handed over; 0010-0018 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 159 unit tests, `npm run test:db` 223 database
-  checks, `npm run test:e2e` 210 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 165 unit tests, `npm run test:db` 271 database
+  checks, `npm run test:e2e` 228 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.
@@ -535,23 +554,18 @@ docs/technique/             technical doc (French, user choice): overview, front
   https://pokemon-booster-game.vercel.app). Check without sending an
   email: `GET /auth/v1/verify?type=recovery&token=fake&redirect_to=<url>`
   redirects to `<url>` if allowed, else to the site URL.
-- **Next mini-games** (user picked them 2026-09-28, after "Super
-  effective!"). Already teased on the games page and hub tile as
-  `soon: true` entries of `src/utils/games.js` (ids `evolution-chain`,
-  `boss-raid`, EN/FR texts, "Coming soon", not clickable, user liked the
-  teasing): to ship one, drop `soon`, add its route + store in `useGames()`.
-  1. **Evolution chain**: put a family's stages back in order (3 shuffled
-     cards; later levels blur the art or add an intruder from another
-     family). Needs `cards.evolves_from` (pokemontcg.io `evolvesFrom`):
-     new migration + populate + a re-import. The Pokédex number isn't
-     enough (Eevee, regional forms).
-  2. **Weekly boss raid**: a giant Pokémon with a shared HP bar, players
-     attack with their challenge cards, everyone rewarded if it falls
-     before Sunday. Rules to settle with the user first: attacks per day,
-     card locked after attacking (day or week?), damage from value / HP /
-     type vs the boss (could reuse `cards.weaknesses`), reward split
-     (flat vs by contribution, a card for the top attacker), HP scaled to
-     active players. Live HP bar through Realtime (not e2e-testable).
+- **Next mini-game** (user picked it 2026-09-28; "Evolution chain"
+  shipped 2026-09-30). Already teased on the games page and hub tile as a
+  `soon: true` entry of `src/utils/games.js` (id `boss-raid`, EN/FR
+  texts, "Coming soon", not clickable, user liked the teasing): to ship
+  it, drop `soon`, add its route + store in `useGames()`.
+  **Weekly boss raid**: a giant Pokémon with a shared HP bar, players
+  attack with their challenge cards, everyone rewarded if it falls
+  before Sunday. Rules to settle with the user first: attacks per day,
+  card locked after attacking (day or week?), damage from value / HP /
+  type vs the boss (could reuse `cards.weaknesses`), reward split
+  (flat vs by contribution, a card for the top attacker), HP scaled to
+  active players. Live HP bar through Realtime (not e2e-testable).
 - **Regional achievements for every region** (user, 2026-09-30: noted,
   **don't start until asked**): repeat the Kanto focus (`src/utils/kanto.js`)
   for Johto, Hoenn, Sinnoh, Unova, Kalos, Alola, Galar, Paldea: one

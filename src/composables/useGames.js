@@ -1,6 +1,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useElectrodeFlipStore } from '@/stores/electrodeFlip'
+import { useEvolutionChainStore } from '@/stores/evolutionChain'
 import { useMinigameStore } from '@/stores/minigame'
 import { useSuperEffectiveStore } from '@/stores/superEffective'
 import { GAMES } from '@/utils/games'
@@ -17,6 +18,7 @@ export function useGames() {
   const higherLower = useMinigameStore()
   const electrodeFlip = useElectrodeFlipStore()
   const superEffective = useSuperEffectiveStore()
+  const evolutionChain = useEvolutionChainStore()
 
   const statusOf = {
     'higher-lower': () => ({
@@ -42,6 +44,14 @@ export function useGames() {
         ? t('minigame.nextPaid', { count: superEffective.paidLeft }, superEffective.paidLeft)
         : t('minigame.nextFree'),
       record: superEffective.best ? t('minigame.bestShort', { count: superEffective.best }) : '',
+    }),
+    'evolution-chain': () => ({
+      store: evolutionChain,
+      inProgress: Boolean(evolutionChain.run),
+      line: evolutionChain.paidLeft
+        ? t('minigame.nextPaid', { count: evolutionChain.paidLeft }, evolutionChain.paidLeft)
+        : t('minigame.nextFree'),
+      record: evolutionChain.best ? t('minigame.bestShort', { count: evolutionChain.best }) : '',
     }),
   }
 
@@ -72,6 +82,7 @@ export function useGames() {
       higherLower.load()
       electrodeFlip.load()
       superEffective.load()
+      evolutionChain.load()
     },
   }
 }

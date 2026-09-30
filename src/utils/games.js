@@ -24,7 +24,7 @@ export const GAMES = [
   },
   {
     id: 'evolution-chain',
-    soon: true,
+    route: 'challenge-game-evolution-chain',
     // Three growing stages, linked
     icon: 'M3 18a2 2 0 1 0 4 0a2 2 0 1 0-4 0M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0M15.5 5.5a3 3 0 1 0 6 0a3 3 0 1 0-6 0M6.5 16.5l3.3-2.8M14.2 10.2l2.2-2.2',
   },

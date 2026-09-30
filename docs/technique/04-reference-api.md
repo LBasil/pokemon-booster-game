@@ -473,6 +473,48 @@ n'est pas repassé). RPC absente (`PGRST202`) ou `ready: false` → store
 
 ---
 
+## Mini-jeu « Chaîne d'évolution » (Défi, migration 0018)
+
+| RPC | JS | Rôle |
+| --- | --- | --- |
+| `evolution_chain_state()` | `fetchEvolutionChainState()` | Règles, `ready` (une lignée complète existe), parties payées restantes, pièces du jour, record, partie en cours. Ferme une partie dont la question a expiré |
+| `evolution_chain_start()` | `startEvolutionChain()` | Abandonne la partie en cours et en démarre une (payée s'il en reste). 20 par minute au maximum (`slow_down`). Renvoie l'état |
+| `evolution_chain_answer(p_order)` | `answerEvolutionChain(order)` | 3 ids distincts parmi `cards`, carte de base en premier (`null` = temps écoulé). Renvoie le résultat, le bon ordre et l'état suivant |
+
+État (`evolution_chain_state`) :
+
+```json
+{
+  "paid_runs": 3, "coins_per_answer": 3, "max_paid_answers": 20, "answer_seconds": 15,
+  "ready": true, "coins": 1250, "paid_left": 2, "today_coins": 9, "best": 7,
+  "run": {
+    "paid": true, "streak": 3, "coins": 9, "seconds_left": 12,
+    "cards": [
+      { "id": "sv3pt5-6", "name": "Charizard ex", "image_small": "…" },
+      { "id": "sv3pt5-4", "name": "Charmander", "image_small": "…" },
+      { "id": "sv3pt5-5", "name": "Charmeleon", "image_small": "…" }
+    ]
+  }
+}
+```
+
+Réponse (`evolution_chain_answer`) :
+
+```json
+{
+  "correct": false, "late": false, "earned": 0, "streak": 3, "run_coins": 9,
+  "chain": ["sv3pt5-4", "sv3pt5-5", "sv3pt5-6"],
+  "state": { "…evolution_chain_state()…" }
+}
+```
+
+Erreurs : `no_game`, `invalid_pick` (pas 3 cartes distinctes parmi celles
+montrées), `slow_down`, `evolution_chain_unavailable` (aucune lignée
+complète : l'import n'est pas repassé). RPC absente (`PGRST202`) ou
+`ready: false` → store `unavailable`, « Bientôt ».
+
+---
+
 ## Import des cartes (admin)
 
 `scripts/populate.mjs` utilise la clé **service role** et fait des `upsert`

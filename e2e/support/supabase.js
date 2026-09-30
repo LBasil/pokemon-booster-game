@@ -75,6 +75,15 @@ export const SUPER_EFFECTIVE_QUESTIONS = [
   { card: 'sv3pt5-1', answer: 'Fire', options: ['Water', 'Darkness', 'Fire'] }, // Bulbasaur
 ]
 
+// "Evolution chain" (migration 0018): the lines the mock asks, in order.
+// `cards` = the order on screen, `chain` = the right order (Basic first).
+const evoCard = (id, name) => ({ id, name, image_small: `https://images.e2e.test/${id}.png` })
+export const EVOLUTION_QUESTIONS = [
+  { cards: [evoCard('sv3pt5-6', 'Charizard ex'), evoCard('sv3pt5-4', 'Charmander'), evoCard('sv3pt5-5', 'Charmeleon')], chain: ['sv3pt5-4', 'sv3pt5-5', 'sv3pt5-6'] },
+  { cards: [evoCard('sv3pt5-8', 'Wartortle'), evoCard('sv3pt5-9', 'Blastoise'), evoCard('sv3pt5-7', 'Squirtle')], chain: ['sv3pt5-7', 'sv3pt5-8', 'sv3pt5-9'] },
+  { cards: [evoCard('sv3pt5-1', 'Bulbasaur'), evoCard('sv3pt5-3', 'Venusaur ex'), evoCard('sv3pt5-2', 'Ivysaur')], chain: ['sv3pt5-1', 'sv3pt5-2', 'sv3pt5-3'] },
+]
+
 export async function mockSupabase(page, options = {}) {
   const state = {
     collection: options.collection ?? [collectionEntry('sv3pt5-4', 2), collectionEntry('base1-4')],
@@ -129,6 +138,10 @@ export async function mockSupabase(page, options = {}) {
     // false = no weaknesses loaded yet; questions in SUPER_EFFECTIVE_QUESTIONS order
     superEffective:
       options.superEffective === 'missing' ? 'missing' : { ready: true, paidUsed: 0, best: 0, todayCoins: 0, run: null, next: 0, ...options.superEffective },
+    // "Evolution chain" (migration 0018): 'missing' = not applied; ready:
+    // false = no evolves_from loaded yet; lines in EVOLUTION_QUESTIONS order
+    evolutionChain:
+      options.evolutionChain === 'missing' ? 'missing' : { ready: true, paidUsed: 0, best: 0, todayCoins: 0, run: null, next: 0, ...options.evolutionChain },
   }
   const challengeState = () => {
     const c = state.challenge
@@ -318,6 +331,51 @@ export async function mockSupabase(page, options = {}) {
         if (!ef.board.flips) return raise('nothing_to_cash')
         const earned = end('cashed')
         return json({ earned, result: efView(), state: efState() })
+      }
+    }
+    // ---- Evolution chain (migration 0018) ----
+    if (path.startsWith('/rest/v1/rpc/evolution_chain_')) {
+      const ec = state.evolutionChain
+      if (ec === 'missing') return json({ code: 'PGRST202', message: `Could not find the function public.${path.split('/').pop()} in the schema cache` }, 404)
+      const draw = () => EVOLUTION_QUESTIONS[ec.next++ % EVOLUTION_QUESTIONS.length]
+      const ecState = () => ({
+        paid_runs: 3,
+        coins_per_answer: 3,
+        max_paid_answers: 20,
+        answer_seconds: 15,
+        ready: ec.ready,
+        coins: c.coins,
+        paid_left: Math.max(0, 3 - ec.paidUsed),
+        today_coins: ec.todayCoins,
+        best: ec.best,
+        run: ec.run && { paid: ec.run.paid, streak: ec.run.streak, coins: ec.run.coins, cards: ec.run.question.cards, seconds_left: 15 },
+      })
+      if (path === '/rest/v1/rpc/evolution_chain_state') return json(ecState())
+      if (path === '/rest/v1/rpc/evolution_chain_start') {
+        if (!ec.ready) return raise('evolution_chain_unavailable')
+        const paid = ec.paidUsed < 3
+        if (paid) ec.paidUsed++
+        ec.run = { paid, streak: 0, coins: 0, question: draw() }
+        return json(ecState())
+      }
+      if (path === '/rest/v1/rpc/evolution_chain_answer') {
+        const run = ec.run
+        if (!run) return raise('no_game')
+        const question = run.question
+        const correct = args.p_order !== null && args.p_order.join() === question.chain.join()
+        let earned = 0
+        if (correct) {
+          earned = run.paid && run.streak < 20 ? 3 : 0
+          run.streak++
+          run.coins += earned
+          c.coins += earned
+          ec.todayCoins += earned
+          ec.best = Math.max(ec.best, run.streak)
+          run.question = draw()
+        } else {
+          ec.run = null
+        }
+        return json({ correct, late: args.p_order === null, earned, streak: run.streak, run_coins: run.coins, chain: question.chain, state: ecState() })
       }
     }
     // ---- Super effective! (migration 0015) ----

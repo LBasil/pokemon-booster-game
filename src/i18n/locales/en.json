@@ -436,7 +436,8 @@
       "invalid_tile": "That tile doesn’t exist.",
       "already_flipped": "That tile is already flipped.",
       "nothing_to_cash": "Flip at least one tile before cashing out.",
-      "super_effective_unavailable": "No cards to ask about right now. Try again later."
+      "super_effective_unavailable": "No cards to ask about right now. Try again later.",
+      "evolution_chain_unavailable": "No evolution lines to ask about right now. Try again later."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -712,6 +713,31 @@
       "pick": "A Pokémon card shows up: tap the type it's weak to. You have {seconds} seconds.",
       "weakness": "The answer is the weakness printed on the card itself, so it follows the rules of the card's era.",
       "harder": "The longer the streak, the more types to pick from: 3, then 4, then 6."
+    }
+  },
+  "evolutionChain": {
+    "title": "Evolution chain",
+    "subtitle": "Three cards from one evolution line show up shuffled: put them back in order before time runs out. Earn coins for your challenge boosters.",
+    "unavailable": "The mini-game is coming soon.",
+    "loadError": "Couldn’t load the mini-game. Try again in a moment.",
+    "question": "Put them in evolution order",
+    "keys": "Tap the cards from the first stage to the last (or press 1 to {count}).",
+    "undo": "Tap a picked card to take it back.",
+    "stages": {
+      "basic": "Basic",
+      "stage1": "Stage 1",
+      "stage2": "Stage 2"
+    },
+    "picked": "{name}, stage {n} of 3",
+    "intruder": "Intruder",
+    "right": "Perfect evolution!",
+    "wrong": "That’s not the order…",
+    "line": "The line: {names}",
+    "rules": {
+      "pick": "Three cards from one evolution line show up shuffled: tap them from the Basic Pokémon to its last evolution. You have {seconds} seconds.",
+      "hidden": "The stage and the “Evolves from” printed on each card are hidden: go by the names and the art.",
+      "harder": "The longer the streak, the more intruders from other lines slip in (1, then 2): leave them out.",
+      "coins": "The simplest of the mini-games, so it pays a bit less than the others."
     }
   },
   "electrodeFlip": {

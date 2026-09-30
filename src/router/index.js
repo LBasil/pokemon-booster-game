@@ -132,6 +132,13 @@ const router = createRouter({
       meta: { requiresAuth: true, mode: 'challenge' },
     },
     {
+      // "Evolution chain" (migration 0018)
+      path: '/challenge/games/evolution-chain',
+      name: 'challenge-game-evolution-chain',
+      component: () => import('@/views/EvolutionChainView.vue'),
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
       path: '/challenge/trades',
       name: 'challenge-trades',
       component: () => import('@/views/TradesView.vue'),

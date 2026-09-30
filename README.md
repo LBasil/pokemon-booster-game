@@ -39,8 +39,13 @@ How it works inside (every table, RPC and flow, in French):
   board, cash out any time; points = coins, up to 300 a day — and
   **"Super effective!"**: a Pokémon card shows up (its top half), tap the
   type it's weak to within 10 seconds (the weakness printed on the card;
-  3, then 4, then 6 types to pick from), same pay as "Higher or lower". Two more are
-  teased as "Coming soon" (**Evolution chain**, **Boss raid**). Packs
+  3, then 4, then 6 types to pick from), same pay as "Higher or lower", and
+  **"Evolution chain"**: three cards of one evolution line show up shuffled
+  (art and names only, the printed stage is hidden), tap them from the Basic
+  to the last stage within 15 seconds; intruders from other lines slip in as
+  the streak grows. The simplest game, so it pays the least: 3 coins per
+  right line (60 per run, 180 a day at most). One more is teased as
+  "Coming soon" (**Boss raid**). Packs
   keep the real pull rates (no pity timer), except that 1 booster in 500 is
   a "god pack" (holos and better only). **Trade cards** with other
   trainers (up to 5 for 5, or as a gift; the trainer field suggests
@@ -245,6 +250,11 @@ its **SQL editor** and run, in order:
    recycling a pick of duplicates in one call. Run it after 0016; until
    then answers only pop up live (no badge) and a pick is recycled one
    card at a time.
+18. `supabase/migrations/0018_minigame_evolution_chain.sql` — the cards'
+   previous stage (`cards.evolves_from`) and the "Evolution chain"
+   mini-game. Run it after 0017; the next card sync (twice a day, or run the
+   "Sync cards" Action / `npm run populate:cards`) fills `evolves_from`;
+   until both are done the game says "Coming soon".
 
 Then in **Authentication**:
 

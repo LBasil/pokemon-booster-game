@@ -121,6 +121,24 @@ address** for the sign-up part.
 - [ ] On a 320px phone: card, question, types and feedback fit above the
       tab bar, both themes.
 
+## Evolution chain (after migration 0018 + a card import)
+
+- [ ] Right after 0018, before the import: the games page says "Coming
+      soon" for "Evolution chain" (no card has its `evolves_from` yet).
+- [ ] After the sync (or `npm run populate:cards`): "3 paid runs left
+      today" → Play: 3 cards of one line, art only (no name bar, no
+      "Stage 1/2", no "Evolves from" visible on real cards, full arts
+      included), names under them.
+- [ ] Tap them Basic → Stage 1 → Stage 2: numbers 1, 2, 3 appear, the
+      slots below fill; tapping a picked card takes it back. Right order →
+      "Perfect evolution!", +3, next line; wrong → "The line: …" and the
+      run ends.
+- [ ] From 5 right lines: 4 cards (1 intruder, marked "Intruder" at the
+      end), from 10: 5 cards. An intruder is never from the same line.
+- [ ] Keys 1 to 5 and Backspace (desktop); 15 s without answering → "Too
+      slow!".
+- [ ] On a 320px phone: cards, slots and feedback fit, both themes.
+
 ## Trades (after migration 0007, two accounts A and B)
 
 - [ ] On B's public profile, A taps "Propose a trade" → the trades page

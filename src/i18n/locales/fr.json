@@ -436,7 +436,8 @@
       "invalid_tile": "Cette case n'existe pas.",
       "already_flipped": "Cette case est déjà retournée.",
       "nothing_to_cash": "Retourne au moins une case avant d'encaisser.",
-      "super_effective_unavailable": "Aucune carte à proposer pour l'instant. Réessaie plus tard."
+      "super_effective_unavailable": "Aucune carte à proposer pour l'instant. Réessaie plus tard.",
+      "evolution_chain_unavailable": "Aucune lignée à proposer pour l'instant. Réessaie plus tard."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -712,6 +713,31 @@
       "pick": "Une carte Pokémon s'affiche : touche le type auquel elle est faible. Tu as {seconds} secondes.",
       "weakness": "La réponse est la faiblesse imprimée sur la carte elle-même : elle suit les règles de son époque.",
       "harder": "Plus la série est longue, plus il y a de types au choix : 3, puis 4, puis 6."
+    }
+  },
+  "evolutionChain": {
+    "title": "Chaîne d'évolution",
+    "subtitle": "Trois cartes d'une même lignée arrivent mélangées : remets-les dans l'ordre avant la fin du temps. Gagne des pièces pour tes boosters du défi.",
+    "unavailable": "Le mini-jeu arrive bientôt.",
+    "loadError": "Impossible de charger le mini-jeu. Réessaie dans un instant.",
+    "question": "Remets-les dans l'ordre d'évolution",
+    "keys": "Touche les cartes du premier stade au dernier (ou appuie sur 1 à {count}).",
+    "undo": "Touche une carte choisie pour la retirer.",
+    "stages": {
+      "basic": "De base",
+      "stage1": "Niveau 1",
+      "stage2": "Niveau 2"
+    },
+    "picked": "{name}, stade {n} sur 3",
+    "intruder": "Intrus",
+    "right": "Évolution parfaite !",
+    "wrong": "Ce n'est pas le bon ordre…",
+    "line": "La lignée : {names}",
+    "rules": {
+      "pick": "Trois cartes d'une même lignée arrivent mélangées : touche-les du Pokémon de base à sa dernière évolution. Tu as {seconds} secondes.",
+      "hidden": "Le stade et le « Évolue de » imprimés sur chaque carte sont cachés : fie-toi aux noms et aux illustrations.",
+      "harder": "Plus la série est longue, plus des intrus d'autres lignées se glissent parmi elles (1, puis 2) : laisse-les de côté.",
+      "coins": "C'est le plus simple des mini-jeux, alors il rapporte un peu moins que les autres."
     }
   },
   "electrodeFlip": {

@@ -656,6 +656,61 @@ sequenceDiagram
 - Pastilles de couleur par type : tokens `--pb-type-*` (une seule série
   pour les deux thèmes, jamais derrière du texte).
 
+### « Chaîne d'évolution »
+
+Page : [EvolutionChainView.vue](../../src/views/EvolutionChainView.vue)
+(`/challenge/games/evolution-chain`), store `evolutionChain`, migration 0018.
+
+Trois cartes d'une même lignée arrivent mélangées, recadrées sur leur
+illustration (le stade et le « Évolue de » sont imprimés au-dessus), avec
+leur nom en dessous. On les touche de la carte de base au dernier stade
+(ou touches 1 à 5, Retour arrière pour reprendre la dernière) ; les
+numéros 1, 2, 3 s'affichent sur les cartes et dans trois cases « De base
+/ Niveau 1 / Niveau 2 ». Toucher une carte déjà choisie la reprend (avec
+celles choisies après). La troisième carte envoie l'ordre.
+
+```mermaid
+sequenceDiagram
+  actor J as Joueur
+  participant EV as EvolutionChainView
+  participant DB as Postgres
+
+  EV->>DB: evolution_chain_state() : ready ? reprend une partie en cours
+  J->>EV: « Jouer »
+  EV->>DB: evolution_chain_start()
+  DB-->>EV: cartes mélangées (nom + image, sans stade)
+  loop jusqu'à une erreur
+    J->>EV: touche 3 cartes (ou le temps s'écoule : null)
+    EV->>DB: evolution_chain_answer([base, niveau 1, niveau 2])
+    DB-->>EV: juste ?, bon ordre, pièces, lignée suivante
+  end
+```
+
+- **La lignée** vient des cartes : `cards.evolves_from` (pokemontcg.io
+  `evolvesFrom`, rempli par `scripts/populate.mjs` depuis 0018). Le serveur
+  tire un Niveau 2 au hasard, puis une impression au hasard du Niveau 1
+  qu'il nomme et de la carte de base que celui-ci nomme (un stade absent de
+  la base = on retire). Le numéro du Pokédex ne suffisait pas (Évoli,
+  formes régionales).
+- **Intrus** : aucun (série 0–4), 1 (5–9), puis 2 ; des Pokémon d'autres
+  lignées (jamais le même nom, le même numéro du Pokédex, ni une évolution
+  d'un des stades), du même type d'abord pour qu'ils se fondent dans le lot.
+  À la correction ils sont estompés et marqués « Intrus ».
+- **Règles** (**miroir** : `evolution_chain_rules()` et
+  `src/utils/evolutionChain.js`) : 15 s par lignée (le serveur accepte
+  20 s). C'est le jeu le plus simple, donc celui qui rapporte le moins
+  (choix de l'utilisateur, 2026-09-30) : 3 parties payées par jour,
+  **3 pièces** par bonne lignée pour les 20 premières (60 par partie,
+  **180 par jour**, contre 300 pour les autres jeux), ensuite pour le
+  record. Une ligne `evolution_chain` par réponse payée dans le journal.
+- **Avant l'import** : tant qu'aucune lignée complète n'est connue,
+  `evolution_chain_state()` renvoie `ready: false` et le jeu affiche
+  « Bientôt ».
+- **Anti-triche** : l'ordre reste sur le serveur jusqu'à la réponse, et
+  les cartes arrivent sans stade. Limite acceptée : `cards` est public, un
+  script pourrait retrouver les stades ; le plafond quotidien borne le
+  gain.
+
 ---
 
 ## 9. Communauté : fil et classements
