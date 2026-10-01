@@ -431,7 +431,7 @@ sequenceDiagram
 ## 7. Succès
 
 Définitions : [src/utils/achievements.js](../../src/utils/achievements.js)
-(~650, 20 catégories, sous-catégories `sub` dans les grosses, tags de
+(~760, 20 catégories, sous-catégories `sub` dans les grosses, tags de
 région `tags` pour le filtre « Région », `?region=`). Les groupes de Pokémon (lignées d'évolution,
 légendaires et fabuleux, équipes des champions d'arène de Kanto et Johto,
 Conseil 4, Maîtres de la Ligue, rivaux et héros, lieux et leurs Pokémon
@@ -447,7 +447,12 @@ dresseurs en cartes, séries Neo et HGSS) et Hoenn
 ([src/utils/hoenn.js](../../src/utils/hoenn.js) : lignées de
 Rubis/Saphir, routes 101 à 134, grottes et sommets, badges, Conseil 4,
 Timmy, Max et Arthur, Team Magma et Team Aqua en cartes, premières séries
-EX et époque ROSA) ; leur
+EX et époque ROSA) et Sinnoh
+([src/utils/sinnoh.js](../../src/utils/sinnoh.js) : lignées de
+Diamant/Perle, fossiles, bébés et nouvelles évolutions de DP, formes et
+nouveaux Pokémon de Hisui, routes 201 à 230, lacs et grottes, badges,
+Conseil 4, Hélio, Cynthia et Team Galaxie en cartes, séries DP, Platine
+et 2022). Équipes et noms officiels vérifiés sur PokéAPI et Poképédia ; leur
 description nomme les membres (`achievements.desc.groups.<id>`), donc
 changer une liste = changer ses deux textes. **Calculés dans le navigateur, par mode.** Le
 Défi est mis en avant, c'est celui qui compte.

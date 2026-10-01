@@ -2764,6 +2764,345 @@
       },
       "orasSets": {
         "title": "Puissance primitive"
+      },
+      "starlyLine": {
+        "title": "Lignée d’Étouraptor"
+      },
+      "bidoofLine": {
+        "title": "Lignée de Castorno"
+      },
+      "kricketotLine": {
+        "title": "Lignée de Mélokrik"
+      },
+      "shinxLine": {
+        "title": "Lignée de Luxray"
+      },
+      "cranidosLine": {
+        "title": "Lignée de Charkos"
+      },
+      "shieldonLine": {
+        "title": "Lignée de Bastiodon"
+      },
+      "burmyLine": {
+        "title": "Famille de Cheniti"
+      },
+      "combeeLine": {
+        "title": "Lignée d’Apireine"
+      },
+      "buizelLine": {
+        "title": "Lignée de Mustéflott"
+      },
+      "cherubiLine": {
+        "title": "Lignée de Ceriflor"
+      },
+      "shellosLine": {
+        "title": "Lignée de Tritosor"
+      },
+      "drifloonLine": {
+        "title": "Lignée de Grodrive"
+      },
+      "bunearyLine": {
+        "title": "Lignée de Lockpin"
+      },
+      "glameowLine": {
+        "title": "Lignée de Chaffreux"
+      },
+      "stunkyLine": {
+        "title": "Lignée de Moufflair"
+      },
+      "bronzorLine": {
+        "title": "Lignée d’Archéodong"
+      },
+      "hippopotasLine": {
+        "title": "Lignée d’Hippodocus"
+      },
+      "skorupiLine": {
+        "title": "Lignée de Drascore"
+      },
+      "croagunkLine": {
+        "title": "Lignée de Coatox"
+      },
+      "finneonLine": {
+        "title": "Lignée de Luminéon"
+      },
+      "snoverLine": {
+        "title": "Lignée de Blizzaroi"
+      },
+      "route201": {
+        "title": "Route 201"
+      },
+      "route202": {
+        "title": "Route 202"
+      },
+      "route203": {
+        "title": "Route 203"
+      },
+      "route204": {
+        "title": "Route 204"
+      },
+      "route205": {
+        "title": "Route 205"
+      },
+      "route206": {
+        "title": "Route 206"
+      },
+      "route207": {
+        "title": "Route 207"
+      },
+      "route208": {
+        "title": "Route 208"
+      },
+      "route209": {
+        "title": "Route 209"
+      },
+      "route210": {
+        "title": "Route 210"
+      },
+      "route211": {
+        "title": "Route 211"
+      },
+      "route212": {
+        "title": "Route 212"
+      },
+      "route213": {
+        "title": "Route 213"
+      },
+      "route214": {
+        "title": "Route 214"
+      },
+      "route215": {
+        "title": "Route 215"
+      },
+      "route216": {
+        "title": "Route 216"
+      },
+      "route217": {
+        "title": "Route 217"
+      },
+      "route218": {
+        "title": "Route 218"
+      },
+      "route219": {
+        "title": "Route 219"
+      },
+      "route220": {
+        "title": "Route 220"
+      },
+      "route221": {
+        "title": "Route 221"
+      },
+      "route222": {
+        "title": "Route 222"
+      },
+      "route223": {
+        "title": "Route 223"
+      },
+      "route224": {
+        "title": "Route 224"
+      },
+      "route225": {
+        "title": "Route 225"
+      },
+      "route226": {
+        "title": "Route 226"
+      },
+      "route227": {
+        "title": "Route 227"
+      },
+      "route228": {
+        "title": "Route 228"
+      },
+      "route229": {
+        "title": "Route 229"
+      },
+      "route230": {
+        "title": "Route 230"
+      },
+      "oreburghMine": {
+        "title": "Mine Charbourg"
+      },
+      "ravagedPath": {
+        "title": "Chemin Rocheux"
+      },
+      "valleyWindworks": {
+        "title": "Les Eoliennes"
+      },
+      "eternaForest": {
+        "title": "Forêt Vestigion"
+      },
+      "oldChateau": {
+        "title": "Vieux Château"
+      },
+      "fuegoIronworks": {
+        "title": "Forge Fuego"
+      },
+      "waywardCave": {
+        "title": "Grotte Revèche"
+      },
+      "mtCoronet": {
+        "title": "Mont Couronné"
+      },
+      "lostTower": {
+        "title": "Tour Perdue"
+      },
+      "ruinManiacCave": {
+        "title": "Grotte Ruinem."
+      },
+      "trophyGarden": {
+        "title": "Jardin Trophée"
+      },
+      "greatMarsh": {
+        "title": "Grand Marais"
+      },
+      "ironIsland": {
+        "title": "Ile de Fer"
+      },
+      "lakeVerity": {
+        "title": "Lac Vérité"
+      },
+      "lakeValor": {
+        "title": "Lac Courage"
+      },
+      "lakeAcuity": {
+        "title": "Lac Savoir"
+      },
+      "valorLakefront": {
+        "title": "Rive Lac Courage"
+      },
+      "acuityLakefront": {
+        "title": "Rive Lac Savoir"
+      },
+      "spearPillar": {
+        "title": "Colonnes Lances"
+      },
+      "sinnohVictoryRoad": {
+        "title": "Route Victoire de Sinnoh"
+      },
+      "starkMountain": {
+        "title": "Mont Abrupt"
+      },
+      "snowpointTemple": {
+        "title": "Temple Frimapic"
+      },
+      "turnbackCave": {
+        "title": "Grotte Retour"
+      },
+      "sendoffSpring": {
+        "title": "Source Adieu"
+      },
+      "coalBadge": {
+        "title": "Badge Charbon"
+      },
+      "forestBadge": {
+        "title": "Badge Forêt"
+      },
+      "cobbleBadge": {
+        "title": "Badge Pavé"
+      },
+      "fenBadge": {
+        "title": "Badge Palustre"
+      },
+      "relicBadge": {
+        "title": "Badge Fantôme"
+      },
+      "mineBadge": {
+        "title": "Badge Mine"
+      },
+      "icicleBadge": {
+        "title": "Badge Glaçon"
+      },
+      "beaconBadge": {
+        "title": "Badge Phare"
+      },
+      "sinnohBadges": {
+        "title": "Boîte à badges de Sinnoh"
+      },
+      "aaron": {
+        "title": "Aaron"
+      },
+      "bertha": {
+        "title": "Terry"
+      },
+      "flint": {
+        "title": "Adrien"
+      },
+      "lucian": {
+        "title": "Lucio"
+      },
+      "sinnohEliteFour": {
+        "title": "La Ligue de Sinnoh"
+      },
+      "cyrus": {
+        "title": "Hélio, chef de la Team Galaxie"
+      },
+      "sinnohSolos": {
+        "title": "Solitaires de Sinnoh"
+      },
+      "sinnohFossils": {
+        "title": "Fossiles de Sinnoh"
+      },
+      "sinnohBabies": {
+        "title": "Pouponnière de Diamant et Perle"
+      },
+      "sinnohEvolutionBoom": {
+        "title": "Le boom des évolutions"
+      },
+      "hisuiNewPokemon": {
+        "title": "Les nouveaux de Hisui"
+      },
+      "hisuianForms": {
+        "title": "Formes de Hisui"
+      },
+      "sinnohLines10": {
+        "title": "Album de famille de Sinnoh"
+      },
+      "sinnohLines26": {
+        "title": "Toutes les lignées de Sinnoh"
+      },
+      "sinnohDex25": {
+        "title": "Débutant de Sinnoh"
+      },
+      "sinnohDex50": {
+        "title": "Dresseur de Sinnoh"
+      },
+      "sinnohDex100": {
+        "title": "As de Sinnoh"
+      },
+      "sinnohRoutes": {
+        "title": "Toutes les routes de Sinnoh"
+      },
+      "sinnohLandmarks": {
+        "title": "Spéléologue de Sinnoh"
+      },
+      "sinnohPlaceCards": {
+        "title": "Sinnoh en cartes"
+      },
+      "tc_sinnohGymLeaders": {
+        "title": "Champions de Sinnoh dans le classeur"
+      },
+      "tc_sinnohEliteFour": {
+        "title": "Le Conseil 4 de Sinnoh en cartes"
+      },
+      "tc_cynthia": {
+        "title": "Admirateur de Cynthia"
+      },
+      "tc_sinnohHeroes": {
+        "title": "Amis de Bonaugure"
+      },
+      "tc_rowan": {
+        "title": "Le labo du Prof. Sorbier"
+      },
+      "tc_teamGalactic": {
+        "title": "Les plans de la Team Galaxie"
+      },
+      "dpSets": {
+        "title": "L’ère Diamant & Perle"
+      },
+      "platinumSets": {
+        "title": "L’ère Platine"
+      },
+      "sinnohReturnSets": {
+        "title": "Retour à Sinnoh"
       }
     },
     "desc": {
@@ -3177,7 +3516,100 @@
         "archie": "L’équipe d’Arthur dans Saphir : possède Grahyèna, Nostenfer et Sharpedo",
         "hoennSolos": "Possède les 21 Pokémon de Hoenn qui n’évoluent pas dans Rubis et Saphir, légendaires à part : Tarinor, Ténéfix, Mysdibule, Posipi, Négapi, Muciole, Lumivole, Rosélia, Chartor, Spinda, Mangriff, Séviper, Séléroc, Solaroc, Morphéo, Kecleon, Tropius, Éoko, Absol, Relicanth et Lovdisc",
         "hoennBabies": "Possède les bébés ajoutés plus tard aux Pokémon de Hoenn : Rozbouton et Korillon",
-        "hoennNewEvolutions": "Possède les évolutions que les jeux suivants ont données aux Pokémon de Hoenn : Roserade, Gallame, Tarinorme, Noctunoir, Momartik et Ixon"
+        "hoennNewEvolutions": "Possède les évolutions que les jeux suivants ont données aux Pokémon de Hoenn : Roserade, Gallame, Tarinorme, Noctunoir, Momartik et Ixon",
+        "starlyLine": "Possède toute la lignée : Étourmi, Étourvol et Étouraptor",
+        "bidoofLine": "Possède toute la lignée : Keunotor et Castorno",
+        "kricketotLine": "Possède toute la lignée : Crikzik et Mélokrik",
+        "shinxLine": "Possède toute la lignée : Lixy, Luxio et Luxray",
+        "cranidosLine": "Possède toute la lignée : Kranidos et Charkos",
+        "shieldonLine": "Possède toute la lignée : Dinoclier et Bastiodon",
+        "burmyLine": "Possède toute la lignée : Cheniti, Cheniselle et Papilord",
+        "combeeLine": "Possède toute la lignée : Apitrini et Apireine",
+        "buizelLine": "Possède toute la lignée : Mustébouée et Mustéflott",
+        "cherubiLine": "Possède toute la lignée : Ceribou et Ceriflor",
+        "shellosLine": "Possède toute la lignée : Sancoki et Tritosor",
+        "drifloonLine": "Possède toute la lignée : Baudrive et Grodrive",
+        "bunearyLine": "Possède toute la lignée : Laporeille et Lockpin",
+        "glameowLine": "Possède toute la lignée : Chaglam et Chaffreux",
+        "stunkyLine": "Possède toute la lignée : Moufouette et Moufflair",
+        "bronzorLine": "Possède toute la lignée : Archéomire et Archéodong",
+        "hippopotasLine": "Possède toute la lignée : Hippopotas et Hippodocus",
+        "skorupiLine": "Possède toute la lignée : Rapion et Drascore",
+        "croagunkLine": "Possède toute la lignée : Cradopaud et Coatox",
+        "finneonLine": "Possède toute la lignée : Écayon et Luminéon",
+        "snoverLine": "Possède toute la lignée : Blizzi et Blizzaroi",
+        "route201": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nidoran♀, Nidoran♂, Caninos, Doduo, Étourmi et Keunotor",
+        "route202": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Caninos, Fouinette, Zigzaton, Étourmi, Keunotor, Crikzik et Lixy",
+        "route203": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferapti, Psykokwak, Akwakwak, Abra, Osselait, Poissoroy, Léviator, Pomdepik, Nénupiot, Grainipiot, Tarsal, Kirlia, Étourmi, Keunotor, Crikzik et Lixy",
+        "route204": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Chenipan, Aspicot, Nosferapti, Psykokwak, Akwakwak, Poissoroy, Léviator, Tournegrin, Pomdepik, Nénupiot, Grainipiot, Tarsal, Kirlia, Étourmi, Keunotor, Crikzik, Lixy et Rozbouton",
+        "route205": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Psykokwak, Akwakwak, Tentacool, Tentacruel, Ramoloss, Kokiyas, Léviator, Granivol, Floravol, Élekid, Nénupiot, Goélise, Bekipan, Barbicha, Keunotor, Pachirisu, Mustébouée, Sancoki et Luminéon",
+        "route206": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferapti, Racaillou, Ponyta, Scorplane, Tarinor, Balbuto, Crikzik, Mélokrik, Moufouette et Archéomire",
+        "route207": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferapti, Machoc, Racaillou, Scorplane, Phanpy, Cerfrousse, Embrylex et Crikzik",
+        "route208": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferapti, Psykokwak, Akwakwak, Machoc, Léviator, Insolourdo, Debugant, Méditikka, Mangriff, Séviper, Barbicha, Keunotor et Castorno",
+        "route209": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Goupix, Nosferapti, Psykokwak, Akwakwak, Fantominus, Leveinard, Poissoroy, Tauros, Léviator, Snubbull, Écrémeuh, Étourmi, Étourvol, Castorno, Manzaï, Mime Jr. et Spiritomb",
+        "route210": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Psykokwak, Akwakwak, Machoc, Machopeur, Racaillou, Ponyta, Leveinard, Tauros, Léviator, Hoothoot, Noarfang, Pomdepik, Écrémeuh, Grainipiot, Pifeuil, Méditikka, Mangriff, Séviper, Barbicha, Kecleon, Draby, Castorno, Mélokrik, Manzaï et Mime Jr.",
+        "route211": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferapti, Machopeur, Racaillou, Gravalanch, Ponyta, Hoothoot, Noarfang, Teddiursa, Debugant, Méditikka, Tylton, Keunotor et Korillon",
+        "route212": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Abo, Psykokwak, Akwakwak, Tadmorv, Poissoroy, Léviator, Axoloto, Maraiste, Queulorior, Nénupiot, Lombre, Rosélia, Barbicha, Étourmi, Étourvol, Castorno, Mélokrik et Rozbouton",
+        "route213": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Tentacool, Tentacruel, Léviator, Octillery, Hélédelle, Goélise, Bekipan, Sharpedo, Absol, Mustébouée, Mustéflott et Sancoki",
+        "route214": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Goupix, Psykokwak, Akwakwak, Racaillou, Gravalanch, Ponyta, Poissoroy, Léviator, Simularbre, Girafarig, Scorplane, Démolosse, Grahyèna, Spoink, Mélokrik et Moufouette",
+        "route215": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Abra, Kadabra, Racaillou, Ponyta, Soporifik, Scorplane, Démolosse, Grahyèna et Mélokrik",
+        "route216": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferapti, Machopeur, Gravalanch, Noarfang, Farfuret, Ursaring, Cadoizo, Méditikka, Stalgamin et Blizzi",
+        "route217": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferapti, Machopeur, Noarfang, Farfuret, Ursaring, Marcacrin, Méditikka, Charmina, Stalgamin et Blizzi",
+        "route218": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Tentacool, Tentacruel, Voltorbe, M. Mime, Léviator, Métamorph, Goélise, Bekipan, Mustéflott, Sancoki, Tritosor, Chaglam et Luminéon",
+        "route219": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Tentacool, Tentacruel, Léviator, Goélise, Bekipan, Coquiperl et Luminéon",
+        "route220": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Tentacool, Tentacruel, Léviator, Loupio, Lanturn, Goélise, Bekipan et Luminéon",
+        "route221": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nidorina, Nidorino, Tentacool, Tentacruel, Canarticho, Léviator, Simularbre, Goélise, Bekipan, Rosélia, Coquiperl, Mustéflott, Sancoki, Tritosor, Moufouette, Moufflair et Luminéon",
+        "route222": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Tentacool, Tentacruel, M. Mime, Léviator, Lainergie, Octillery, Goélise, Bekipan, Skitty, Sharpedo, Mustéflott, Tritosor, Chaglam, Chaffreux et Pijako",
+        "route223": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Tentacruel, Léviator, Octillery, Bekipan, Wailmer, Wailord et Babimanta",
+        "route224": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Ortide, Boustiflor, Tentacruel, Léviator, Natu, Caratroc, Octillery, Charmillon, Bekipan, Rosélia, Skelénox, Téraclope, Lovdisc, Mustébouée, Mustéflott, Sancoki, Tritosor et Pijako",
+        "route225": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Rattata, Rattatac, Piafabec, Rapasdepic, Akwakwak, Férosinge, Colossinge, Têtarte, Machopeur, Léviator, Makuhita, Rosélia, Branette et Moufflair",
+        "route226": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Rattata, Rattatac, Piafabec, Rapasdepic, Akwakwak, Férosinge, Colossinge, Machopeur, Tentacruel, Otaria, Lamantine, Krabby, Hypocéan, Léviator, Bekipan, Branette, Obalie, Phogleur et Relicanth",
+        "route227": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Rapasdepic, Nosferalto, Ptitard, Têtarte, Gravalanch, Smogogo, Rhinocorne, Rhinoféros, Léviator, Scorplane, Airmure, Magby, Chamallot, Camérupt, Chartor, Spinda, Barbicha et Branette",
+        "route228": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Sablaireau, Taupiqueur, Triopikeur, Ptitard, Têtarte, Rhinoféros, Léviator, Kraknoix, Vibraninf, Cacnea, Cacturne, Barbicha, Terhal et Hippodocus",
+        "route229": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Roucool, Mystherbe, Ortide, Mimitoss, Aéromite, Chétiflor, Boustiflor, Insécateur, Scarabrute, Léviator, Coxyclaque, Migalos, Pomdepik, Lombre, Pifeuil, Goélise, Bekipan, Muciole, Lumivole, Rosélia et Chaffreux",
+        "route230": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Mystherbe, Ortide, Akwakwak, Chétiflor, Boustiflor, Tentacruel, Otaria, Lamantine, Léviator, Togepi, Corayon, Octillery, Charmillon, Papinox, Bekipan, Wailmer, Wailord, Obalie, Phogleur, Mustéflott et Tritosor",
+        "oreburghMine": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferapti, Racaillou et Onix",
+        "ravagedPath": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferapti, Nosferalto, Psykokwak, Akwakwak, Racaillou, Léviator et Barbicha",
+        "valleyWindworks": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Tentacool, Tentacruel, Kokiyas, Léviator, Wattouat, Élekid, Goélise, Bekipan, Dynavolt, Keunotor, Pachirisu, Mustébouée, Sancoki, Baudrive et Luminéon",
+        "eternaForest": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Chrysacier, Coconfort, Cornèbre, Feuforêve, Pomdepik, Chenipotte, Armulys, Charmillon, Blindalys, Papinox, Grainipiot, Parecool, Ningale, Rozbouton et Laporeille",
+        "oldChateau": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Fantominus, Spectrum, Ectoplasma et Motisma",
+        "fuegoIronworks": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Tentacool, Tentacruel, Magnéti, Kokiyas, Léviator, Granivol, Floravol, Goélise, Bekipan, Galekid, Lixy, Luxio, Pachirisu, Mustéflott, Sancoki, Tritosor et Luminéon",
+        "waywardCave": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Sabelette, Nosferapti, Racaillou, Archéomire et Griknot",
+        "mtCoronet": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Mélofée, Nosferapti, Nosferalto, Machoc, Machopeur, Racaillou, Gravalanch, Léviator, Minidraco, Draco, Noarfang, Mélo, Ramboum, Méditikka, Charmina, Séléroc, Solaroc, Barbicha, Barpau, Éoko, Korillon, Archéomire, Archéodong, Blizzi et Blizzaroi",
+        "lostTower": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferapti, Nosferalto, Fantominus, Cornèbre et Feuforêve",
+        "ruinManiacCave": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Racaillou et Hippopotas",
+        "trophyGarden": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Pikachu, Mélofée, Rondoudou, Miaouss, Leveinard, Évoli, Porygon, Pichu, Mélo, Toudoudou, Marill, Azurill, Posipi, Négapi, Rosélia, Morphéo, Étourvol, Mélokrik, Manzaï, Mime Jr. et Ptiravi",
+        "greatMarsh": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Arbok, Paras, Psykokwak, Akwakwak, Noeunoeuf, Kangourex, Léviator, Hoothoot, Noarfang, Marill, Yanma, Axoloto, Maraiste, Balignon, Azurill, Rosélia, Gloupti, Carvanha, Barbicha, Étourmi, Étourvol, Keunotor, Castorno, Rozbouton, Rapion, Drascore, Cradopaud, Coatox et Vortente",
+        "ironIsland": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferapti, Nosferalto, Tentacool, Tentacruel, Racaillou, Gravalanch, Onix, Léviator, Steelix, Qwilfish, Goélise, Bekipan, Ténéfix, Mysdibule et Luminéon",
+        "lakeVerity": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Psykokwak, Akwakwak, Poissoroy, Léviator, Qulbutoké, Arakdo, Séléroc, Solaroc, Étourmi, Étourvol, Keunotor et Castorno",
+        "lakeValor": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Psykokwak, Akwakwak, Excelangue, Poissoroy, Léviator, Noarfang, Qulbutoké, Séléroc, Solaroc, Étourvol, Castorno, Korillon et Créfadet",
+        "lakeAcuity": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Psykokwak, Akwakwak, Poissoroy, Léviator, Noarfang, Qulbutoké, Farfuret, Ursaring, Lippouti, Séléroc, Solaroc, Castorno, Korillon et Créhelf",
+        "valorLakefront": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nidorina, Nidorino, Racaillou, Gravalanch, Girafarig, Étourvol, Castorno et Mélokrik",
+        "acuityLakefront": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferapti, Machopeur, Noarfang, Farfuret, Teddiursa, Méditikka, Charmina, Stalgamin et Blizzi",
+        "spearPillar": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Dialga et Palkia",
+        "sinnohVictoryRoad": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferalto, Kadabra, Machopeur, Gravalanch, Onix, Léviator, Lokhlass, Steelix, Charmina et Mustéflott",
+        "starkMountain": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Rapasdepic, Nosferalto, Machopeur, Racaillou, Gravalanch, Onix, Smogogo, Rhinocorne, Rhinoféros, Scorplane, Limagma, Volcaropod, Airmure, Magby, Chamallot, Camérupt, Chartor, Branette et Heatran",
+        "snowpointTemple": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferalto, Gravalanch, Onix, Steelix, Farfuret et Regigigas",
+        "turnbackCave": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Nosferalto, Spectrum, Séléroc, Solaroc, Archéomire et Archéodong",
+        "sendoffSpring": "Possède les Pokémon qu’on y trouve dans Diamant et Perle : Akwakwak, Poissoroy, Léviator, Noarfang, Séléroc, Solaroc, Éoko, Étourvol et Castorno",
+        "coalBadge": "L’équipe de Pierrick, champion d’arène : possède Racaillou, Onix et Kranidos",
+        "forestBadge": "L’équipe de Flo, championne d’arène : possède Ceribou, Tortipouss et Roserade",
+        "cobbleBadge": "L’équipe de Mélina, championne d’arène : possède Méditikka, Machopeur et Lucario",
+        "fenBadge": "L’équipe de Lovis, champion d’arène : possède Léviator, Maraiste et Mustéflott",
+        "relicBadge": "L’équipe de Kiméra, championne d’arène : possède Grodrive, Ectoplasma et Magirêve",
+        "mineBadge": "L’équipe de Charles, champion d’arène : possède Archéomire, Steelix et Bastiodon",
+        "icicleBadge": "L’équipe de Gladys, championne d’arène : possède Blizzi, Farfuret, Charmina et Blizzaroi",
+        "beaconBadge": "L’équipe de Tanguy, champion d’arène : possède Raichu, Octillery, Capidextre et Luxray",
+        "aaron": "L’équipe d’Aaron, membre du Conseil 4 dans Diamant et Perle : possède Papinox, Apireine, Charmillon, Drascore et Scarhino",
+        "bertha": "L’équipe de Terry, membre du Conseil 4 dans Diamant et Perle : possède Maraiste, Grolem, Simularbre, Hippodocus et Barbicha",
+        "flint": "L’équipe d’Adrien, membre du Conseil 4 dans Diamant et Perle : possède Galopa, Lockpin, Steelix, Simiabraz et Grodrive",
+        "lucian": "L’équipe de Lucio, membre du Conseil 4 dans Diamant et Perle : possède M. Mime, Alakazam, Girafarig, Archéodong et Charmina",
+        "cyrus": "L’équipe d’Hélio aux Colonnes Lances dans Diamant et Perle : possède Corboss, Léviator, Nostenfer et Dimoret",
+        "sinnohSolos": "Possède les 5 Pokémon de Sinnoh qui n’évoluent pas, légendaires et fabuleux à part : Pachirisu, Pijako, Spiritomb, Vortente et Motisma",
+        "sinnohFossils": "Possède les lignées des deux fossiles : Kranidos, Charkos, Dinoclier et Bastiodon",
+        "sinnohBabies": "Possède les bébés que Diamant et Perle ont ajoutés aux lignées plus anciennes : Rozbouton, Korillon, Manzaï, Mime Jr., Ptiravi, Goinfrex et Babimanta",
+        "sinnohEvolutionBoom": "Possède les 22 évolutions que Diamant et Perle ont données aux Pokémon plus anciens : Roserade, Capidextre, Magirêve, Corboss, Dimoret, Magnézone, Coudlangue, Rhinastoc, Bouldeneu, Élekable, Maganon, Togekiss, Yanmega, Phyllali, Givrali, Scorvol, Mammochon, Porygon-Z, Gallame, Tarinorme, Noctunoir et Momartik",
+        "hisuiNewPokemon": "Possède les nouveaux Pokémon de Légendes Pokémon : Arceus : Cerbyllin, Hachécateur, Ursaking, Paragruel, Farfurex, Qwilpik et Amovénus"
       },
       "families": "Complète {count} lignée d’évolution | Complète {count} lignées d’évolution",
       "allStarters": "Possède les {count} Pokémon de départ, de Kanto à Paldea",
@@ -3254,8 +3686,25 @@
       "tc_birch": "Possède {count} cartes différentes du Professeur Seko",
       "tc_teamMagma": "Possède {count} cartes différentes de la Team Magma (leurs Pokémon, Max, leurs coups tordus)",
       "tc_teamAqua": "Possède {count} cartes différentes de la Team Aqua (leurs Pokémon, Arthur, leurs coups tordus)",
-      "exHoennSets": "Possède une carte de chacune des premières séries EX, à Hoenn : Rubis & Saphir, Tempête de Sable, Dragon, Team Magma vs Team Aqua et Légendes Oubliées",
-      "orasSets": "Possède une carte de chaque série de l’époque Rubis Oméga et Saphir Alpha : Primo-Choc, Ciel Rugissant et Double Danger"
+      "exHoennSets": "Possède une carte de chacune des premières séries EX, à Hoenn : EX Rubis & Saphir, EX Tempête de sable, EX Dragon, EX Team Magma VS Team Aqua et EX Légendes Oubliées",
+      "orasSets": "Possède une carte de chaque série de l’époque Rubis Oméga et Saphir Alpha : XY Primo-Choc, XY Ciel Rugissant et Double Danger",
+      "sinnohBadges": "Complète les équipes des {count} champions d’arène de Sinnoh",
+      "sinnohEliteFour": "Complète les équipes du Conseil 4 de Sinnoh (Diamant et Perle)",
+      "hisuianForms": "Possède les 17 formes de Hisui imprimées en cartes : Caninos, Arcanin, Voltorbe, Électrode, Typhlosion, Qwilfish, Farfuret, Clamiral, Fragilady, Bargantua, Zorua, Zoroark, Gueriaigle, Colimucus, Muplodocus, Séracrawl et Archéduc",
+      "sinnohLines": "Complète {count} lignées d’évolution de Sinnoh",
+      "sinnohDex": "Possède {count} Pokémon différents de Sinnoh (n° 387 à 493)",
+      "sinnohRoutes": "Possède tous les Pokémon de toutes les routes de Sinnoh, de la route 201 à la route 230",
+      "sinnohLandmarks": "Possède tous les Pokémon des grottes, lacs, forêts et sommets de Sinnoh",
+      "sinnohPlaceCards": "Possède les lieux de Sinnoh imprimés en cartes Stade : Mont Couronné, Temple Frimapic, Mont Abrupt, Lac Savoir, le QG Galaxie et l’Arène de Rivamar",
+      "tc_sinnohGymLeaders": "Possède une carte de chaque champion d’arène de Sinnoh qui en a une : Pierrick, Flo, Lovis, Kiméra, Gladys et Tanguy (pas encore de carte de Mélina ou Charles)",
+      "tc_sinnohEliteFour": "Possède une carte de chaque membre du Conseil 4 de Sinnoh : Aaron, Terry, Adrien et Lucio",
+      "tc_cynthia": "Possède {count} cartes différentes au nom de Cynthia",
+      "tc_sinnohHeroes": "Possède une carte de René et une d’Aurore",
+      "tc_rowan": "Possède une carte du Professeur Sorbier",
+      "tc_teamGalactic": "Possède {count} cartes différentes de la Team Galaxie (Hélio, ses commandants, leurs inventions)",
+      "dpSets": "Possède une carte de chacune des 7 séries Diamant & Perle",
+      "platinumSets": "Possède une carte de chacune des 4 séries Platine",
+      "sinnohReturnSets": "Possède une carte de chacune des 3 séries Épée et Bouclier de retour à Sinnoh et Hisui (2022)"
     },
     "subs": {
       "allLines": "Toutes régions",
@@ -3265,15 +3714,19 @@
       "johtoMore": "Johto, au-delà des lignées",
       "hoennLines": "Lignées de Hoenn (Rubis et Saphir)",
       "hoennMore": "Hoenn, au-delà des lignées",
+      "sinnohLines": "Lignées de Sinnoh (Diamant et Perle)",
+      "sinnohMore": "Sinnoh, au-delà des lignées",
       "otherLines": "Autres régions",
       "kantoGyms": "Arènes de Kanto",
       "johtoGyms": "Arènes de Johto",
       "hoennGyms": "Arènes de Hoenn",
+      "sinnohGyms": "Arènes de Sinnoh",
       "league": "Ligue Pokémon",
       "rivals": "Rivaux et héros",
       "trainerCards": "Dresseurs de Kanto en cartes",
       "johtoTrainerCards": "Dresseurs de Johto en cartes",
       "hoennTrainerCards": "Dresseurs de Hoenn en cartes",
+      "sinnohTrainerCards": "Dresseurs de Sinnoh en cartes",
       "allPlaces": "Tous les lieux",
       "kantoRoutes": "Routes de Kanto (Rouge et Bleu)",
       "kantoLandmarks": "Grottes, forêts et bâtiments de Kanto",
@@ -3281,7 +3734,9 @@
       "johtoRoutes": "Routes de Johto (Or et Argent)",
       "johtoLandmarks": "Grottes, tours et bâtiments de Johto",
       "hoennRoutes": "Routes de Hoenn (Rubis et Saphir)",
-      "hoennLandmarks": "Grottes, forêts et sommets de Hoenn"
+      "hoennLandmarks": "Grottes, forêts et sommets de Hoenn",
+      "sinnohRoutes": "Routes de Sinnoh (Diamant et Perle)",
+      "sinnohLandmarks": "Grottes, lacs et sommets de Sinnoh"
     }
   },
   "beta": {

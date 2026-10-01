@@ -2764,6 +2764,345 @@
       },
       "orasSets": {
         "title": "Primal power"
+      },
+      "starlyLine": {
+        "title": "Staraptor line"
+      },
+      "bidoofLine": {
+        "title": "Bibarel line"
+      },
+      "kricketotLine": {
+        "title": "Kricketune line"
+      },
+      "shinxLine": {
+        "title": "Luxray line"
+      },
+      "cranidosLine": {
+        "title": "Rampardos line"
+      },
+      "shieldonLine": {
+        "title": "Bastiodon line"
+      },
+      "burmyLine": {
+        "title": "Burmy family"
+      },
+      "combeeLine": {
+        "title": "Vespiquen line"
+      },
+      "buizelLine": {
+        "title": "Floatzel line"
+      },
+      "cherubiLine": {
+        "title": "Cherrim line"
+      },
+      "shellosLine": {
+        "title": "Gastrodon line"
+      },
+      "drifloonLine": {
+        "title": "Drifblim line"
+      },
+      "bunearyLine": {
+        "title": "Lopunny line"
+      },
+      "glameowLine": {
+        "title": "Purugly line"
+      },
+      "stunkyLine": {
+        "title": "Skuntank line"
+      },
+      "bronzorLine": {
+        "title": "Bronzong line"
+      },
+      "hippopotasLine": {
+        "title": "Hippowdon line"
+      },
+      "skorupiLine": {
+        "title": "Drapion line"
+      },
+      "croagunkLine": {
+        "title": "Toxicroak line"
+      },
+      "finneonLine": {
+        "title": "Lumineon line"
+      },
+      "snoverLine": {
+        "title": "Abomasnow line"
+      },
+      "route201": {
+        "title": "Route 201"
+      },
+      "route202": {
+        "title": "Route 202"
+      },
+      "route203": {
+        "title": "Route 203"
+      },
+      "route204": {
+        "title": "Route 204"
+      },
+      "route205": {
+        "title": "Route 205"
+      },
+      "route206": {
+        "title": "Route 206"
+      },
+      "route207": {
+        "title": "Route 207"
+      },
+      "route208": {
+        "title": "Route 208"
+      },
+      "route209": {
+        "title": "Route 209"
+      },
+      "route210": {
+        "title": "Route 210"
+      },
+      "route211": {
+        "title": "Route 211"
+      },
+      "route212": {
+        "title": "Route 212"
+      },
+      "route213": {
+        "title": "Route 213"
+      },
+      "route214": {
+        "title": "Route 214"
+      },
+      "route215": {
+        "title": "Route 215"
+      },
+      "route216": {
+        "title": "Route 216"
+      },
+      "route217": {
+        "title": "Route 217"
+      },
+      "route218": {
+        "title": "Route 218"
+      },
+      "route219": {
+        "title": "Route 219"
+      },
+      "route220": {
+        "title": "Route 220"
+      },
+      "route221": {
+        "title": "Route 221"
+      },
+      "route222": {
+        "title": "Route 222"
+      },
+      "route223": {
+        "title": "Route 223"
+      },
+      "route224": {
+        "title": "Route 224"
+      },
+      "route225": {
+        "title": "Route 225"
+      },
+      "route226": {
+        "title": "Route 226"
+      },
+      "route227": {
+        "title": "Route 227"
+      },
+      "route228": {
+        "title": "Route 228"
+      },
+      "route229": {
+        "title": "Route 229"
+      },
+      "route230": {
+        "title": "Route 230"
+      },
+      "oreburghMine": {
+        "title": "Oreburgh Mine"
+      },
+      "ravagedPath": {
+        "title": "Ravaged Path"
+      },
+      "valleyWindworks": {
+        "title": "Valley Windworks"
+      },
+      "eternaForest": {
+        "title": "Eterna Forest"
+      },
+      "oldChateau": {
+        "title": "Old Chateau"
+      },
+      "fuegoIronworks": {
+        "title": "Fuego Ironworks"
+      },
+      "waywardCave": {
+        "title": "Wayward Cave"
+      },
+      "mtCoronet": {
+        "title": "Mt. Coronet"
+      },
+      "lostTower": {
+        "title": "Lost Tower"
+      },
+      "ruinManiacCave": {
+        "title": "Ruin Maniac Cave"
+      },
+      "trophyGarden": {
+        "title": "Trophy Garden"
+      },
+      "greatMarsh": {
+        "title": "Great Marsh"
+      },
+      "ironIsland": {
+        "title": "Iron Island"
+      },
+      "lakeVerity": {
+        "title": "Lake Verity"
+      },
+      "lakeValor": {
+        "title": "Lake Valor"
+      },
+      "lakeAcuity": {
+        "title": "Lake Acuity"
+      },
+      "valorLakefront": {
+        "title": "Valor Lakefront"
+      },
+      "acuityLakefront": {
+        "title": "Acuity Lakefront"
+      },
+      "spearPillar": {
+        "title": "Spear Pillar"
+      },
+      "sinnohVictoryRoad": {
+        "title": "Sinnoh Victory Road"
+      },
+      "starkMountain": {
+        "title": "Stark Mountain"
+      },
+      "snowpointTemple": {
+        "title": "Snowpoint Temple"
+      },
+      "turnbackCave": {
+        "title": "Turnback Cave"
+      },
+      "sendoffSpring": {
+        "title": "Sendoff Spring"
+      },
+      "coalBadge": {
+        "title": "Coal Badge"
+      },
+      "forestBadge": {
+        "title": "Forest Badge"
+      },
+      "cobbleBadge": {
+        "title": "Cobble Badge"
+      },
+      "fenBadge": {
+        "title": "Fen Badge"
+      },
+      "relicBadge": {
+        "title": "Relic Badge"
+      },
+      "mineBadge": {
+        "title": "Mine Badge"
+      },
+      "icicleBadge": {
+        "title": "Icicle Badge"
+      },
+      "beaconBadge": {
+        "title": "Beacon Badge"
+      },
+      "sinnohBadges": {
+        "title": "Sinnoh badge case"
+      },
+      "aaron": {
+        "title": "Aaron"
+      },
+      "bertha": {
+        "title": "Bertha"
+      },
+      "flint": {
+        "title": "Flint"
+      },
+      "lucian": {
+        "title": "Lucian"
+      },
+      "sinnohEliteFour": {
+        "title": "Sinnoh’s League"
+      },
+      "cyrus": {
+        "title": "Team Galactic’s Cyrus"
+      },
+      "sinnohSolos": {
+        "title": "Sinnoh loners"
+      },
+      "sinnohFossils": {
+        "title": "Sinnoh fossils"
+      },
+      "sinnohBabies": {
+        "title": "Diamond and Pearl nursery"
+      },
+      "sinnohEvolutionBoom": {
+        "title": "The evolution boom"
+      },
+      "hisuiNewPokemon": {
+        "title": "Hisui’s newcomers"
+      },
+      "hisuianForms": {
+        "title": "Hisuian forms"
+      },
+      "sinnohLines10": {
+        "title": "Sinnoh family album"
+      },
+      "sinnohLines26": {
+        "title": "Every Sinnoh line"
+      },
+      "sinnohDex25": {
+        "title": "Sinnoh rookie"
+      },
+      "sinnohDex50": {
+        "title": "Sinnoh trainer"
+      },
+      "sinnohDex100": {
+        "title": "Sinnoh ace"
+      },
+      "sinnohRoutes": {
+        "title": "Every Sinnoh route"
+      },
+      "sinnohLandmarks": {
+        "title": "Sinnoh spelunker"
+      },
+      "sinnohPlaceCards": {
+        "title": "Sinnoh on cards"
+      },
+      "tc_sinnohGymLeaders": {
+        "title": "Sinnoh leaders in the binder"
+      },
+      "tc_sinnohEliteFour": {
+        "title": "Sinnoh’s Elite Four on cards"
+      },
+      "tc_cynthia": {
+        "title": "Cynthia’s admirer"
+      },
+      "tc_sinnohHeroes": {
+        "title": "Twinleaf friends"
+      },
+      "tc_rowan": {
+        "title": "Rowan’s lab"
+      },
+      "tc_teamGalactic": {
+        "title": "Galactic schemes"
+      },
+      "dpSets": {
+        "title": "Diamond and Pearl era"
+      },
+      "platinumSets": {
+        "title": "Platinum era"
+      },
+      "sinnohReturnSets": {
+        "title": "Back to Sinnoh"
       }
     },
     "desc": {
@@ -3177,7 +3516,100 @@
         "archie": "Archie’s team in Sapphire: own Mightyena, Crobat and Sharpedo",
         "hoennSolos": "Own the 21 Hoenn Pokémon that don’t evolve in Ruby and Sapphire, legendaries aside: Nosepass, Sableye, Mawile, Plusle, Minun, Volbeat, Illumise, Roselia, Torkoal, Spinda, Zangoose, Seviper, Lunatone, Solrock, Castform, Kecleon, Tropius, Chimecho, Absol, Relicanth and Luvdisc",
         "hoennBabies": "Own the babies later added to Hoenn Pokémon: Budew and Chingling",
-        "hoennNewEvolutions": "Own the evolutions later games gave Hoenn Pokémon: Roserade, Gallade, Probopass, Dusknoir, Froslass and Obstagoon"
+        "hoennNewEvolutions": "Own the evolutions later games gave Hoenn Pokémon: Roserade, Gallade, Probopass, Dusknoir, Froslass and Obstagoon",
+        "starlyLine": "Own the whole line: Starly, Staravia and Staraptor",
+        "bidoofLine": "Own the whole line: Bidoof and Bibarel",
+        "kricketotLine": "Own the whole line: Kricketot and Kricketune",
+        "shinxLine": "Own the whole line: Shinx, Luxio and Luxray",
+        "cranidosLine": "Own the whole line: Cranidos and Rampardos",
+        "shieldonLine": "Own the whole line: Shieldon and Bastiodon",
+        "burmyLine": "Own the whole line: Burmy, Wormadam and Mothim",
+        "combeeLine": "Own the whole line: Combee and Vespiquen",
+        "buizelLine": "Own the whole line: Buizel and Floatzel",
+        "cherubiLine": "Own the whole line: Cherubi and Cherrim",
+        "shellosLine": "Own the whole line: Shellos and Gastrodon",
+        "drifloonLine": "Own the whole line: Drifloon and Drifblim",
+        "bunearyLine": "Own the whole line: Buneary and Lopunny",
+        "glameowLine": "Own the whole line: Glameow and Purugly",
+        "stunkyLine": "Own the whole line: Stunky and Skuntank",
+        "bronzorLine": "Own the whole line: Bronzor and Bronzong",
+        "hippopotasLine": "Own the whole line: Hippopotas and Hippowdon",
+        "skorupiLine": "Own the whole line: Skorupi and Drapion",
+        "croagunkLine": "Own the whole line: Croagunk and Toxicroak",
+        "finneonLine": "Own the whole line: Finneon and Lumineon",
+        "snoverLine": "Own the whole line: Snover and Abomasnow",
+        "route201": "Own the Pokémon found there in Diamond and Pearl: Nidoran♀, Nidoran♂, Growlithe, Doduo, Starly and Bidoof",
+        "route202": "Own the Pokémon found there in Diamond and Pearl: Growlithe, Sentret, Zigzagoon, Starly, Bidoof, Kricketot and Shinx",
+        "route203": "Own the Pokémon found there in Diamond and Pearl: Zubat, Psyduck, Golduck, Abra, Cubone, Seaking, Gyarados, Pineco, Lotad, Seedot, Ralts, Kirlia, Starly, Bidoof, Kricketot and Shinx",
+        "route204": "Own the Pokémon found there in Diamond and Pearl: Caterpie, Weedle, Zubat, Psyduck, Golduck, Seaking, Gyarados, Sunkern, Pineco, Lotad, Seedot, Ralts, Kirlia, Starly, Bidoof, Kricketot, Shinx and Budew",
+        "route205": "Own the Pokémon found there in Diamond and Pearl: Psyduck, Golduck, Tentacool, Tentacruel, Slowpoke, Shellder, Gyarados, Hoppip, Skiploom, Elekid, Lotad, Wingull, Pelipper, Whiscash, Bidoof, Pachirisu, Buizel, Shellos and Lumineon",
+        "route206": "Own the Pokémon found there in Diamond and Pearl: Zubat, Geodude, Ponyta, Gligar, Nosepass, Baltoy, Kricketot, Kricketune, Stunky and Bronzor",
+        "route207": "Own the Pokémon found there in Diamond and Pearl: Zubat, Machop, Geodude, Gligar, Phanpy, Stantler, Larvitar and Kricketot",
+        "route208": "Own the Pokémon found there in Diamond and Pearl: Zubat, Psyduck, Golduck, Machop, Gyarados, Dunsparce, Tyrogue, Meditite, Zangoose, Seviper, Whiscash, Bidoof and Bibarel",
+        "route209": "Own the Pokémon found there in Diamond and Pearl: Vulpix, Zubat, Psyduck, Golduck, Gastly, Chansey, Seaking, Tauros, Gyarados, Snubbull, Miltank, Starly, Staravia, Bibarel, Bonsly, Mime Jr. and Spiritomb",
+        "route210": "Own the Pokémon found there in Diamond and Pearl: Psyduck, Golduck, Machop, Machoke, Geodude, Ponyta, Chansey, Tauros, Gyarados, Hoothoot, Noctowl, Pineco, Miltank, Seedot, Nuzleaf, Meditite, Zangoose, Seviper, Whiscash, Kecleon, Bagon, Bibarel, Kricketune, Bonsly and Mime Jr.",
+        "route211": "Own the Pokémon found there in Diamond and Pearl: Zubat, Machoke, Geodude, Graveler, Ponyta, Hoothoot, Noctowl, Teddiursa, Tyrogue, Meditite, Swablu, Bidoof and Chingling",
+        "route212": "Own the Pokémon found there in Diamond and Pearl: Ekans, Psyduck, Golduck, Grimer, Seaking, Gyarados, Wooper, Quagsire, Smeargle, Lotad, Lombre, Roselia, Whiscash, Starly, Staravia, Bibarel, Kricketune and Budew",
+        "route213": "Own the Pokémon found there in Diamond and Pearl: Tentacool, Tentacruel, Gyarados, Octillery, Swellow, Wingull, Pelipper, Sharpedo, Absol, Buizel, Floatzel and Shellos",
+        "route214": "Own the Pokémon found there in Diamond and Pearl: Vulpix, Psyduck, Golduck, Geodude, Graveler, Ponyta, Seaking, Gyarados, Sudowoodo, Girafarig, Gligar, Houndoom, Mightyena, Spoink, Kricketune and Stunky",
+        "route215": "Own the Pokémon found there in Diamond and Pearl: Abra, Kadabra, Geodude, Ponyta, Drowzee, Gligar, Houndoom, Mightyena and Kricketune",
+        "route216": "Own the Pokémon found there in Diamond and Pearl: Zubat, Machoke, Graveler, Noctowl, Sneasel, Ursaring, Delibird, Meditite, Snorunt and Snover",
+        "route217": "Own the Pokémon found there in Diamond and Pearl: Zubat, Machoke, Noctowl, Sneasel, Ursaring, Swinub, Meditite, Medicham, Snorunt and Snover",
+        "route218": "Own the Pokémon found there in Diamond and Pearl: Tentacool, Tentacruel, Voltorb, Mr. Mime, Gyarados, Ditto, Wingull, Pelipper, Floatzel, Shellos, Gastrodon, Glameow and Lumineon",
+        "route219": "Own the Pokémon found there in Diamond and Pearl: Tentacool, Tentacruel, Gyarados, Wingull, Pelipper, Clamperl and Lumineon",
+        "route220": "Own the Pokémon found there in Diamond and Pearl: Tentacool, Tentacruel, Gyarados, Chinchou, Lanturn, Wingull, Pelipper and Lumineon",
+        "route221": "Own the Pokémon found there in Diamond and Pearl: Nidorina, Nidorino, Tentacool, Tentacruel, Farfetch’d, Gyarados, Sudowoodo, Wingull, Pelipper, Roselia, Clamperl, Floatzel, Shellos, Gastrodon, Stunky, Skuntank and Lumineon",
+        "route222": "Own the Pokémon found there in Diamond and Pearl: Tentacool, Tentacruel, Mr. Mime, Gyarados, Flaaffy, Octillery, Wingull, Pelipper, Skitty, Sharpedo, Floatzel, Gastrodon, Glameow, Purugly and Chatot",
+        "route223": "Own the Pokémon found there in Diamond and Pearl: Tentacruel, Gyarados, Octillery, Pelipper, Wailmer, Wailord and Mantyke",
+        "route224": "Own the Pokémon found there in Diamond and Pearl: Gloom, Weepinbell, Tentacruel, Gyarados, Natu, Shuckle, Octillery, Beautifly, Pelipper, Roselia, Duskull, Dusclops, Luvdisc, Buizel, Floatzel, Shellos, Gastrodon and Chatot",
+        "route225": "Own the Pokémon found there in Diamond and Pearl: Rattata, Raticate, Spearow, Fearow, Golduck, Mankey, Primeape, Poliwhirl, Machoke, Gyarados, Makuhita, Roselia, Banette and Skuntank",
+        "route226": "Own the Pokémon found there in Diamond and Pearl: Rattata, Raticate, Spearow, Fearow, Golduck, Mankey, Primeape, Machoke, Tentacruel, Seel, Dewgong, Krabby, Seadra, Gyarados, Pelipper, Banette, Spheal, Sealeo and Relicanth",
+        "route227": "Own the Pokémon found there in Diamond and Pearl: Fearow, Golbat, Poliwag, Poliwhirl, Graveler, Weezing, Rhyhorn, Rhydon, Gyarados, Gligar, Skarmory, Magby, Numel, Camerupt, Torkoal, Spinda, Whiscash and Banette",
+        "route228": "Own the Pokémon found there in Diamond and Pearl: Sandslash, Diglett, Dugtrio, Poliwag, Poliwhirl, Rhydon, Gyarados, Trapinch, Vibrava, Cacnea, Cacturne, Whiscash, Beldum and Hippowdon",
+        "route229": "Own the Pokémon found there in Diamond and Pearl: Pidgey, Oddish, Gloom, Venonat, Venomoth, Bellsprout, Weepinbell, Scyther, Pinsir, Gyarados, Ledian, Ariados, Pineco, Lombre, Nuzleaf, Wingull, Pelipper, Volbeat, Illumise, Roselia and Purugly",
+        "route230": "Own the Pokémon found there in Diamond and Pearl: Oddish, Gloom, Golduck, Bellsprout, Weepinbell, Tentacruel, Seel, Dewgong, Gyarados, Togepi, Corsola, Octillery, Beautifly, Dustox, Pelipper, Wailmer, Wailord, Spheal, Sealeo, Floatzel and Gastrodon",
+        "oreburghMine": "Own the Pokémon found there in Diamond and Pearl: Zubat, Geodude and Onix",
+        "ravagedPath": "Own the Pokémon found there in Diamond and Pearl: Zubat, Golbat, Psyduck, Golduck, Geodude, Gyarados and Whiscash",
+        "valleyWindworks": "Own the Pokémon found there in Diamond and Pearl: Tentacool, Tentacruel, Shellder, Gyarados, Mareep, Elekid, Wingull, Pelipper, Electrike, Bidoof, Pachirisu, Buizel, Shellos, Drifloon and Lumineon",
+        "eternaForest": "Own the Pokémon found there in Diamond and Pearl: Metapod, Kakuna, Murkrow, Misdreavus, Pineco, Wurmple, Silcoon, Beautifly, Cascoon, Dustox, Seedot, Slakoth, Nincada, Budew and Buneary",
+        "oldChateau": "Own the Pokémon found there in Diamond and Pearl: Gastly, Haunter, Gengar and Rotom",
+        "fuegoIronworks": "Own the Pokémon found there in Diamond and Pearl: Tentacool, Tentacruel, Magnemite, Shellder, Gyarados, Hoppip, Skiploom, Wingull, Pelipper, Aron, Shinx, Luxio, Pachirisu, Floatzel, Shellos, Gastrodon and Lumineon",
+        "waywardCave": "Own the Pokémon found there in Diamond and Pearl: Sandshrew, Zubat, Geodude, Bronzor and Gible",
+        "mtCoronet": "Own the Pokémon found there in Diamond and Pearl: Clefairy, Zubat, Golbat, Machop, Machoke, Geodude, Graveler, Gyarados, Dratini, Dragonair, Noctowl, Cleffa, Loudred, Meditite, Medicham, Lunatone, Solrock, Whiscash, Feebas, Chimecho, Chingling, Bronzor, Bronzong, Snover and Abomasnow",
+        "lostTower": "Own the Pokémon found there in Diamond and Pearl: Zubat, Golbat, Gastly, Murkrow and Misdreavus",
+        "ruinManiacCave": "Own the Pokémon found there in Diamond and Pearl: Geodude and Hippopotas",
+        "trophyGarden": "Own the Pokémon found there in Diamond and Pearl: Pikachu, Clefairy, Jigglypuff, Meowth, Chansey, Eevee, Porygon, Pichu, Cleffa, Igglybuff, Marill, Azurill, Plusle, Minun, Roselia, Castform, Staravia, Kricketune, Bonsly, Mime Jr. and Happiny",
+        "greatMarsh": "Own the Pokémon found there in Diamond and Pearl: Arbok, Paras, Psyduck, Golduck, Exeggcute, Kangaskhan, Gyarados, Hoothoot, Noctowl, Marill, Yanma, Wooper, Quagsire, Shroomish, Azurill, Roselia, Gulpin, Carvanha, Whiscash, Starly, Staravia, Bidoof, Bibarel, Budew, Skorupi, Drapion, Croagunk, Toxicroak and Carnivine",
+        "ironIsland": "Own the Pokémon found there in Diamond and Pearl: Zubat, Golbat, Tentacool, Tentacruel, Geodude, Graveler, Onix, Gyarados, Steelix, Qwilfish, Wingull, Pelipper, Sableye, Mawile and Lumineon",
+        "lakeVerity": "Own the Pokémon found there in Diamond and Pearl: Psyduck, Golduck, Seaking, Gyarados, Wobbuffet, Surskit, Lunatone, Solrock, Starly, Staravia, Bidoof and Bibarel",
+        "lakeValor": "Own the Pokémon found there in Diamond and Pearl: Psyduck, Golduck, Lickitung, Seaking, Gyarados, Noctowl, Wobbuffet, Lunatone, Solrock, Staravia, Bibarel, Chingling and Azelf",
+        "lakeAcuity": "Own the Pokémon found there in Diamond and Pearl: Psyduck, Golduck, Seaking, Gyarados, Noctowl, Wobbuffet, Sneasel, Ursaring, Smoochum, Lunatone, Solrock, Bibarel, Chingling and Uxie",
+        "valorLakefront": "Own the Pokémon found there in Diamond and Pearl: Nidorina, Nidorino, Geodude, Graveler, Girafarig, Staravia, Bibarel and Kricketune",
+        "acuityLakefront": "Own the Pokémon found there in Diamond and Pearl: Zubat, Machoke, Noctowl, Sneasel, Teddiursa, Meditite, Medicham, Snorunt and Snover",
+        "spearPillar": "Own the Pokémon found there in Diamond and Pearl: Dialga and Palkia",
+        "sinnohVictoryRoad": "Own the Pokémon found there in Diamond and Pearl: Golbat, Kadabra, Machoke, Graveler, Onix, Gyarados, Lapras, Steelix, Medicham and Floatzel",
+        "starkMountain": "Own the Pokémon found there in Diamond and Pearl: Fearow, Golbat, Machoke, Geodude, Graveler, Onix, Weezing, Rhyhorn, Rhydon, Gligar, Slugma, Magcargo, Skarmory, Magby, Numel, Camerupt, Torkoal, Banette and Heatran",
+        "snowpointTemple": "Own the Pokémon found there in Diamond and Pearl: Golbat, Graveler, Onix, Steelix, Sneasel and Regigigas",
+        "turnbackCave": "Own the Pokémon found there in Diamond and Pearl: Golbat, Haunter, Lunatone, Solrock, Bronzor and Bronzong",
+        "sendoffSpring": "Own the Pokémon found there in Diamond and Pearl: Golduck, Seaking, Gyarados, Noctowl, Lunatone, Solrock, Chimecho, Staravia and Bibarel",
+        "coalBadge": "Gym leader Roark’s team: own Geodude, Onix and Cranidos",
+        "forestBadge": "Gym leader Gardenia’s team: own Cherubi, Turtwig and Roserade",
+        "cobbleBadge": "Gym leader Maylene’s team: own Meditite, Machoke and Lucario",
+        "fenBadge": "Gym leader Crasher Wake’s team: own Gyarados, Quagsire and Floatzel",
+        "relicBadge": "Gym leader Fantina’s team: own Drifblim, Gengar and Mismagius",
+        "mineBadge": "Gym leader Byron’s team: own Bronzor, Steelix and Bastiodon",
+        "icicleBadge": "Gym leader Candice’s team: own Snover, Sneasel, Medicham and Abomasnow",
+        "beaconBadge": "Gym leader Volkner’s team: own Raichu, Octillery, Ambipom and Luxray",
+        "aaron": "Elite Four Aaron’s team in Diamond and Pearl: own Dustox, Vespiquen, Beautifly, Drapion and Heracross",
+        "bertha": "Elite Four Bertha’s team in Diamond and Pearl: own Quagsire, Golem, Sudowoodo, Hippowdon and Whiscash",
+        "flint": "Elite Four Flint’s team in Diamond and Pearl: own Rapidash, Lopunny, Steelix, Infernape and Drifblim",
+        "lucian": "Elite Four Lucian’s team in Diamond and Pearl: own Mr. Mime, Alakazam, Girafarig, Bronzong and Medicham",
+        "cyrus": "Cyrus’s team at Spear Pillar in Diamond and Pearl: own Honchkrow, Gyarados, Crobat and Weavile",
+        "sinnohSolos": "Own the 5 Sinnoh Pokémon that don’t evolve, legendaries and mythicals aside: Pachirisu, Chatot, Spiritomb, Carnivine and Rotom",
+        "sinnohFossils": "Own both fossils’ lines: Cranidos, Rampardos, Shieldon and Bastiodon",
+        "sinnohBabies": "Own the babies Diamond and Pearl added to older lines: Budew, Chingling, Bonsly, Mime Jr., Happiny, Munchlax and Mantyke",
+        "sinnohEvolutionBoom": "Own the 22 evolutions Diamond and Pearl gave older Pokémon: Roserade, Ambipom, Mismagius, Honchkrow, Weavile, Magnezone, Lickilicky, Rhyperior, Tangrowth, Electivire, Magmortar, Togekiss, Yanmega, Leafeon, Glaceon, Gliscor, Mamoswine, Porygon-Z, Gallade, Probopass, Dusknoir and Froslass",
+        "hisuiNewPokemon": "Own the new Pokémon of Legends: Arceus: Wyrdeer, Kleavor, Ursaluna, Basculegion, Sneasler, Overqwil and Enamorus"
       },
       "families": "Complete {count} evolution line | Complete {count} evolution lines",
       "allStarters": "Own the {count} starter Pokémon, Kanto to Paldea",
@@ -3255,7 +3687,24 @@
       "tc_teamMagma": "Own {count} different Team Magma cards (their Pokémon, Maxie and their schemes)",
       "tc_teamAqua": "Own {count} different Team Aqua cards (their Pokémon, Archie and their schemes)",
       "exHoennSets": "Own a card from each of the first EX sets, set in Hoenn: Ruby & Sapphire, Sandstorm, Dragon, Team Magma vs Team Aqua and Hidden Legends",
-      "orasSets": "Own a card from each Omega Ruby & Alpha Sapphire era set: Primal Clash, Roaring Skies and Double Crisis"
+      "orasSets": "Own a card from each Omega Ruby & Alpha Sapphire era set: Primal Clash, Roaring Skies and Double Crisis",
+      "sinnohBadges": "Complete the teams of Sinnoh’s {count} gym leaders",
+      "sinnohEliteFour": "Complete the teams of Sinnoh’s Elite Four (Diamond and Pearl)",
+      "hisuianForms": "Own the 17 Hisuian forms printed on cards: Growlithe, Arcanine, Voltorb, Electrode, Typhlosion, Qwilfish, Sneasel, Samurott, Lilligant, Basculin, Zorua, Zoroark, Braviary, Sliggoo, Goodra, Avalugg and Decidueye",
+      "sinnohLines": "Complete {count} evolution lines of Sinnoh",
+      "sinnohDex": "Own {count} different Pokémon of Sinnoh (#387 to #493)",
+      "sinnohRoutes": "Own every Pokémon of every Sinnoh route, from Route 201 to Route 230",
+      "sinnohLandmarks": "Own every Pokémon of Sinnoh’s caves, lakes, forests and peaks",
+      "sinnohPlaceCards": "Own the Sinnoh places printed as Stadium cards: Mt. Coronet, Snowpoint Temple, Stark Mountain, Lake Acuity, Galactic HQ and Sunyshore City Gym",
+      "tc_sinnohGymLeaders": "Own a card of each Sinnoh gym leader who has one: Roark, Gardenia, Crasher Wake, Fantina, Candice and Volkner (no Maylene or Byron card yet)",
+      "tc_sinnohEliteFour": "Own a card of each member of Sinnoh’s Elite Four: Aaron, Bertha, Flint and Lucian",
+      "tc_cynthia": "Own {count} different cards bearing Cynthia’s name, like Cynthia’s Garchomp ex",
+      "tc_sinnohHeroes": "Own a card of Barry and one of Dawn",
+      "tc_rowan": "Own a Professor Rowan card",
+      "tc_teamGalactic": "Own {count} different Team Galactic cards (Cyrus, his commanders and their inventions)",
+      "dpSets": "Own a card from each Diamond & Pearl set: Diamond & Pearl, Mysterious Treasures, Secret Wonders, Great Encounters, Majestic Dawn, Legends Awakened and Stormfront",
+      "platinumSets": "Own a card from each Platinum set: Platinum, Rising Rivals, Supreme Victors and Arceus",
+      "sinnohReturnSets": "Own a card from each Sword & Shield set back in Sinnoh and Hisui: Brilliant Stars, Astral Radiance and Lost Origin"
     },
     "subs": {
       "allLines": "All regions",
@@ -3265,15 +3714,19 @@
       "johtoMore": "Johto, beyond the lines",
       "hoennLines": "Hoenn lines (Ruby and Sapphire)",
       "hoennMore": "Hoenn, beyond the lines",
+      "sinnohLines": "Sinnoh lines (Diamond and Pearl)",
+      "sinnohMore": "Sinnoh, beyond the lines",
       "otherLines": "Other regions",
       "kantoGyms": "Kanto gyms",
       "johtoGyms": "Johto gyms",
       "hoennGyms": "Hoenn gyms",
+      "sinnohGyms": "Sinnoh gyms",
       "league": "Pokémon League",
       "rivals": "Rivals and heroes",
       "trainerCards": "Kanto trainers on cards",
       "johtoTrainerCards": "Johto trainers on cards",
       "hoennTrainerCards": "Hoenn trainers on cards",
+      "sinnohTrainerCards": "Sinnoh trainers on cards",
       "allPlaces": "All places",
       "kantoRoutes": "Kanto routes (Red and Blue)",
       "kantoLandmarks": "Kanto caves, forests and buildings",
@@ -3281,7 +3734,9 @@
       "johtoRoutes": "Johto routes (Gold and Silver)",
       "johtoLandmarks": "Johto caves, towers and buildings",
       "hoennRoutes": "Hoenn routes (Ruby and Sapphire)",
-      "hoennLandmarks": "Hoenn caves, forests and peaks"
+      "hoennLandmarks": "Hoenn caves, forests and peaks",
+      "sinnohRoutes": "Sinnoh routes (Diamond and Pearl)",
+      "sinnohLandmarks": "Sinnoh caves, lakes and peaks"
     }
   },
   "beta": {

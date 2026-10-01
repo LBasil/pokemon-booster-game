@@ -4,13 +4,8 @@
 // (achievements.desc.groups.<id>): change the list, change both texts.
 
 // Whole evolution lines (first stage to last) of the regions without a
-// file of their own yet (Kanto: kanto.js, Johto: johto.js, Hoenn: hoenn.js)
+// file of their own yet (Kanto: kanto.js, then johto.js, hoenn.js, sinnoh.js)
 export const FAMILIES = {
-  turtwigLine: [387, 388, 389],
-  chimcharLine: [390, 391, 392],
-  piplupLine: [393, 394, 395],
-  gibleLine: [443, 444, 445],
-  rioluLine: [447, 448],
   snivyLine: [495, 496, 497],
   tepigLine: [498, 499, 500],
   oshawottLine: [501, 502, 503],

@@ -5,7 +5,8 @@ import { CATEGORIES, DEFINITIONS, achievementProgress, achievements, collectorSt
 import { KANTO_EXTRAS, KANTO_LINES } from './kanto'
 import johto from './johto'
 import hoenn from './hoenn'
-import { LEGENDS, MYTHICALS } from './pokemonGroups'
+import sinnoh from './sinnoh'
+import { LEGENDARIES, LEGENDS, MYTHICALS } from './pokemonGroups'
 
 const card = (id, fields = {}) => ({
   id,
@@ -381,6 +382,17 @@ describe('no duplicates', () => {
     const all = [...lines, ...hoenn.extras.hoennSolos, ...legends, ...johtos].sort((a, b) => a - b)
     expect(all).toEqual(Array.from({ length: 135 }, (_, i) => i + 252))
   })
+
+  it('split every Sinnoh Pokémon into lines, loners, legends and older regions’ groups', () => {
+    const inSinnoh = (n) => n >= 387 && n <= 493
+    const lines = Object.values(sinnoh.lines).flat()
+    const legends = [...LEGENDARIES, ...MYTHICALS].filter(inSinnoh)
+    // Babies and evolutions of older Pokémon (Budew, Magnezone, Togekiss...)
+    const older = [...Object.values(KANTO_EXTRAS), ...Object.values(johto.extras), ...Object.values(hoenn.extras)].flat().filter(inSinnoh)
+    const all = [...new Set([...lines, ...sinnoh.extras.sinnohSolos, ...legends, ...older])].sort((a, b) => a - b)
+    expect(all).toEqual(Array.from({ length: 107 }, (_, i) => i + 387))
+    expect(lines.length + sinnoh.extras.sinnohSolos.length + legends.length + new Set(older).size).toBe(107) // no Pokémon in two of them
+  })
 })
 
 describe('Kanto', () => {
@@ -514,5 +526,38 @@ describe('Hoenn', () => {
     const a = byId(achievements([entry('ex1-1'), entry('ex4-1'), entry('xy5-1')], sets))
     expect(a.exHoennSets.current).toBe(2)
     expect(a.orasSets.current).toBe(1)
+  })
+})
+
+describe('Sinnoh', () => {
+  const dex = (...numbers) => numbers.map((n) => entry(`dp1-${n}`, { national_pokedex_number: n }))
+  const named = (...names) => names.map((name, i) => entry(`pl1-${i}`, { name }))
+
+  it('counts complete Sinnoh lines, gyms, the League and Cyrus', () => {
+    const a = byId(achievements(dex(399, 400, 74, 95, 408, 430, 130, 169, 461), sets))
+    expect(a.bidoofLine).toMatchObject({ unlocked: true, sub: 'sinnohLines', tags: ['sinnoh'] })
+    expect(a.gibleLine.sub).toBe('sinnohLines') // moved from the other regions' lines
+    expect(a.coalBadge).toMatchObject({ unlocked: true, sub: 'sinnohGyms' })
+    expect(a.cyrus.unlocked).toBe(true)
+    expect(a.sinnohEvolutionBoom.current).toBe(2) // Honchkrow, Weavile
+    expect(a.sinnohDex25.current).toBe(5) // Bidoof, Bibarel, Cranidos, Honchkrow, Weavile
+  })
+
+  it('reads Sinnoh trainers’ and places’ cards from their names', () => {
+    const cards = named('Roark', "Gardenia's Vigor", "Flint's Willpower", 'Fiery Flint', "Cynthia's Garchomp ex", 'Cynthia & Caitlin', 'Mars', 'Marshadow', "Team Galactic's Wager", 'Mt. Coronet', 'Hisuian Zoroark VSTAR')
+    const a = byId(achievements(cards, sets))
+    expect(a.tc_sinnohGymLeaders.current).toBe(2)
+    expect(a.tc_sinnohEliteFour.current).toBe(1) // Flint, not Fiery Flint
+    expect(a.tc_cynthia.current).toBe(2)
+    expect(a.tc_teamGalactic.current).toBe(2) // Mars and the Wager, not Marshadow
+    expect(a.sinnohPlaceCards.current).toBe(1)
+    expect(a.hisuianForms).toMatchObject({ current: 1, target: 17 })
+  })
+
+  it('counts the Sinnoh sets', () => {
+    const a = byId(achievements([entry('dp1-1'), entry('pl4-1'), entry('swsh10-1')], sets))
+    expect(a.dpSets.current).toBe(1)
+    expect(a.platinumSets.current).toBe(1)
+    expect(a.sinnohReturnSets.current).toBe(1)
   })
 })
