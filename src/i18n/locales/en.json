@@ -2215,6 +2215,234 @@
       },
       "impostor": {
         "title": "That’s not Oak!"
+      },
+      "sentretLine": {
+        "title": "Furret line"
+      },
+      "hoothootLine": {
+        "title": "Noctowl line"
+      },
+      "ledybaLine": {
+        "title": "Ledian line"
+      },
+      "spinarakLine": {
+        "title": "Ariados line"
+      },
+      "chinchouLine": {
+        "title": "Lanturn line"
+      },
+      "togepiLine": {
+        "title": "Togetic line"
+      },
+      "natuLine": {
+        "title": "Xatu line"
+      },
+      "marillLine": {
+        "title": "Azumarill line"
+      },
+      "hoppipLine": {
+        "title": "Jumpluff line"
+      },
+      "sunkernLine": {
+        "title": "Sunflora line"
+      },
+      "wooperLine": {
+        "title": "Quagsire line"
+      },
+      "pinecoLine": {
+        "title": "Forretress line"
+      },
+      "snubbullLine": {
+        "title": "Granbull line"
+      },
+      "teddiursaLine": {
+        "title": "Ursaring line"
+      },
+      "slugmaLine": {
+        "title": "Magcargo line"
+      },
+      "swinubLine": {
+        "title": "Piloswine line"
+      },
+      "remoraidLine": {
+        "title": "Octillery line"
+      },
+      "houndourLine": {
+        "title": "Houndoom line"
+      },
+      "phanpyLine": {
+        "title": "Donphan line"
+      },
+      "johtoLines10": {
+        "title": "Johto family album"
+      },
+      "johtoLines24": {
+        "title": "Every Johto line"
+      },
+      "johtoDex25": {
+        "title": "Johto rookie"
+      },
+      "johtoDex50": {
+        "title": "Johto trainer"
+      },
+      "johtoSolos": {
+        "title": "Johto loners"
+      },
+      "johtoBabies": {
+        "title": "Johto nursery"
+      },
+      "johtoNewEvolutions": {
+        "title": "Johto late bloomers"
+      },
+      "johtoForms": {
+        "title": "Johto abroad"
+      },
+      "route29": {
+        "title": "Route 29"
+      },
+      "route30": {
+        "title": "Route 30"
+      },
+      "route31": {
+        "title": "Route 31"
+      },
+      "route32": {
+        "title": "Route 32"
+      },
+      "route33": {
+        "title": "Route 33"
+      },
+      "route34": {
+        "title": "Route 34"
+      },
+      "route35": {
+        "title": "Route 35"
+      },
+      "route36": {
+        "title": "Route 36"
+      },
+      "route37": {
+        "title": "Route 37"
+      },
+      "route38": {
+        "title": "Route 38"
+      },
+      "route39": {
+        "title": "Route 39"
+      },
+      "route40": {
+        "title": "Route 40"
+      },
+      "route41": {
+        "title": "Route 41"
+      },
+      "route42": {
+        "title": "Route 42"
+      },
+      "route43": {
+        "title": "Route 43"
+      },
+      "route44": {
+        "title": "Route 44"
+      },
+      "route45": {
+        "title": "Route 45"
+      },
+      "route46": {
+        "title": "Route 46"
+      },
+      "sproutTower": {
+        "title": "Sprout Tower"
+      },
+      "ruinsOfAlph": {
+        "title": "Ruins of Alph"
+      },
+      "unionCave": {
+        "title": "Union Cave"
+      },
+      "slowpokeWell": {
+        "title": "Slowpoke Well"
+      },
+      "ilexForest": {
+        "title": "Ilex Forest"
+      },
+      "burnedTower": {
+        "title": "Burned Tower"
+      },
+      "tinTower": {
+        "title": "Tin Tower"
+      },
+      "whirlIslands": {
+        "title": "Whirl Islands"
+      },
+      "mtMortar": {
+        "title": "Mt. Mortar"
+      },
+      "lakeOfRage": {
+        "title": "Lake of Rage"
+      },
+      "teamRocketHq": {
+        "title": "Team Rocket HQ"
+      },
+      "icePath": {
+        "title": "Ice Path"
+      },
+      "dragonsDen": {
+        "title": "Dragon’s Den"
+      },
+      "darkCave": {
+        "title": "Dark Cave"
+      },
+      "tohjoFalls": {
+        "title": "Tohjo Falls"
+      },
+      "johtoRoutes": {
+        "title": "Every Johto route"
+      },
+      "johtoLandmarks": {
+        "title": "Johto spelunker"
+      },
+      "johtoPlaceCards": {
+        "title": "Johto on cards"
+      },
+      "will": {
+        "title": "Will"
+      },
+      "johtoKoga": {
+        "title": "Koga in Johto"
+      },
+      "johtoBruno": {
+        "title": "Bruno in Johto"
+      },
+      "karen": {
+        "title": "Karen"
+      },
+      "johtoEliteFour": {
+        "title": "Johto’s League"
+      },
+      "lanceJohto": {
+        "title": "Champion Lance"
+      },
+      "tc_johtoGymLeaders": {
+        "title": "Johto leaders in the binder"
+      },
+      "tc_johtoEliteFour": {
+        "title": "Johto’s Elite Four on cards"
+      },
+      "tc_ethan": {
+        "title": "Ethan’s adventure"
+      },
+      "tc_elm": {
+        "title": "Elm’s lab"
+      },
+      "tc_rocketExecutives": {
+        "title": "Rocket’s comeback"
+      },
+      "neoSets": {
+        "title": "Neo era"
+      },
+      "hgssSets": {
+        "title": "Back to Johto"
       }
     },
     "desc": {
@@ -2393,7 +2621,7 @@
         "pokemonMansion": "Own the Pokémon found there in Red and Blue: Vulpix, Growlithe, Ponyta, Grimer, Muk, Koffing, Weezing and Magmar",
         "ceruleanCave": "Own the Pokémon found there in Red and Blue: Arbok, Raichu, Sandslash, Wigglytuff, Golbat, Parasect, Venomoth, Kadabra, Slowbro, Magneton, Dodrio, Hypno, Kingler, Electrode, Marowak, Rhydon, Chansey, Seadra, Seaking, Ditto and Mewtwo",
         "victoryRoad": "Own the Pokémon found there in Red and Blue: Zubat, Golbat, Venomoth, Machop, Machoke, Geodude, Graveler, Onix, Marowak and Moltres",
-        "nationalPark": "Own the Pokémon found there: Scyther, Pinsir, Butterfree, Beedrill, Venonat and Paras",
+        "nationalPark": "Own the Pokémon of its Bug-Catching Contest in Gold and Silver: Scyther, Pinsir, Butterfree, Beedrill, Venonat and Paras",
         "petalburgWoods": "Own the Pokémon found there: Wurmple, Shroomish and Slakoth",
         "meteorFalls": "Own the Pokémon found there: Lunatone, Solrock and Bagon",
         "route119": "Own the Pokémon found there: Feebas and Milotic",
@@ -2482,7 +2710,67 @@
         "route24and25": "Own the Pokémon found there in Red and Blue: Caterpie, Metapod, Weedle, Kakuna, Pidgey, Oddish, Psyduck, Abra, Bellsprout, Krabby and Goldeen",
         "rockTunnel": "Own the Pokémon found there in Red and Blue: Zubat, Machop, Geodude and Onix",
         "diglettsCave": "Own the Pokémon found there in Red and Blue: Diglett and Dugtrio",
-        "mtSilver": "Own the Pokémon found there in Gold and Silver: Golbat, Golduck, Poliwag, Poliwhirl, Graveler, Ponyta, Rapidash, Doduo, Dodrio, Onix, Tangela, Goldeen, Seaking, Magikarp, Quagsire, Misdreavus, Sneasel, Ursaring, Donphan and Larvitar"
+        "mtSilver": "Own the Pokémon found there in Gold and Silver: Golbat, Golduck, Poliwag, Poliwhirl, Graveler, Ponyta, Rapidash, Doduo, Dodrio, Onix, Tangela, Goldeen, Seaking, Magikarp, Quagsire, Misdreavus, Sneasel, Ursaring, Donphan and Larvitar",
+        "sentretLine": "Own the whole line: Sentret and Furret",
+        "hoothootLine": "Own the whole line: Hoothoot and Noctowl",
+        "ledybaLine": "Own the whole line: Ledyba and Ledian",
+        "spinarakLine": "Own the whole line: Spinarak and Ariados",
+        "chinchouLine": "Own the whole line: Chinchou and Lanturn",
+        "togepiLine": "Own the whole line: Togepi and Togetic",
+        "natuLine": "Own the whole line: Natu and Xatu",
+        "marillLine": "Own the whole line: Marill and Azumarill",
+        "hoppipLine": "Own the whole line: Hoppip, Skiploom and Jumpluff",
+        "sunkernLine": "Own the whole line: Sunkern and Sunflora",
+        "wooperLine": "Own the whole line: Wooper and Quagsire",
+        "pinecoLine": "Own the whole line: Pineco and Forretress",
+        "snubbullLine": "Own the whole line: Snubbull and Granbull",
+        "teddiursaLine": "Own the whole line: Teddiursa and Ursaring",
+        "slugmaLine": "Own the whole line: Slugma and Magcargo",
+        "swinubLine": "Own the whole line: Swinub and Piloswine",
+        "remoraidLine": "Own the whole line: Remoraid and Octillery",
+        "houndourLine": "Own the whole line: Houndour and Houndoom",
+        "phanpyLine": "Own the whole line: Phanpy and Donphan",
+        "johtoSolos": "Own the 22 Johto Pokémon that don’t evolve in Gold and Silver, legendaries aside: Sudowoodo, Aipom, Yanma, Murkrow, Misdreavus, Unown, Wobbuffet, Girafarig, Dunsparce, Gligar, Qwilfish, Shuckle, Heracross, Sneasel, Corsola, Delibird, Mantine, Skarmory, Stantler, Smeargle, Hitmontop and Miltank",
+        "johtoBabies": "Own the babies later added to Johto Pokémon: Azurill, Wynaut, Bonsly and Mantyke",
+        "johtoNewEvolutions": "Own the evolutions later games gave Johto Pokémon: Ambipom, Mismagius, Honchkrow, Weavile, Togekiss, Yanmega, Gliscor, Mamoswine, Cursola, Wyrdeer, Ursaluna, Sneasler, Overqwil, Clodsire, Farigiraf and Dudunsparce",
+        "route29": "Own the Pokémon found there in Gold and Silver: Pidgey, Rattata, Sentret and Hoothoot",
+        "route30": "Own the Pokémon found there in Gold and Silver: Caterpie, Metapod, Weedle, Kakuna, Pidgey, Rattata, Poliwag, Poliwhirl, Magikarp, Hoothoot, Ledyba and Spinarak",
+        "route31": "Own the Pokémon found there in Gold and Silver: Caterpie, Metapod, Weedle, Kakuna, Pidgey, Rattata, Poliwag, Poliwhirl, Bellsprout, Magikarp, Hoothoot, Ledyba and Spinarak",
+        "route32": "Own the Pokémon found there in Gold and Silver: Rattata, Ekans, Zubat, Bellsprout, Tentacool, Tentacruel, Magikarp, Mareep, Hoppip, Wooper, Quagsire and Qwilfish",
+        "route33": "Own the Pokémon found there in Gold and Silver: Rattata, Spearow, Ekans, Zubat and Hoppip",
+        "route34": "Own the Pokémon found there in Gold and Silver: Rattata, Abra, Tentacool, Tentacruel, Drowzee, Krabby, Kingler, Staryu, Ditto and Corsola",
+        "route35": "Own the Pokémon found there in Gold and Silver: Pidgey, Nidoran♀, Nidoran♂, Psyduck, Golduck, Poliwag, Abra, Drowzee, Magikarp, Ditto, Hoothoot and Yanma",
+        "route36": "Own the Pokémon found there in Gold and Silver: Pidgey, Nidoran♀, Nidoran♂, Vulpix, Growlithe, Hoothoot, Sudowoodo and Stantler",
+        "route37": "Own the Pokémon found there in Gold and Silver: Pidgey, Pidgeotto, Vulpix, Growlithe, Hoothoot, Ledyba, Spinarak and Stantler",
+        "route38": "Own the Pokémon found there in Gold and Silver: Rattata, Raticate, Meowth, Magnemite, Farfetch’d, Tauros, Snubbull and Miltank",
+        "route39": "Own the Pokémon found there in Gold and Silver: Rattata, Raticate, Meowth, Magnemite, Farfetch’d, Tauros and Miltank",
+        "route40": "Own the Pokémon found there in Gold and Silver: Tentacool, Tentacruel, Krabby, Kingler, Staryu and Corsola",
+        "route41": "Own the Pokémon found there in Gold and Silver: Tentacool, Tentacruel, Shellder, Chinchou, Lanturn and Mantine",
+        "route42": "Own the Pokémon found there in Gold and Silver: Spearow, Zubat, Mankey, Goldeen, Seaking, Magikarp, Mareep and Flaaffy",
+        "route43": "Own the Pokémon found there in Gold and Silver: Pidgeotto, Venonat, Poliwag, Magikarp, Noctowl, Mareep, Flaaffy and Girafarig",
+        "route44": "Own the Pokémon found there in Gold and Silver: Poliwag, Poliwhirl, Bellsprout, Weepinbell, Lickitung, Tangela, Magikarp and Remoraid",
+        "route45": "Own the Pokémon found there in Gold and Silver: Geodude, Graveler, Magikarp, Dratini, Dragonair, Gligar, Teddiursa, Skarmory and Phanpy",
+        "route46": "Own the Pokémon found there in Gold and Silver: Rattata, Spearow, Jigglypuff and Geodude",
+        "sproutTower": "Own the Pokémon found there in Gold and Silver: Rattata and Gastly",
+        "ruinsOfAlph": "Own the Pokémon found there in Gold and Silver: Poliwag, Magikarp, Natu, Wooper, Quagsire, Unown and Smeargle",
+        "unionCave": "Own the Pokémon found there in Gold and Silver: Rattata, Raticate, Sandshrew, Zubat, Golbat, Tentacool, Tentacruel, Geodude, Onix, Krabby, Kingler, Goldeen, Seaking, Staryu, Magikarp, Lapras, Wooper, Quagsire and Corsola",
+        "slowpokeWell": "Own the Pokémon found there in Gold and Silver: Zubat, Golbat, Slowpoke, Slowbro, Goldeen, Seaking and Magikarp",
+        "ilexForest": "Own the Pokémon found there in Gold and Silver: Caterpie, Metapod, Weedle, Kakuna, Zubat, Oddish, Paras, Psyduck, Golduck, Poliwag and Magikarp",
+        "burnedTower": "Own the Pokémon found there in Gold and Silver: Rattata, Raticate, Zubat, Koffing and Magmar",
+        "tinTower": "Own the Pokémon found there in Gold and Silver: Rattata, Gastly and Ho-Oh",
+        "whirlIslands": "Own the Pokémon found there in Gold and Silver: Zubat, Golbat, Tentacool, Tentacruel, Seel, Krabby, Kingler, Horsea, Seadra and Lugia",
+        "mtMortar": "Own the Pokémon found there in Gold and Silver: Rattata, Raticate, Zubat, Golbat, Machop, Machoke, Geodude, Graveler, Goldeen, Seaking, Magikarp and Marill",
+        "lakeOfRage": "Own the Pokémon found there in Gold and Silver: Magikarp and Gyarados",
+        "teamRocketHq": "Own the Pokémon found there in Gold and Silver: Geodude, Voltorb, Electrode and Koffing",
+        "icePath": "Own the Pokémon found there in Gold and Silver: Zubat, Golbat, Jynx, Swinub and Delibird",
+        "dragonsDen": "Own the Pokémon found there in Gold and Silver: Magikarp, Dratini and Dragonair",
+        "darkCave": "Own the Pokémon found there in Gold and Silver: Zubat, Golbat, Geodude, Graveler, Goldeen, Seaking, Magikarp, Wobbuffet and Dunsparce",
+        "tohjoFalls": "Own the Pokémon found there in Gold and Silver: Rattata, Raticate, Zubat, Golbat, Slowpoke, Goldeen, Seaking and Magikarp",
+        "will": "Elite Four Will’s team in Gold and Silver: own Xatu, Jynx, Exeggutor and Slowbro",
+        "johtoKoga": "Elite Four Koga’s team in Gold and Silver: own Ariados, Venomoth, Forretress, Muk and Crobat",
+        "johtoBruno": "Elite Four Bruno’s team in Gold and Silver: own Hitmontop, Hitmonlee, Hitmonchan, Onix and Machamp",
+        "karen": "Elite Four Karen’s team in Gold and Silver: own Umbreon, Vileplume, Gengar, Murkrow and Houndoom",
+        "lanceJohto": "Lance’s team as champion (Gold and Silver): own Gyarados, Dragonite, Aerodactyl and Charizard"
       },
       "families": "Complete {count} evolution line | Complete {count} evolution lines",
       "allStarters": "Own the {count} starter Pokémon, Kanto to Paldea",
@@ -2529,22 +2817,41 @@
       "tc_bill": "Own a card of Bill, the Pokémaniac of Route 25",
       "tc_teamRocket": "Own {count} different Team Rocket cards (their Pokémon, admins and schemes)",
       "originalSets": "Own a card from each of the first sets: Base Set, Jungle, Fossil, Team Rocket, Gym Heroes and Gym Challenge",
-      "impostor": "Own an Impostor Professor Oak card"
+      "impostor": "Own an Impostor Professor Oak card",
+      "johtoLines": "Complete {count} evolution lines of Johto",
+      "johtoDex": "Own {count} different Pokémon of Johto (#152 to #251)",
+      "johtoForms": "Own the 5 regional forms of Johto Pokémon: Galarian Corsola, Hisuian Qwilfish, Hisuian Sneasel, Hisuian Typhlosion and Paldean Wooper",
+      "johtoRoutes": "Own every Pokémon of every Johto route, from Route 29 to Route 46",
+      "johtoLandmarks": "Own every Pokémon of Johto’s caves, forests, towers and buildings",
+      "johtoPlaceCards": "Own the Johto places printed as Stadium cards: Sprout Tower, Ruins of Alph, Burned Tower and Radio Tower (no Johto city has a card)",
+      "johtoEliteFour": "Complete the teams of Johto’s Elite Four (Gold and Silver)",
+      "tc_johtoGymLeaders": "Own a card of each Johto gym leader who has one: Falkner, Whitney, Morty and Jasmine (no Bugsy, Chuck, Pryce or Clair card yet)",
+      "tc_johtoEliteFour": "Own a card of each member of Johto’s Elite Four: Will, Koga, Bruno and Karen",
+      "tc_ethan": "Own {count} different cards bearing Ethan’s name, like Ethan’s Typhlosion",
+      "tc_elm": "Own {count} different Professor Elm cards",
+      "tc_rocketExecutives": "Own a card of each Team Rocket executive back in Johto: Archer, Ariana, Petrel and Proton",
+      "neoSets": "Own a card from each Neo set, the first ones set in Johto: Neo Genesis, Neo Discovery, Neo Revelation and Neo Destiny",
+      "hgssSets": "Own a card from each HeartGold & SoulSilver set: HeartGold & SoulSilver, Unleashed, Undaunted, Triumphant and Call of Legends"
     },
     "subs": {
       "allLines": "All regions",
       "kantoLines": "Kanto lines (Red and Blue)",
       "kantoMore": "Kanto, beyond the lines",
+      "johtoLines": "Johto lines (Gold and Silver)",
+      "johtoMore": "Johto, beyond the lines",
       "otherLines": "Other regions",
       "kantoGyms": "Kanto gyms",
       "johtoGyms": "Johto gyms",
       "league": "Pokémon League",
       "rivals": "Rivals and heroes",
       "trainerCards": "Kanto trainers on cards",
+      "johtoTrainerCards": "Johto trainers on cards",
       "allPlaces": "All places",
       "kantoRoutes": "Kanto routes (Red and Blue)",
       "kantoLandmarks": "Kanto caves, forests and buildings",
       "kantoCities": "Kanto cities on cards",
+      "johtoRoutes": "Johto routes (Gold and Silver)",
+      "johtoLandmarks": "Johto caves, towers and buildings",
       "otherPlaces": "Other regions"
     }
   },

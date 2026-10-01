@@ -102,7 +102,7 @@ How it works inside (every table, RPC and flow, in French):
   touch screens, drops the 3D flip and the glow layers that stuttered on
   phones), and an
   "install the app" button.
-- **Achievements**: ~470 of them in 20 categories (boosters, luck, pulls, sets,
+- **Achievements**: ~540 of them in 20 categories (boosters, luck, pulls, sets,
   Pokédex regions, starters, evolution lines, legends and mythicals,
   famous trainers (gym badges = each Kanto/Johto gym leader's team, the
   Pokémon League, rivals & heroes, Kanto's trainers on their own cards),
@@ -122,6 +122,12 @@ How it works inside (every table, RPC and flow, in French):
   there in Red/Blue, Mt. Silver in Gold/Silver), the cities that have a
   card, and cards of Kanto's trainers (gym leaders, Elite Four, Red & Blue,
   Oak, Bill, Team Rocket).
+  **Johto (Gen 2) the same way**: every Gold/Silver line, loners, babies,
+  later evolutions and regional forms of Johto Pokémon, Routes 29 to 46
+  and every cave, tower and building (Pokémon found there in Gold/Silver),
+  Johto's Elite Four and champion Lance, Johto places and trainers on
+  cards (gym leaders, Elite Four, Ethan, Professor Elm, Team Rocket's
+  executives), the Neo and HeartGold & SoulSilver sets.
   A Steam-style **"Achievement unlocked" pop-up** (with a chime) shows at the
   end of an opening — never mid-reveal, so nothing is spoiled — and each
   achievement shows the **share of players** who have it.

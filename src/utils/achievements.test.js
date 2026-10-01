@@ -3,7 +3,8 @@ import en from '@/i18n/locales/en.json'
 import fr from '@/i18n/locales/fr.json'
 import { CATEGORIES, DEFINITIONS, achievementProgress, achievements, collectorStats, filterAchievements, MAX_TOASTS, newlyUnlocked, nextUp, rateOf, sortForToasts, tagsOf, TAGS, toastBatch } from './achievements'
 import { KANTO_EXTRAS, KANTO_LINES } from './kanto'
-import { LEGENDS } from './pokemonGroups'
+import { JOHTO_EXTRAS, JOHTO_LINES } from './johto'
+import { LEGENDS, MYTHICALS } from './pokemonGroups'
 
 const card = (id, fields = {}) => ({
   id,
@@ -328,12 +329,14 @@ describe('Pokémon groups', () => {
 
 describe('no duplicates', () => {
   // The same Pokémon behind two achievements of different meaning, kept on
-  // purpose: Morty's and Misty's teams are one evolution line each, and
-  // Diglett's Cave only has the Diglett line
+  // purpose: Morty's and Misty's teams are one evolution line each,
+  // Diglett's Cave only has the Diglett line and the Lake of Rage the
+  // Magikarp line (its red Gyarados)
   const SAME_MEMBERS_OK = [
     ['ghostLine', 'fogBadge'],
     ['staryuLine', 'cascadeBadge'],
     ['diglettLine', 'diglettsCave'],
+    ['magikarpLine', 'lakeOfRage'],
   ].map((pair) => pair.sort().join('+'))
 
   it('no two "own them all" groups ask for the same Pokémon', () => {
@@ -359,6 +362,15 @@ describe('no duplicates', () => {
     const kantoLegends = [...LEGENDS.legendaryBirds, ...LEGENDS.mewDuo]
     const all = [...lines, ...KANTO_EXTRAS.kantoSolos, ...kantoLegends].sort((a, b) => a - b)
     expect(all).toEqual(Array.from({ length: 151 }, (_, i) => i + 1))
+  })
+
+  it('split every Johto Pokémon into lines, loners, legends and Kanto’s groups', () => {
+    const lines = Object.values(JOHTO_LINES).flat()
+    const johtoLegends = [...LEGENDS.legendaryBeasts, ...LEGENDS.towerDuo, ...MYTHICALS.filter((n) => n >= 152 && n <= 251)]
+    // Babies and new evolutions of Kanto Pokémon (Pichu, Crobat, Espeon...)
+    const kantos = [...KANTO_EXTRAS.kantoBabies, ...KANTO_EXTRAS.kantoNewEvolutions, ...KANTO_EXTRAS.eeveelutions].filter((n) => n >= 152 && n <= 251)
+    const all = [...lines, ...JOHTO_EXTRAS.johtoSolos, ...johtoLegends, ...kantos].sort((a, b) => a - b)
+    expect(all).toEqual(Array.from({ length: 100 }, (_, i) => i + 152))
   })
 })
 
@@ -417,5 +429,47 @@ describe('Kanto', () => {
     expect(kanto.every((a) => a.tags.includes('kanto'))).toBe(true)
     expect(kanto.some((a) => a.category === 'people' && a.sub === 'trainerCards')).toBe(true)
     expect(filterAchievements(list, { tag: 'johto' }).map((a) => a.id)).toContain('mtSilver')
+  })
+})
+
+describe('Johto', () => {
+  const dex = (...numbers) => numbers.map((n) => entry(`neo1-${n}`, { national_pokedex_number: n }))
+  const named = (...names) => names.map((name, i) => entry(`hgss1-${i}`, { name }))
+
+  it('counts complete Johto lines, routes and the League', () => {
+    const a = byId(achievements(dex(16, 19, 161, 162, 163, 178, 124, 103, 80), sets))
+    expect(a.sentretLine).toMatchObject({ unlocked: true, sub: 'johtoLines', tags: ['johto'] })
+    expect(a.chikoritaLine.sub).toBe('johtoLines') // moved from the other regions' lines
+    expect(a.johtoLines10.current).toBe(1)
+    expect(a.route29.unlocked).toBe(true)
+    expect(a.johtoRoutes).toMatchObject({ current: 1, target: 18 })
+    expect(a.will.unlocked).toBe(true)
+    expect(a.johtoEliteFour).toMatchObject({ current: 1, target: 4, sub: 'league' })
+    expect(a.johtoDex25.current).toBe(4) // Sentret, Furret, Hoothoot, Xatu
+    expect(a.nationalPark.sub).toBe('johtoLandmarks')
+  })
+
+  it('reads Johto trainers’ and places’ cards from their names', () => {
+    const cards = named('Falkner', "Morty's Conviction", 'Will', 'Willow', "Ethan's Typhlosion", "Ethan's Ho-Oh ex", 'Professor Elm', "Team Rocket's Archer", 'Ruins of Alph', 'Paldean Wooper', 'Hisuian Typhlosion VSTAR')
+    const a = byId(achievements(cards, sets))
+    expect(a.tc_johtoGymLeaders.current).toBe(2) // Falkner, Morty
+    expect(a.tc_johtoEliteFour.current).toBe(1) // Will, not Willow
+    expect(a.tc_ethan.current).toBe(2)
+    expect(a.tc_elm.current).toBe(1)
+    expect(a.tc_rocketExecutives.current).toBe(1)
+    expect(a.johtoPlaceCards.current).toBe(1)
+    expect(a.johtoForms).toMatchObject({ current: 2, target: 5 })
+  })
+
+  it('counts the Neo and HeartGold & SoulSilver sets', () => {
+    const a = byId(achievements([entry('neo1-1'), entry('neo4-1'), entry('col1-1')], sets))
+    expect(a.neoSets.current).toBe(2)
+    expect(a.hgssSets.current).toBe(1)
+  })
+
+  it('tags Johto’s achievements', () => {
+    const johto = filterAchievements(achievements([], sets), { tag: 'johto' })
+    expect(johto.length).toBeGreaterThan(80)
+    expect(johto.some((a) => a.sub === 'johtoTrainerCards')).toBe(true)
   })
 })

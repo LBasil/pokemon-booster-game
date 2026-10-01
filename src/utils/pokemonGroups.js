@@ -3,13 +3,9 @@
 // (achievements.items.<id>.title) and description naming the members
 // (achievements.desc.groups.<id>): change the list, change both texts.
 
-// Whole evolution lines (first stage to last) outside Kanto (Kanto: KANTO_LINES in kanto.js)
+// Whole evolution lines (first stage to last) outside Kanto and Johto
+// (KANTO_LINES in kanto.js, JOHTO_LINES in johto.js)
 export const FAMILIES = {
-  chikoritaLine: [152, 153, 154],
-  cyndaquilLine: [155, 156, 157],
-  totodileLine: [158, 159, 160],
-  mareepLine: [179, 180, 181],
-  larvitarLine: [246, 247, 248],
   treeckoLine: [252, 253, 254],
   torchicLine: [255, 256, 257],
   mudkipLine: [258, 259, 260],
@@ -118,15 +114,22 @@ export const JOHTO_GYMS = {
   risingBadge: [148, 230], // Clair
 }
 
-// Kanto's Elite Four (Red/Blue), then champions' teams (their games' final battle)
+// Kanto's Elite Four (Red/Blue), Johto's (Gold/Silver), then champions' teams (their games' final battle)
 export const ELITE_FOUR = {
   lorelei: [87, 91, 80, 124, 131],
   bruno: [95, 107, 106, 68],
   agatha: [94, 42, 93, 24],
   lance: [130, 148, 142, 149],
 }
+export const JOHTO_ELITE_FOUR = {
+  will: [178, 124, 103, 80],
+  johtoKoga: [168, 49, 205, 89, 169],
+  johtoBruno: [237, 106, 107, 95, 68],
+  karen: [197, 45, 94, 198, 229],
+}
 export const CHAMPIONS = {
   blue: [18, 65, 112, 130, 59, 103], // HeartGold/SoulSilver
+  lanceJohto: [130, 149, 142, 6], // Gold/Silver
   steven: [227, 344, 306, 346, 348, 376], // Ruby/Sapphire
   wallace: [321, 73, 272, 340, 130, 350], // Emerald
   cynthia: [442, 407, 423, 448, 350, 445], // Diamond/Pearl
@@ -145,10 +148,9 @@ export const RIVALS = {
   teamRocket: [23, 109, 52, 24, 110, 202], // Jessie, James and Meowth
 }
 
-// Places outside Kanto and their wild Pokémon (Gold/Silver, Ruby/Sapphire).
-// Kanto's: KANTO_ROUTES and KANTO_LANDMARKS in kanto.js
+// Places outside Kanto and Johto and their wild Pokémon (Ruby/Sapphire).
+// Kanto's and Johto's: kanto.js and johto.js
 export const PLACES = {
-  nationalPark: [123, 127, 12, 15, 48, 46],
   petalburgWoods: [265, 285, 287],
   meteorFalls: [337, 338, 371],
   route119: [349, 350],

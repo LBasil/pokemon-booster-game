@@ -220,9 +220,10 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `rarity.js` | `rarityBucket(label)` (**miroir** de `rarity_bucket()` en SQL), `BUCKETS`, `rarityTier` (3 niveaux visuels), `rarityRank`, `sortForReveal`, `bestPull` |
 | `collection.js` | `filterEntries`, `sortEntries`, `setProgress`, `collectionStats` (cartes, uniques, sets, valeur), `binderSlots`, `pokedexSlots`, `cardNumber` |
 | `profile.js` | `boostersOpened`, `packSummary` (nombre exact de boosters par mode), `RANKS` + `rankFor` (niveau), `rarityBreakdown`, `validateUsername` |
-| `achievements.js` | Les ~470 définitions (catégorie, `sub` = sous-catégorie, `tags` = régions du filtre), `collectorStats` (tout en une passe), `achievements()`, `nextUp`, `achievementProgress`, filtres, taux, tri des toasts |
-| `pokemonGroups.js` | Listes de numéros du Pokédex des succès « possède-les tous » : lignées, starters, légendaires, fabuleux, Ultra-Chimères, badges d'arène, Conseil 4, Maîtres, rivaux, lieux hors Kanto |
+| `achievements.js` | Les ~540 définitions (catégorie, `sub` = sous-catégorie, `tags` = régions du filtre), `collectorStats` (tout en une passe), `achievements()`, `nextUp`, `achievementProgress`, filtres, taux, tri des toasts |
+| `pokemonGroups.js` | Listes de numéros du Pokédex des succès « possède-les tous » : lignées, starters, légendaires, fabuleux, Ultra-Chimères, badges d'arène, Conseil 4, Maîtres, rivaux, lieux hors Kanto et Johto |
 | `kanto.js` | Données Gen 1 : lignées de Rouge/Bleu, solitaires, bébés, évolutions tardives, formes régionales (noms de cartes), routes et lieux (Pokémon sauvages, PokéAPI), villes et dresseurs (motifs sur les noms de cartes), premières séries |
+| `johto.js` | Données Gen 2, même modèle : lignées d'Or/Argent, solitaires, bébés, évolutions tardives, formes régionales, routes 29 à 46 et lieux (PokéAPI), lieux et dresseurs en cartes, séries Neo et HGSS |
 | `challenge.js` | Économie du Défi (**miroir** du SQL) : prix, recyclage (`recyclePreview` avec sélection, `duplicateGroups`), fabrication, récompense quotidienne, comptes à rebours UTC |
 | `minigame.js` | Règles de « Plus ou moins » (**miroir** de `minigame_rules()`) |
 | `electrodeFlip.js` | Règles d'« Électrode Shiny Flip » (**miroir** de `electrode_flip_rules()` / `electrode_flip_end()`) : points, niveau suivant, pièces, lignes sûres |

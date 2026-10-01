@@ -2215,6 +2215,234 @@
       },
       "impostor": {
         "title": "Ce n’est pas Chen !"
+      },
+      "sentretLine": {
+        "title": "Lignée de Fouinar"
+      },
+      "hoothootLine": {
+        "title": "Lignée de Noarfang"
+      },
+      "ledybaLine": {
+        "title": "Lignée de Coxyclaque"
+      },
+      "spinarakLine": {
+        "title": "Lignée de Migalos"
+      },
+      "chinchouLine": {
+        "title": "Lignée de Lanturn"
+      },
+      "togepiLine": {
+        "title": "Lignée de Togetic"
+      },
+      "natuLine": {
+        "title": "Lignée de Xatu"
+      },
+      "marillLine": {
+        "title": "Lignée d’Azumarill"
+      },
+      "hoppipLine": {
+        "title": "Lignée de Cotovol"
+      },
+      "sunkernLine": {
+        "title": "Lignée d’Héliatronc"
+      },
+      "wooperLine": {
+        "title": "Lignée de Maraiste"
+      },
+      "pinecoLine": {
+        "title": "Lignée de Foretress"
+      },
+      "snubbullLine": {
+        "title": "Lignée de Granbull"
+      },
+      "teddiursaLine": {
+        "title": "Lignée d’Ursaring"
+      },
+      "slugmaLine": {
+        "title": "Lignée de Volcaropod"
+      },
+      "swinubLine": {
+        "title": "Lignée de Cochignon"
+      },
+      "remoraidLine": {
+        "title": "Lignée d’Octillery"
+      },
+      "houndourLine": {
+        "title": "Lignée de Démolosse"
+      },
+      "phanpyLine": {
+        "title": "Lignée de Donphan"
+      },
+      "johtoLines10": {
+        "title": "Album de famille de Johto"
+      },
+      "johtoLines24": {
+        "title": "Toutes les lignées de Johto"
+      },
+      "johtoDex25": {
+        "title": "Débutant de Johto"
+      },
+      "johtoDex50": {
+        "title": "Dresseur de Johto"
+      },
+      "johtoSolos": {
+        "title": "Solitaires de Johto"
+      },
+      "johtoBabies": {
+        "title": "Pouponnière de Johto"
+      },
+      "johtoNewEvolutions": {
+        "title": "Évolutions tardives de Johto"
+      },
+      "johtoForms": {
+        "title": "Johto à l’étranger"
+      },
+      "route29": {
+        "title": "Route 29"
+      },
+      "route30": {
+        "title": "Route 30"
+      },
+      "route31": {
+        "title": "Route 31"
+      },
+      "route32": {
+        "title": "Route 32"
+      },
+      "route33": {
+        "title": "Route 33"
+      },
+      "route34": {
+        "title": "Route 34"
+      },
+      "route35": {
+        "title": "Route 35"
+      },
+      "route36": {
+        "title": "Route 36"
+      },
+      "route37": {
+        "title": "Route 37"
+      },
+      "route38": {
+        "title": "Route 38"
+      },
+      "route39": {
+        "title": "Route 39"
+      },
+      "route40": {
+        "title": "Route 40"
+      },
+      "route41": {
+        "title": "Route 41"
+      },
+      "route42": {
+        "title": "Route 42"
+      },
+      "route43": {
+        "title": "Route 43"
+      },
+      "route44": {
+        "title": "Route 44"
+      },
+      "route45": {
+        "title": "Route 45"
+      },
+      "route46": {
+        "title": "Route 46"
+      },
+      "sproutTower": {
+        "title": "Tour Chétiflor"
+      },
+      "ruinsOfAlph": {
+        "title": "Ruines d’Alpha"
+      },
+      "unionCave": {
+        "title": "Caves Jumelles"
+      },
+      "slowpokeWell": {
+        "title": "Puits Ramoloss"
+      },
+      "ilexForest": {
+        "title": "Bois aux Chênes"
+      },
+      "burnedTower": {
+        "title": "Tour Cendrée"
+      },
+      "tinTower": {
+        "title": "Tour Carillon"
+      },
+      "whirlIslands": {
+        "title": "Îles Tourbillon"
+      },
+      "mtMortar": {
+        "title": "Mont Creuset"
+      },
+      "lakeOfRage": {
+        "title": "Lac Colère"
+      },
+      "teamRocketHq": {
+        "title": "QG de la Team Rocket"
+      },
+      "icePath": {
+        "title": "Route de Glace"
+      },
+      "dragonsDen": {
+        "title": "Antre du Dragon"
+      },
+      "darkCave": {
+        "title": "Antre Noir"
+      },
+      "tohjoFalls": {
+        "title": "Chutes Tohjo"
+      },
+      "johtoRoutes": {
+        "title": "Toutes les routes de Johto"
+      },
+      "johtoLandmarks": {
+        "title": "Spéléologue de Johto"
+      },
+      "johtoPlaceCards": {
+        "title": "Johto en cartes"
+      },
+      "will": {
+        "title": "Clément"
+      },
+      "johtoKoga": {
+        "title": "Koga à Johto"
+      },
+      "johtoBruno": {
+        "title": "Aldo à Johto"
+      },
+      "karen": {
+        "title": "Marion"
+      },
+      "johtoEliteFour": {
+        "title": "La Ligue de Johto"
+      },
+      "lanceJohto": {
+        "title": "Maître Peter"
+      },
+      "tc_johtoGymLeaders": {
+        "title": "Champions de Johto dans le classeur"
+      },
+      "tc_johtoEliteFour": {
+        "title": "Le Conseil 4 de Johto en cartes"
+      },
+      "tc_ethan": {
+        "title": "L’aventure de Luth"
+      },
+      "tc_elm": {
+        "title": "Le labo du Prof. Orme"
+      },
+      "tc_rocketExecutives": {
+        "title": "Le retour de la Team Rocket"
+      },
+      "neoSets": {
+        "title": "L’ère Neo"
+      },
+      "hgssSets": {
+        "title": "Retour à Johto"
       }
     },
     "desc": {
@@ -2393,7 +2621,7 @@
         "pokemonMansion": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Goupix, Caninos, Ponyta, Tadmorv, Grotadmorv, Smogo, Smogogo et Magmar",
         "ceruleanCave": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Arbok, Raichu, Sablaireau, Grodoudou, Nosferalto, Parasect, Aéromite, Kadabra, Flagadoss, Magnéton, Dodrio, Hypnomade, Krabboss, Électrode, Ossatueur, Rhinoféros, Leveinard, Hypocéan, Poissoroy, Métamorph et Mewtwo",
         "victoryRoad": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Nosferapti, Nosferalto, Aéromite, Machoc, Machopeur, Racaillou, Gravalanch, Onix, Ossatueur et Sulfura",
-        "nationalPark": "Possède les Pokémon qu’on y trouve : Insécateur, Scarabrute, Papilusion, Dardargnan, Mimitoss et Paras",
+        "nationalPark": "Possède les Pokémon de son Concours de Capture d’Insecte dans Or et Argent : Insécateur, Scarabrute, Papilusion, Dardargnan, Mimitoss et Paras",
         "petalburgWoods": "Possède les Pokémon qu’on y trouve : Chenipotte, Balignon et Parecool",
         "meteorFalls": "Possède les Pokémon qu’on y trouve : Séléroc, Solaroc et Draby",
         "route119": "Possède les Pokémon qu’on y trouve : Barpau et Milobellus",
@@ -2482,7 +2710,67 @@
         "route24and25": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Chenipan, Chrysacier, Aspicot, Coconfort, Roucool, Mystherbe, Psykokwak, Abra, Chétiflor, Krabby et Poissirène",
         "rockTunnel": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Nosferapti, Machoc, Racaillou et Onix",
         "diglettsCave": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Taupiqueur et Triopikeur",
-        "mtSilver": "Possède les Pokémon qu’on y trouve dans Or et Argent : Nosferalto, Akwakwak, Ptitard, Têtarte, Gravalanch, Ponyta, Galopa, Doduo, Dodrio, Onix, Saquedeneu, Poissirène, Poissoroy, Magicarpe, Maraiste, Feuforêve, Farfuret, Ursaring, Donphan et Embrylex"
+        "mtSilver": "Possède les Pokémon qu’on y trouve dans Or et Argent : Nosferalto, Akwakwak, Ptitard, Têtarte, Gravalanch, Ponyta, Galopa, Doduo, Dodrio, Onix, Saquedeneu, Poissirène, Poissoroy, Magicarpe, Maraiste, Feuforêve, Farfuret, Ursaring, Donphan et Embrylex",
+        "sentretLine": "Possède toute la lignée : Fouinette et Fouinar",
+        "hoothootLine": "Possède toute la lignée : Hoothoot et Noarfang",
+        "ledybaLine": "Possède toute la lignée : Coxy et Coxyclaque",
+        "spinarakLine": "Possède toute la lignée : Mimigal et Migalos",
+        "chinchouLine": "Possède toute la lignée : Loupio et Lanturn",
+        "togepiLine": "Possède toute la lignée : Togepi et Togetic",
+        "natuLine": "Possède toute la lignée : Natu et Xatu",
+        "marillLine": "Possède toute la lignée : Marill et Azumarill",
+        "hoppipLine": "Possède toute la lignée : Granivol, Floravol et Cotovol",
+        "sunkernLine": "Possède toute la lignée : Tournegrin et Héliatronc",
+        "wooperLine": "Possède toute la lignée : Axoloto et Maraiste",
+        "pinecoLine": "Possède toute la lignée : Pomdepik et Foretress",
+        "snubbullLine": "Possède toute la lignée : Snubbull et Granbull",
+        "teddiursaLine": "Possède toute la lignée : Teddiursa et Ursaring",
+        "slugmaLine": "Possède toute la lignée : Limagma et Volcaropod",
+        "swinubLine": "Possède toute la lignée : Marcacrin et Cochignon",
+        "remoraidLine": "Possède toute la lignée : Rémoraid et Octillery",
+        "houndourLine": "Possède toute la lignée : Malosse et Démolosse",
+        "phanpyLine": "Possède toute la lignée : Phanpy et Donphan",
+        "johtoSolos": "Possède les 22 Pokémon de Johto qui n’évoluent pas dans Or et Argent, légendaires à part : Simularbre, Capumain, Yanma, Cornèbre, Feuforêve, Zarbi, Qulbutoké, Girafarig, Insolourdo, Scorplane, Qwilfish, Caratroc, Scarhino, Farfuret, Corayon, Cadoizo, Démanta, Airmure, Cerfrousse, Queulorior, Kapoera et Écrémeuh",
+        "johtoBabies": "Possède les bébés ajoutés plus tard aux Pokémon de Johto : Azurill, Okéoké, Manzaï et Babimanta",
+        "johtoNewEvolutions": "Possède les évolutions que les jeux suivants ont données aux Pokémon de Johto : Capidextre, Magirêve, Corboss, Dimoret, Togekiss, Yanmega, Scorvol, Mammochon, Corayôme, Cerbyllin, Ursaking, Farfurex, Qwilpik, Terraiste, Farigiraf et Deusolourdo",
+        "route29": "Possède les Pokémon qu’on y trouve dans Or et Argent : Roucool, Rattata, Fouinette et Hoothoot",
+        "route30": "Possède les Pokémon qu’on y trouve dans Or et Argent : Chenipan, Chrysacier, Aspicot, Coconfort, Roucool, Rattata, Ptitard, Têtarte, Magicarpe, Hoothoot, Coxy et Mimigal",
+        "route31": "Possède les Pokémon qu’on y trouve dans Or et Argent : Chenipan, Chrysacier, Aspicot, Coconfort, Roucool, Rattata, Ptitard, Têtarte, Chétiflor, Magicarpe, Hoothoot, Coxy et Mimigal",
+        "route32": "Possède les Pokémon qu’on y trouve dans Or et Argent : Rattata, Abo, Nosferapti, Chétiflor, Tentacool, Tentacruel, Magicarpe, Wattouat, Granivol, Axoloto, Maraiste et Qwilfish",
+        "route33": "Possède les Pokémon qu’on y trouve dans Or et Argent : Rattata, Piafabec, Abo, Nosferapti et Granivol",
+        "route34": "Possède les Pokémon qu’on y trouve dans Or et Argent : Rattata, Abra, Tentacool, Tentacruel, Soporifik, Krabby, Krabboss, Stari, Métamorph et Corayon",
+        "route35": "Possède les Pokémon qu’on y trouve dans Or et Argent : Roucool, Nidoran♀, Nidoran♂, Psykokwak, Akwakwak, Ptitard, Abra, Soporifik, Magicarpe, Métamorph, Hoothoot et Yanma",
+        "route36": "Possède les Pokémon qu’on y trouve dans Or et Argent : Roucool, Nidoran♀, Nidoran♂, Goupix, Caninos, Hoothoot, Simularbre et Cerfrousse",
+        "route37": "Possède les Pokémon qu’on y trouve dans Or et Argent : Roucool, Roucoups, Goupix, Caninos, Hoothoot, Coxy, Mimigal et Cerfrousse",
+        "route38": "Possède les Pokémon qu’on y trouve dans Or et Argent : Rattata, Rattatac, Miaouss, Magnéti, Canarticho, Tauros, Snubbull et Écrémeuh",
+        "route39": "Possède les Pokémon qu’on y trouve dans Or et Argent : Rattata, Rattatac, Miaouss, Magnéti, Canarticho, Tauros et Écrémeuh",
+        "route40": "Possède les Pokémon qu’on y trouve dans Or et Argent : Tentacool, Tentacruel, Krabby, Krabboss, Stari et Corayon",
+        "route41": "Possède les Pokémon qu’on y trouve dans Or et Argent : Tentacool, Tentacruel, Kokiyas, Loupio, Lanturn et Démanta",
+        "route42": "Possède les Pokémon qu’on y trouve dans Or et Argent : Piafabec, Nosferapti, Férosinge, Poissirène, Poissoroy, Magicarpe, Wattouat et Lainergie",
+        "route43": "Possède les Pokémon qu’on y trouve dans Or et Argent : Roucoups, Mimitoss, Ptitard, Magicarpe, Noarfang, Wattouat, Lainergie et Girafarig",
+        "route44": "Possède les Pokémon qu’on y trouve dans Or et Argent : Ptitard, Têtarte, Chétiflor, Boustiflor, Excelangue, Saquedeneu, Magicarpe et Rémoraid",
+        "route45": "Possède les Pokémon qu’on y trouve dans Or et Argent : Racaillou, Gravalanch, Magicarpe, Minidraco, Draco, Scorplane, Teddiursa, Airmure et Phanpy",
+        "route46": "Possède les Pokémon qu’on y trouve dans Or et Argent : Rattata, Piafabec, Rondoudou et Racaillou",
+        "sproutTower": "Possède les Pokémon qu’on y trouve dans Or et Argent : Rattata et Fantominus",
+        "ruinsOfAlph": "Possède les Pokémon qu’on y trouve dans Or et Argent : Ptitard, Magicarpe, Natu, Axoloto, Maraiste, Zarbi et Queulorior",
+        "unionCave": "Possède les Pokémon qu’on y trouve dans Or et Argent : Rattata, Rattatac, Sabelette, Nosferapti, Nosferalto, Tentacool, Tentacruel, Racaillou, Onix, Krabby, Krabboss, Poissirène, Poissoroy, Stari, Magicarpe, Lokhlass, Axoloto, Maraiste et Corayon",
+        "slowpokeWell": "Possède les Pokémon qu’on y trouve dans Or et Argent : Nosferapti, Nosferalto, Ramoloss, Flagadoss, Poissirène, Poissoroy et Magicarpe",
+        "ilexForest": "Possède les Pokémon qu’on y trouve dans Or et Argent : Chenipan, Chrysacier, Aspicot, Coconfort, Nosferapti, Mystherbe, Paras, Psykokwak, Akwakwak, Ptitard et Magicarpe",
+        "burnedTower": "Possède les Pokémon qu’on y trouve dans Or et Argent : Rattata, Rattatac, Nosferapti, Smogo et Magmar",
+        "tinTower": "Possède les Pokémon qu’on y trouve dans Or et Argent : Rattata, Fantominus et Ho-Oh",
+        "whirlIslands": "Possède les Pokémon qu’on y trouve dans Or et Argent : Nosferapti, Nosferalto, Tentacool, Tentacruel, Otaria, Krabby, Krabboss, Hypotrempe, Hypocéan et Lugia",
+        "mtMortar": "Possède les Pokémon qu’on y trouve dans Or et Argent : Rattata, Rattatac, Nosferapti, Nosferalto, Machoc, Machopeur, Racaillou, Gravalanch, Poissirène, Poissoroy, Magicarpe et Marill",
+        "lakeOfRage": "Possède les Pokémon qu’on y trouve dans Or et Argent : Magicarpe et Léviator",
+        "teamRocketHq": "Possède les Pokémon qu’on y trouve dans Or et Argent : Racaillou, Voltorbe, Électrode et Smogo",
+        "icePath": "Possède les Pokémon qu’on y trouve dans Or et Argent : Nosferapti, Nosferalto, Lippoutou, Marcacrin et Cadoizo",
+        "dragonsDen": "Possède les Pokémon qu’on y trouve dans Or et Argent : Magicarpe, Minidraco et Draco",
+        "darkCave": "Possède les Pokémon qu’on y trouve dans Or et Argent : Nosferapti, Nosferalto, Racaillou, Gravalanch, Poissirène, Poissoroy, Magicarpe, Qulbutoké et Insolourdo",
+        "tohjoFalls": "Possède les Pokémon qu’on y trouve dans Or et Argent : Rattata, Rattatac, Nosferapti, Nosferalto, Ramoloss, Poissirène, Poissoroy et Magicarpe",
+        "will": "L’équipe de Clément, membre du Conseil 4 dans Or et Argent : possède Xatu, Lippoutou, Noadkoko et Flagadoss",
+        "johtoKoga": "L’équipe de Koga, membre du Conseil 4 dans Or et Argent : possède Migalos, Aéromite, Foretress, Grotadmorv et Nostenfer",
+        "johtoBruno": "L’équipe d’Aldo, membre du Conseil 4 dans Or et Argent : possède Kapoera, Kicklee, Tygnon, Onix et Mackogneur",
+        "karen": "L’équipe de Marion, membre du Conseil 4 dans Or et Argent : possède Noctali, Rafflesia, Ectoplasma, Cornèbre et Démolosse",
+        "lanceJohto": "L’équipe de Peter, maître de la Ligue (Or et Argent) : possède Léviator, Dracolosse, Ptéra et Dracaufeu"
       },
       "families": "Complète {count} lignée d’évolution | Complète {count} lignées d’évolution",
       "allStarters": "Possède les {count} Pokémon de départ, de Kanto à Paldea",
@@ -2529,22 +2817,41 @@
       "tc_bill": "Possède une carte de Léo, le Pokémaniac de la route 25",
       "tc_teamRocket": "Possède {count} cartes différentes de la Team Rocket (leurs Pokémon, leurs admins, leurs coups tordus)",
       "originalSets": "Possède une carte de chacune des premières séries : Set de Base, Jungle, Fossile, Team Rocket, Gym Heroes et Gym Challenge",
-      "impostor": "Possède une carte Imposteur Professeur Chen"
+      "impostor": "Possède une carte Imposteur Professeur Chen",
+      "johtoLines": "Complète {count} lignées d’évolution de Johto",
+      "johtoDex": "Possède {count} Pokémon différents de Johto (n° 152 à 251)",
+      "johtoForms": "Possède les 5 formes régionales de Pokémon de Johto : Corayon de Galar, Qwilfish de Hisui, Farfuret de Hisui, Typhlosion de Hisui et Axoloto de Paldea",
+      "johtoRoutes": "Possède tous les Pokémon de toutes les routes de Johto, de la route 29 à la route 46",
+      "johtoLandmarks": "Possède tous les Pokémon des grottes, forêts, tours et bâtiments de Johto",
+      "johtoPlaceCards": "Possède les lieux de Johto imprimés en cartes Stade : Tour Chétiflor, Ruines d’Alpha, Tour Cendrée et Tour Radio (aucune ville de Johto n’a de carte)",
+      "johtoEliteFour": "Complète les équipes du Conseil 4 de Johto (Or et Argent)",
+      "tc_johtoGymLeaders": "Possède une carte de chaque champion d’arène de Johto qui en a une : Albert, Blanche, Mortimer et Jasmine (pas encore de carte d’Hector, Chuck, Frédo ou Sandra)",
+      "tc_johtoEliteFour": "Possède une carte de chaque membre du Conseil 4 de Johto : Clément, Koga, Aldo et Marion",
+      "tc_ethan": "Possède {count} cartes différentes au nom de Luth, comme Typhlosion de Luth",
+      "tc_elm": "Possède {count} cartes différentes du Professeur Orme",
+      "tc_rocketExecutives": "Possède une carte de chaque admin de la Team Rocket de retour à Johto : Amos, Ariane, Lance et Lambda",
+      "neoSets": "Possède une carte de chaque série Neo, les premières à Johto : Neo Genesis, Neo Discovery, Neo Revelation et Neo Destiny",
+      "hgssSets": "Possède une carte de chaque série HeartGold SoulSilver : HeartGold SoulSilver, Déchaînement, Indomptable, Triomphe et L’Appel des Légendes"
     },
     "subs": {
       "allLines": "Toutes régions",
       "kantoLines": "Lignées de Kanto (Rouge et Bleu)",
       "kantoMore": "Kanto, au-delà des lignées",
+      "johtoLines": "Lignées de Johto (Or et Argent)",
+      "johtoMore": "Johto, au-delà des lignées",
       "otherLines": "Autres régions",
       "kantoGyms": "Arènes de Kanto",
       "johtoGyms": "Arènes de Johto",
       "league": "Ligue Pokémon",
       "rivals": "Rivaux et héros",
       "trainerCards": "Dresseurs de Kanto en cartes",
+      "johtoTrainerCards": "Dresseurs de Johto en cartes",
       "allPlaces": "Tous les lieux",
       "kantoRoutes": "Routes de Kanto (Rouge et Bleu)",
       "kantoLandmarks": "Grottes, forêts et bâtiments de Kanto",
       "kantoCities": "Villes de Kanto en cartes",
+      "johtoRoutes": "Routes de Johto (Or et Argent)",
+      "johtoLandmarks": "Grottes, tours et bâtiments de Johto",
       "otherPlaces": "Autres régions"
     }
   },
