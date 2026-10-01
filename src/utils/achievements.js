@@ -38,6 +38,7 @@ import hoenn from '@/utils/hoenn'
 import sinnoh from '@/utils/sinnoh'
 import unova from '@/utils/unova'
 import kalos from '@/utils/kalos'
+import alola from '@/utils/alola'
 
 // Achievements are computed from the (unlimited) collection alone, so they
 // work on public profiles too, and a newly added achievement unlocks at once
@@ -277,7 +278,7 @@ const kanto = { tags: ['kanto'] }
 // region, under subcategories named after the region (<region>Lines,
 // <region>More, <region>Gyms, <region>TrainerCards, <region>Routes,
 // <region>Landmarks, <region>Cities).
-const REGION_FOCUS = [johto, hoenn, sinnoh, unova, kalos]
+const REGION_FOCUS = [johto, hoenn, sinnoh, unova, kalos, alola]
 const lineIds = (focus) => Object.keys(focus.lines)
 const placesOf = (focus) => ({ ...focus.routes, ...focus.landmarks })
 const setsOwned = (ids) => (s) => ids.filter((id) => s.perSet.has(id)).length

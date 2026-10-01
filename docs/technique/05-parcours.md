@@ -431,7 +431,7 @@ sequenceDiagram
 ## 7. Succès
 
 Définitions : [src/utils/achievements.js](../../src/utils/achievements.js)
-(~970, 20 catégories, sous-catégories `sub` dans les grosses, tags de
+(~1070, 20 catégories, sous-catégories `sub` dans les grosses, tags de
 région `tags` pour le filtre « Région », `?region=`). Les groupes de Pokémon (lignées d'évolution,
 légendaires et fabuleux, équipes des champions d'arène de Kanto et Johto,
 Conseil 4, Maîtres de la Ligue, rivaux et héros, lieux et leurs Pokémon
@@ -461,7 +461,13 @@ cartes, séries Noir & Blanc, Plasma, Foudre Noire et Flamme Blanche) et
 Kalos ([src/utils/kalos.js](../../src/utils/kalos.js) : lignées de X/Y,
 solitaires, fossiles, routes 2 à 22 (`kalosRoute<n>`), Forêt de
 Neuvartault, Grotte Coda et autres lieux, badges, Conseil 4, Lysandre et
-AZ, Dianthéa et Team Flare en cartes, séries XY et Méga-Évolution). Équipes et noms officiels vérifiés sur PokéAPI et Poképédia ; leur
+AZ, Dianthéa et Team Flare en cartes, séries XY et Méga-Évolution) et
+Alola ([src/utils/alola.js](../../src/utils/alola.js) : lignées de
+Soleil/Lune, solitaires, Pokémon Dominants, routes 1 à 17
+(`alolaRoute<n>`), Colline Dicarat, Grand Canyon de Poni et autres lieux,
+grandes épreuves des doyens (Alola n'a pas d'arènes), Conseil 4,
+Elsa-Mina, Guzma et Euphorbe, doyens, capitaines, Lilie, Fondation Æther
+et Team Skull en cartes, séries Soleil et Lune). Équipes et noms officiels vérifiés sur PokéAPI et Poképédia ; leur
 description nomme les membres (`achievements.desc.groups.<id>`), donc
 changer une liste = changer ses deux textes. **Calculés dans le navigateur, par mode.** Le
 Défi est mis en avant, c'est celui qui compte.

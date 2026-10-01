@@ -8,7 +8,8 @@ import hoenn from './hoenn'
 import sinnoh from './sinnoh'
 import unova from './unova'
 import kalos from './kalos'
-import { LEGENDARIES, LEGENDS, MYTHICALS } from './pokemonGroups'
+import alola from './alola'
+import { LEGENDARIES, LEGENDS, MYTHICALS, ULTRA_BEASTS } from './pokemonGroups'
 
 const card = (id, fields = {}) => ({
   id,
@@ -410,6 +411,13 @@ describe('no duplicates', () => {
     const all = [...lines, ...kalos.extras.kalosSolos, ...legends, ...sylveon].sort((a, b) => a - b)
     expect(all).toEqual(Array.from({ length: 72 }, (_, i) => i + 650))
   })
+
+  it('split every Alola Pokémon into lines, loners, legends and Ultra Beasts', () => {
+    const lines = Object.values(alola.lines).flat()
+    const legends = [...LEGENDARIES, ...MYTHICALS, ...ULTRA_BEASTS].filter((n) => n >= 722 && n <= 809)
+    const all = [...lines, ...alola.extras.alolaSolos, ...legends].sort((a, b) => a - b)
+    expect(all).toEqual(Array.from({ length: 88 }, (_, i) => i + 722))
+  })
 })
 
 describe('Kanto', () => {
@@ -644,5 +652,38 @@ describe('Kalos', () => {
     const a = byId(achievements([entry('xy1-1'), entry('xy5-1'), entry('xy11-1'), entry('me3-1')], sets))
     expect(a.xySets.current).toBe(2) // Primal Clash is Hoenn's
     expect(a.megaSets.current).toBe(1)
+  })
+})
+
+describe('Alola', () => {
+  const dex = (...numbers) => numbers.map((n) => entry(`sm1-${n}`, { national_pokedex_number: n }))
+  const named = (...names) => names.map((name, i) => entry(`sm3-${i}`, { name }))
+
+  it('counts complete Alola lines, grand trials, the League and the villains', () => {
+    const a = byId(achievements(dex(731, 732, 733, 56, 296, 739, 227, 733, 630, 169, 741, 768, 168, 284, 212, 127), sets))
+    expect(a.pikipekLine).toMatchObject({ unlocked: true, sub: 'alolaLines', tags: ['alola'] })
+    expect(a.rowletLine.sub).toBe('alolaLines') // moved from the other regions' lines
+    expect(a.melemeleTrial).toMatchObject({ unlocked: true, sub: 'alolaGyms' })
+    expect(a.kahili.unlocked).toBe(true)
+    expect(a.guzma.unlocked).toBe(true)
+    expect(a.alolaSolos.current).toBe(1) // Oricorio
+    expect(a.alolaDex25.current).toBe(6)
+  })
+
+  it('reads Alola trainers’ and places’ cards from their names', () => {
+    const cards = named('Hala', 'Guzma & Hala', 'Olivia', 'Mallow & Lana', "Lillie's Full Force", "Lillie's Clefairy ex", 'Gladion', 'Faba', 'Aether Paradise Conservation Area', 'Po Town', 'Team Skull Grunt', 'Halan Candy')
+    const a = byId(achievements(cards, sets))
+    expect(a.tc_alolaKahunas.current).toBe(2) // Hala (twice) and Olivia
+    expect(a.tc_alolaCaptains.current).toBe(2) // Mallow and Lana on one card
+    expect(a.tc_lillie.current).toBe(2)
+    expect(a.tc_alolaFriends.current).toBe(1)
+    expect(a.tc_aether.current).toBe(2) // Faba, Aether Paradise
+    expect(a.tc_teamSkull.current).toBe(3) // Guzma & Hala, Po Town, the grunt
+    expect(a.alolaPlaceCards.current).toBe(2)
+  })
+
+  it('counts the Sun & Moon sets', () => {
+    const a = byId(achievements([entry('sm1-1'), entry('sm12-1'), entry('sm115-1'), entry('sm35-1')], sets))
+    expect(a.smSets.current).toBe(2) // Hidden Fates and Shining Legends aside
   })
 })

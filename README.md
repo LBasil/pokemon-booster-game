@@ -102,9 +102,9 @@ How it works inside (every table, RPC and flow, in French):
   touch screens, drops the 3D flip and the glow layers that stuttered on
   phones), and an
   "install the app" button.
-- **Achievements**: ~970 of them in 20 categories (boosters, luck, pulls, sets,
+- **Achievements**: ~1070 of them in 20 categories (boosters, luck, pulls, sets,
   Pokédex regions, starters, evolution lines, legends and mythicals,
-  famous trainers (gym badges = each Kanto to Kalos gym leader's team, the
+  famous trainers (gym badges = each Kanto to Kalos gym leader's team, Alola's grand trials, the
   Pokémon League, rivals & heroes, Kanto's trainers on their own cards),
   places, types, mechanics, treasure, illustrators,
   subsets, daily streaks, a challenge-only "coins & trades" one, a few
@@ -142,7 +142,11 @@ How it works inside (every table, RPC and flow, in French):
   well: X/Y lines, loners, fossils, Routes 2 to 22, Santalune Forest,
   Terminus Cave and the other caves, gym badges, Elite Four, Lysandre and
   AZ, Diantha and Team Flare on cards, the XY sets and the Mega Evolution
-  series. Data for a new
+  series. **Alola (Gen 7)** too: Sun/Moon lines, loners, the trials' totems,
+  Routes 1 to 17, Ten Carat Hill, Vast Poni Canyon and the other places, the
+  kahunas' grand trials, Elite Four, Lusamine, Guzma and Kukui, kahunas,
+  captains, Lillie, the Aether Foundation and Team Skull on cards, the Sun &
+  Moon sets. Data for a new
   region: `node scripts/region-tools.mjs` (PokéAPI, dev only).
   A Steam-style **"Achievement unlocked" pop-up** (with a chime) shows at the
   end of an opening — never mid-reveal, so nothing is spoiled — and each

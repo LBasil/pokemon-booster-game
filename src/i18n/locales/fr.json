@@ -3733,6 +3733,297 @@
       },
       "megaSets": {
         "title": "Retour à Kalos"
+      },
+      "pikipekLine": {
+        "title": "Lignée de Bazoucan"
+      },
+      "yungoosLine": {
+        "title": "Lignée d’Argouste"
+      },
+      "grubbinLine": {
+        "title": "Lignée de Lucanon"
+      },
+      "crabrawlerLine": {
+        "title": "Lignée de Crabominable"
+      },
+      "cutieflyLine": {
+        "title": "Lignée de Rubombelle"
+      },
+      "rockruffLine": {
+        "title": "Lignée de Lougaroc"
+      },
+      "mareanieLine": {
+        "title": "Lignée de Prédastérie"
+      },
+      "mudbrayLine": {
+        "title": "Lignée de Bourrinos"
+      },
+      "dewpiderLine": {
+        "title": "Lignée de Tarenbulle"
+      },
+      "fomantisLine": {
+        "title": "Lignée de Floramantis"
+      },
+      "morelullLine": {
+        "title": "Lignée de Lampignon"
+      },
+      "salanditLine": {
+        "title": "Lignée de Malamandre"
+      },
+      "stuffulLine": {
+        "title": "Lignée de Chelours"
+      },
+      "bounsweetLine": {
+        "title": "Lignée de Sucreine"
+      },
+      "wimpodLine": {
+        "title": "Lignée de Sarmuraï"
+      },
+      "sandygastLine": {
+        "title": "Lignée de Trépassable"
+      },
+      "alolaRoute1": {
+        "title": "Route 1 d’Alola"
+      },
+      "alolaRoute2": {
+        "title": "Route 2 d’Alola"
+      },
+      "alolaRoute3": {
+        "title": "Route 3 d’Alola"
+      },
+      "alolaRoute4": {
+        "title": "Route 4 d’Alola"
+      },
+      "alolaRoute5": {
+        "title": "Route 5 d’Alola"
+      },
+      "alolaRoute6": {
+        "title": "Route 6 d’Alola"
+      },
+      "alolaRoute7": {
+        "title": "Route 7 d’Alola"
+      },
+      "alolaRoute8": {
+        "title": "Route 8 d’Alola"
+      },
+      "alolaRoute9": {
+        "title": "Route 9 d’Alola"
+      },
+      "alolaRoute10": {
+        "title": "Route 10 d’Alola"
+      },
+      "alolaRoute11": {
+        "title": "Route 11 d’Alola"
+      },
+      "alolaRoute12": {
+        "title": "Route 12 d’Alola"
+      },
+      "alolaRoute13": {
+        "title": "Route 13 d’Alola"
+      },
+      "alolaRoute14": {
+        "title": "Route 14 d’Alola"
+      },
+      "alolaRoute15": {
+        "title": "Route 15 d’Alola"
+      },
+      "alolaRoute16": {
+        "title": "Route 16 d’Alola"
+      },
+      "alolaRoute17": {
+        "title": "Route 17 d’Alola"
+      },
+      "kalaeBay": {
+        "title": "Baie de Kala’e"
+      },
+      "melemeleSea": {
+        "title": "Mer de Mele-Mele"
+      },
+      "tenCaratHill": {
+        "title": "Colline Dicarat"
+      },
+      "hauoliCemetery": {
+        "title": "Cimetière d’Ekaeka"
+      },
+      "melemeleMeadow": {
+        "title": "Jardin de Mele-Mele"
+      },
+      "seawardCave": {
+        "title": "Grotte Verlamer"
+      },
+      "hanoBeach": {
+        "title": "Plage Hano-Hano"
+      },
+      "memorialHill": {
+        "title": "Colline Memento"
+      },
+      "paniolaRanch": {
+        "title": "Ranch Ohana"
+      },
+      "welaVolcanoPark": {
+        "title": "Parc Volcanique"
+      },
+      "brookletHill": {
+        "title": "Colline Clapotis"
+      },
+      "lushJungle": {
+        "title": "Jungle Sombrefeuille"
+      },
+      "akalaOutskirts": {
+        "title": "Côte Reculée d’Akala"
+      },
+      "diglettsTunnel": {
+        "title": "Tunnel Taupiqueur"
+      },
+      "secludedShore": {
+        "title": "Côte Sauvage"
+      },
+      "hainaDesert": {
+        "title": "Désert Haina"
+      },
+      "ulaulaMeadow": {
+        "title": "Jardin d’Ula-Ula"
+      },
+      "malieGarden": {
+        "title": "Parc de Malié"
+      },
+      "mountHokulani": {
+        "title": "Mont Hokulani"
+      },
+      "blushMountain": {
+        "title": "Mont Ardent"
+      },
+      "mountLanakila": {
+        "title": "Mont Lanakila"
+      },
+      "poniMeadow": {
+        "title": "Jardin de Poni"
+      },
+      "poniWilds": {
+        "title": "Prairie de Poni"
+      },
+      "ancientPoniPath": {
+        "title": "Vieille Route"
+      },
+      "poniBreakerCoast": {
+        "title": "Récif de Poni"
+      },
+      "poniGrove": {
+        "title": "Forêt de Poni"
+      },
+      "poniPlains": {
+        "title": "Plaine de Poni"
+      },
+      "poniGauntlet": {
+        "title": "Chemin du Défi"
+      },
+      "vastPoniCanyon": {
+        "title": "Grand Canyon de Poni"
+      },
+      "resolutionCave": {
+        "title": "Caverne Coda"
+      },
+      "exeggutorIsland": {
+        "title": "Île Noadkoko"
+      },
+      "verdantCavern": {
+        "title": "Grotte Verdoyante"
+      },
+      "thriftyMegamart": {
+        "title": "Ancien site Bradley Prix"
+      },
+      "alolaSolos": {
+        "title": "Solitaires d’Alola"
+      },
+      "alolaTotems": {
+        "title": "Chasseur de Dominants"
+      },
+      "alolaLines10": {
+        "title": "Album de famille d’Alola"
+      },
+      "alolaLines20": {
+        "title": "Toutes les lignées d’Alola"
+      },
+      "alolaDex25": {
+        "title": "Débutant d’Alola"
+      },
+      "alolaDex50": {
+        "title": "Dresseur d’Alola"
+      },
+      "melemeleTrial": {
+        "title": "Grande épreuve de Mele-Mele"
+      },
+      "akalaTrial": {
+        "title": "Grande épreuve d’Akala"
+      },
+      "ulaulaTrial": {
+        "title": "Grande épreuve d’Ula-Ula"
+      },
+      "poniTrial": {
+        "title": "Grande épreuve de Poni"
+      },
+      "alolaBadges": {
+        "title": "Le tour des îles"
+      },
+      "hala": {
+        "title": "Pectorius"
+      },
+      "olivia": {
+        "title": "Alyxia"
+      },
+      "acerola": {
+        "title": "Margie"
+      },
+      "kahili": {
+        "title": "Kahili"
+      },
+      "alolaEliteFour": {
+        "title": "La Ligue d’Alola"
+      },
+      "lusamine": {
+        "title": "Elsa-Mina, présidente d’Æther"
+      },
+      "guzma": {
+        "title": "Guzma, chef de la Team Skull"
+      },
+      "kukui": {
+        "title": "Le défi du Professeur Euphorbe"
+      },
+      "alolaRoutes": {
+        "title": "Toutes les routes d’Alola"
+      },
+      "alolaLandmarks": {
+        "title": "Explorateur d’Alola"
+      },
+      "alolaPlaceCards": {
+        "title": "Alola en cartes"
+      },
+      "tc_alolaKahunas": {
+        "title": "Les doyens dans le classeur"
+      },
+      "tc_alolaCaptains": {
+        "title": "Les capitaines en cartes"
+      },
+      "tc_alolaEliteFour": {
+        "title": "Le Conseil 4 d’Alola en cartes"
+      },
+      "tc_kukui": {
+        "title": "Le labo du Prof. Euphorbe"
+      },
+      "tc_lillie": {
+        "title": "Le voyage de Lilie"
+      },
+      "tc_alolaFriends": {
+        "title": "Amis des îles"
+      },
+      "tc_aether": {
+        "title": "Fondation Æther"
+      },
+      "tc_teamSkull": {
+        "title": "Le style Team Skull"
+      },
+      "smSets": {
+        "title": "L’ère Soleil et Lune"
       }
     },
     "desc": {
@@ -4410,7 +4701,86 @@
         "wikstrom": "L’équipe de Thyméo, membre du Conseil 4 dans X et Y : possède Trousselin, Exagide, Tarinorme et Cizayox",
         "drasna": "L’équipe de Dracéna, membre du Conseil 4 dans X et Y : possède Kravarech, Bruyverne, Altaria et Drakkarmin",
         "lysandre": "L’équipe de Lysandre lors de son dernier combat dans X et Y : possède Shaofouine, Némélios, Corboss et Léviator",
-        "az": "L’équipe d’AZ quand il t’affronte dans X et Y : possède Chartor, Golemastoc et Cryptéro"
+        "az": "L’équipe d’AZ quand il t’affronte dans X et Y : possède Chartor, Golemastoc et Cryptéro",
+        "pikipekLine": "Possède toute la lignée : Picassaut, Piclairon et Bazoucan",
+        "yungoosLine": "Possède toute la lignée : Manglouton et Argouste",
+        "grubbinLine": "Possède toute la lignée : Larvibule, Chrysapile et Lucanon",
+        "crabrawlerLine": "Possède toute la lignée : Crabagarre et Crabominable",
+        "cutieflyLine": "Possède toute la lignée : Bombydou et Rubombelle",
+        "rockruffLine": "Possède toute la lignée : Rocabot et Lougaroc",
+        "mareanieLine": "Possède toute la lignée : Vorastérie et Prédastérie",
+        "mudbrayLine": "Possède toute la lignée : Tiboudet et Bourrinos",
+        "dewpiderLine": "Possède toute la lignée : Araqua et Tarenbulle",
+        "fomantisLine": "Possède toute la lignée : Mimantis et Floramantis",
+        "morelullLine": "Possède toute la lignée : Spododo et Lampignon",
+        "salanditLine": "Possède toute la lignée : Tritox et Malamandre",
+        "stuffulLine": "Possède toute la lignée : Nounourson et Chelours",
+        "bounsweetLine": "Possède toute la lignée : Croquine, Candine et Sucreine",
+        "wimpodLine": "Possède toute la lignée : Sovkipou et Sarmuraï",
+        "sandygastLine": "Possède toute la lignée : Bacabouh et Trépassable",
+        "alolaRoute1": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Chenipan, Chrysacier, Rattata, Miaouss, Tentacool, Ramoloss, Magnéti, Tadmorv, Coxy, Mimigal, Pichu, Goélise, Manzaï, Goinfrex, Écayon, Picassaut, Manglouton et Larvibule",
+        "alolaRoute2": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattata, Piafabec, Miaouss, Caninos, Abra, Soporifik, Queulorior, Manglouton et Bombydou",
+        "alolaRoute3": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattata, Piafabec, Férosinge, Cadoizo, Draby, Manglouton et Bombydou",
+        "alolaRoute4": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattata, Évoli, Toudoudou, Ponchiot, Picassaut, Manglouton, Larvibule et Tiboudet",
+        "alolaRoute5": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Chenipan, Chrysacier, Papilusion, Ponchiot, Picassaut, Larvibule et Mimantis",
+        "alolaRoute6": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattata, Évoli, Toudoudou, Ponchiot, Picassaut, Manglouton, Larvibule, Plumeline et Tiboudet",
+        "alolaRoute7": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Tentacool, Stari, Magicarpe, Goélise, Écayon, Froussardine et Concombaffe",
+        "alolaRoute8": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattata, Magicarpe, Loupio, Braisillon, Piclairon, Manglouton, Froussardine, Tritox, Nounourson et Sovkipou",
+        "alolaRoute9": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Magicarpe, Corayon, Lovdisc et Froussardine",
+        "alolaRoute10": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattatac, Rapasdepic, Coxyclaque, Migalos, Airmure, Pandespiègle et Argouste",
+        "alolaRoute11": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattatac, Paras, Coxyclaque, Migalos, Pandespiègle, Piclairon, Argouste, Spododo et Dodoala",
+        "alolaRoute12": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Racaillou, Élekid, Chartor et Tiboudet",
+        "alolaRoute13": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Magicarpe, Froussardine et Denticrisse",
+        "alolaRoute14": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattatac, Sabelette, Goupix, Tentacool, Magicarpe, Bekipan, Absol, Stalgamin, Écayon, Argouste, Froussardine et Denticrisse",
+        "alolaRoute15": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattatac, Tentacool, Ramoloss, Magicarpe, Bekipan, Écayon, Argouste, Froussardine et Denticrisse",
+        "alolaRoute16": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattatac, Ramoloss, Bekipan et Argouste",
+        "alolaRoute17": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattatac, Rapasdepic, Gravalanch, Coxyclaque, Migalos, Airmure, Pandespiègle, Argouste et Katagami",
+        "kalaeBay": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattata, Tentacool, Ramoloss, Kokiyas, Magicarpe, Goélise, Draby, Écayon, Manglouton et Froussardine",
+        "melemeleSea": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Tentacool, Magicarpe, Corayon, Goélise, Lovdisc, Écayon et Froussardine",
+        "tenCaratHill": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Nosferapti, Taupiqueur, Machoc, Spinda, Nodulithe, Strassie, Rocabot et Necrozma",
+        "hauoliCemetery": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Nosferapti, Fantominus, Feuforêve et Baudrive",
+        "melemeleMeadow": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Chenipan, Chrysacier, Papilusion, Doudouvet, Chlorobule, Plumeline, Bombydou et Mouscoto",
+        "seawardCave": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Nosferapti, Taupiqueur, Psykokwak, Magicarpe et Barloche",
+        "hanoBeach": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Tentacool, Stari, Goélise, Écayon, Bacabouh et Concombaffe",
+        "memorialHill": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Nosferapti, Fantominus, Brocélôme et Câblifère",
+        "paniolaRanch": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Tauros, Écrémeuh, Ponchiot et Tiboudet",
+        "welaVolcanoPark": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Osselait, Kangourex, Magby, Passerouge, Tritox et Zéroïd",
+        "brookletHill": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Paras, Psykokwak, Ptitard, Tentacool, Poissirène, Magicarpe, Goélise, Arakdo, Barpau, Écayon, Ponchiot, Mamanbo, Froussardine, Araqua et Spododo",
+        "lushJungle": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Chenipan, Chrysacier, Nosferapti, Paras, Taupiqueur, Scarabrute, Manzaï, Piclairon, Mimantis, Spododo, Croquine, Guérilande, Gouroutan, Quartermac et Câblifère",
+        "akalaOutskirts": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattatac, Goélise, Tarinor, Argouste et Nounourson",
+        "diglettsTunnel": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Nosferapti, Taupiqueur et Zéroïd",
+        "secludedShore": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Tentacool, Magicarpe, Bekipan, Écayon, Froussardine et Denticrisse",
+        "hainaDesert": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Triopikeur, Mascaïman et Bamboiselle",
+        "ulaulaMeadow": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Coxyclaque, Migalos, Doudouvet, Chlorobule, Plumeline et Rubombelle",
+        "malieGarden": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Miaouss, Psykokwak, Ptitard, Poissirène, Magicarpe, Coxyclaque, Migalos, Maskadra, Doudouvet, Chlorobule, Tarenbulle, Bamboiselle et Katagami",
+        "mountHokulani": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rapasdepic, Métamorph, Mélo, Airmure, Terhal et Météno",
+        "blushMountain": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Racaillou, Élekid, Chartor, Chrysapile, Tiboudet, Boumata et Togedemaru",
+        "mountLanakila": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Sabelette, Goupix, Nosferalto, Farfuret, Absol, Stalgamin et Draïeul",
+        "poniMeadow": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Magicarpe, Minidraco, Barloche, Doudouvet, Chlorobule, Plumeline et Rubombelle",
+        "poniWilds": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattatac, Tentacruel, Noeunoeuf, Magicarpe, Lokhlass, Granbull, Bekipan, Wailmer, Relicanth, Tritosor, Luminéon, Argouste et Sovkipou",
+        "ancientPoniPath": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattatac, Noeunoeuf, Granbull, Bekipan, Tritosor et Argouste",
+        "poniBreakerCoast": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Magicarpe, Sharpedo, Wailmer et Sovkipou",
+        "poniGrove": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattatac, Scarabrute, Granbull, Riolu, Piclairon et Argouste",
+        "poniPlains": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattatac, Rapasdepic, Hypnomade, Tauros, Écrémeuh, Bekipan, Doudouvet, Chlorobule, Piclairon, Argouste et Bourrinos",
+        "poniGauntlet": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Rattatac, Akwakwak, Magicarpe, Minidraco, Granbull, Bekipan, Barloche, Argouste et Chelours",
+        "vastPoniCanyon": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Nosferalto, Triopikeur, Akwakwak, Machopeur, Magicarpe, Minidraco, Cornèbre, Airmure, Barloche, Géolithe, Strassie, Lougaroc et Bébécaille",
+        "resolutionCave": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Nosferalto, Triopikeur et Engloutyran",
+        "exeggutorIsland": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Noeunoeuf, Noadkoko, Bekipan et Tritosor",
+        "verdantCavern": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Nosferapti, Taupiqueur et Cancrelove",
+        "thriftyMegamart": "Possède les Pokémon qu’on y trouve dans Soleil et Lune : Nosferalto, Spectrum, Trousselin et Mimiqui",
+        "alolaSolos": "Possède les 14 Pokémon d’Alola qui n’évoluent pas, légendaires, fabuleux et Ultra-Chimères à part : Plumeline, Froussardine, Guérilande, Gouroutan, Quartermac, Concombaffe, Météno, Dodoala, Boumata, Togedemaru, Mimiqui, Denticrisse, Draïeul et Sinistrail",
+        "alolaTotems": "Possède les Pokémon Dominants des épreuves de Soleil et Lune (Argouste dans Soleil, Rattatac dans Lune, les deux comptent) : Rattatac, Argouste, Froussardine, Malamandre, Floramantis, Lucanon, Mimiqui et Ékaïser",
+        "melemeleTrial": "L’équipe de Pectorius, doyen de Mele-Mele, à la grande épreuve : possède Férosinge, Makuhita et Crabagarre",
+        "akalaTrial": "L’équipe d’Alyxia, doyenne d’Akala, à la grande épreuve : possède Tarinor, Géolithe et Lougaroc",
+        "ulaulaTrial": "L’équipe de Danh, doyen d’Ula-Ula, à la grande épreuve : possède Ténéfix, Escroco et Persian",
+        "poniTrial": "L’équipe de Paulie, doyenne de Poni, à la grande épreuve : possède Triopikeur, Bourrinos, Tritosor et Libégon",
+        "hala": "L’équipe de Pectorius, membre du Conseil 4 dans Soleil et Lune : possède Hariyama, Tartard, Colossinge, Crabominable et Chelours",
+        "olivia": "L’équipe d’Alyxia, membre du Conseil 4 dans Soleil et Lune : possède Relicanth, Tarinorme, Strassie, Lougaroc et Grolem",
+        "acerola": "L’équipe de Margie, membre du Conseil 4 dans Soleil et Lune : possède Ténéfix, Momartik, Grodrive, Trépassable et Sinistrail",
+        "kahili": "L’équipe de Kahili, membre du Conseil 4 dans Soleil et Lune : possède Airmure, Bazoucan, Vaututrice, Nostenfer et Plumeline",
+        "lusamine": "L’équipe d’Elsa-Mina dans l’Ultra-Dimension dans Soleil et Lune : possède Mélodelfe, Fragilady, Chelours, Milobellus et Magirêve",
+        "guzma": "L’équipe de Guzma lors de son dernier combat dans Soleil et Lune : possède Sarmuraï, Migalos, Maskadra, Cizayox et Scarabrute",
+        "kukui": "L’équipe du Professeur Euphorbe à la Ligue dans Soleil et Lune (sans son sixième Pokémon, qui dépend de ton starter) : possède Lougaroc, Ronflex, Feunard, Magnézone et Gueriaigle"
       },
       "families": "Complète {count} lignée d’évolution | Complète {count} lignées d’évolution",
       "allStarters": "Possède les {count} Pokémon de départ, de Kanto à Paldea",
@@ -4538,7 +4908,23 @@
       "tc_az": "Possède une carte d’AZ",
       "tc_teamFlare": "Possède {count} cartes différentes de la Team Flare (Lysandre, Xanthin, leurs sbires et leur équipement)",
       "xySets": "Possède une carte de chaque série XY qui se passe à Kalos : XY, Étincelles, Poings Furieux, Vigueur Spectrale, Origines Antiques, Impulsion TURBO, Rupture TURBO, Impact des Destins et Offensive Vapeur",
-      "megaSets": "Possède une carte de chaque série Méga-Évolution (2025, Légendes Pokémon : Z-A à Illumis) : Méga-Évolution, Flammes Fantasmagoriques, Équilibre Parfait, Chaos Ascendant et Nuit Noire"
+      "megaSets": "Possède une carte de chaque série Méga-Évolution (2025, Légendes Pokémon : Z-A à Illumis) : Méga-Évolution, Flammes Fantasmagoriques, Équilibre Parfait, Chaos Ascendant et Nuit Noire",
+      "alolaLines": "Complète {count} lignées d’évolution d’Alola",
+      "alolaDex": "Possède {count} Pokémon différents d’Alola (n° 722 à 809)",
+      "alolaBadges": "Complète les équipes des {count} doyens d’Alola à leurs grandes épreuves",
+      "alolaEliteFour": "Complète les équipes du Conseil 4 d’Alola (Soleil et Lune)",
+      "alolaRoutes": "Possède tous les Pokémon de toutes les routes d’Alola de Soleil et Lune, de la route 1 à la route 17",
+      "alolaLandmarks": "Possède tous les Pokémon des grottes, jardins, monts et côtes d’Alola",
+      "alolaPlaceCards": "Possède les lieux d’Alola imprimés en cartes Stade : Paradis Æther, Colline Clapotis, Parc Volcanique, Mont Lanakila, Kokohio, Autel du Soleil et Autel de la Lune",
+      "tc_alolaKahunas": "Possède une carte de chaque doyen des îles : Pectorius, Alyxia, Danh et Paulie",
+      "tc_alolaCaptains": "Possède une carte de chaque capitaine d’épreuve : Althéo, Néphie, Kiawe, Barbara, Chrys, Margie et Oléa",
+      "tc_alolaEliteFour": "Possède une carte de chaque membre du premier Conseil 4 d’Alola : Pectorius, Alyxia, Margie et Kahili",
+      "tc_kukui": "Possède une carte du Professeur Euphorbe",
+      "tc_lillie": "Possède {count} cartes différentes de Lilie (ses Supporters, ses objets et ses Pokémon)",
+      "tc_alolaFriends": "Possède une carte de Tili et de Gladio",
+      "tc_aether": "Possède {count} cartes différentes de la Fondation Æther (Elsa-Mina, Saubohne, Vicky, leurs employés et le Paradis Æther)",
+      "tc_teamSkull": "Possède {count} cartes différentes de la Team Skull (Guzma, Apocyne, leurs sbires et Kokohio)",
+      "smSets": "Possède une carte de chaque série Soleil et Lune numérotée : Soleil et Lune, Gardiens Ascendants, Ombres Ardentes, Invasion Carmin, Ultra-Prisme, Lumière Interdite, Tempête Céleste, Tonnerre Perdu, Duo de Choc, Alliance Infaillible, Harmonie des Esprits et Éclipse Cosmique"
     },
     "subs": {
       "allLines": "Toutes régions",
@@ -4582,7 +4968,13 @@
       "kalosGyms": "Arènes de Kalos",
       "kalosTrainerCards": "Dresseurs de Kalos en cartes",
       "kalosRoutes": "Routes de Kalos (X et Y)",
-      "kalosLandmarks": "Grottes, forêts et lieux cachés de Kalos"
+      "kalosLandmarks": "Grottes, forêts et lieux cachés de Kalos",
+      "alolaLines": "Lignées d’Alola (Soleil et Lune)",
+      "alolaMore": "Alola, au-delà des lignées",
+      "alolaGyms": "Grandes épreuves d’Alola",
+      "alolaTrainerCards": "Dresseurs d’Alola en cartes",
+      "alolaRoutes": "Routes d’Alola (Soleil et Lune)",
+      "alolaLandmarks": "Grottes, jardins et monts d’Alola"
     }
   },
   "beta": {

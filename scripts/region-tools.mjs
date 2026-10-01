@@ -8,7 +8,8 @@
 //     Wild Pokémon of the region's first games per location (every area of a
 //     location together): walk, surf, Super Rod and one-off encounters; Old
 //     and Good Rods, Headbutt, Rock Smash, gifts, trades and roamers are left
-//     out (the Kanto rules). Locations with the same Pokémon are grouped.
+//     out (the Kanto rules). Forms count as their species (Alolan Rattata =
+//     #19). Locations with the same Pokémon are grouped.
 //   node scripts/region-tools.mjs cards <regex>
 //     Card names of the database matching <regex> (scripts/.env.local).
 //   node scripts/region-tools.mjs texts <region>
@@ -87,6 +88,9 @@ async function lines(from, to) {
 
 const KEPT_METHODS = ['walk', 'surf', 'super-rod', 'static', 'only-one', 'squirt-bottle', 'wailmer-pail', 'devon-scope', 'seaweed', 'feebas-tile-fishing']
 
+// Forms (Alolan Rattata, Oricorio's styles) have their own ids past 10000
+const speciesOf = async (url) => (idOf(url) > 10000 ? idOf((await get(url)).species.url) : idOf(url))
+
 async function encounters(regionId, versions) {
   const region = await get(`region/${regionId}/`)
   const byLocation = new Map()
@@ -100,7 +104,7 @@ async function encounters(regionId, versions) {
           if (!versions.includes(detail.version.name)) continue
           for (const { method } of detail.encounter_details) {
             methods.add(method.name)
-            if (KEPT_METHODS.includes(method.name)) found.add(idOf(encounter.pokemon.url))
+            if (KEPT_METHODS.includes(method.name)) found.add(await speciesOf(encounter.pokemon.url))
           }
         }
       }

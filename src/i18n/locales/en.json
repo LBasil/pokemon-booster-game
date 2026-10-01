@@ -3733,6 +3733,297 @@
       },
       "megaSets": {
         "title": "Back to Kalos"
+      },
+      "pikipekLine": {
+        "title": "Toucannon line"
+      },
+      "yungoosLine": {
+        "title": "Gumshoos line"
+      },
+      "grubbinLine": {
+        "title": "Vikavolt line"
+      },
+      "crabrawlerLine": {
+        "title": "Crabominable line"
+      },
+      "cutieflyLine": {
+        "title": "Ribombee line"
+      },
+      "rockruffLine": {
+        "title": "Lycanroc line"
+      },
+      "mareanieLine": {
+        "title": "Toxapex line"
+      },
+      "mudbrayLine": {
+        "title": "Mudsdale line"
+      },
+      "dewpiderLine": {
+        "title": "Araquanid line"
+      },
+      "fomantisLine": {
+        "title": "Lurantis line"
+      },
+      "morelullLine": {
+        "title": "Shiinotic line"
+      },
+      "salanditLine": {
+        "title": "Salazzle line"
+      },
+      "stuffulLine": {
+        "title": "Bewear line"
+      },
+      "bounsweetLine": {
+        "title": "Tsareena line"
+      },
+      "wimpodLine": {
+        "title": "Golisopod line"
+      },
+      "sandygastLine": {
+        "title": "Palossand line"
+      },
+      "alolaRoute1": {
+        "title": "Alola Route 1"
+      },
+      "alolaRoute2": {
+        "title": "Alola Route 2"
+      },
+      "alolaRoute3": {
+        "title": "Alola Route 3"
+      },
+      "alolaRoute4": {
+        "title": "Alola Route 4"
+      },
+      "alolaRoute5": {
+        "title": "Alola Route 5"
+      },
+      "alolaRoute6": {
+        "title": "Alola Route 6"
+      },
+      "alolaRoute7": {
+        "title": "Alola Route 7"
+      },
+      "alolaRoute8": {
+        "title": "Alola Route 8"
+      },
+      "alolaRoute9": {
+        "title": "Alola Route 9"
+      },
+      "alolaRoute10": {
+        "title": "Alola Route 10"
+      },
+      "alolaRoute11": {
+        "title": "Alola Route 11"
+      },
+      "alolaRoute12": {
+        "title": "Alola Route 12"
+      },
+      "alolaRoute13": {
+        "title": "Alola Route 13"
+      },
+      "alolaRoute14": {
+        "title": "Alola Route 14"
+      },
+      "alolaRoute15": {
+        "title": "Alola Route 15"
+      },
+      "alolaRoute16": {
+        "title": "Alola Route 16"
+      },
+      "alolaRoute17": {
+        "title": "Alola Route 17"
+      },
+      "kalaeBay": {
+        "title": "Kala’e Bay"
+      },
+      "melemeleSea": {
+        "title": "Melemele Sea"
+      },
+      "tenCaratHill": {
+        "title": "Ten Carat Hill"
+      },
+      "hauoliCemetery": {
+        "title": "Hau’oli Cemetery"
+      },
+      "melemeleMeadow": {
+        "title": "Melemele Meadow"
+      },
+      "seawardCave": {
+        "title": "Seaward Cave"
+      },
+      "hanoBeach": {
+        "title": "Hano Beach"
+      },
+      "memorialHill": {
+        "title": "Memorial Hill"
+      },
+      "paniolaRanch": {
+        "title": "Paniola Ranch"
+      },
+      "welaVolcanoPark": {
+        "title": "Wela Volcano Park"
+      },
+      "brookletHill": {
+        "title": "Brooklet Hill"
+      },
+      "lushJungle": {
+        "title": "Lush Jungle"
+      },
+      "akalaOutskirts": {
+        "title": "Akala Outskirts"
+      },
+      "diglettsTunnel": {
+        "title": "Diglett’s Tunnel"
+      },
+      "secludedShore": {
+        "title": "Secluded Shore"
+      },
+      "hainaDesert": {
+        "title": "Haina Desert"
+      },
+      "ulaulaMeadow": {
+        "title": "Ula’ula Meadow"
+      },
+      "malieGarden": {
+        "title": "Malie Garden"
+      },
+      "mountHokulani": {
+        "title": "Mount Hokulani"
+      },
+      "blushMountain": {
+        "title": "Blush Mountain"
+      },
+      "mountLanakila": {
+        "title": "Mount Lanakila"
+      },
+      "poniMeadow": {
+        "title": "Poni Meadow"
+      },
+      "poniWilds": {
+        "title": "Poni Wilds"
+      },
+      "ancientPoniPath": {
+        "title": "Ancient Poni Path"
+      },
+      "poniBreakerCoast": {
+        "title": "Poni Breaker Coast"
+      },
+      "poniGrove": {
+        "title": "Poni Grove"
+      },
+      "poniPlains": {
+        "title": "Poni Plains"
+      },
+      "poniGauntlet": {
+        "title": "Poni Gauntlet"
+      },
+      "vastPoniCanyon": {
+        "title": "Vast Poni Canyon"
+      },
+      "resolutionCave": {
+        "title": "Resolution Cave"
+      },
+      "exeggutorIsland": {
+        "title": "Exeggutor Island"
+      },
+      "verdantCavern": {
+        "title": "Verdant Cavern"
+      },
+      "thriftyMegamart": {
+        "title": "Abandoned Thrifty Megamart"
+      },
+      "alolaSolos": {
+        "title": "Alola loners"
+      },
+      "alolaTotems": {
+        "title": "Totem hunter"
+      },
+      "alolaLines10": {
+        "title": "Alola family album"
+      },
+      "alolaLines20": {
+        "title": "Every Alola line"
+      },
+      "alolaDex25": {
+        "title": "Alola rookie"
+      },
+      "alolaDex50": {
+        "title": "Alola trainer"
+      },
+      "melemeleTrial": {
+        "title": "Melemele grand trial"
+      },
+      "akalaTrial": {
+        "title": "Akala grand trial"
+      },
+      "ulaulaTrial": {
+        "title": "Ula’ula grand trial"
+      },
+      "poniTrial": {
+        "title": "Poni grand trial"
+      },
+      "alolaBadges": {
+        "title": "Island challenge"
+      },
+      "hala": {
+        "title": "Hala"
+      },
+      "olivia": {
+        "title": "Olivia"
+      },
+      "acerola": {
+        "title": "Acerola"
+      },
+      "kahili": {
+        "title": "Kahili"
+      },
+      "alolaEliteFour": {
+        "title": "Alola’s League"
+      },
+      "lusamine": {
+        "title": "Lusamine, the Aether president"
+      },
+      "guzma": {
+        "title": "Guzma, Team Skull’s boss"
+      },
+      "kukui": {
+        "title": "Professor Kukui’s challenge"
+      },
+      "alolaRoutes": {
+        "title": "Every Alola route"
+      },
+      "alolaLandmarks": {
+        "title": "Alola explorer"
+      },
+      "alolaPlaceCards": {
+        "title": "Alola on cards"
+      },
+      "tc_alolaKahunas": {
+        "title": "Kahunas in the binder"
+      },
+      "tc_alolaCaptains": {
+        "title": "Trial captains on cards"
+      },
+      "tc_alolaEliteFour": {
+        "title": "Alola’s Elite Four on cards"
+      },
+      "tc_kukui": {
+        "title": "Kukui’s lab"
+      },
+      "tc_lillie": {
+        "title": "Lillie’s journey"
+      },
+      "tc_alolaFriends": {
+        "title": "Island friends"
+      },
+      "tc_aether": {
+        "title": "Aether Foundation"
+      },
+      "tc_teamSkull": {
+        "title": "Skull style"
+      },
+      "smSets": {
+        "title": "Sun & Moon era"
       }
     },
     "desc": {
@@ -4410,7 +4701,86 @@
         "wikstrom": "Elite Four Wikstrom’s team in X and Y: own Klefki, Aegislash, Probopass and Scizor",
         "drasna": "Elite Four Drasna’s team in X and Y: own Dragalge, Noivern, Altaria and Druddigon",
         "lysandre": "Lysandre’s team in his last battle in X and Y: own Mienshao, Pyroar, Honchkrow and Gyarados",
-        "az": "AZ’s team when he battles you in X and Y: own Torkoal, Golurk and Sigilyph"
+        "az": "AZ’s team when he battles you in X and Y: own Torkoal, Golurk and Sigilyph",
+        "pikipekLine": "Own the whole line: Pikipek, Trumbeak and Toucannon",
+        "yungoosLine": "Own the whole line: Yungoos and Gumshoos",
+        "grubbinLine": "Own the whole line: Grubbin, Charjabug and Vikavolt",
+        "crabrawlerLine": "Own the whole line: Crabrawler and Crabominable",
+        "cutieflyLine": "Own the whole line: Cutiefly and Ribombee",
+        "rockruffLine": "Own the whole line: Rockruff and Lycanroc",
+        "mareanieLine": "Own the whole line: Mareanie and Toxapex",
+        "mudbrayLine": "Own the whole line: Mudbray and Mudsdale",
+        "dewpiderLine": "Own the whole line: Dewpider and Araquanid",
+        "fomantisLine": "Own the whole line: Fomantis and Lurantis",
+        "morelullLine": "Own the whole line: Morelull and Shiinotic",
+        "salanditLine": "Own the whole line: Salandit and Salazzle",
+        "stuffulLine": "Own the whole line: Stufful and Bewear",
+        "bounsweetLine": "Own the whole line: Bounsweet, Steenee and Tsareena",
+        "wimpodLine": "Own the whole line: Wimpod and Golisopod",
+        "sandygastLine": "Own the whole line: Sandygast and Palossand",
+        "alolaRoute1": "Own the Pokémon found there in Sun and Moon: Caterpie, Metapod, Rattata, Meowth, Tentacool, Slowpoke, Magnemite, Grimer, Ledyba, Spinarak, Pichu, Wingull, Bonsly, Munchlax, Finneon, Pikipek, Yungoos and Grubbin",
+        "alolaRoute2": "Own the Pokémon found there in Sun and Moon: Rattata, Spearow, Meowth, Growlithe, Abra, Drowzee, Smeargle, Yungoos and Cutiefly",
+        "alolaRoute3": "Own the Pokémon found there in Sun and Moon: Rattata, Spearow, Mankey, Delibird, Bagon, Yungoos and Cutiefly",
+        "alolaRoute4": "Own the Pokémon found there in Sun and Moon: Rattata, Eevee, Igglybuff, Lillipup, Pikipek, Yungoos, Grubbin and Mudbray",
+        "alolaRoute5": "Own the Pokémon found there in Sun and Moon: Caterpie, Metapod, Butterfree, Lillipup, Pikipek, Grubbin and Fomantis",
+        "alolaRoute6": "Own the Pokémon found there in Sun and Moon: Rattata, Eevee, Igglybuff, Lillipup, Pikipek, Yungoos, Grubbin, Oricorio and Mudbray",
+        "alolaRoute7": "Own the Pokémon found there in Sun and Moon: Tentacool, Staryu, Magikarp, Wingull, Finneon, Wishiwashi and Pyukumuku",
+        "alolaRoute8": "Own the Pokémon found there in Sun and Moon: Rattata, Magikarp, Chinchou, Fletchinder, Trumbeak, Yungoos, Wishiwashi, Salandit, Stufful and Wimpod",
+        "alolaRoute9": "Own the Pokémon found there in Sun and Moon: Magikarp, Corsola, Luvdisc and Wishiwashi",
+        "alolaRoute10": "Own the Pokémon found there in Sun and Moon: Raticate, Fearow, Ledian, Ariados, Skarmory, Pancham and Gumshoos",
+        "alolaRoute11": "Own the Pokémon found there in Sun and Moon: Raticate, Paras, Ledian, Ariados, Pancham, Trumbeak, Gumshoos, Morelull and Komala",
+        "alolaRoute12": "Own the Pokémon found there in Sun and Moon: Geodude, Elekid, Torkoal and Mudbray",
+        "alolaRoute13": "Own the Pokémon found there in Sun and Moon: Magikarp, Wishiwashi and Bruxish",
+        "alolaRoute14": "Own the Pokémon found there in Sun and Moon: Raticate, Sandshrew, Vulpix, Tentacool, Magikarp, Pelipper, Absol, Snorunt, Finneon, Gumshoos, Wishiwashi and Bruxish",
+        "alolaRoute15": "Own the Pokémon found there in Sun and Moon: Raticate, Tentacool, Slowpoke, Magikarp, Pelipper, Finneon, Gumshoos, Wishiwashi and Bruxish",
+        "alolaRoute16": "Own the Pokémon found there in Sun and Moon: Raticate, Slowpoke, Pelipper and Gumshoos",
+        "alolaRoute17": "Own the Pokémon found there in Sun and Moon: Raticate, Fearow, Graveler, Ledian, Ariados, Skarmory, Pancham, Gumshoos and Kartana",
+        "kalaeBay": "Own the Pokémon found there in Sun and Moon: Rattata, Tentacool, Slowpoke, Shellder, Magikarp, Wingull, Bagon, Finneon, Yungoos and Wishiwashi",
+        "melemeleSea": "Own the Pokémon found there in Sun and Moon: Tentacool, Magikarp, Corsola, Wingull, Luvdisc, Finneon and Wishiwashi",
+        "tenCaratHill": "Own the Pokémon found there in Sun and Moon: Zubat, Diglett, Machop, Spinda, Roggenrola, Carbink, Rockruff and Necrozma",
+        "hauoliCemetery": "Own the Pokémon found there in Sun and Moon: Zubat, Gastly, Misdreavus and Drifloon",
+        "melemeleMeadow": "Own the Pokémon found there in Sun and Moon: Caterpie, Metapod, Butterfree, Cottonee, Petilil, Oricorio, Cutiefly and Buzzwole",
+        "seawardCave": "Own the Pokémon found there in Sun and Moon: Zubat, Diglett, Psyduck, Magikarp and Barboach",
+        "hanoBeach": "Own the Pokémon found there in Sun and Moon: Tentacool, Staryu, Wingull, Finneon, Sandygast and Pyukumuku",
+        "memorialHill": "Own the Pokémon found there in Sun and Moon: Zubat, Gastly, Phantump and Xurkitree",
+        "paniolaRanch": "Own the Pokémon found there in Sun and Moon: Tauros, Miltank, Lillipup and Mudbray",
+        "welaVolcanoPark": "Own the Pokémon found there in Sun and Moon: Cubone, Kangaskhan, Magby, Fletchling, Salandit and Nihilego",
+        "brookletHill": "Own the Pokémon found there in Sun and Moon: Paras, Psyduck, Poliwag, Tentacool, Goldeen, Magikarp, Wingull, Surskit, Feebas, Finneon, Lillipup, Alomomola, Wishiwashi, Dewpider and Morelull",
+        "lushJungle": "Own the Pokémon found there in Sun and Moon: Caterpie, Metapod, Zubat, Paras, Diglett, Pinsir, Bonsly, Trumbeak, Fomantis, Morelull, Bounsweet, Comfey, Oranguru, Passimian and Xurkitree",
+        "akalaOutskirts": "Own the Pokémon found there in Sun and Moon: Raticate, Wingull, Nosepass, Gumshoos and Stufful",
+        "diglettsTunnel": "Own the Pokémon found there in Sun and Moon: Zubat, Diglett and Nihilego",
+        "secludedShore": "Own the Pokémon found there in Sun and Moon: Tentacool, Magikarp, Pelipper, Finneon, Wishiwashi and Bruxish",
+        "hainaDesert": "Own the Pokémon found there in Sun and Moon: Dugtrio, Sandile and Celesteela",
+        "ulaulaMeadow": "Own the Pokémon found there in Sun and Moon: Ledian, Ariados, Cottonee, Petilil, Oricorio and Ribombee",
+        "malieGarden": "Own the Pokémon found there in Sun and Moon: Meowth, Psyduck, Poliwag, Goldeen, Magikarp, Ledian, Ariados, Masquerain, Cottonee, Petilil, Araquanid, Celesteela and Kartana",
+        "mountHokulani": "Own the Pokémon found there in Sun and Moon: Fearow, Ditto, Cleffa, Skarmory, Beldum and Minior",
+        "blushMountain": "Own the Pokémon found there in Sun and Moon: Geodude, Elekid, Torkoal, Charjabug, Mudbray, Turtonator and Togedemaru",
+        "mountLanakila": "Own the Pokémon found there in Sun and Moon: Sandshrew, Vulpix, Golbat, Sneasel, Absol, Snorunt and Drampa",
+        "poniMeadow": "Own the Pokémon found there in Sun and Moon: Magikarp, Dratini, Barboach, Cottonee, Petilil, Oricorio and Ribombee",
+        "poniWilds": "Own the Pokémon found there in Sun and Moon: Raticate, Tentacruel, Exeggcute, Magikarp, Lapras, Granbull, Pelipper, Wailmer, Relicanth, Gastrodon, Lumineon, Gumshoos and Wimpod",
+        "ancientPoniPath": "Own the Pokémon found there in Sun and Moon: Raticate, Exeggcute, Granbull, Pelipper, Gastrodon and Gumshoos",
+        "poniBreakerCoast": "Own the Pokémon found there in Sun and Moon: Magikarp, Sharpedo, Wailmer and Wimpod",
+        "poniGrove": "Own the Pokémon found there in Sun and Moon: Raticate, Pinsir, Granbull, Riolu, Trumbeak and Gumshoos",
+        "poniPlains": "Own the Pokémon found there in Sun and Moon: Raticate, Fearow, Hypno, Tauros, Miltank, Pelipper, Cottonee, Petilil, Trumbeak, Gumshoos and Mudsdale",
+        "poniGauntlet": "Own the Pokémon found there in Sun and Moon: Raticate, Golduck, Magikarp, Dratini, Granbull, Pelipper, Barboach, Gumshoos and Bewear",
+        "vastPoniCanyon": "Own the Pokémon found there in Sun and Moon: Golbat, Dugtrio, Golduck, Machoke, Magikarp, Dratini, Murkrow, Skarmory, Barboach, Boldore, Carbink, Lycanroc and Jangmo-o",
+        "resolutionCave": "Own the Pokémon found there in Sun and Moon: Golbat, Dugtrio and Guzzlord",
+        "exeggutorIsland": "Own the Pokémon found there in Sun and Moon: Exeggcute, Exeggutor, Pelipper and Gastrodon",
+        "verdantCavern": "Own the Pokémon found there in Sun and Moon: Zubat, Diglett and Pheromosa",
+        "thriftyMegamart": "Own the Pokémon found there in Sun and Moon: Golbat, Haunter, Klefki and Mimikyu",
+        "alolaSolos": "Own the 14 Alola Pokémon that don’t evolve, legendaries, mythicals and Ultra Beasts aside: Oricorio, Wishiwashi, Comfey, Oranguru, Passimian, Pyukumuku, Minior, Komala, Turtonator, Togedemaru, Mimikyu, Bruxish, Drampa and Dhelmise",
+        "alolaTotems": "Own the totem Pokémon of Sun and Moon’s trials (Gumshoos in Sun, Raticate in Moon, both counted): Raticate, Gumshoos, Wishiwashi, Salazzle, Lurantis, Vikavolt, Mimikyu and Kommo-o",
+        "melemeleTrial": "Island kahuna Hala’s team in the grand trial: own Mankey, Makuhita and Crabrawler",
+        "akalaTrial": "Island kahuna Olivia’s team in the grand trial: own Nosepass, Boldore and Lycanroc",
+        "ulaulaTrial": "Island kahuna Nanu’s team in the grand trial: own Sableye, Krokorok and Persian",
+        "poniTrial": "Island kahuna Hapu’s team in the grand trial: own Dugtrio, Mudsdale, Gastrodon and Flygon",
+        "hala": "Elite Four Hala’s team in Sun and Moon: own Hariyama, Poliwrath, Primeape, Crabominable and Bewear",
+        "olivia": "Elite Four Olivia’s team in Sun and Moon: own Relicanth, Probopass, Carbink, Lycanroc and Golem",
+        "acerola": "Elite Four Acerola’s team in Sun and Moon: own Sableye, Froslass, Drifblim, Palossand and Dhelmise",
+        "kahili": "Elite Four Kahili’s team in Sun and Moon: own Skarmory, Toucannon, Mandibuzz, Crobat and Oricorio",
+        "lusamine": "Lusamine’s team in Ultra Space in Sun and Moon: own Clefable, Lilligant, Bewear, Milotic and Mismagius",
+        "guzma": "Guzma’s team in his last battle in Sun and Moon: own Golisopod, Ariados, Masquerain, Scizor and Pinsir",
+        "kukui": "Professor Kukui’s team at the League in Sun and Moon (his sixth Pokémon, which depends on your starter, aside): own Lycanroc, Snorlax, Ninetales, Magnezone and Braviary"
       },
       "families": "Complete {count} evolution line | Complete {count} evolution lines",
       "allStarters": "Own the {count} starter Pokémon, Kanto to Paldea",
@@ -4538,7 +4908,23 @@
       "tc_az": "Own an AZ card",
       "tc_teamFlare": "Own {count} different Team Flare cards (Lysandre, Xerosic, their grunts and their gear)",
       "xySets": "Own a card from each XY set that takes place in Kalos: XY, Flashfire, Furious Fists, Phantom Forces, Ancient Origins, BREAKthrough, BREAKpoint, Fates Collide and Steam Siege",
-      "megaSets": "Own a card from each Mega Evolution set (2025, Legends: Z-A in Lumiose City): Mega Evolution, Phantasmal Flames, Perfect Order, Chaos Rising and Pitch Black"
+      "megaSets": "Own a card from each Mega Evolution set (2025, Legends: Z-A in Lumiose City): Mega Evolution, Phantasmal Flames, Perfect Order, Chaos Rising and Pitch Black",
+      "alolaLines": "Complete {count} evolution lines of Alola",
+      "alolaDex": "Own {count} different Pokémon of Alola (#722 to #809)",
+      "alolaBadges": "Complete the teams of Alola’s {count} island kahunas in their grand trials",
+      "alolaEliteFour": "Complete the teams of Alola’s Elite Four (Sun and Moon)",
+      "alolaRoutes": "Own every Pokémon of every Alola route of Sun and Moon, from Route 1 to Route 17",
+      "alolaLandmarks": "Own every Pokémon of Alola’s caves, meadows, mountains and shores",
+      "alolaPlaceCards": "Own the Alola places printed as Stadium cards: Aether Paradise, Brooklet Hill, Wela Volcano Park, Mount Lanakila, Po Town, the Altar of the Sunne and the Altar of the Moone",
+      "tc_alolaKahunas": "Own a card of each island kahuna: Hala, Olivia, Nanu and Hapu",
+      "tc_alolaCaptains": "Own a card of each trial captain: Ilima, Lana, Kiawe, Mallow, Sophocles, Acerola and Mina",
+      "tc_alolaEliteFour": "Own a card of each member of Alola’s first Elite Four: Hala, Olivia, Acerola and Kahili",
+      "tc_kukui": "Own a Professor Kukui card",
+      "tc_lillie": "Own {count} different Lillie cards (her Supporters, her items and her Pokémon)",
+      "tc_alolaFriends": "Own a card of Hau and of Gladion",
+      "tc_aether": "Own {count} different Aether Foundation cards (Lusamine, Faba, Wicke, their employees and Aether Paradise)",
+      "tc_teamSkull": "Own {count} different Team Skull cards (Guzma, Plumeria, their grunts and Po Town)",
+      "smSets": "Own a card from each numbered Sun & Moon set: Sun & Moon, Guardians Rising, Burning Shadows, Crimson Invasion, Ultra Prism, Forbidden Light, Celestial Storm, Lost Thunder, Team Up, Unbroken Bonds, Unified Minds and Cosmic Eclipse"
     },
     "subs": {
       "allLines": "All regions",
@@ -4582,7 +4968,13 @@
       "kalosGyms": "Kalos gyms",
       "kalosTrainerCards": "Kalos trainers on cards",
       "kalosRoutes": "Kalos routes (X and Y)",
-      "kalosLandmarks": "Kalos caves, forests and hideaways"
+      "kalosLandmarks": "Kalos caves, forests and hideaways",
+      "alolaLines": "Alola lines (Sun and Moon)",
+      "alolaMore": "Alola, beyond the lines",
+      "alolaGyms": "Alola grand trials",
+      "alolaTrainerCards": "Alola trainers on cards",
+      "alolaRoutes": "Alola routes (Sun and Moon)",
+      "alolaLandmarks": "Alola caves, meadows and mountains"
     }
   },
   "beta": {
