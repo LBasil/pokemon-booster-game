@@ -368,6 +368,7 @@
   },
   "community": {
     "title": "Community",
+    "feedModes": "Show pulls from",
     "feedTitle": "Latest big pulls",
     "pulled": "pulled",
     "publicNote": "Your profile is public: your ultra and secret pulls show up here.",

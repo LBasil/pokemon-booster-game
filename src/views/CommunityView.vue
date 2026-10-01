@@ -17,25 +17,42 @@ const setsStore = useSetsStore()
 
 // ---------- Live feed ----------
 
-const feed = ref([])
-const feedState = ref('loading') // loading | ready | error
+// Challenge | Unlimited switch (like the leaderboards), opening on the mode
+// the player came from. Each mode's list is fetched once, then kept live.
+const MODES = ['challenge', 'unlimited']
+const feedMode = ref(routeMode(route))
+const feeds = ref({ challenge: [], unlimited: [] })
+const feedStates = ref({ challenge: 'idle', unlimited: 'idle' }) // idle | loading | ready | error
+const feed = computed(() => feeds.value[feedMode.value])
+const feedState = computed(() => (feedStates.value[feedMode.value] === 'idle' ? 'loading' : feedStates.value[feedMode.value]))
 const freshIds = ref(new Set()) // just arrived: highlighted briefly
 const now = ref(new Date())
 let unsubscribe = null
 let clock = null
 
-onMounted(async () => {
+async function loadFeed(mode) {
+  if (feedStates.value[mode] === 'loading' || feedStates.value[mode] === 'ready') return
+  feedStates.value[mode] = 'loading'
+  try {
+    const pulls = await fetchFeed(30, mode)
+    // Realtime pulls that came in meanwhile stay on top
+    const seen = new Set(feeds.value[mode].map((item) => item.id))
+    feeds.value[mode] = [...feeds.value[mode], ...pulls.filter((item) => !seen.has(item.id))].slice(0, 50)
+    feedStates.value[mode] = 'ready'
+  } catch {
+    feedStates.value[mode] = 'error'
+  }
+}
+watch(feedMode, loadFeed)
+
+onMounted(() => {
   profileStore.load()
   setsStore.load()
-  try {
-    feed.value = await fetchFeed(30)
-    feedState.value = 'ready'
-  } catch {
-    feedState.value = 'error'
-  }
+  loadFeed(feedMode.value)
   unsubscribe = subscribeToFeed((pull) => {
-    if (feed.value.some((item) => item.id === pull.id)) return
-    feed.value = [pull, ...feed.value].slice(0, 50)
+    const mode = pull.mode === 'challenge' ? 'challenge' : 'unlimited'
+    if (feeds.value[mode].some((item) => item.id === pull.id)) return
+    feeds.value[mode] = [pull, ...feeds.value[mode]].slice(0, 50)
     freshIds.value = new Set(freshIds.value).add(pull.id)
     setTimeout(() => {
       const next = new Set(freshIds.value)
@@ -55,7 +72,6 @@ onBeforeUnmount(() => {
 
 // Challenge | Unlimited switch, then that mode's boards. Opens on the mode
 // the player came from; each mode remembers its last board.
-const BOARD_MODES = ['challenge', 'unlimited']
 const boardMode = ref(routeMode(route))
 const lastBoard = { challenge: LEADERBOARDS.challenge[0], unlimited: LEADERBOARDS.unlimited[0] }
 const board = ref(lastBoard[boardMode.value])
@@ -112,7 +128,22 @@ function scoreLabel(row) {
       <div class="community-layout">
         <!-- ============ Live feed ============ -->
         <section class="panel feed-panel" aria-labelledby="feed-title">
-          <h2 id="feed-title" class="pb-section-title">{{ t('community.feedTitle') }}</h2>
+          <div class="board-head">
+            <h2 id="feed-title" class="pb-section-title">{{ t('community.feedTitle') }}</h2>
+            <div class="mode-tabs feed-modes" role="tablist" :aria-label="t('community.feedModes')">
+              <button
+                v-for="item in MODES"
+                :key="item"
+                type="button"
+                role="tab"
+                :aria-selected="feedMode === item"
+                :class="{ active: feedMode === item }"
+                @click="feedMode = item"
+              >
+                {{ t(item === 'challenge' ? 'nav.modeChallenge' : 'nav.modeUnlimited') }}
+              </button>
+            </div>
+          </div>
 
           <div v-if="feedState === 'error'" class="alert alert-danger mt-3" role="alert">{{ t('community.feedError') }}</div>
           <div v-else-if="feedState === 'loading'" class="feed-list mt-3">
@@ -148,9 +179,9 @@ function scoreLabel(row) {
           <div class="board-head">
             <h2 id="board-title" class="pb-section-title">{{ t('community.boardsTitle') }}</h2>
             <!-- Separate collections: each mode has its own boards -->
-            <div class="board-modes" role="tablist" :aria-label="t('nav.modeSwitch')">
+            <div class="mode-tabs board-modes" role="tablist" :aria-label="t('nav.modeSwitch')">
               <button
-                v-for="item in BOARD_MODES"
+                v-for="item in MODES"
                 :key="item"
                 type="button"
                 role="tab"
@@ -349,7 +380,7 @@ function scoreLabel(row) {
   gap: 0.75rem;
 }
 
-.board-modes {
+.mode-tabs {
   display: flex;
   gap: 4px;
   padding: 4px;
@@ -358,7 +389,7 @@ function scoreLabel(row) {
   background: var(--pb-input-bg);
 }
 
-.board-modes button {
+.mode-tabs button {
   padding: 0.35rem 0.9rem;
   border: none;
   border-radius: 999px;
@@ -369,7 +400,7 @@ function scoreLabel(row) {
   white-space: nowrap;
 }
 
-.board-modes button.active {
+.mode-tabs button.active {
   background: var(--pb-text);
   color: var(--pb-bg);
 }

@@ -368,6 +368,7 @@
   },
   "community": {
     "title": "Communauté",
+    "feedModes": "Afficher les tirages du mode",
     "feedTitle": "Derniers gros tirages",
     "pulled": "a tiré",
     "publicNote": "Ton profil est public : tes ultra rares et secrètes apparaissent ici.",

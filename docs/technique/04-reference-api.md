@@ -172,7 +172,7 @@ Erreur : `unknown leaderboard …`.
 
 ### Fil des gros tirages
 
-- `fetchFeed(30)` : `pull_feed` : `select id, username, card_id, card_name, image_small, bucket, set_id, mode, pulled_at order by pulled_at desc limit 30`. Public (profils publics seulement).
+- `fetchFeed(limit = 30, mode = null)` : `pull_feed` : `select id, username, card_id, card_name, image_small, bucket, set_id, mode, pulled_at order by pulled_at desc limit <limit>`, plus `mode = eq.<mode>` si `mode` est donné (`'challenge'` | `'unlimited'` : le switch de Communauté ; l'accueil prend les deux modes). Public (profils publics seulement).
 - `subscribeToFeed(onPull)` : canal Realtime `pull-feed`, événement `INSERT` sur `public.pull_feed`. `onPull` reçoit la nouvelle ligne.
 
 ---

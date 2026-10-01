@@ -162,7 +162,7 @@ How it works inside (every table, RPC and flow, in French):
 - **Community**: public profiles at `/u/<username>` (readable signed out,
   so the link can be shared), a **live feed** of the latest ultra/secret
   pulls (holos for old sets that have nothing rarer, like Base Set;
-  Supabase Realtime), and luck-based **leaderboards** (hit rate, best
+  Supabase Realtime; Challenge | Unlimited switch), and luck-based **leaderboards** (hit rate, best
   pull, complete sets).
 - **Installable PWA**: manifest, icons, and a service worker that keeps the
   app and already-seen card art available offline.

@@ -300,7 +300,11 @@ docs/technique/             technical doc (French, user choice): overview, front
   les deux"); the challenge one has "Ask for it" ->
   `/challenge/trades?to=<name>&want=<card id>`, the unlimited one is
   look-only. Every pull in the feed (community + hub "Live" row) says
-  its mode (Unlimited | Challenge).
+  its mode (Unlimited | Challenge); Community's feed has its own
+  Challenge | Unlimited switch (user, 2026-10-01; opens on `routeMode`,
+  `fetchFeed(30, mode)` per mode, Realtime pulls go to their mode's list).
+  Its tablist is named "Show pulls from", not "Game mode" (e2e picks the
+  leaderboards' one by that name).
   **Mini-games** (user: "I'll add plenty"): `/challenge/games`
   (`GamesView`) lists every game of `src/utils/games.js` (id, route
   `challenge-game-<id>`, icon; EN/FR `games.items.<id>` — `games.test.js`

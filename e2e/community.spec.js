@@ -14,7 +14,7 @@ test('community shows the live feed and the leaderboards', async ({ page }) => {
   await expect(page).toHaveURL('/u/Misty')
 })
 
-test('every hit in the feed says which mode it was pulled in', async ({ page }) => {
+test('the feed switches between challenge and unlimited pulls, each saying its mode', async ({ page }) => {
   const at = new Date().toISOString()
   const hit = { card_id: 'sv3pt5-199', card_name: 'Charizard ex', image_small: null, bucket: 'secret', set_id: 'sv3pt5', pulled_at: at }
   await signIn(page)
@@ -25,8 +25,17 @@ test('every hit in the feed says which mode it was pulled in', async ({ page }) 
     ],
   })
   await page.goto('/community')
-  await expect(page.locator('.feed-item').nth(0).locator('.feed-mode')).toHaveText('Challenge')
-  await expect(page.locator('.feed-item').nth(1).locator('.feed-mode')).toHaveText('Unlimited')
+  // One mode at a time: the switch opens on the mode the player came from
+  const feedModes = page.locator('.feed-modes')
+  await expect(feedModes.getByRole('tab', { name: 'Unlimited' })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.locator('.feed-item')).toHaveCount(1)
+  await expect(page.locator('.feed-item').locator('.feed-mode')).toHaveText('Unlimited')
+  await expect(page.locator('.feed-item')).toContainText('Brock')
+
+  await feedModes.getByRole('tab', { name: 'Challenge' }).click()
+  await expect(page.locator('.feed-item')).toHaveCount(1)
+  await expect(page.locator('.feed-item').locator('.feed-mode')).toHaveText('Challenge')
+  await expect(page.locator('.feed-item')).toContainText('Misty')
 
   await page.goto('/game')
   await expect(page.locator('.hub-live-item').nth(0).locator('.hub-live-mode')).toHaveText('Challenge')

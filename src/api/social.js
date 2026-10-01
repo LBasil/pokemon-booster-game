@@ -14,13 +14,18 @@ export async function fetchLeaderboard(kind, limit = 20) {
   return data
 }
 
-/** Most recent ultra/secret pulls by public profiles (both game modes, see `mode`). */
-export async function fetchFeed(limit = 30) {
-  const { data, error } = await supabase
+/**
+ * Most recent big pulls by public profiles: both game modes (see `mode`), or
+ * only `mode`'s ('challenge' | 'unlimited') when given.
+ */
+export async function fetchFeed(limit = 30, mode = null) {
+  let query = supabase
     .from('pull_feed')
     .select('id, username, card_id, card_name, image_small, bucket, set_id, mode, pulled_at')
     .order('pulled_at', { ascending: false })
     .limit(limit)
+  if (mode) query = query.eq('mode', mode)
+  const { data, error } = await query
   if (error) throw error
   return data
 }

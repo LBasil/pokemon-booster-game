@@ -690,7 +690,10 @@ export async function mockSupabase(page, options = {}) {
         { recorded_on: '2026-09-22', value: 180 },
       ])
     }
-    if (table === 'pull_feed') return json(state.feed)
+    if (table === 'pull_feed') {
+      const mode = url.searchParams.get('mode')?.replace('eq.', '')
+      return json(mode ? state.feed.filter((f) => (f.mode ?? 'unlimited') === mode) : state.feed)
+    }
 
     return json({ message: `e2e mock: unhandled ${method} ${path}` }, 404)
   })

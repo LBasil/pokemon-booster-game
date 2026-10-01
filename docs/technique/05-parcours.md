@@ -769,9 +769,11 @@ sequenceDiagram
 Page : [CommunityView.vue](../../src/views/CommunityView.vue)
 (`/community`, mode partagé).
 
-- **Fil** : `fetchFeed(30)` puis `subscribeToFeed` (Realtime, `INSERT`
-  sur `pull_feed`). Chaque nouveau tirage s'ajoute en haut (50 au
-  maximum), surligné 4 s ; « il y a 3 min » se met à jour toutes les 30 s.
+- **Fil** : un switch Défi | Illimité (comme les classements, ouvert sur
+  le mode d'où vient le joueur) ; chaque mode est chargé une fois, à la
+  première visite de son onglet, par `fetchFeed(30, mode)`, puis
+  `subscribeToFeed` (Realtime, `INSERT` sur `pull_feed`) range chaque
+  nouveau tirage dans la liste de son mode, en haut (50 au maximum), surligné 4 s ; « il y a 3 min » se met à jour toutes les 30 s.
   Le fil vient de `save_booster_opening` : chaque ultra/secret d'un profil
   public (ou chaque holo d'un set sans rien de plus rare, comme Base Set :
   sinon ces sets n'y apparaissaient jamais ; `hits` et le classement
