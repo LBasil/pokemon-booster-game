@@ -3484,6 +3484,255 @@
       },
       "unovaReturnSets": {
         "title": "Back to Unova"
+      },
+      "bunnelbyLine": {
+        "title": "Diggersby line"
+      },
+      "fletchlingLine": {
+        "title": "Talonflame line"
+      },
+      "scatterbugLine": {
+        "title": "Vivillon line"
+      },
+      "litleoLine": {
+        "title": "Pyroar line"
+      },
+      "flabebeLine": {
+        "title": "Florges line"
+      },
+      "skiddoLine": {
+        "title": "Gogoat line"
+      },
+      "panchamLine": {
+        "title": "Pangoro line"
+      },
+      "espurrLine": {
+        "title": "Meowstic line"
+      },
+      "honedgeLine": {
+        "title": "Aegislash line"
+      },
+      "spritzeeLine": {
+        "title": "Aromatisse line"
+      },
+      "swirlixLine": {
+        "title": "Slurpuff line"
+      },
+      "inkayLine": {
+        "title": "Malamar line"
+      },
+      "binacleLine": {
+        "title": "Barbaracle line"
+      },
+      "skrelpLine": {
+        "title": "Dragalge line"
+      },
+      "clauncherLine": {
+        "title": "Clawitzer line"
+      },
+      "helioptileLine": {
+        "title": "Heliolisk line"
+      },
+      "tyruntLine": {
+        "title": "Tyrantrum line"
+      },
+      "amauraLine": {
+        "title": "Aurorus line"
+      },
+      "phantumpLine": {
+        "title": "Trevenant line"
+      },
+      "pumpkabooLine": {
+        "title": "Gourgeist line"
+      },
+      "bergmiteLine": {
+        "title": "Avalugg line"
+      },
+      "noibatLine": {
+        "title": "Noivern line"
+      },
+      "kalosRoute2": {
+        "title": "Kalos Route 2"
+      },
+      "kalosRoute3": {
+        "title": "Kalos Route 3"
+      },
+      "kalosRoute5": {
+        "title": "Kalos Route 5"
+      },
+      "kalosRoute7": {
+        "title": "Kalos Route 7"
+      },
+      "kalosRoute8": {
+        "title": "Kalos Route 8"
+      },
+      "kalosRoute10": {
+        "title": "Kalos Route 10"
+      },
+      "kalosRoute11": {
+        "title": "Kalos Route 11"
+      },
+      "kalosRoute12": {
+        "title": "Kalos Route 12"
+      },
+      "kalosRoute14": {
+        "title": "Kalos Route 14"
+      },
+      "kalosRoute15": {
+        "title": "Kalos Route 15"
+      },
+      "kalosRoute16": {
+        "title": "Kalos Route 16"
+      },
+      "kalosRoute18": {
+        "title": "Kalos Route 18"
+      },
+      "kalosRoute19": {
+        "title": "Kalos Route 19"
+      },
+      "kalosRoute20": {
+        "title": "Kalos Route 20"
+      },
+      "kalosRoute21": {
+        "title": "Kalos Route 21"
+      },
+      "kalosRoute22": {
+        "title": "Kalos Route 22"
+      },
+      "santaluneForest": {
+        "title": "Santalune Forest"
+      },
+      "parfumPalace": {
+        "title": "Parfum Palace"
+      },
+      "glitteringCave": {
+        "title": "Glittering Cave"
+      },
+      "connectingCave": {
+        "title": "Connecting Cave"
+      },
+      "reflectionCave": {
+        "title": "Reflection Cave"
+      },
+      "azureBay": {
+        "title": "Azure Bay"
+      },
+      "lostHotel": {
+        "title": "Lost Hotel"
+      },
+      "frostCavern": {
+        "title": "Frost Cavern"
+      },
+      "pokemonVillage": {
+        "title": "Pokémon Village"
+      },
+      "terminusCave": {
+        "title": "Terminus Cave"
+      },
+      "kalosVictoryRoad": {
+        "title": "Kalos Victory Road"
+      },
+      "kalosSolos": {
+        "title": "Kalos loners"
+      },
+      "kalosFossils": {
+        "title": "Kalos fossils"
+      },
+      "kalosLines10": {
+        "title": "Kalos family album"
+      },
+      "kalosLines26": {
+        "title": "Every Kalos line"
+      },
+      "kalosDex25": {
+        "title": "Kalos rookie"
+      },
+      "kalosDex50": {
+        "title": "Kalos trainer"
+      },
+      "bugBadge": {
+        "title": "Bug Badge"
+      },
+      "cliffBadge": {
+        "title": "Cliff Badge"
+      },
+      "rumbleBadge": {
+        "title": "Rumble Badge"
+      },
+      "plantBadge": {
+        "title": "Plant Badge"
+      },
+      "voltageBadge": {
+        "title": "Voltage Badge"
+      },
+      "fairyBadge": {
+        "title": "Fairy Badge"
+      },
+      "psychicBadge": {
+        "title": "Psychic Badge"
+      },
+      "icebergBadge": {
+        "title": "Iceberg Badge"
+      },
+      "kalosBadges": {
+        "title": "Kalos badge case"
+      },
+      "malva": {
+        "title": "Malva"
+      },
+      "siebold": {
+        "title": "Siebold"
+      },
+      "wikstrom": {
+        "title": "Wikstrom"
+      },
+      "drasna": {
+        "title": "Drasna"
+      },
+      "kalosEliteFour": {
+        "title": "Kalos’s League"
+      },
+      "lysandre": {
+        "title": "Lysandre, Team Flare’s boss"
+      },
+      "az": {
+        "title": "AZ, the eternal king"
+      },
+      "kalosRoutes": {
+        "title": "Every Kalos route"
+      },
+      "kalosLandmarks": {
+        "title": "Kalos explorer"
+      },
+      "kalosPlaceCards": {
+        "title": "Kalos on cards"
+      },
+      "tc_kalosGymLeaders": {
+        "title": "Kalos leaders in the binder"
+      },
+      "tc_kalosEliteFour": {
+        "title": "Kalos’s Elite Four on cards"
+      },
+      "tc_diantha": {
+        "title": "Diantha on stage"
+      },
+      "tc_kalosFriends": {
+        "title": "Vaniville friends"
+      },
+      "tc_sycamore": {
+        "title": "Sycamore’s lab"
+      },
+      "tc_az": {
+        "title": "AZ’s card"
+      },
+      "tc_teamFlare": {
+        "title": "Flare fashion"
+      },
+      "xySets": {
+        "title": "XY era"
+      },
+      "megaSets": {
+        "title": "Back to Kalos"
       }
     },
     "desc": {
@@ -4096,7 +4345,72 @@
         "caitlin": "Elite Four Caitlin’s team in Black and White: own Sigilyph, Musharna, Reuniclus and Gothitelle",
         "marshal": "Elite Four Marshal’s team in Black and White: own Throh, Sawk, Conkeldurr and Mienshao",
         "n": "N’s team in his castle in Black and White, his legendary aside: own Archeops, Carracosta, Zoroark, Vanilluxe and Klinklang",
-        "ghetsis": "Ghetsis’s team right after N in Black and White: own Cofagrigus, Bouffalant, Seismitoad, Bisharp, Eelektross and Hydreigon"
+        "ghetsis": "Ghetsis’s team right after N in Black and White: own Cofagrigus, Bouffalant, Seismitoad, Bisharp, Eelektross and Hydreigon",
+        "bunnelbyLine": "Own the whole line: Bunnelby and Diggersby",
+        "fletchlingLine": "Own the whole line: Fletchling, Fletchinder and Talonflame",
+        "scatterbugLine": "Own the whole line: Scatterbug, Spewpa and Vivillon",
+        "litleoLine": "Own the whole line: Litleo and Pyroar",
+        "flabebeLine": "Own the whole line: Flabébé, Floette and Florges",
+        "skiddoLine": "Own the whole line: Skiddo and Gogoat",
+        "panchamLine": "Own the whole line: Pancham and Pangoro",
+        "espurrLine": "Own the whole line: Espurr and Meowstic",
+        "honedgeLine": "Own the whole line: Honedge, Doublade and Aegislash",
+        "spritzeeLine": "Own the whole line: Spritzee and Aromatisse",
+        "swirlixLine": "Own the whole line: Swirlix and Slurpuff",
+        "inkayLine": "Own the whole line: Inkay and Malamar",
+        "binacleLine": "Own the whole line: Binacle and Barbaracle",
+        "skrelpLine": "Own the whole line: Skrelp and Dragalge",
+        "clauncherLine": "Own the whole line: Clauncher and Clawitzer",
+        "helioptileLine": "Own the whole line: Helioptile and Heliolisk",
+        "tyruntLine": "Own the whole line: Tyrunt and Tyrantrum",
+        "amauraLine": "Own the whole line: Amaura and Aurorus",
+        "phantumpLine": "Own the whole line: Phantump and Trevenant",
+        "pumpkabooLine": "Own the whole line: Pumpkaboo and Gourgeist",
+        "bergmiteLine": "Own the whole line: Bergmite and Avalugg",
+        "noibatLine": "Own the whole line: Noibat and Noivern",
+        "kalosRoute2": "Own the Pokémon found there in X and Y: Caterpie, Weedle, Pidgey, Zigzagoon, Bunnelby, Fletchling and Scatterbug",
+        "kalosRoute3": "Own the Pokémon found there in X and Y: Pidgey, Pikachu, Seaking, Gyarados, Marill, Dunsparce, Masquerain, Azurill, Crawdaunt, Bidoof, Burmy, Bunnelby and Fletchling",
+        "kalosRoute5": "Own the Pokémon found there in X and Y: Abra, Doduo, Plusle, Minun, Gulpin, Bunnelby, Skiddo, Pancham and Furfrou",
+        "kalosRoute7": "Own the Pokémon found there in X and Y: Snorlax, Smeargle, Volbeat, Illumise, Roselia, Croagunk, Ducklett, Flabébé, Spritzee and Swirlix",
+        "kalosRoute8": "Own the Pokémon found there in X and Y: Tentacool, Cloyster, Starmie, Qwilfish, Wailmer, Spoink, Zangoose, Seviper, Absol, Bagon, Drifloon, Mienfoo, Inkay, Dragalge and Clawitzer",
+        "kalosRoute10": "Own the Pokémon found there in X and Y: Eevee, Snubbull, Houndour, Electrike, Sigilyph, Emolga, Golett and Hawlucha",
+        "kalosRoute11": "Own the Pokémon found there in X and Y: Nidorina, Nidorino, Hariyama, Staravia, Chingling, Stunky, Throh, Sawk and Dedenne",
+        "kalosRoute12": "Own the Pokémon found there in X and Y: Tentacool, Slowpoke, Exeggcute, Pinsir, Tauros, Lapras, Heracross, Corsola, Octillery, Miltank, Huntail, Gorebyss, Pachirisu, Chatot and Mantyke",
+        "kalosRoute14": "Own the Pokémon found there in X and Y: Poliwhirl, Weepinbell, Haunter, Quagsire, Whiscash, Skorupi, Carnivine, Karrablast, Shelmet, Stunfisk and Goomy",
+        "kalosRoute15": "Own the Pokémon found there in X and Y: Poliwhirl, Mightyena, Lombre, Floatzel, Skorupi, Watchog, Liepard, Basculin, Foongus, Pawniard and Klefki",
+        "kalosRoute16": "Own the Pokémon found there in X and Y: Poliwhirl, Lombre, Floatzel and Basculin",
+        "kalosRoute18": "Own the Pokémon found there in X and Y: Sandslash, Graveler, Pupitar, Lairon, Torkoal, Gurdurr, Heatmor and Durant",
+        "kalosRoute19": "Own the Pokémon found there in X and Y: Poliwhirl, Politoed, Quagsire, Whiscash, Stunfisk and Sliggoo",
+        "kalosRoute20": "Own the Pokémon found there in X and Y: Jigglypuff, Noctowl, Zoroark, Gothorita, Amoonguss and Trevenant",
+        "kalosRoute21": "Own the Pokémon found there in X and Y: Poliwhirl, Dragonair, Lombre, Floatzel and Basculin",
+        "kalosRoute22": "Own the Pokémon found there in X and Y: Psyduck, Farfetch’d, Seaking, Gyarados, Azumarill, Dunsparce, Azurill, Sharpedo, Bidoof, Riolu, Bunnelby and Litleo",
+        "santaluneForest": "Own the Pokémon found there in X and Y: Caterpie, Metapod, Weedle, Kakuna, Pikachu, Pansage, Pansear, Panpour, Fletchling and Scatterbug",
+        "parfumPalace": "Own the Pokémon found there in X and Y: Seaking, Gyarados and Crawdaunt",
+        "glitteringCave": "Own the Pokémon found there in X and Y: Machop, Onix, Cubone, Rhyhorn, Kangaskhan, Mawile, Lunatone and Solrock",
+        "connectingCave": "Own the Pokémon found there in X and Y: Zubat, Whismur, Meditite and Axew",
+        "reflectionCave": "Own the Pokémon found there in X and Y: Mr. Mime, Wobbuffet, Sableye, Chingling, Roggenrola, Solosis and Carbink",
+        "azureBay": "Own the Pokémon found there in X and Y: Tentacool, Slowpoke, Exeggcute, Lapras, Lanturn, Octillery, Chatot, Mantyke, Alomomola and Inkay",
+        "lostHotel": "Own the Pokémon found there in X and Y: Magneton, Electrode, Litwick, Pawniard and Klefki",
+        "frostCavern": "Own the Pokémon found there in X and Y: Poliwhirl, Haunter, Jynx, Piloswine, Floatzel, Basculin, Beartic, Cryogonal and Bergmite",
+        "pokemonVillage": "Own the Pokémon found there in X and Y: Poliwhirl, Lombre and Basculin",
+        "terminusCave": "Own the Pokémon found there in X and Y: Sandslash, Graveler, Pupitar, Lairon, Durant and Zygarde",
+        "kalosVictoryRoad": "Own the Pokémon found there in X and Y: Poliwhirl, Poliwrath, Graveler, Haunter, Lickitung, Lombre, Floatzel, Gurdurr, Basculin, Druddigon and Zweilous",
+        "kalosSolos": "Own the 5 Kalos Pokémon that don’t evolve, legendaries and mythicals aside: Furfrou, Hawlucha, Dedenne, Carbink and Klefki",
+        "kalosFossils": "Own both fossils’ lines: Tyrunt, Tyrantrum, Amaura and Aurorus",
+        "bugBadge": "Gym leader Viola’s team: own Surskit and Vivillon",
+        "cliffBadge": "Gym leader Grant’s team: own Amaura and Tyrunt",
+        "rumbleBadge": "Gym leader Korrina’s team: own Mienfoo, Machoke and Hawlucha",
+        "plantBadge": "Gym leader Ramos’s team: own Jumpluff, Weepinbell and Gogoat",
+        "voltageBadge": "Gym leader Clemont’s team: own Emolga, Magneton and Heliolisk",
+        "fairyBadge": "Gym leader Valerie’s team: own Mawile, Mr. Mime and Sylveon",
+        "psychicBadge": "Gym leader Olympia’s team: own Sigilyph, Slowking and Meowstic",
+        "icebergBadge": "Gym leader Wulfric’s team: own Abomasnow, Cryogonal and Avalugg",
+        "malva": "Elite Four Malva’s team in X and Y: own Pyroar, Talonflame, Torkoal and Chandelure",
+        "siebold": "Elite Four Siebold’s team in X and Y: own Clawitzer, Barbaracle, Gyarados and Starmie",
+        "wikstrom": "Elite Four Wikstrom’s team in X and Y: own Klefki, Aegislash, Probopass and Scizor",
+        "drasna": "Elite Four Drasna’s team in X and Y: own Dragalge, Noivern, Altaria and Druddigon",
+        "lysandre": "Lysandre’s team in his last battle in X and Y: own Mienshao, Pyroar, Honchkrow and Gyarados",
+        "az": "AZ’s team when he battles you in X and Y: own Torkoal, Golurk and Sigilyph"
       },
       "families": "Complete {count} evolution line | Complete {count} evolution lines",
       "allStarters": "Own the {count} starter Pokémon, Kanto to Paldea",
@@ -4208,7 +4522,23 @@
       "tc_teamPlasma": "Own {count} different Team Plasma cards (Ghetsis, Colress, their grunts and their frigate)",
       "bwSets": "Own a card from each Black & White set outside Team Plasma’s: Black & White, Emerging Powers, Noble Victories, Next Destinies, Dark Explorers, Dragons Exalted, Boundaries Crossed and Legendary Treasures",
       "plasmaSets": "Own a card from each Team Plasma set: Plasma Storm, Plasma Freeze and Plasma Blast",
-      "unovaReturnSets": "Own a card from both Scarlet & Violet sets back in Unova (2025): Black Bolt and White Flare"
+      "unovaReturnSets": "Own a card from both Scarlet & Violet sets back in Unova (2025): Black Bolt and White Flare",
+      "kalosBadges": "Complete the teams of Kalos’s {count} gym leaders",
+      "kalosEliteFour": "Complete the teams of Kalos’s Elite Four (X and Y)",
+      "kalosLines": "Complete {count} evolution lines of Kalos",
+      "kalosDex": "Own {count} different Pokémon of Kalos (#650 to #721)",
+      "kalosRoutes": "Own every Pokémon of every Kalos route of X and Y, from Route 2 to Route 22",
+      "kalosLandmarks": "Own every Pokémon of Kalos’s caves, forests and hideaways",
+      "kalosPlaceCards": "Own the Kalos places printed as Stadium cards: Lumiose City, Prism Tower and Lysandre Labs",
+      "tc_kalosGymLeaders": "Own a card of each Kalos gym leader who has one: Grant, Korrina, Clemont and Olympia (no Viola, Ramos, Valerie or Wulfric card yet)",
+      "tc_kalosEliteFour": "Own a card of each member of Kalos’s Elite Four who has one: Siebold and Drasna (no Malva or Wikstrom card yet)",
+      "tc_diantha": "Own a Diantha card",
+      "tc_kalosFriends": "Own a card of Shauna, Tierno, Trevor and Serena",
+      "tc_sycamore": "Own a Professor Sycamore card",
+      "tc_az": "Own an AZ card",
+      "tc_teamFlare": "Own {count} different Team Flare cards (Lysandre, Xerosic, their grunts and their gear)",
+      "xySets": "Own a card from each XY set that takes place in Kalos: XY, Flashfire, Furious Fists, Phantom Forces, Ancient Origins, BREAKthrough, BREAKpoint, Fates Collide and Steam Siege",
+      "megaSets": "Own a card from each Mega Evolution set (2025, Legends: Z-A in Lumiose City): Mega Evolution, Phantasmal Flames, Perfect Order, Chaos Rising and Pitch Black"
     },
     "subs": {
       "allLines": "All regions",
@@ -4246,7 +4576,13 @@
       "unovaGyms": "Unova gyms",
       "unovaTrainerCards": "Unova trainers on cards",
       "unovaRoutes": "Unova routes (Black and White)",
-      "unovaLandmarks": "Unova caves, forests and towers"
+      "unovaLandmarks": "Unova caves, forests and towers",
+      "kalosLines": "Kalos lines (X and Y)",
+      "kalosMore": "Kalos, beyond the lines",
+      "kalosGyms": "Kalos gyms",
+      "kalosTrainerCards": "Kalos trainers on cards",
+      "kalosRoutes": "Kalos routes (X and Y)",
+      "kalosLandmarks": "Kalos caves, forests and hideaways"
     }
   },
   "beta": {

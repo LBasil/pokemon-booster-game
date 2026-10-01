@@ -431,7 +431,7 @@ sequenceDiagram
 ## 7. Succès
 
 Définitions : [src/utils/achievements.js](../../src/utils/achievements.js)
-(~890, 20 catégories, sous-catégories `sub` dans les grosses, tags de
+(~970, 20 catégories, sous-catégories `sub` dans les grosses, tags de
 région `tags` pour le filtre « Région », `?region=`). Les groupes de Pokémon (lignées d'évolution,
 légendaires et fabuleux, équipes des champions d'arène de Kanto et Johto,
 Conseil 4, Maîtres de la Ligue, rivaux et héros, lieux et leurs Pokémon
@@ -457,7 +457,11 @@ et 2022) et Unys
 solitaires, fossiles, singes d'Ogoesse, routes 1 à 18 (ids `unovaRoute<n>`,
 pour ne pas croiser celles de Kanto), Tour Dragospire, Grotte Cyclopéenne
 et autres lieux, badges, Conseil 4, N et Ghetis, N et Team Plasma en
-cartes, séries Noir & Blanc, Plasma, Foudre Noire et Flamme Blanche). Équipes et noms officiels vérifiés sur PokéAPI et Poképédia ; leur
+cartes, séries Noir & Blanc, Plasma, Foudre Noire et Flamme Blanche) et
+Kalos ([src/utils/kalos.js](../../src/utils/kalos.js) : lignées de X/Y,
+solitaires, fossiles, routes 2 à 22 (`kalosRoute<n>`), Forêt de
+Neuvartault, Grotte Coda et autres lieux, badges, Conseil 4, Lysandre et
+AZ, Dianthéa et Team Flare en cartes, séries XY et Méga-Évolution). Équipes et noms officiels vérifiés sur PokéAPI et Poképédia ; leur
 description nomme les membres (`achievements.desc.groups.<id>`), donc
 changer une liste = changer ses deux textes. **Calculés dans le navigateur, par mode.** Le
 Défi est mis en avant, c'est celui qui compte.

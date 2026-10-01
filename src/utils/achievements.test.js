@@ -7,6 +7,7 @@ import johto from './johto'
 import hoenn from './hoenn'
 import sinnoh from './sinnoh'
 import unova from './unova'
+import kalos from './kalos'
 import { LEGENDARIES, LEGENDS, MYTHICALS } from './pokemonGroups'
 
 const card = (id, fields = {}) => ({
@@ -401,6 +402,14 @@ describe('no duplicates', () => {
     const all = [...lines, ...unova.extras.unovaSolos, ...legends].sort((a, b) => a - b)
     expect(all).toEqual(Array.from({ length: 156 }, (_, i) => i + 494))
   })
+
+  it('split every Kalos Pokémon into lines, loners, legends and Sylveon', () => {
+    const lines = Object.values(kalos.lines).flat()
+    const legends = [...LEGENDARIES, ...MYTHICALS].filter((n) => n >= 650 && n <= 721)
+    const sylveon = KANTO_EXTRAS.eeveelutions.filter((n) => n >= 650 && n <= 721)
+    const all = [...lines, ...kalos.extras.kalosSolos, ...legends, ...sylveon].sort((a, b) => a - b)
+    expect(all).toEqual(Array.from({ length: 72 }, (_, i) => i + 650))
+  })
 })
 
 describe('Kanto', () => {
@@ -602,5 +611,38 @@ describe('Unova', () => {
     expect(a.bwSets.current).toBe(2)
     expect(a.plasmaSets.current).toBe(1)
     expect(a.unovaReturnSets.current).toBe(1)
+  })
+})
+
+describe('Kalos', () => {
+  const dex = (...numbers) => numbers.map((n) => entry(`xy1-${n}`, { national_pokedex_number: n }))
+  const named = (...names) => names.map((name, i) => entry(`xy4-${i}`, { name }))
+
+  it('counts complete Kalos lines, gyms, the League, Lysandre and AZ', () => {
+    const a = byId(achievements(dex(659, 660, 283, 666, 707, 681, 476, 212, 324, 623, 561), sets))
+    expect(a.bunnelbyLine).toMatchObject({ unlocked: true, sub: 'kalosLines', tags: ['kalos'] })
+    expect(a.goomyLine.sub).toBe('kalosLines') // moved from the other regions' lines
+    expect(a.bugBadge).toMatchObject({ unlocked: true, sub: 'kalosGyms' })
+    expect(a.wikstrom.unlocked).toBe(true)
+    expect(a.az.unlocked).toBe(true)
+    expect(a.kalosSolos.current).toBe(1) // Klefki
+    expect(a.kalosDex25.current).toBe(5)
+  })
+
+  it('reads Kalos trainers’ and places’ cards from their names', () => {
+    const cards = named('Grant', "Clemont's Quick Wit", 'Siebold', 'Shauna', 'AZ', "AZ's Tranquility", 'Lysandre', 'Lysandre Labs', 'Head Ringer Team Flare Hyper Gear', 'Team Flare Grunt', 'Lumiose Galette')
+    const a = byId(achievements(cards, sets))
+    expect(a.tc_kalosGymLeaders.current).toBe(2)
+    expect(a.tc_kalosEliteFour.current).toBe(1)
+    expect(a.tc_kalosFriends.current).toBe(1)
+    expect(a.tc_az.unlocked).toBe(true)
+    expect(a.tc_teamFlare.current).toBe(4) // Lysandre, his Labs, the gear, the grunt
+    expect(a.kalosPlaceCards.current).toBe(1) // the Labs, not the Galette
+  })
+
+  it('counts the Kalos sets', () => {
+    const a = byId(achievements([entry('xy1-1'), entry('xy5-1'), entry('xy11-1'), entry('me3-1')], sets))
+    expect(a.xySets.current).toBe(2) // Primal Clash is Hoenn's
+    expect(a.megaSets.current).toBe(1)
   })
 })

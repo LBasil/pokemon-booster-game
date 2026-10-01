@@ -3484,6 +3484,255 @@
       },
       "unovaReturnSets": {
         "title": "Retour à Unys"
+      },
+      "bunnelbyLine": {
+        "title": "Lignée d’Excavarenne"
+      },
+      "fletchlingLine": {
+        "title": "Lignée de Flambusard"
+      },
+      "scatterbugLine": {
+        "title": "Lignée de Prismillon"
+      },
+      "litleoLine": {
+        "title": "Lignée de Némélios"
+      },
+      "flabebeLine": {
+        "title": "Lignée de Florges"
+      },
+      "skiddoLine": {
+        "title": "Lignée de Chevroum"
+      },
+      "panchamLine": {
+        "title": "Lignée de Pandarbare"
+      },
+      "espurrLine": {
+        "title": "Lignée de Mistigrix"
+      },
+      "honedgeLine": {
+        "title": "Lignée d’Exagide"
+      },
+      "spritzeeLine": {
+        "title": "Lignée de Cocotine"
+      },
+      "swirlixLine": {
+        "title": "Lignée de Cupcanaille"
+      },
+      "inkayLine": {
+        "title": "Lignée de Sepiatroce"
+      },
+      "binacleLine": {
+        "title": "Lignée de Golgopathe"
+      },
+      "skrelpLine": {
+        "title": "Lignée de Kravarech"
+      },
+      "clauncherLine": {
+        "title": "Lignée de Gamblast"
+      },
+      "helioptileLine": {
+        "title": "Lignée d’Iguolta"
+      },
+      "tyruntLine": {
+        "title": "Lignée de Rexillius"
+      },
+      "amauraLine": {
+        "title": "Lignée de Dragmara"
+      },
+      "phantumpLine": {
+        "title": "Lignée de Desséliande"
+      },
+      "pumpkabooLine": {
+        "title": "Lignée de Banshitrouye"
+      },
+      "bergmiteLine": {
+        "title": "Lignée de Séracrawl"
+      },
+      "noibatLine": {
+        "title": "Lignée de Bruyverne"
+      },
+      "kalosRoute2": {
+        "title": "Route 2 de Kalos"
+      },
+      "kalosRoute3": {
+        "title": "Route 3 de Kalos"
+      },
+      "kalosRoute5": {
+        "title": "Route 5 de Kalos"
+      },
+      "kalosRoute7": {
+        "title": "Route 7 de Kalos"
+      },
+      "kalosRoute8": {
+        "title": "Route 8 de Kalos"
+      },
+      "kalosRoute10": {
+        "title": "Route 10 de Kalos"
+      },
+      "kalosRoute11": {
+        "title": "Route 11 de Kalos"
+      },
+      "kalosRoute12": {
+        "title": "Route 12 de Kalos"
+      },
+      "kalosRoute14": {
+        "title": "Route 14 de Kalos"
+      },
+      "kalosRoute15": {
+        "title": "Route 15 de Kalos"
+      },
+      "kalosRoute16": {
+        "title": "Route 16 de Kalos"
+      },
+      "kalosRoute18": {
+        "title": "Route 18 de Kalos"
+      },
+      "kalosRoute19": {
+        "title": "Route 19 de Kalos"
+      },
+      "kalosRoute20": {
+        "title": "Route 20 de Kalos"
+      },
+      "kalosRoute21": {
+        "title": "Route 21 de Kalos"
+      },
+      "kalosRoute22": {
+        "title": "Route 22 de Kalos"
+      },
+      "santaluneForest": {
+        "title": "Forêt de Neuvartault"
+      },
+      "parfumPalace": {
+        "title": "Palais Chaydeuvre"
+      },
+      "glitteringCave": {
+        "title": "Grotte Étincelante"
+      },
+      "connectingCave": {
+        "title": "Cave Connecterre"
+      },
+      "reflectionCave": {
+        "title": "Grotte Miroitante"
+      },
+      "azureBay": {
+        "title": "Baie Azur"
+      },
+      "lostHotel": {
+        "title": "Hôtel Désolation"
+      },
+      "frostCavern": {
+        "title": "Caverne Gelée"
+      },
+      "pokemonVillage": {
+        "title": "Village Pokémon"
+      },
+      "terminusCave": {
+        "title": "Grotte Coda"
+      },
+      "kalosVictoryRoad": {
+        "title": "Route Victoire de Kalos"
+      },
+      "kalosSolos": {
+        "title": "Solitaires de Kalos"
+      },
+      "kalosFossils": {
+        "title": "Fossiles de Kalos"
+      },
+      "kalosLines10": {
+        "title": "Album de famille de Kalos"
+      },
+      "kalosLines26": {
+        "title": "Toutes les lignées de Kalos"
+      },
+      "kalosDex25": {
+        "title": "Débutant de Kalos"
+      },
+      "kalosDex50": {
+        "title": "Dresseur de Kalos"
+      },
+      "bugBadge": {
+        "title": "Badge Coléoptère"
+      },
+      "cliffBadge": {
+        "title": "Badge Mur"
+      },
+      "rumbleBadge": {
+        "title": "Badge Lutte"
+      },
+      "plantBadge": {
+        "title": "Badge Végétal"
+      },
+      "voltageBadge": {
+        "title": "Badge Tension"
+      },
+      "fairyBadge": {
+        "title": "Badge Nymphe"
+      },
+      "psychicBadge": {
+        "title": "Badge Psychisme"
+      },
+      "icebergBadge": {
+        "title": "Badge Iceberg"
+      },
+      "kalosBadges": {
+        "title": "Boîte à badges de Kalos"
+      },
+      "malva": {
+        "title": "Malva"
+      },
+      "siebold": {
+        "title": "Narcisse"
+      },
+      "wikstrom": {
+        "title": "Thyméo"
+      },
+      "drasna": {
+        "title": "Dracéna"
+      },
+      "kalosEliteFour": {
+        "title": "La Ligue de Kalos"
+      },
+      "lysandre": {
+        "title": "Lysandre, chef de la Team Flare"
+      },
+      "az": {
+        "title": "AZ, le roi éternel"
+      },
+      "kalosRoutes": {
+        "title": "Toutes les routes de Kalos"
+      },
+      "kalosLandmarks": {
+        "title": "Explorateur de Kalos"
+      },
+      "kalosPlaceCards": {
+        "title": "Kalos en cartes"
+      },
+      "tc_kalosGymLeaders": {
+        "title": "Champions de Kalos dans le classeur"
+      },
+      "tc_kalosEliteFour": {
+        "title": "Le Conseil 4 de Kalos en cartes"
+      },
+      "tc_diantha": {
+        "title": "Dianthéa en scène"
+      },
+      "tc_kalosFriends": {
+        "title": "Amis de Bourg Croquis"
+      },
+      "tc_sycamore": {
+        "title": "Le labo du Prof. Platane"
+      },
+      "tc_az": {
+        "title": "La carte d’AZ"
+      },
+      "tc_teamFlare": {
+        "title": "La mode Team Flare"
+      },
+      "xySets": {
+        "title": "L’ère XY"
+      },
+      "megaSets": {
+        "title": "Retour à Kalos"
       }
     },
     "desc": {
@@ -4096,7 +4345,72 @@
         "caitlin": "L’équipe de Percila, membre du Conseil 4 dans Noir et Blanc : possède Cryptéro, Mushana, Symbios et Sidérella",
         "marshal": "L’équipe de Kunz, membre du Conseil 4 dans Noir et Blanc : possède Judokrak, Karaclée, Bétochef et Shaofouine",
         "n": "L’équipe de N dans son palais dans Noir et Blanc, son légendaire à part : possède Aéroptéryx, Mégapagos, Zoroark, Sorbouboul et Cliticlic",
-        "ghetsis": "L’équipe de Ghetis juste après N dans Noir et Blanc : possède Tutankafer, Frison, Crapustule, Scalproie, Ohmassacre et Trioxhydre"
+        "ghetsis": "L’équipe de Ghetis juste après N dans Noir et Blanc : possède Tutankafer, Frison, Crapustule, Scalproie, Ohmassacre et Trioxhydre",
+        "bunnelbyLine": "Possède toute la lignée : Sapereau et Excavarenne",
+        "fletchlingLine": "Possède toute la lignée : Passerouge, Braisillon et Flambusard",
+        "scatterbugLine": "Possède toute la lignée : Lépidonille, Pérégrain et Prismillon",
+        "litleoLine": "Possède toute la lignée : Hélionceau et Némélios",
+        "flabebeLine": "Possède toute la lignée : Flabébé, Floette et Florges",
+        "skiddoLine": "Possède toute la lignée : Cabriolaine et Chevroum",
+        "panchamLine": "Possède toute la lignée : Pandespiègle et Pandarbare",
+        "espurrLine": "Possède toute la lignée : Psystigri et Mistigrix",
+        "honedgeLine": "Possède toute la lignée : Monorpale, Dimoclès et Exagide",
+        "spritzeeLine": "Possède toute la lignée : Fluvetin et Cocotine",
+        "swirlixLine": "Possède toute la lignée : Sucroquin et Cupcanaille",
+        "inkayLine": "Possède toute la lignée : Sepiatop et Sepiatroce",
+        "binacleLine": "Possède toute la lignée : Opermine et Golgopathe",
+        "skrelpLine": "Possède toute la lignée : Venalgue et Kravarech",
+        "clauncherLine": "Possède toute la lignée : Flingouste et Gamblast",
+        "helioptileLine": "Possède toute la lignée : Galvaran et Iguolta",
+        "tyruntLine": "Possède toute la lignée : Ptyranidur et Rexillius",
+        "amauraLine": "Possède toute la lignée : Amagara et Dragmara",
+        "phantumpLine": "Possède toute la lignée : Brocélôme et Desséliande",
+        "pumpkabooLine": "Possède toute la lignée : Pitrouille et Banshitrouye",
+        "bergmiteLine": "Possède toute la lignée : Grelaçon et Séracrawl",
+        "noibatLine": "Possède toute la lignée : Sonistrelle et Bruyverne",
+        "kalosRoute2": "Possède les Pokémon qu’on y trouve dans X et Y : Chenipan, Aspicot, Roucool, Zigzaton, Sapereau, Passerouge et Lépidonille",
+        "kalosRoute3": "Possède les Pokémon qu’on y trouve dans X et Y : Roucool, Pikachu, Poissoroy, Léviator, Marill, Insolourdo, Maskadra, Azurill, Colhomard, Keunotor, Cheniti, Sapereau et Passerouge",
+        "kalosRoute5": "Possède les Pokémon qu’on y trouve dans X et Y : Abra, Doduo, Posipi, Négapi, Gloupti, Sapereau, Cabriolaine, Pandespiègle et Couafarel",
+        "kalosRoute7": "Possède les Pokémon qu’on y trouve dans X et Y : Ronflex, Queulorior, Muciole, Lumivole, Rosélia, Cradopaud, Couaneton, Flabébé, Fluvetin et Sucroquin",
+        "kalosRoute8": "Possède les Pokémon qu’on y trouve dans X et Y : Tentacool, Crustabri, Staross, Qwilfish, Wailmer, Spoink, Mangriff, Séviper, Absol, Draby, Baudrive, Kungfouine, Sepiatop, Kravarech et Gamblast",
+        "kalosRoute10": "Possède les Pokémon qu’on y trouve dans X et Y : Évoli, Snubbull, Malosse, Dynavolt, Cryptéro, Emolga, Gringolem et Brutalibré",
+        "kalosRoute11": "Possède les Pokémon qu’on y trouve dans X et Y : Nidorina, Nidorino, Hariyama, Étourvol, Korillon, Moufouette, Judokrak, Karaclée et Dedenne",
+        "kalosRoute12": "Possède les Pokémon qu’on y trouve dans X et Y : Tentacool, Ramoloss, Noeunoeuf, Scarabrute, Tauros, Lokhlass, Scarhino, Corayon, Octillery, Écrémeuh, Serpang, Rosabyss, Pachirisu, Pijako et Babimanta",
+        "kalosRoute14": "Possède les Pokémon qu’on y trouve dans X et Y : Têtarte, Boustiflor, Spectrum, Maraiste, Barbicha, Rapion, Vortente, Carabing, Escargaume, Limonde et Mucuscule",
+        "kalosRoute15": "Possède les Pokémon qu’on y trouve dans X et Y : Têtarte, Grahyèna, Lombre, Mustéflott, Rapion, Miradar, Léopardus, Bargantua, Trompignon, Scalpion et Trousselin",
+        "kalosRoute16": "Possède les Pokémon qu’on y trouve dans X et Y : Têtarte, Lombre, Mustéflott et Bargantua",
+        "kalosRoute18": "Possède les Pokémon qu’on y trouve dans X et Y : Sablaireau, Gravalanch, Ymphect, Galegon, Chartor, Ouvrifier, Aflamanoir et Fermite",
+        "kalosRoute19": "Possède les Pokémon qu’on y trouve dans X et Y : Têtarte, Tarpaud, Maraiste, Barbicha, Limonde et Colimucus",
+        "kalosRoute20": "Possède les Pokémon qu’on y trouve dans X et Y : Rondoudou, Noarfang, Zoroark, Mesmérella, Gaulet et Desséliande",
+        "kalosRoute21": "Possède les Pokémon qu’on y trouve dans X et Y : Têtarte, Draco, Lombre, Mustéflott et Bargantua",
+        "kalosRoute22": "Possède les Pokémon qu’on y trouve dans X et Y : Psykokwak, Canarticho, Poissoroy, Léviator, Azumarill, Insolourdo, Azurill, Sharpedo, Keunotor, Riolu, Sapereau et Hélionceau",
+        "santaluneForest": "Possède les Pokémon qu’on y trouve dans X et Y : Chenipan, Chrysacier, Aspicot, Coconfort, Pikachu, Feuillajou, Flamajou, Flotajou, Passerouge et Lépidonille",
+        "parfumPalace": "Possède les Pokémon qu’on y trouve dans X et Y : Poissoroy, Léviator et Colhomard",
+        "glitteringCave": "Possède les Pokémon qu’on y trouve dans X et Y : Machoc, Onix, Osselait, Rhinocorne, Kangourex, Mysdibule, Séléroc et Solaroc",
+        "connectingCave": "Possède les Pokémon qu’on y trouve dans X et Y : Nosferapti, Chuchmur, Méditikka et Coupenotte",
+        "reflectionCave": "Possède les Pokémon qu’on y trouve dans X et Y : M. Mime, Qulbutoké, Ténéfix, Korillon, Nodulithe, Nucléos et Strassie",
+        "azureBay": "Possède les Pokémon qu’on y trouve dans X et Y : Tentacool, Ramoloss, Noeunoeuf, Lokhlass, Lanturn, Octillery, Pijako, Babimanta, Mamanbo et Sepiatop",
+        "lostHotel": "Possède les Pokémon qu’on y trouve dans X et Y : Magnéton, Électrode, Funécire, Scalpion et Trousselin",
+        "frostCavern": "Possède les Pokémon qu’on y trouve dans X et Y : Têtarte, Spectrum, Lippoutou, Cochignon, Mustéflott, Bargantua, Polagriffe, Hexagel et Grelaçon",
+        "pokemonVillage": "Possède les Pokémon qu’on y trouve dans X et Y : Têtarte, Lombre et Bargantua",
+        "terminusCave": "Possède les Pokémon qu’on y trouve dans X et Y : Sablaireau, Gravalanch, Ymphect, Galegon, Fermite et Zygarde",
+        "kalosVictoryRoad": "Possède les Pokémon qu’on y trouve dans X et Y : Têtarte, Tartard, Gravalanch, Spectrum, Excelangue, Lombre, Mustéflott, Ouvrifier, Bargantua, Drakkarmin et Diamat",
+        "kalosSolos": "Possède les 5 Pokémon de Kalos qui n’évoluent pas, légendaires et fabuleux à part : Couafarel, Brutalibré, Dedenne, Strassie et Trousselin",
+        "kalosFossils": "Possède les lignées des deux fossiles : Ptyranidur, Rexillius, Amagara et Dragmara",
+        "bugBadge": "L’équipe de Violette, championne d’arène : possède Arakdo et Prismillon",
+        "cliffBadge": "L’équipe de Lino, champion d’arène : possède Amagara et Ptyranidur",
+        "rumbleBadge": "L’équipe de Cornélia, championne d’arène : possède Kungfouine, Machopeur et Brutalibré",
+        "plantBadge": "L’équipe d’Amaro, champion d’arène : possède Cotovol, Boustiflor et Chevroum",
+        "voltageBadge": "L’équipe de Lem, champion d’arène : possède Emolga, Magnéton et Iguolta",
+        "fairyBadge": "L’équipe de Valériane, championne d’arène : possède Mysdibule, M. Mime et Nymphali",
+        "psychicBadge": "L’équipe d’Astera, championne d’arène : possède Cryptéro, Roigada et Mistigrix",
+        "icebergBadge": "L’équipe d’Urup, champion d’arène : possède Blizzaroi, Hexagel et Séracrawl",
+        "malva": "L’équipe de Malva, membre du Conseil 4 dans X et Y : possède Némélios, Flambusard, Chartor et Lugulabre",
+        "siebold": "L’équipe de Narcisse, membre du Conseil 4 dans X et Y : possède Gamblast, Golgopathe, Léviator et Staross",
+        "wikstrom": "L’équipe de Thyméo, membre du Conseil 4 dans X et Y : possède Trousselin, Exagide, Tarinorme et Cizayox",
+        "drasna": "L’équipe de Dracéna, membre du Conseil 4 dans X et Y : possède Kravarech, Bruyverne, Altaria et Drakkarmin",
+        "lysandre": "L’équipe de Lysandre lors de son dernier combat dans X et Y : possède Shaofouine, Némélios, Corboss et Léviator",
+        "az": "L’équipe d’AZ quand il t’affronte dans X et Y : possède Chartor, Golemastoc et Cryptéro"
       },
       "families": "Complète {count} lignée d’évolution | Complète {count} lignées d’évolution",
       "allStarters": "Possède les {count} Pokémon de départ, de Kanto à Paldea",
@@ -4208,7 +4522,23 @@
       "tc_teamPlasma": "Possède {count} cartes différentes de la Team Plasma (Ghetis, Nikolaï, leurs sbires et leur frégate)",
       "bwSets": "Possède une carte de chaque série Noir & Blanc hors Team Plasma : Noir & Blanc, Pouvoirs Émergents, Nobles Victoires, Destinées Futures, Explorateurs Obscurs, Dragons Exaltés, Frontières Franchies et Trésors Légendaires",
       "plasmaSets": "Possède une carte de chaque série de la Team Plasma : Tempête Plasma, Glaciation Plasma et Explosion Plasma",
-      "unovaReturnSets": "Possède une carte des deux séries Écarlate et Violet de retour à Unys (2025) : Foudre Noire et Flamme Blanche"
+      "unovaReturnSets": "Possède une carte des deux séries Écarlate et Violet de retour à Unys (2025) : Foudre Noire et Flamme Blanche",
+      "kalosBadges": "Complète les équipes des {count} champions d’arène de Kalos",
+      "kalosEliteFour": "Complète les équipes du Conseil 4 de Kalos (X et Y)",
+      "kalosLines": "Complète {count} lignées d’évolution de Kalos",
+      "kalosDex": "Possède {count} Pokémon différents de Kalos (n° 650 à 721)",
+      "kalosRoutes": "Possède tous les Pokémon de toutes les routes de Kalos de X et Y, de la route 2 à la route 22",
+      "kalosLandmarks": "Possède tous les Pokémon des grottes, forêts et lieux cachés de Kalos",
+      "kalosPlaceCards": "Possède les lieux de Kalos imprimés en cartes Stade : Illumis, Tour Prismatique et Labos Lysandre",
+      "tc_kalosGymLeaders": "Possède une carte de chaque champion d’arène de Kalos qui en a une : Lino, Cornélia, Lem et Astera (pas encore de carte de Violette, Amaro, Valériane ou Urup)",
+      "tc_kalosEliteFour": "Possède une carte de chaque membre du Conseil 4 de Kalos qui en a une : Narcisse et Dracéna (pas encore de carte de Malva ou Thyméo)",
+      "tc_diantha": "Possède une carte de Dianthéa",
+      "tc_kalosFriends": "Possède une carte de Sannah, Tierno, Trovato et Serena",
+      "tc_sycamore": "Possède une carte du Professeur Platane",
+      "tc_az": "Possède une carte d’AZ",
+      "tc_teamFlare": "Possède {count} cartes différentes de la Team Flare (Lysandre, Xanthin, leurs sbires et leur équipement)",
+      "xySets": "Possède une carte de chaque série XY qui se passe à Kalos : XY, Étincelles, Poings Furieux, Vigueur Spectrale, Origines Antiques, Impulsion TURBO, Rupture TURBO, Impact des Destins et Offensive Vapeur",
+      "megaSets": "Possède une carte de chaque série Méga-Évolution (2025, Légendes Pokémon : Z-A à Illumis) : Méga-Évolution, Flammes Fantasmagoriques, Équilibre Parfait, Chaos Ascendant et Nuit Noire"
     },
     "subs": {
       "allLines": "Toutes régions",
@@ -4246,7 +4576,13 @@
       "unovaGyms": "Arènes d’Unys",
       "unovaTrainerCards": "Dresseurs d’Unys en cartes",
       "unovaRoutes": "Routes d’Unys (Noir et Blanc)",
-      "unovaLandmarks": "Grottes, forêts et tours d’Unys"
+      "unovaLandmarks": "Grottes, forêts et tours d’Unys",
+      "kalosLines": "Lignées de Kalos (X et Y)",
+      "kalosMore": "Kalos, au-delà des lignées",
+      "kalosGyms": "Arènes de Kalos",
+      "kalosTrainerCards": "Dresseurs de Kalos en cartes",
+      "kalosRoutes": "Routes de Kalos (X et Y)",
+      "kalosLandmarks": "Grottes, forêts et lieux cachés de Kalos"
     }
   },
   "beta": {
