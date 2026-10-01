@@ -3103,6 +3103,387 @@
       },
       "sinnohReturnSets": {
         "title": "Retour à Sinnoh"
+      },
+      "patratLine": {
+        "title": "Lignée de Miradar"
+      },
+      "lillipupLine": {
+        "title": "Lignée de Mastouffe"
+      },
+      "purrloinLine": {
+        "title": "Lignée de Léopardus"
+      },
+      "pansageLine": {
+        "title": "Lignée de Feuiloutan"
+      },
+      "pansearLine": {
+        "title": "Lignée de Flamoutan"
+      },
+      "panpourLine": {
+        "title": "Lignée de Flotoutan"
+      },
+      "munnaLine": {
+        "title": "Lignée de Mushana"
+      },
+      "pidoveLine": {
+        "title": "Lignée de Déflaisan"
+      },
+      "blitzleLine": {
+        "title": "Lignée de Zéblitz"
+      },
+      "roggenrolaLine": {
+        "title": "Lignée de Gigalithe"
+      },
+      "woobatLine": {
+        "title": "Lignée de Rhinolove"
+      },
+      "drilburLine": {
+        "title": "Lignée de Minotaupe"
+      },
+      "timburrLine": {
+        "title": "Lignée de Bétochef"
+      },
+      "tympoleLine": {
+        "title": "Lignée de Crapustule"
+      },
+      "sewaddleLine": {
+        "title": "Lignée de Manternel"
+      },
+      "venipedeLine": {
+        "title": "Lignée de Brutapode"
+      },
+      "cottoneeLine": {
+        "title": "Lignée de Farfaduvet"
+      },
+      "petililLine": {
+        "title": "Lignée de Fragilady"
+      },
+      "sandileLine": {
+        "title": "Lignée de Crocorible"
+      },
+      "darumakaLine": {
+        "title": "Lignée de Darumacho"
+      },
+      "dwebbleLine": {
+        "title": "Lignée de Crabaraque"
+      },
+      "scraggyLine": {
+        "title": "Lignée de Baggaïd"
+      },
+      "yamaskLine": {
+        "title": "Lignée de Tutankafer"
+      },
+      "tirtougaLine": {
+        "title": "Lignée de Mégapagos"
+      },
+      "archenLine": {
+        "title": "Lignée d’Aéroptéryx"
+      },
+      "trubbishLine": {
+        "title": "Lignée de Miasmax"
+      },
+      "zoruaLine": {
+        "title": "Lignée de Zoroark"
+      },
+      "minccinoLine": {
+        "title": "Lignée de Pashmilla"
+      },
+      "gothitaLine": {
+        "title": "Lignée de Sidérella"
+      },
+      "solosisLine": {
+        "title": "Lignée de Symbios"
+      },
+      "ducklettLine": {
+        "title": "Lignée de Lakmécygne"
+      },
+      "vanilliteLine": {
+        "title": "Lignée de Sorbouboul"
+      },
+      "deerlingLine": {
+        "title": "Lignée d’Haydaim"
+      },
+      "karrablastLine": {
+        "title": "Lignée de Lançargot"
+      },
+      "foongusLine": {
+        "title": "Lignée de Gaulet"
+      },
+      "frillishLine": {
+        "title": "Lignée de Moyade"
+      },
+      "joltikLine": {
+        "title": "Lignée de Mygavolt"
+      },
+      "ferroseedLine": {
+        "title": "Lignée de Noacier"
+      },
+      "klinkLine": {
+        "title": "Lignée de Cliticlic"
+      },
+      "tynamoLine": {
+        "title": "Lignée d’Ohmassacre"
+      },
+      "elgyemLine": {
+        "title": "Lignée de Neitram"
+      },
+      "litwickLine": {
+        "title": "Lignée de Lugulabre"
+      },
+      "axewLine": {
+        "title": "Lignée de Tranchodon"
+      },
+      "cubchooLine": {
+        "title": "Lignée de Polagriffe"
+      },
+      "shelmetLine": {
+        "title": "Lignée de Limaspeed"
+      },
+      "mienfooLine": {
+        "title": "Lignée de Shaofouine"
+      },
+      "golettLine": {
+        "title": "Lignée de Golemastoc"
+      },
+      "pawniardLine": {
+        "title": "Lignée de Scalproie"
+      },
+      "ruffletLine": {
+        "title": "Lignée de Gueriaigle"
+      },
+      "vullabyLine": {
+        "title": "Lignée de Vaututrice"
+      },
+      "larvestaLine": {
+        "title": "Lignée de Pyrax"
+      },
+      "unovaRoute1": {
+        "title": "Route 1 d’Unys"
+      },
+      "unovaRoute2": {
+        "title": "Route 2 d’Unys"
+      },
+      "unovaRoute3": {
+        "title": "Route 3 d’Unys"
+      },
+      "unovaRoute4": {
+        "title": "Route 4 d’Unys"
+      },
+      "unovaRoute5and16": {
+        "title": "Routes 5 et 16 d’Unys"
+      },
+      "unovaRoute6": {
+        "title": "Route 6 d’Unys"
+      },
+      "unovaRoute7": {
+        "title": "Route 7 d’Unys"
+      },
+      "unovaRoute8": {
+        "title": "Route 8 d’Unys"
+      },
+      "unovaRoute9": {
+        "title": "Route 9 d’Unys"
+      },
+      "unovaRoute10": {
+        "title": "Route 10 d’Unys"
+      },
+      "unovaRoute11": {
+        "title": "Route 11 d’Unys"
+      },
+      "unovaRoute12": {
+        "title": "Route 12 d’Unys"
+      },
+      "unovaRoute13": {
+        "title": "Route 13 d’Unys"
+      },
+      "unovaRoute14": {
+        "title": "Route 14 d’Unys"
+      },
+      "unovaRoute15": {
+        "title": "Route 15 d’Unys"
+      },
+      "unovaRoute17": {
+        "title": "Route 17 d’Unys"
+      },
+      "unovaRoute18": {
+        "title": "Route 18 d’Unys"
+      },
+      "dreamyard": {
+        "title": "Vestiges du Rêve"
+      },
+      "pinwheelForest": {
+        "title": "Forêt d'Empoigne"
+      },
+      "desertResort": {
+        "title": "Désert Délassant"
+      },
+      "relicCastle": {
+        "title": "Château Enfoui"
+      },
+      "coldStorage": {
+        "title": "Hangar Frigorifique"
+      },
+      "chargestoneCave": {
+        "title": "Grotte Électrolithe"
+      },
+      "celestialTower": {
+        "title": "Tour des Cieux"
+      },
+      "twistMountain": {
+        "title": "Mont Foré"
+      },
+      "dragonspiralTower": {
+        "title": "Tour Dragospire"
+      },
+      "unovaVictoryRoad": {
+        "title": "Route Victoire d’Unys"
+      },
+      "wellspringCave": {
+        "title": "Veine Souterraine"
+      },
+      "mistraltonCave": {
+        "title": "Grotte Parsemille"
+      },
+      "challengersCave": {
+        "title": "Antre d’Entraînement"
+      },
+      "giantChasm": {
+        "title": "Grotte Cyclopéenne"
+      },
+      "p2Laboratory": {
+        "title": "Labo P2"
+      },
+      "villageBridge": {
+        "title": "Pont du Hameau"
+      },
+      "abundantShrine": {
+        "title": "Autel Abondance"
+      },
+      "undellaBay": {
+        "title": "Baie Vaguelone"
+      },
+      "lostlornForest": {
+        "title": "Bois des Illusions"
+      },
+      "unovaSolos": {
+        "title": "Solitaires d’Unys"
+      },
+      "unovaFossils": {
+        "title": "Fossiles d’Unys"
+      },
+      "elementalMonkeys": {
+        "title": "Les singes d’Ogoesse"
+      },
+      "tradeSwap": {
+        "title": "L’échange de coquille"
+      },
+      "unovaNewEvolutions": {
+        "title": "Évolutions tardives d’Unys"
+      },
+      "unovaForms": {
+        "title": "Détour par Galar"
+      },
+      "unovaLines10": {
+        "title": "Album de famille d’Unys"
+      },
+      "unovaLines25": {
+        "title": "Généalogiste d’Unys"
+      },
+      "unovaLines55": {
+        "title": "Toutes les lignées d’Unys"
+      },
+      "unovaDex25": {
+        "title": "Débutant d’Unys"
+      },
+      "unovaDex50": {
+        "title": "Dresseur d’Unys"
+      },
+      "unovaDex100": {
+        "title": "As d’Unys"
+      },
+      "trioBadge": {
+        "title": "Badge Triple"
+      },
+      "basicBadge": {
+        "title": "Badge Basique"
+      },
+      "insectBadge": {
+        "title": "Badge Élytre"
+      },
+      "boltBadge": {
+        "title": "Badge Volt"
+      },
+      "quakeBadge": {
+        "title": "Badge Sismique"
+      },
+      "jetBadge": {
+        "title": "Badge Jet"
+      },
+      "freezeBadge": {
+        "title": "Badge Stalactite"
+      },
+      "legendBadge": {
+        "title": "Badge Mythe"
+      },
+      "unovaBadges": {
+        "title": "Boîte à badges d’Unys"
+      },
+      "shauntal": {
+        "title": "Anis"
+      },
+      "grimsley": {
+        "title": "Pieris"
+      },
+      "caitlin": {
+        "title": "Percila"
+      },
+      "marshal": {
+        "title": "Kunz"
+      },
+      "unovaEliteFour": {
+        "title": "La Ligue d’Unys"
+      },
+      "n": {
+        "title": "N, roi de la Team Plasma"
+      },
+      "ghetsis": {
+        "title": "Ghetis, le manipulateur"
+      },
+      "unovaRoutes": {
+        "title": "Toutes les routes d’Unys"
+      },
+      "unovaLandmarks": {
+        "title": "Explorateur d’Unys"
+      },
+      "unovaPlaceCards": {
+        "title": "Unys en cartes"
+      },
+      "tc_unovaGymLeaders": {
+        "title": "Champions d’Unys dans le classeur"
+      },
+      "tc_unovaEliteFour": {
+        "title": "Le Conseil 4 d’Unys en cartes"
+      },
+      "tc_n": {
+        "title": "Les idéaux de N"
+      },
+      "tc_unovaHeroes": {
+        "title": "Amis de Renouet"
+      },
+      "tc_juniper": {
+        "title": "Le labo du Prof. Keteleeria"
+      },
+      "tc_teamPlasma": {
+        "title": "Les complots de la Team Plasma"
+      },
+      "bwSets": {
+        "title": "L’ère Noir & Blanc"
+      },
+      "plasmaSets": {
+        "title": "L’ère Plasma"
+      },
+      "unovaReturnSets": {
+        "title": "Retour à Unys"
       }
     },
     "desc": {
@@ -3609,7 +3990,113 @@
         "sinnohFossils": "Possède les lignées des deux fossiles : Kranidos, Charkos, Dinoclier et Bastiodon",
         "sinnohBabies": "Possède les bébés que Diamant et Perle ont ajoutés aux lignées plus anciennes : Rozbouton, Korillon, Manzaï, Mime Jr., Ptiravi, Goinfrex et Babimanta",
         "sinnohEvolutionBoom": "Possède les 22 évolutions que Diamant et Perle ont données aux Pokémon plus anciens : Roserade, Capidextre, Magirêve, Corboss, Dimoret, Magnézone, Coudlangue, Rhinastoc, Bouldeneu, Élekable, Maganon, Togekiss, Yanmega, Phyllali, Givrali, Scorvol, Mammochon, Porygon-Z, Gallame, Tarinorme, Noctunoir et Momartik",
-        "hisuiNewPokemon": "Possède les nouveaux Pokémon de Légendes Pokémon : Arceus : Cerbyllin, Hachécateur, Ursaking, Paragruel, Farfurex, Qwilpik et Amovénus"
+        "hisuiNewPokemon": "Possède les nouveaux Pokémon de Légendes Pokémon : Arceus : Cerbyllin, Hachécateur, Ursaking, Paragruel, Farfurex, Qwilpik et Amovénus",
+        "patratLine": "Possède toute la lignée : Ratentif et Miradar",
+        "lillipupLine": "Possède toute la lignée : Ponchiot, Ponchien et Mastouffe",
+        "purrloinLine": "Possède toute la lignée : Chacripan et Léopardus",
+        "pansageLine": "Possède toute la lignée : Feuillajou et Feuiloutan",
+        "pansearLine": "Possède toute la lignée : Flamajou et Flamoutan",
+        "panpourLine": "Possède toute la lignée : Flotajou et Flotoutan",
+        "munnaLine": "Possède toute la lignée : Munna et Mushana",
+        "pidoveLine": "Possède toute la lignée : Poichigeon, Colombeau et Déflaisan",
+        "blitzleLine": "Possède toute la lignée : Zébibron et Zéblitz",
+        "roggenrolaLine": "Possède toute la lignée : Nodulithe, Géolithe et Gigalithe",
+        "woobatLine": "Possède toute la lignée : Chovsourir et Rhinolove",
+        "drilburLine": "Possède toute la lignée : Rototaupe et Minotaupe",
+        "timburrLine": "Possède toute la lignée : Charpenti, Ouvrifier et Bétochef",
+        "tympoleLine": "Possède toute la lignée : Tritonde, Batracné et Crapustule",
+        "sewaddleLine": "Possède toute la lignée : Larveyette, Couverdure et Manternel",
+        "venipedeLine": "Possède toute la lignée : Venipatte, Scobolide et Brutapode",
+        "cottoneeLine": "Possède toute la lignée : Doudouvet et Farfaduvet",
+        "petililLine": "Possède toute la lignée : Chlorobule et Fragilady",
+        "sandileLine": "Possède toute la lignée : Mascaïman, Escroco et Crocorible",
+        "darumakaLine": "Possède toute la lignée : Darumarond et Darumacho",
+        "dwebbleLine": "Possède toute la lignée : Crabicoque et Crabaraque",
+        "scraggyLine": "Possède toute la lignée : Baggiguane et Baggaïd",
+        "yamaskLine": "Possède toute la lignée : Tutafeh et Tutankafer",
+        "tirtougaLine": "Possède toute la lignée : Carapagos et Mégapagos",
+        "archenLine": "Possède toute la lignée : Arkéapti et Aéroptéryx",
+        "trubbishLine": "Possède toute la lignée : Miamiasme et Miasmax",
+        "zoruaLine": "Possède toute la lignée : Zorua et Zoroark",
+        "minccinoLine": "Possède toute la lignée : Chinchidou et Pashmilla",
+        "gothitaLine": "Possède toute la lignée : Scrutella, Mesmérella et Sidérella",
+        "solosisLine": "Possède toute la lignée : Nucléos, Méios et Symbios",
+        "ducklettLine": "Possède toute la lignée : Couaneton et Lakmécygne",
+        "vanilliteLine": "Possède toute la lignée : Sorbébé, Sorboul et Sorbouboul",
+        "deerlingLine": "Possède toute la lignée : Vivaldaim et Haydaim",
+        "karrablastLine": "Possède toute la lignée : Carabing et Lançargot",
+        "foongusLine": "Possède toute la lignée : Trompignon et Gaulet",
+        "frillishLine": "Possède toute la lignée : Viskuse et Moyade",
+        "joltikLine": "Possède toute la lignée : Statitik et Mygavolt",
+        "ferroseedLine": "Possède toute la lignée : Grindur et Noacier",
+        "klinkLine": "Possède toute la lignée : Tic, Clic et Cliticlic",
+        "tynamoLine": "Possède toute la lignée : Anchwatt, Lampéroie et Ohmassacre",
+        "elgyemLine": "Possède toute la lignée : Lewsor et Neitram",
+        "litwickLine": "Possède toute la lignée : Funécire, Mélancolux et Lugulabre",
+        "axewLine": "Possède toute la lignée : Coupenotte, Incisache et Tranchodon",
+        "cubchooLine": "Possède toute la lignée : Polarhume et Polagriffe",
+        "shelmetLine": "Possède toute la lignée : Escargaume et Limaspeed",
+        "mienfooLine": "Possède toute la lignée : Kungfouine et Shaofouine",
+        "golettLine": "Possède toute la lignée : Gringolem et Golemastoc",
+        "pawniardLine": "Possède toute la lignée : Scalpion et Scalproie",
+        "ruffletLine": "Possède toute la lignée : Furaiglon et Gueriaigle",
+        "vullabyLine": "Possède toute la lignée : Vostourno et Vaututrice",
+        "larvestaLine": "Possède toute la lignée : Pyronille et Pyrax",
+        "unovaRoute1": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Barpau, Ratentif, Ponchiot et Bargantua",
+        "unovaRoute2": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Ratentif, Ponchiot et Chacripan",
+        "unovaRoute3": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Poissirène, Ratentif, Ponchiot, Chacripan, Poichigeon, Zébibron et Bargantua",
+        "unovaRoute4": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Krabby, Coquiperl, Lovdisc, Mascaïman, Darumarond, Baggiguane et Viskuse",
+        "unovaRoute5and16": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Léopardus, Miamiasme, Chinchidou, Scrutella et Nucléos",
+        "unovaRoute6": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Ptitard, Têtarte, Colombeau, Couverdure, Bargantua, Sorbébé, Vivaldaim, Carabing et Trompignon",
+        "unovaRoute7": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Miradar, Colombeau, Zéblitz, Vivaldaim, Trompignon et Polarhume",
+        "unovaRoute8": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Barloche, Batracné, Escargaume et Limonde",
+        "unovaRoute9": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Léopardus, Miasmax, Chinchidou, Mesmérella, Méios et Scalpion",
+        "unovaRoute10": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Ponchien, Judokrak, Karaclée, Trompignon, Gaulet, Frison, Furaiglon et Vostourno",
+        "unovaRoute11": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Akwakwak, Poissirène, Scorplane, Mangriff, Séviper, Mustébouée, Bargantua, Carabing, Gaulet, Scalpion, Furaiglon et Vostourno",
+        "unovaRoute12": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Chrysacier, Coconfort, Galopa, Scarabrute, Tournegrin, Insolourdo, Scarhino, Apitrini, Ceriflor et Colombeau",
+        "unovaRoute13": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Nosferalto, Kokiyas, Krabby, Saquedeneu, Stari, Hélédelle, Goélise, Bekipan, Séléroc, Solaroc, Absol, Lovdisc et Grodrive",
+        "unovaRoute14": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Rondoudou, Akwakwak, Poissirène, Caratroc, Altaria, Tropius, Mustébouée, Grodrive, Bargantua, Neitram et Kungfouine",
+        "unovaRoute15": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Rapasdepic, Ossatueur, Kangourex, Scorplane, Ymphect, Judokrak et Karaclée",
+        "unovaRoute17": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Hypotrempe, Écayon et Viskuse",
+        "unovaRoute18": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Hypotrempe, Loupio, Écayon, Miradar, Judokrak, Karaclée, Crabicoque, Baggiguane et Viskuse",
+        "dreamyard": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Ratentif, Chacripan, Munna et Mushana",
+        "pinwheelForest": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Poissirène, Poichigeon, Charpenti, Tritonde, Judokrak, Karaclée, Larveyette, Venipatte, Doudouvet, Chlorobule, Bargantua et Viridium",
+        "desertResort": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Mascaïman, Darumarond, Maracachi, Crabicoque, Baggiguane et Cryptéro",
+        "relicCastle": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Sablaireau, Onix, Kaorine, Mascaïman, Escroco, Tutafeh, Tutankafer et Pyrax",
+        "coldStorage": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Ponchien, Charpenti, Chinchidou et Sorbébé",
+        "chargestoneCave": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Géolithe, Statitik, Grindur, Tic et Anchwatt",
+        "celestialTower": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Lewsor et Funécire",
+        "twistMountain": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Géolithe, Chovsourir, Ouvrifier, Polarhume et Hexagel",
+        "dragonspiralTower": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Minidraco, Draco, Colombeau, Bargantua, Sorbébé, Vivaldaim, Polarhume, Kungfouine, Drakkarmin, Gringolem, Reshiram et Zekrom",
+        "unovaVictoryRoad": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Ptitard, Têtarte, Géolithe, Chovsourir, Bargantua, Incisache, Kungfouine, Furaiglon, Vostourno, Aflamanoir, Fermite, Solochi et Terrakium",
+        "wellspringCave": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Ptitard, Têtarte, Nodulithe, Chovsourir et Bargantua",
+        "mistraltonCave": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Géolithe, Chovsourir, Coupenotte et Cobaltium",
+        "challengersCave": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Ptitard, Têtarte, Gravalanch, Excelangue, Ténéfix, Mysdibule, Riolu, Géolithe, Chovsourir et Bargantua",
+        "giantChasm": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Mélofée, Nosferalto, Ptitard, Têtarte, Otaria, Saquedeneu, Lippoutou, Métamorph, Farfuret, Cochignon, Cadoizo, Hélédelle, Séléroc, Solaroc, Absol, Métang, Grodrive, Géolithe, Bargantua et Kyurem",
+        "p2Laboratory": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Hypotrempe, Écayon, Miradar, Ponchien, Baggiguane, Viskuse et Tic",
+        "villageBridge": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Akwakwak, Carvanha, Mangriff, Séviper, Castorno, Bargantua, Furaiglon et Vostourno",
+        "abundantShrine": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Goupix, Ramoloss, Poissirène, Noarfang, Cornèbre, Feuforêve, Cerfrousse, Éoko, Archéodong, Doudouvet, Chlorobule, Bargantua et Démétéros",
+        "undellaBay": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Kokiyas, Rémoraid, Goélise, Bekipan, Obalie, Lovdisc et Babimanta",
+        "lostlornForest": "Possède les Pokémon qu’on y trouve dans Noir et Blanc : Poissirène, Colombeau, Couverdure, Venipatte, Doudouvet, Chlorobule, Bargantua et Zoroark",
+        "unovaSolos": "Possède les 14 Pokémon d’Unys qui n’évoluent pas dans Noir et Blanc, légendaires et fabuleux à part : Nanméouïe, Judokrak, Karaclée, Bargantua, Maracachi, Cryptéro, Emolga, Mamanbo, Hexagel, Limonde, Drakkarmin, Frison, Aflamanoir et Fermite",
+        "unovaFossils": "Possède les lignées des deux fossiles : Carapagos, Mégapagos, Arkéapti et Aéroptéryx",
+        "elementalMonkeys": "Possède les trois singes de l’Arène d’Ogoesse et leurs évolutions : Feuillajou, Feuiloutan, Flamajou, Flamoutan, Flotajou et Flotoutan",
+        "tradeSwap": "Possède les deux Pokémon qui évoluent quand on les échange l’un contre l’autre, avant et après : Carabing, Lançargot, Escargaume et Limaspeed",
+        "unovaNewEvolutions": "Possède les évolutions que les jeux suivants ont données aux Pokémon d’Unys : Tutétékri, Paragruel et Scalpereur",
+        "trioBadge": "L’équipe de Rachid, d’Armando ou de Noa (selon ton starter) : possède Ponchiot, Feuillajou, Flamajou et Flotajou",
+        "basicBadge": "L’équipe d’Aloé, championne d’arène : possède Ponchien et Miradar",
+        "insectBadge": "L’équipe d’Artie, champion d’arène : possède Scobolide, Crabicoque et Manternel",
+        "boltBadge": "L’équipe d’Inezia, championne d’arène : possède Emolga et Zéblitz",
+        "quakeBadge": "L’équipe de Bardane, champion d’arène : possède Escroco, Batracné et Minotaupe",
+        "jetBadge": "L’équipe de Carolina, championne d’arène : possède Rhinolove, Déflaisan et Lakmécygne",
+        "freezeBadge": "L’équipe de Zhu, champion d’arène : possède Sorboul, Hexagel et Polagriffe",
+        "legendBadge": "L’équipe de Watson dans Noir, d’Iris dans Blanc : possède Incisache, Drakkarmin et Tranchodon",
+        "shauntal": "L’équipe d’Anis, membre du Conseil 4 dans Noir et Blanc : possède Tutankafer, Lugulabre, Moyade et Golemastoc",
+        "grimsley": "L’équipe de Pieris, membre du Conseil 4 dans Noir et Blanc : possède Baggaïd, Scalproie, Crocorible et Léopardus",
+        "caitlin": "L’équipe de Percila, membre du Conseil 4 dans Noir et Blanc : possède Cryptéro, Mushana, Symbios et Sidérella",
+        "marshal": "L’équipe de Kunz, membre du Conseil 4 dans Noir et Blanc : possède Judokrak, Karaclée, Bétochef et Shaofouine",
+        "n": "L’équipe de N dans son palais dans Noir et Blanc, son légendaire à part : possède Aéroptéryx, Mégapagos, Zoroark, Sorbouboul et Cliticlic",
+        "ghetsis": "L’équipe de Ghetis juste après N dans Noir et Blanc : possède Tutankafer, Frison, Crapustule, Scalproie, Ohmassacre et Trioxhydre"
       },
       "families": "Complète {count} lignée d’évolution | Complète {count} lignées d’évolution",
       "allStarters": "Possède les {count} Pokémon de départ, de Kanto à Paldea",
@@ -3704,7 +4191,24 @@
       "tc_teamGalactic": "Possède {count} cartes différentes de la Team Galaxie (Hélio, ses commandants, leurs inventions)",
       "dpSets": "Possède une carte de chacune des 7 séries Diamant & Perle",
       "platinumSets": "Possède une carte de chacune des 4 séries Platine",
-      "sinnohReturnSets": "Possède une carte de chacune des 3 séries Épée et Bouclier de retour à Sinnoh et Hisui (2022)"
+      "sinnohReturnSets": "Possède une carte de chacune des 3 séries Épée et Bouclier de retour à Sinnoh et Hisui (2022)",
+      "unovaForms": "Possède les formes de Galar de Darumarond, Darumacho, Tutafeh et Limonde",
+      "unovaBadges": "Complète les équipes des {count} arènes d’Unys",
+      "unovaEliteFour": "Complète les équipes du Conseil 4 d’Unys (Noir et Blanc)",
+      "unovaLines": "Complète {count} lignées d’évolution d’Unys",
+      "unovaDex": "Possède {count} Pokémon différents d’Unys (n° 494 à 649)",
+      "unovaRoutes": "Possède tous les Pokémon de toutes les routes d’Unys de Noir et Blanc, de la route 1 à la route 18",
+      "unovaLandmarks": "Possède tous les Pokémon des grottes, forêts, tours et ruines d’Unys",
+      "unovaPlaceCards": "Possède les lieux d’Unys imprimés en cartes Stade : Pont Sagiciel, Mont Foré, Frégate Plasma, Palais de N, l’Arène de Pavonnay et celle d’Ondes-sur-Mer",
+      "tc_unovaGymLeaders": "Possède une carte de chaque champion d’arène d’Unys qui en a une : Rachid ou Armando, Tcheren, Strykna, Inezia, Bardane, Carolina et Iris (pas encore de carte d’Aloé, Artie, Zhu, Watson ou Amana)",
+      "tc_unovaEliteFour": "Possède une carte de chaque membre du Conseil 4 d’Unys qui en a une : Anis, Pieris et Percila (pas encore de carte de Kunz)",
+      "tc_n": "Possède {count} cartes différentes au nom de N",
+      "tc_unovaHeroes": "Possède une carte de Bianca, Ludvina, Matis et Écho",
+      "tc_juniper": "Possède une carte du Professeur Keteleeria",
+      "tc_teamPlasma": "Possède {count} cartes différentes de la Team Plasma (Ghetis, Nikolaï, leurs sbires et leur frégate)",
+      "bwSets": "Possède une carte de chaque série Noir & Blanc hors Team Plasma : Noir & Blanc, Pouvoirs Émergents, Nobles Victoires, Destinées Futures, Explorateurs Obscurs, Dragons Exaltés, Frontières Franchies et Trésors Légendaires",
+      "plasmaSets": "Possède une carte de chaque série de la Team Plasma : Tempête Plasma, Glaciation Plasma et Explosion Plasma",
+      "unovaReturnSets": "Possède une carte des deux séries Écarlate et Violet de retour à Unys (2025) : Foudre Noire et Flamme Blanche"
     },
     "subs": {
       "allLines": "Toutes régions",
@@ -3736,7 +4240,13 @@
       "hoennRoutes": "Routes de Hoenn (Rubis et Saphir)",
       "hoennLandmarks": "Grottes, forêts et sommets de Hoenn",
       "sinnohRoutes": "Routes de Sinnoh (Diamant et Perle)",
-      "sinnohLandmarks": "Grottes, lacs et sommets de Sinnoh"
+      "sinnohLandmarks": "Grottes, lacs et sommets de Sinnoh",
+      "unovaLines": "Lignées d’Unys (Noir et Blanc)",
+      "unovaMore": "Unys, au-delà des lignées",
+      "unovaGyms": "Arènes d’Unys",
+      "unovaTrainerCards": "Dresseurs d’Unys en cartes",
+      "unovaRoutes": "Routes d’Unys (Noir et Blanc)",
+      "unovaLandmarks": "Grottes, forêts et tours d’Unys"
     }
   },
   "beta": {

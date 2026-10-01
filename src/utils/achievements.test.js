@@ -6,6 +6,7 @@ import { KANTO_EXTRAS, KANTO_LINES } from './kanto'
 import johto from './johto'
 import hoenn from './hoenn'
 import sinnoh from './sinnoh'
+import unova from './unova'
 import { LEGENDARIES, LEGENDS, MYTHICALS } from './pokemonGroups'
 
 const card = (id, fields = {}) => ({
@@ -393,6 +394,13 @@ describe('no duplicates', () => {
     expect(all).toEqual(Array.from({ length: 107 }, (_, i) => i + 387))
     expect(lines.length + sinnoh.extras.sinnohSolos.length + legends.length + new Set(older).size).toBe(107) // no Pokémon in two of them
   })
+
+  it('split every Unova Pokémon into lines, loners and legends', () => {
+    const lines = Object.values(unova.lines).flat()
+    const legends = [...LEGENDARIES, ...MYTHICALS].filter((n) => n >= 494 && n <= 649)
+    const all = [...lines, ...unova.extras.unovaSolos, ...legends].sort((a, b) => a - b)
+    expect(all).toEqual(Array.from({ length: 156 }, (_, i) => i + 494))
+  })
 })
 
 describe('Kanto', () => {
@@ -559,5 +567,40 @@ describe('Sinnoh', () => {
     expect(a.dpSets.current).toBe(1)
     expect(a.platinumSets.current).toBe(1)
     expect(a.sinnohReturnSets.current).toBe(1)
+  })
+})
+
+describe('Unova', () => {
+  const dex = (...numbers) => numbers.map((n) => entry(`bw1-${n}`, { national_pokedex_number: n }))
+  const named = (...names) => names.map((name, i) => entry(`bw8-${i}`, { name }))
+
+  it('counts complete Unova lines, gyms, the League, N and Ghetsis', () => {
+    const a = byId(achievements(dex(504, 505, 507, 563, 609, 593, 623, 567, 565, 571, 584, 601), sets))
+    expect(a.patratLine).toMatchObject({ unlocked: true, sub: 'unovaLines', tags: ['unova'] })
+    expect(a.snivyLine.sub).toBe('unovaLines') // moved from the other regions' lines
+    expect(a.basicBadge).toMatchObject({ unlocked: true, sub: 'unovaGyms' })
+    expect(a.shauntal.unlocked).toBe(true)
+    expect(a.n.unlocked).toBe(true)
+    expect(a.ghetsis.current).toBe(1) // Cofagrigus
+    expect(a.unovaFossils.current).toBe(2) // Carracosta, Archeops
+    expect(a.unovaDex25.current).toBe(12)
+  })
+
+  it('reads Unova trainers’ and places’ cards from their names', () => {
+    const cards = named('Chili & Cilan & Cress', 'Clay', 'Claydol', 'Caitlin', 'Cynthia & Caitlin', 'N', "N's Zoroark ex", 'Nidoking', 'Team Plasma Ball', 'Plasma Frigate', 'Colress Machine', 'Galarian Darmanitan V')
+    const a = byId(achievements(cards, sets))
+    expect(a.tc_unovaGymLeaders.current).toBe(2) // the trio and Clay, not Claydol
+    expect(a.tc_unovaEliteFour.current).toBe(1) // Caitlin, not Cynthia & Caitlin
+    expect(a.tc_n.current).toBe(2) // not Nidoking
+    expect(a.tc_teamPlasma.current).toBe(3)
+    expect(a.unovaPlaceCards.current).toBe(1)
+    expect(a.unovaForms).toMatchObject({ current: 1, target: 4 })
+  })
+
+  it('counts the Unova sets', () => {
+    const a = byId(achievements([entry('bw1-1'), entry('bw11-1'), entry('bw9-1'), entry('zsv10pt5-1')], sets))
+    expect(a.bwSets.current).toBe(2)
+    expect(a.plasmaSets.current).toBe(1)
+    expect(a.unovaReturnSets.current).toBe(1)
   })
 })

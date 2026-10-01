@@ -123,7 +123,8 @@ région> <versions>` : Pokémon sauvages des premiers jeux par lieu
 regroupés ; `cards <regex>` : noms de cartes de la base (clé service
 role de `scripts/.env.local`) ; `texts <région>` : écrit les textes EN/FR
 manquants des lignées, routes et lieux avec les noms officiels de
-PokéAPI. Le reste (arènes, dresseurs, séries) s'écrit à la main.
+PokéAPI (une route peut porter sa région : `unovaRoute5and16`). Le reste
+(arènes, dresseurs, séries) s'écrit à la main.
 
 ---
 

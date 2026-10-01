@@ -395,7 +395,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   a background `load({ force: true })`). Resetting it once hid the whole
   challenge hub — and unmounted the component that was supposed to
   trigger the reload (Vue drops `emit` from unmounted components).
-- **Achievements** (`src/utils/achievements.js`): ~760 definitions in 20
+- **Achievements** (`src/utils/achievements.js`): ~890 definitions in 20
   categories, **per game mode** (user decision: separate, the challenge
   put first — it's the one that counts). Computed client side from that
   mode's collection + sets in one pass (`collectorStats`), plus the
@@ -419,9 +419,9 @@ docs/technique/             technical doc (French, user choice): overview, front
   Red/Blue from PokéAPI; identical routes share one: "Routes 4 and 9"),
   Mt. Silver (Gold/Silver), cities with a card (Pallet Town has none) and
   trainers' cards (name patterns on `s.names`).
-  **Other regions** (user, 2026-10-01: Johto, Hoenn, Sinnoh; the rest when
-  asked): one file per region (`src/utils/johto.js`, `hoenn.js`,
-  `sinnoh.js`), a
+  **Other regions** (user, 2026-10-01: Johto, Hoenn, Sinnoh, Unova; the rest
+  when asked): one file per region (`src/utils/johto.js`, `hoenn.js`,
+  `sinnoh.js`, `unova.js`), a
   default-exported object of one shape (fields documented at the top of
   hoenn.js: lines, extras, forms, gyms, eliteFour, people, trainerCards,
   routes, landmarks, cities?, placeCards, sets), listed in `REGION_FOCUS`
@@ -443,7 +443,9 @@ docs/technique/             technical doc (French, user choice): overview, front
   member). Official names: PokéAPI or Poképédia (WebFetch; Bulbapedia
   answers 403), never from memory (user, 2026-10-01): teams, FR trainer,
   badge and set names were all checked there; when a name can't be
-  found, the FR text doesn't name it (Sinnoh's FR set texts). Each region's partition test checks every dex number of its
+  found, the FR text doesn't name it (Sinnoh's FR set texts). Unova's
+  routes 1-18 would clash with Kanto's ids: they are `unovaRoute<n>`
+  (titled "Unova Route n"; `texts` reads that prefix too). Each region's partition test checks every dex number of its
   range lands in exactly one group (lines, solos, legends, or an earlier
   region's babies/evolutions). No duplicates: the test
   fails when two groups ask for the same Pokémon (4 whitelisted pairs,
@@ -489,7 +491,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   and reads `achievement_rates(mode)`; `src/api/achievements.js` falls
   back to the 0008 signatures and hides what a missing migration can't
   give. Deliberate, documented exception to rule 9:
-  the ids are client-claimed (the server can't recheck ~760 JS
+  the ids are client-claimed (the server can't recheck ~890 JS
   definitions), acceptable because it only nudges an anonymous
   percentage that nothing ranks or rewards on.
 - **Sounds/haptics**: `src/lib/sfx.js` synthesizes everything with Web Audio
@@ -531,7 +533,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   Wishlist, URL filters, card detail with price chart), set binders,
   history (exact totals, "With a hit" filter), community (live feed +
   leaderboards), profiles + public profiles (incl. the challenge
-  collection with "Ask for it"), ~760 achievements per mode (collapsible, region filter, Kanto to Sinnoh focus,
+  collection with "Ask for it"), ~890 achievements per mode (collapsible, region filter, Kanto to Unova focus,
   categories, rates, unlock toasts), challenge mode (coins, daily reward,
   daily + weekly missions, recycle, craft, god packs, mini-games "Higher
   or lower", "Shiny Electrode Flip" (needs 0014), "Super effective!"
@@ -558,7 +560,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   verified locally with PGlite before being handed over; 0010-0019 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 180 unit tests, `npm run test:db` 291 database
+- Tests: `npm test` 184 unit tests, `npm run test:db` 291 database
   checks, `npm run test:e2e` 234 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
@@ -605,7 +607,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   active players. Live HP bar through Realtime (not e2e-testable).
 - **Regional achievements for every region** (user, 2026-09-30: noted,
   **don't start until asked**): repeat the Kanto focus (`src/utils/kanto.js`)
-  (Johto, Hoenn, Sinnoh done 2026-10-01 on request, see "Other regions") for Unova, Kalos, Alola, Galar, Paldea: one
+  (Johto, Hoenn, Sinnoh, Unova done 2026-10-01 on request, see "Other regions") for Kalos, Alola, Galar, Paldea: one
   achievement per evolution line + all of them, the Pokémon that don't
   evolve, routes and places with their wild Pokémon (PokéAPI, the region's
   first games), cities that have a card, trainers' cards (gym leaders,

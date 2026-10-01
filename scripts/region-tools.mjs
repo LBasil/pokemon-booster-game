@@ -16,8 +16,10 @@
 //     lines, routes and places, "own the whole line" / "found there"
 //     descriptions) into src/i18n/locales, with official names from PokéAPI
 //     (a place's id in kebab case is its PokéAPI location: mtPyre ->
-//     mt-pyre). Everything else (trainers, sets...) is written by hand; a
-//     branched line (Wurmple) is better named after its first member.
+//     mt-pyre; unovaVictoryRoad -> unova-victory-road; routes can carry
+//     their region: unovaRoute5and16). Everything else (trainers, sets...)
+//     is written by hand; a branched line (Wurmple) is better named after
+//     its first member.
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -165,7 +167,7 @@ async function texts(regionName) {
       )
     }
     for (const [id, list] of Object.entries(groups.places)) {
-      const route = id.match(/^route(\d+)(?:(and|to)(\d+))?$/)
+      const route = id.match(/^(?:[a-z]+R|r)oute(\d+)(?:(and|to)(\d+))?$/) // route4, unovaRoute5and16
       const link = { and: { en: 'and', fr: 'et' }, to: { en: 'to', fr: 'à' } }[route?.[2]]?.[lang]
       const title = route ? (link ? `Routes ${route[1]} ${link} ${route[3]}` : `Route ${route[1]}`) : placeNames[id]?.[lang]
       const games = region.games[lang]

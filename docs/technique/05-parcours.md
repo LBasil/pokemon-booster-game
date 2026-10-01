@@ -431,7 +431,7 @@ sequenceDiagram
 ## 7. Succès
 
 Définitions : [src/utils/achievements.js](../../src/utils/achievements.js)
-(~760, 20 catégories, sous-catégories `sub` dans les grosses, tags de
+(~890, 20 catégories, sous-catégories `sub` dans les grosses, tags de
 région `tags` pour le filtre « Région », `?region=`). Les groupes de Pokémon (lignées d'évolution,
 légendaires et fabuleux, équipes des champions d'arène de Kanto et Johto,
 Conseil 4, Maîtres de la Ligue, rivaux et héros, lieux et leurs Pokémon
@@ -452,7 +452,12 @@ EX et époque ROSA) et Sinnoh
 Diamant/Perle, fossiles, bébés et nouvelles évolutions de DP, formes et
 nouveaux Pokémon de Hisui, routes 201 à 230, lacs et grottes, badges,
 Conseil 4, Hélio, Cynthia et Team Galaxie en cartes, séries DP, Platine
-et 2022). Équipes et noms officiels vérifiés sur PokéAPI et Poképédia ; leur
+et 2022) et Unys
+([src/utils/unova.js](../../src/utils/unova.js) : lignées de Noir/Blanc,
+solitaires, fossiles, singes d'Ogoesse, routes 1 à 18 (ids `unovaRoute<n>`,
+pour ne pas croiser celles de Kanto), Tour Dragospire, Grotte Cyclopéenne
+et autres lieux, badges, Conseil 4, N et Ghetis, N et Team Plasma en
+cartes, séries Noir & Blanc, Plasma, Foudre Noire et Flamme Blanche). Équipes et noms officiels vérifiés sur PokéAPI et Poképédia ; leur
 description nomme les membres (`achievements.desc.groups.<id>`), donc
 changer une liste = changer ses deux textes. **Calculés dans le navigateur, par mode.** Le
 Défi est mis en avant, c'est celui qui compte.

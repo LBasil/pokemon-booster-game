@@ -3103,6 +3103,387 @@
       },
       "sinnohReturnSets": {
         "title": "Back to Sinnoh"
+      },
+      "patratLine": {
+        "title": "Watchog line"
+      },
+      "lillipupLine": {
+        "title": "Stoutland line"
+      },
+      "purrloinLine": {
+        "title": "Liepard line"
+      },
+      "pansageLine": {
+        "title": "Simisage line"
+      },
+      "pansearLine": {
+        "title": "Simisear line"
+      },
+      "panpourLine": {
+        "title": "Simipour line"
+      },
+      "munnaLine": {
+        "title": "Musharna line"
+      },
+      "pidoveLine": {
+        "title": "Unfezant line"
+      },
+      "blitzleLine": {
+        "title": "Zebstrika line"
+      },
+      "roggenrolaLine": {
+        "title": "Gigalith line"
+      },
+      "woobatLine": {
+        "title": "Swoobat line"
+      },
+      "drilburLine": {
+        "title": "Excadrill line"
+      },
+      "timburrLine": {
+        "title": "Conkeldurr line"
+      },
+      "tympoleLine": {
+        "title": "Seismitoad line"
+      },
+      "sewaddleLine": {
+        "title": "Leavanny line"
+      },
+      "venipedeLine": {
+        "title": "Scolipede line"
+      },
+      "cottoneeLine": {
+        "title": "Whimsicott line"
+      },
+      "petililLine": {
+        "title": "Lilligant line"
+      },
+      "sandileLine": {
+        "title": "Krookodile line"
+      },
+      "darumakaLine": {
+        "title": "Darmanitan line"
+      },
+      "dwebbleLine": {
+        "title": "Crustle line"
+      },
+      "scraggyLine": {
+        "title": "Scrafty line"
+      },
+      "yamaskLine": {
+        "title": "Cofagrigus line"
+      },
+      "tirtougaLine": {
+        "title": "Carracosta line"
+      },
+      "archenLine": {
+        "title": "Archeops line"
+      },
+      "trubbishLine": {
+        "title": "Garbodor line"
+      },
+      "zoruaLine": {
+        "title": "Zoroark line"
+      },
+      "minccinoLine": {
+        "title": "Cinccino line"
+      },
+      "gothitaLine": {
+        "title": "Gothitelle line"
+      },
+      "solosisLine": {
+        "title": "Reuniclus line"
+      },
+      "ducklettLine": {
+        "title": "Swanna line"
+      },
+      "vanilliteLine": {
+        "title": "Vanilluxe line"
+      },
+      "deerlingLine": {
+        "title": "Sawsbuck line"
+      },
+      "karrablastLine": {
+        "title": "Escavalier line"
+      },
+      "foongusLine": {
+        "title": "Amoonguss line"
+      },
+      "frillishLine": {
+        "title": "Jellicent line"
+      },
+      "joltikLine": {
+        "title": "Galvantula line"
+      },
+      "ferroseedLine": {
+        "title": "Ferrothorn line"
+      },
+      "klinkLine": {
+        "title": "Klinklang line"
+      },
+      "tynamoLine": {
+        "title": "Eelektross line"
+      },
+      "elgyemLine": {
+        "title": "Beheeyem line"
+      },
+      "litwickLine": {
+        "title": "Chandelure line"
+      },
+      "axewLine": {
+        "title": "Haxorus line"
+      },
+      "cubchooLine": {
+        "title": "Beartic line"
+      },
+      "shelmetLine": {
+        "title": "Accelgor line"
+      },
+      "mienfooLine": {
+        "title": "Mienshao line"
+      },
+      "golettLine": {
+        "title": "Golurk line"
+      },
+      "pawniardLine": {
+        "title": "Bisharp line"
+      },
+      "ruffletLine": {
+        "title": "Braviary line"
+      },
+      "vullabyLine": {
+        "title": "Mandibuzz line"
+      },
+      "larvestaLine": {
+        "title": "Volcarona line"
+      },
+      "unovaRoute1": {
+        "title": "Unova Route 1"
+      },
+      "unovaRoute2": {
+        "title": "Unova Route 2"
+      },
+      "unovaRoute3": {
+        "title": "Unova Route 3"
+      },
+      "unovaRoute4": {
+        "title": "Unova Route 4"
+      },
+      "unovaRoute5and16": {
+        "title": "Unova Routes 5 and 16"
+      },
+      "unovaRoute6": {
+        "title": "Unova Route 6"
+      },
+      "unovaRoute7": {
+        "title": "Unova Route 7"
+      },
+      "unovaRoute8": {
+        "title": "Unova Route 8"
+      },
+      "unovaRoute9": {
+        "title": "Unova Route 9"
+      },
+      "unovaRoute10": {
+        "title": "Unova Route 10"
+      },
+      "unovaRoute11": {
+        "title": "Unova Route 11"
+      },
+      "unovaRoute12": {
+        "title": "Unova Route 12"
+      },
+      "unovaRoute13": {
+        "title": "Unova Route 13"
+      },
+      "unovaRoute14": {
+        "title": "Unova Route 14"
+      },
+      "unovaRoute15": {
+        "title": "Unova Route 15"
+      },
+      "unovaRoute17": {
+        "title": "Unova Route 17"
+      },
+      "unovaRoute18": {
+        "title": "Unova Route 18"
+      },
+      "dreamyard": {
+        "title": "Dreamyard"
+      },
+      "pinwheelForest": {
+        "title": "Pinwheel Forest"
+      },
+      "desertResort": {
+        "title": "Desert Resort"
+      },
+      "relicCastle": {
+        "title": "Relic Castle"
+      },
+      "coldStorage": {
+        "title": "Cold Storage"
+      },
+      "chargestoneCave": {
+        "title": "Chargestone Cave"
+      },
+      "celestialTower": {
+        "title": "Celestial Tower"
+      },
+      "twistMountain": {
+        "title": "Twist Mountain"
+      },
+      "dragonspiralTower": {
+        "title": "Dragonspiral Tower"
+      },
+      "unovaVictoryRoad": {
+        "title": "Unova Victory Road"
+      },
+      "wellspringCave": {
+        "title": "Wellspring Cave"
+      },
+      "mistraltonCave": {
+        "title": "Mistralton Cave"
+      },
+      "challengersCave": {
+        "title": "Challenger’s Cave"
+      },
+      "giantChasm": {
+        "title": "Giant Chasm"
+      },
+      "p2Laboratory": {
+        "title": "P2 Laboratory"
+      },
+      "villageBridge": {
+        "title": "Village Bridge"
+      },
+      "abundantShrine": {
+        "title": "Abundant Shrine"
+      },
+      "undellaBay": {
+        "title": "Undella Bay"
+      },
+      "lostlornForest": {
+        "title": "Lostlorn Forest"
+      },
+      "unovaSolos": {
+        "title": "Unova loners"
+      },
+      "unovaFossils": {
+        "title": "Unova fossils"
+      },
+      "elementalMonkeys": {
+        "title": "The Striaton monkeys"
+      },
+      "tradeSwap": {
+        "title": "Shell swap"
+      },
+      "unovaNewEvolutions": {
+        "title": "Unova late bloomers"
+      },
+      "unovaForms": {
+        "title": "Galarian detour"
+      },
+      "unovaLines10": {
+        "title": "Unova family album"
+      },
+      "unovaLines25": {
+        "title": "Unova genealogist"
+      },
+      "unovaLines55": {
+        "title": "Every Unova line"
+      },
+      "unovaDex25": {
+        "title": "Unova rookie"
+      },
+      "unovaDex50": {
+        "title": "Unova trainer"
+      },
+      "unovaDex100": {
+        "title": "Unova ace"
+      },
+      "trioBadge": {
+        "title": "Trio Badge"
+      },
+      "basicBadge": {
+        "title": "Basic Badge"
+      },
+      "insectBadge": {
+        "title": "Insect Badge"
+      },
+      "boltBadge": {
+        "title": "Bolt Badge"
+      },
+      "quakeBadge": {
+        "title": "Quake Badge"
+      },
+      "jetBadge": {
+        "title": "Jet Badge"
+      },
+      "freezeBadge": {
+        "title": "Freeze Badge"
+      },
+      "legendBadge": {
+        "title": "Legend Badge"
+      },
+      "unovaBadges": {
+        "title": "Unova badge case"
+      },
+      "shauntal": {
+        "title": "Shauntal"
+      },
+      "grimsley": {
+        "title": "Grimsley"
+      },
+      "caitlin": {
+        "title": "Caitlin"
+      },
+      "marshal": {
+        "title": "Marshal"
+      },
+      "unovaEliteFour": {
+        "title": "Unova’s League"
+      },
+      "n": {
+        "title": "N, king of Team Plasma"
+      },
+      "ghetsis": {
+        "title": "Ghetsis, the schemer"
+      },
+      "unovaRoutes": {
+        "title": "Every Unova route"
+      },
+      "unovaLandmarks": {
+        "title": "Unova explorer"
+      },
+      "unovaPlaceCards": {
+        "title": "Unova on cards"
+      },
+      "tc_unovaGymLeaders": {
+        "title": "Unova leaders in the binder"
+      },
+      "tc_unovaEliteFour": {
+        "title": "Unova’s Elite Four on cards"
+      },
+      "tc_n": {
+        "title": "N’s ideals"
+      },
+      "tc_unovaHeroes": {
+        "title": "Nuvema friends"
+      },
+      "tc_juniper": {
+        "title": "Juniper’s lab"
+      },
+      "tc_teamPlasma": {
+        "title": "Plasma plots"
+      },
+      "bwSets": {
+        "title": "Black & White era"
+      },
+      "plasmaSets": {
+        "title": "Plasma era"
+      },
+      "unovaReturnSets": {
+        "title": "Back to Unova"
       }
     },
     "desc": {
@@ -3609,7 +3990,113 @@
         "sinnohFossils": "Own both fossils’ lines: Cranidos, Rampardos, Shieldon and Bastiodon",
         "sinnohBabies": "Own the babies Diamond and Pearl added to older lines: Budew, Chingling, Bonsly, Mime Jr., Happiny, Munchlax and Mantyke",
         "sinnohEvolutionBoom": "Own the 22 evolutions Diamond and Pearl gave older Pokémon: Roserade, Ambipom, Mismagius, Honchkrow, Weavile, Magnezone, Lickilicky, Rhyperior, Tangrowth, Electivire, Magmortar, Togekiss, Yanmega, Leafeon, Glaceon, Gliscor, Mamoswine, Porygon-Z, Gallade, Probopass, Dusknoir and Froslass",
-        "hisuiNewPokemon": "Own the new Pokémon of Legends: Arceus: Wyrdeer, Kleavor, Ursaluna, Basculegion, Sneasler, Overqwil and Enamorus"
+        "hisuiNewPokemon": "Own the new Pokémon of Legends: Arceus: Wyrdeer, Kleavor, Ursaluna, Basculegion, Sneasler, Overqwil and Enamorus",
+        "patratLine": "Own the whole line: Patrat and Watchog",
+        "lillipupLine": "Own the whole line: Lillipup, Herdier and Stoutland",
+        "purrloinLine": "Own the whole line: Purrloin and Liepard",
+        "pansageLine": "Own the whole line: Pansage and Simisage",
+        "pansearLine": "Own the whole line: Pansear and Simisear",
+        "panpourLine": "Own the whole line: Panpour and Simipour",
+        "munnaLine": "Own the whole line: Munna and Musharna",
+        "pidoveLine": "Own the whole line: Pidove, Tranquill and Unfezant",
+        "blitzleLine": "Own the whole line: Blitzle and Zebstrika",
+        "roggenrolaLine": "Own the whole line: Roggenrola, Boldore and Gigalith",
+        "woobatLine": "Own the whole line: Woobat and Swoobat",
+        "drilburLine": "Own the whole line: Drilbur and Excadrill",
+        "timburrLine": "Own the whole line: Timburr, Gurdurr and Conkeldurr",
+        "tympoleLine": "Own the whole line: Tympole, Palpitoad and Seismitoad",
+        "sewaddleLine": "Own the whole line: Sewaddle, Swadloon and Leavanny",
+        "venipedeLine": "Own the whole line: Venipede, Whirlipede and Scolipede",
+        "cottoneeLine": "Own the whole line: Cottonee and Whimsicott",
+        "petililLine": "Own the whole line: Petilil and Lilligant",
+        "sandileLine": "Own the whole line: Sandile, Krokorok and Krookodile",
+        "darumakaLine": "Own the whole line: Darumaka and Darmanitan",
+        "dwebbleLine": "Own the whole line: Dwebble and Crustle",
+        "scraggyLine": "Own the whole line: Scraggy and Scrafty",
+        "yamaskLine": "Own the whole line: Yamask and Cofagrigus",
+        "tirtougaLine": "Own the whole line: Tirtouga and Carracosta",
+        "archenLine": "Own the whole line: Archen and Archeops",
+        "trubbishLine": "Own the whole line: Trubbish and Garbodor",
+        "zoruaLine": "Own the whole line: Zorua and Zoroark",
+        "minccinoLine": "Own the whole line: Minccino and Cinccino",
+        "gothitaLine": "Own the whole line: Gothita, Gothorita and Gothitelle",
+        "solosisLine": "Own the whole line: Solosis, Duosion and Reuniclus",
+        "ducklettLine": "Own the whole line: Ducklett and Swanna",
+        "vanilliteLine": "Own the whole line: Vanillite, Vanillish and Vanilluxe",
+        "deerlingLine": "Own the whole line: Deerling and Sawsbuck",
+        "karrablastLine": "Own the whole line: Karrablast and Escavalier",
+        "foongusLine": "Own the whole line: Foongus and Amoonguss",
+        "frillishLine": "Own the whole line: Frillish and Jellicent",
+        "joltikLine": "Own the whole line: Joltik and Galvantula",
+        "ferroseedLine": "Own the whole line: Ferroseed and Ferrothorn",
+        "klinkLine": "Own the whole line: Klink, Klang and Klinklang",
+        "tynamoLine": "Own the whole line: Tynamo, Eelektrik and Eelektross",
+        "elgyemLine": "Own the whole line: Elgyem and Beheeyem",
+        "litwickLine": "Own the whole line: Litwick, Lampent and Chandelure",
+        "axewLine": "Own the whole line: Axew, Fraxure and Haxorus",
+        "cubchooLine": "Own the whole line: Cubchoo and Beartic",
+        "shelmetLine": "Own the whole line: Shelmet and Accelgor",
+        "mienfooLine": "Own the whole line: Mienfoo and Mienshao",
+        "golettLine": "Own the whole line: Golett and Golurk",
+        "pawniardLine": "Own the whole line: Pawniard and Bisharp",
+        "ruffletLine": "Own the whole line: Rufflet and Braviary",
+        "vullabyLine": "Own the whole line: Vullaby and Mandibuzz",
+        "larvestaLine": "Own the whole line: Larvesta and Volcarona",
+        "unovaRoute1": "Own the Pokémon found there in Black and White: Feebas, Patrat, Lillipup and Basculin",
+        "unovaRoute2": "Own the Pokémon found there in Black and White: Patrat, Lillipup and Purrloin",
+        "unovaRoute3": "Own the Pokémon found there in Black and White: Goldeen, Patrat, Lillipup, Purrloin, Pidove, Blitzle and Basculin",
+        "unovaRoute4": "Own the Pokémon found there in Black and White: Krabby, Clamperl, Luvdisc, Sandile, Darumaka, Scraggy and Frillish",
+        "unovaRoute5and16": "Own the Pokémon found there in Black and White: Liepard, Trubbish, Minccino, Gothita and Solosis",
+        "unovaRoute6": "Own the Pokémon found there in Black and White: Poliwag, Poliwhirl, Tranquill, Swadloon, Basculin, Vanillite, Deerling, Karrablast and Foongus",
+        "unovaRoute7": "Own the Pokémon found there in Black and White: Watchog, Tranquill, Zebstrika, Deerling, Foongus and Cubchoo",
+        "unovaRoute8": "Own the Pokémon found there in Black and White: Barboach, Palpitoad, Shelmet and Stunfisk",
+        "unovaRoute9": "Own the Pokémon found there in Black and White: Liepard, Garbodor, Minccino, Gothorita, Duosion and Pawniard",
+        "unovaRoute10": "Own the Pokémon found there in Black and White: Herdier, Throh, Sawk, Foongus, Amoonguss, Bouffalant, Rufflet and Vullaby",
+        "unovaRoute11": "Own the Pokémon found there in Black and White: Golduck, Goldeen, Gligar, Zangoose, Seviper, Buizel, Basculin, Karrablast, Amoonguss, Pawniard, Rufflet and Vullaby",
+        "unovaRoute12": "Own the Pokémon found there in Black and White: Metapod, Kakuna, Rapidash, Pinsir, Sunkern, Dunsparce, Heracross, Combee, Cherrim and Tranquill",
+        "unovaRoute13": "Own the Pokémon found there in Black and White: Golbat, Shellder, Krabby, Tangela, Staryu, Swellow, Wingull, Pelipper, Lunatone, Solrock, Absol, Luvdisc and Drifblim",
+        "unovaRoute14": "Own the Pokémon found there in Black and White: Jigglypuff, Golduck, Goldeen, Shuckle, Altaria, Tropius, Buizel, Drifblim, Basculin, Beheeyem and Mienfoo",
+        "unovaRoute15": "Own the Pokémon found there in Black and White: Fearow, Marowak, Kangaskhan, Gligar, Pupitar, Throh and Sawk",
+        "unovaRoute17": "Own the Pokémon found there in Black and White: Horsea, Finneon and Frillish",
+        "unovaRoute18": "Own the Pokémon found there in Black and White: Horsea, Chinchou, Finneon, Watchog, Throh, Sawk, Dwebble, Scraggy and Frillish",
+        "dreamyard": "Own the Pokémon found there in Black and White: Patrat, Purrloin, Munna and Musharna",
+        "pinwheelForest": "Own the Pokémon found there in Black and White: Goldeen, Pidove, Timburr, Tympole, Throh, Sawk, Sewaddle, Venipede, Cottonee, Petilil, Basculin and Virizion",
+        "desertResort": "Own the Pokémon found there in Black and White: Sandile, Darumaka, Maractus, Dwebble, Scraggy and Sigilyph",
+        "relicCastle": "Own the Pokémon found there in Black and White: Sandslash, Onix, Claydol, Sandile, Krokorok, Yamask, Cofagrigus and Volcarona",
+        "coldStorage": "Own the Pokémon found there in Black and White: Herdier, Timburr, Minccino and Vanillite",
+        "chargestoneCave": "Own the Pokémon found there in Black and White: Boldore, Joltik, Ferroseed, Klink and Tynamo",
+        "celestialTower": "Own the Pokémon found there in Black and White: Elgyem and Litwick",
+        "twistMountain": "Own the Pokémon found there in Black and White: Boldore, Woobat, Gurdurr, Cubchoo and Cryogonal",
+        "dragonspiralTower": "Own the Pokémon found there in Black and White: Dratini, Dragonair, Tranquill, Basculin, Vanillite, Deerling, Cubchoo, Mienfoo, Druddigon, Golett, Reshiram and Zekrom",
+        "unovaVictoryRoad": "Own the Pokémon found there in Black and White: Poliwag, Poliwhirl, Boldore, Woobat, Basculin, Fraxure, Mienfoo, Rufflet, Vullaby, Heatmor, Durant, Deino and Terrakion",
+        "wellspringCave": "Own the Pokémon found there in Black and White: Poliwag, Poliwhirl, Roggenrola, Woobat and Basculin",
+        "mistraltonCave": "Own the Pokémon found there in Black and White: Boldore, Woobat, Axew and Cobalion",
+        "challengersCave": "Own the Pokémon found there in Black and White: Poliwag, Poliwhirl, Graveler, Lickitung, Sableye, Mawile, Riolu, Boldore, Woobat and Basculin",
+        "giantChasm": "Own the Pokémon found there in Black and White: Clefairy, Golbat, Poliwag, Poliwhirl, Seel, Tangela, Jynx, Ditto, Sneasel, Piloswine, Delibird, Swellow, Lunatone, Solrock, Absol, Metang, Drifblim, Boldore, Basculin and Kyurem",
+        "p2Laboratory": "Own the Pokémon found there in Black and White: Horsea, Finneon, Watchog, Herdier, Scraggy, Frillish and Klink",
+        "villageBridge": "Own the Pokémon found there in Black and White: Golduck, Carvanha, Zangoose, Seviper, Bibarel, Basculin, Rufflet and Vullaby",
+        "abundantShrine": "Own the Pokémon found there in Black and White: Vulpix, Slowpoke, Goldeen, Noctowl, Murkrow, Misdreavus, Stantler, Chimecho, Bronzong, Cottonee, Petilil, Basculin and Landorus",
+        "undellaBay": "Own the Pokémon found there in Black and White: Shellder, Remoraid, Wingull, Pelipper, Spheal, Luvdisc and Mantyke",
+        "lostlornForest": "Own the Pokémon found there in Black and White: Goldeen, Tranquill, Swadloon, Venipede, Cottonee, Petilil, Basculin and Zoroark",
+        "unovaSolos": "Own the 14 Unova Pokémon that don’t evolve in Black and White, legendaries and mythicals aside: Audino, Throh, Sawk, Basculin, Maractus, Sigilyph, Emolga, Alomomola, Cryogonal, Stunfisk, Druddigon, Bouffalant, Heatmor and Durant",
+        "unovaFossils": "Own both fossils’ lines: Tirtouga, Carracosta, Archen and Archeops",
+        "elementalMonkeys": "Own the three monkeys of the Striaton Gym and their evolutions: Pansage, Simisage, Pansear, Simisear, Panpour and Simipour",
+        "tradeSwap": "Own the two Pokémon that evolve when traded for each other, before and after: Karrablast, Escavalier, Shelmet and Accelgor",
+        "unovaNewEvolutions": "Own the evolutions later games gave Unova Pokémon: Runerigus, Basculegion and Kingambit",
+        "trioBadge": "Cilan’s, Chili’s or Cress’s team (it depends on your starter): own Lillipup, Pansage, Pansear and Panpour",
+        "basicBadge": "Gym leader Lenora’s team: own Herdier and Watchog",
+        "insectBadge": "Gym leader Burgh’s team: own Whirlipede, Dwebble and Leavanny",
+        "boltBadge": "Gym leader Elesa’s team: own Emolga and Zebstrika",
+        "quakeBadge": "Gym leader Clay’s team: own Krokorok, Palpitoad and Excadrill",
+        "jetBadge": "Gym leader Skyla’s team: own Swoobat, Unfezant and Swanna",
+        "freezeBadge": "Gym leader Brycen’s team: own Vanillish, Cryogonal and Beartic",
+        "legendBadge": "Drayden’s team in Black, Iris’s in White: own Fraxure, Druddigon and Haxorus",
+        "shauntal": "Elite Four Shauntal’s team in Black and White: own Cofagrigus, Chandelure, Jellicent and Golurk",
+        "grimsley": "Elite Four Grimsley’s team in Black and White: own Scrafty, Bisharp, Krookodile and Liepard",
+        "caitlin": "Elite Four Caitlin’s team in Black and White: own Sigilyph, Musharna, Reuniclus and Gothitelle",
+        "marshal": "Elite Four Marshal’s team in Black and White: own Throh, Sawk, Conkeldurr and Mienshao",
+        "n": "N’s team in his castle in Black and White, his legendary aside: own Archeops, Carracosta, Zoroark, Vanilluxe and Klinklang",
+        "ghetsis": "Ghetsis’s team right after N in Black and White: own Cofagrigus, Bouffalant, Seismitoad, Bisharp, Eelektross and Hydreigon"
       },
       "families": "Complete {count} evolution line | Complete {count} evolution lines",
       "allStarters": "Own the {count} starter Pokémon, Kanto to Paldea",
@@ -3704,7 +4191,24 @@
       "tc_teamGalactic": "Own {count} different Team Galactic cards (Cyrus, his commanders and their inventions)",
       "dpSets": "Own a card from each Diamond & Pearl set: Diamond & Pearl, Mysterious Treasures, Secret Wonders, Great Encounters, Majestic Dawn, Legends Awakened and Stormfront",
       "platinumSets": "Own a card from each Platinum set: Platinum, Rising Rivals, Supreme Victors and Arceus",
-      "sinnohReturnSets": "Own a card from each Sword & Shield set back in Sinnoh and Hisui: Brilliant Stars, Astral Radiance and Lost Origin"
+      "sinnohReturnSets": "Own a card from each Sword & Shield set back in Sinnoh and Hisui: Brilliant Stars, Astral Radiance and Lost Origin",
+      "unovaForms": "Own the Galarian forms of Darumaka, Darmanitan, Yamask and Stunfisk",
+      "unovaBadges": "Complete the teams of Unova’s {count} gyms",
+      "unovaEliteFour": "Complete the teams of Unova’s Elite Four (Black and White)",
+      "unovaLines": "Complete {count} evolution lines of Unova",
+      "unovaDex": "Own {count} different Pokémon of Unova (#494 to #649)",
+      "unovaRoutes": "Own every Pokémon of every Unova route of Black and White, from Route 1 to Route 18",
+      "unovaLandmarks": "Own every Pokémon of Unova’s caves, forests, towers and ruins",
+      "unovaPlaceCards": "Own the Unova places printed as Stadium cards: Skyarrow Bridge, Twist Mountain, Plasma Frigate, N’s Castle, Aspertia City Gym and Virbank City Gym",
+      "tc_unovaGymLeaders": "Own a card of each Unova gym leader who has one: Cilan or Chili, Cheren, Roxie, Elesa, Clay, Skyla and Iris (no Lenora, Burgh, Brycen, Drayden or Marlon card yet)",
+      "tc_unovaEliteFour": "Own a card of each member of Unova’s Elite Four who has one: Shauntal, Grimsley and Caitlin (no Marshal card yet)",
+      "tc_n": "Own {count} different cards bearing N’s name, like N’s Zoroark ex",
+      "tc_unovaHeroes": "Own a card of Bianca, Hilda, Hugh and Rosa",
+      "tc_juniper": "Own a Professor Juniper card",
+      "tc_teamPlasma": "Own {count} different Team Plasma cards (Ghetsis, Colress, their grunts and their frigate)",
+      "bwSets": "Own a card from each Black & White set outside Team Plasma’s: Black & White, Emerging Powers, Noble Victories, Next Destinies, Dark Explorers, Dragons Exalted, Boundaries Crossed and Legendary Treasures",
+      "plasmaSets": "Own a card from each Team Plasma set: Plasma Storm, Plasma Freeze and Plasma Blast",
+      "unovaReturnSets": "Own a card from both Scarlet & Violet sets back in Unova (2025): Black Bolt and White Flare"
     },
     "subs": {
       "allLines": "All regions",
@@ -3736,7 +4240,13 @@
       "hoennRoutes": "Hoenn routes (Ruby and Sapphire)",
       "hoennLandmarks": "Hoenn caves, forests and peaks",
       "sinnohRoutes": "Sinnoh routes (Diamond and Pearl)",
-      "sinnohLandmarks": "Sinnoh caves, lakes and peaks"
+      "sinnohLandmarks": "Sinnoh caves, lakes and peaks",
+      "unovaLines": "Unova lines (Black and White)",
+      "unovaMore": "Unova, beyond the lines",
+      "unovaGyms": "Unova gyms",
+      "unovaTrainerCards": "Unova trainers on cards",
+      "unovaRoutes": "Unova routes (Black and White)",
+      "unovaLandmarks": "Unova caves, forests and towers"
     }
   },
   "beta": {
