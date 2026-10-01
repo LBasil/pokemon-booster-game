@@ -119,7 +119,8 @@ développement (jamais dans le bundle), cache PokéAPI dans
 `scripts/.cache/` (ignoré par git), `NODE_USE_SYSTEM_CA=1` sur cette
 machine. `lines <de> <à>` : chaînes d'évolution ; `encounters <id de
 région> <versions>` : Pokémon sauvages des premiers jeux par lieu
-(herbe, surf, Super Canne, rencontres uniques), formes comptées comme
+(herbe, surf, Super Canne, rencontres uniques, Pokémon visibles
+d'Épée/Bouclier), formes comptées comme
 leur espèce (Rattata d'Alola = n° 19), lieux identiques regroupés ; `cards <regex>` : noms de cartes de la base (clé service
 role de `scripts/.env.local`) ; `texts <région>` : écrit les textes EN/FR
 manquants des lignées, routes et lieux avec les noms officiels de

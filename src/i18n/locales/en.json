@@ -4024,6 +4024,234 @@
       },
       "smSets": {
         "title": "Sun & Moon era"
+      },
+      "skwovetLine": {
+        "title": "Greedent line"
+      },
+      "rookideeLine": {
+        "title": "Corviknight line"
+      },
+      "blipbugLine": {
+        "title": "Orbeetle line"
+      },
+      "nickitLine": {
+        "title": "Thievul line"
+      },
+      "gossifleurLine": {
+        "title": "Eldegoss line"
+      },
+      "woolooLine": {
+        "title": "Dubwool line"
+      },
+      "chewtleLine": {
+        "title": "Drednaw line"
+      },
+      "yamperLine": {
+        "title": "Boltund line"
+      },
+      "rolycolyLine": {
+        "title": "Coalossal line"
+      },
+      "applinLine": {
+        "title": "Applin line"
+      },
+      "silicobraLine": {
+        "title": "Sandaconda line"
+      },
+      "arrokudaLine": {
+        "title": "Barraskewda line"
+      },
+      "toxelLine": {
+        "title": "Toxtricity line"
+      },
+      "sizzlipedeLine": {
+        "title": "Centiskorch line"
+      },
+      "clobbopusLine": {
+        "title": "Grapploct line"
+      },
+      "sinisteaLine": {
+        "title": "Polteageist line"
+      },
+      "hatennaLine": {
+        "title": "Hatterene line"
+      },
+      "impidimpLine": {
+        "title": "Grimmsnarl line"
+      },
+      "milceryLine": {
+        "title": "Alcremie line"
+      },
+      "snomLine": {
+        "title": "Frosmoth line"
+      },
+      "cufantLine": {
+        "title": "Copperajah line"
+      },
+      "galarRoute1": {
+        "title": "Galar Route 1"
+      },
+      "galarRoute2": {
+        "title": "Galar Route 2"
+      },
+      "galarRoute3": {
+        "title": "Galar Route 3"
+      },
+      "galarRoute4": {
+        "title": "Galar Route 4"
+      },
+      "galarRoute5": {
+        "title": "Galar Route 5"
+      },
+      "galarRoute6": {
+        "title": "Galar Route 6"
+      },
+      "galarRoute7": {
+        "title": "Galar Route 7"
+      },
+      "galarRoute8": {
+        "title": "Galar Route 8"
+      },
+      "galarRoute9": {
+        "title": "Galar Route 9"
+      },
+      "galarRoute10": {
+        "title": "Galar Route 10"
+      },
+      "slumberingWeald": {
+        "title": "Slumbering Weald"
+      },
+      "galarMine": {
+        "title": "Galar Mine"
+      },
+      "motostokeOutskirts": {
+        "title": "Motostoke Outskirts"
+      },
+      "glimwoodTangle": {
+        "title": "Glimwood Tangle"
+      },
+      "galarMineNo2": {
+        "title": "Galar Mine No. 2"
+      },
+      "galarSolos": {
+        "title": "Galar loners"
+      },
+      "galarFossils": {
+        "title": "Galar fossils"
+      },
+      "galarNewEvolutions": {
+        "title": "Galar, evolved later"
+      },
+      "galarLines10": {
+        "title": "Galar family album"
+      },
+      "galarLines25": {
+        "title": "Every Galar line"
+      },
+      "galarDex25": {
+        "title": "Galar rookie"
+      },
+      "galarDex50": {
+        "title": "Galar trainer"
+      },
+      "galarGrassBadge": {
+        "title": "Grass Badge (Galar)"
+      },
+      "galarWaterBadge": {
+        "title": "Water Badge (Galar)"
+      },
+      "galarFireBadge": {
+        "title": "Fire Badge (Galar)"
+      },
+      "galarFightingBadge": {
+        "title": "Fighting Badge (Galar)"
+      },
+      "galarGhostBadge": {
+        "title": "Ghost Badge (Galar)"
+      },
+      "galarFairyBadge": {
+        "title": "Fairy Badge (Galar)"
+      },
+      "galarRockBadge": {
+        "title": "Rock Badge (Galar)"
+      },
+      "galarIceBadge": {
+        "title": "Ice Badge (Galar)"
+      },
+      "galarDarkBadge": {
+        "title": "Dark Badge (Galar)"
+      },
+      "galarDragonBadge": {
+        "title": "Dragon Badge (Galar)"
+      },
+      "galarBadges": {
+        "title": "Galar badge case"
+      },
+      "marnie": {
+        "title": "Marnie"
+      },
+      "bede": {
+        "title": "Bede"
+      },
+      "rose": {
+        "title": "Chairman Rose"
+      },
+      "oleana": {
+        "title": "Oleana, at the top of the tower"
+      },
+      "galarRoutes": {
+        "title": "Every Galar route"
+      },
+      "galarLandmarks": {
+        "title": "Galar explorer"
+      },
+      "postwick": {
+        "title": "Postwick"
+      },
+      "turffield": {
+        "title": "Turffield"
+      },
+      "circhester": {
+        "title": "Circhester"
+      },
+      "spikemuth": {
+        "title": "Spikemuth"
+      },
+      "wyndon": {
+        "title": "Wyndon"
+      },
+      "galarCities": {
+        "title": "Galar tour"
+      },
+      "galarPlaceCards": {
+        "title": "Galar on cards"
+      },
+      "tc_galarGymLeaders": {
+        "title": "Galar leaders in the binder"
+      },
+      "tc_leon": {
+        "title": "The unbeatable Champion"
+      },
+      "tc_galarRivals": {
+        "title": "Galar rivals on cards"
+      },
+      "tc_sonia": {
+        "title": "Sonia’s research"
+      },
+      "tc_macroCosmos": {
+        "title": "Macro Cosmos"
+      },
+      "tc_teamYell": {
+        "title": "Team Yell cheers"
+      },
+      "tc_isleOfArmor": {
+        "title": "Master Dojo"
+      },
+      "galarSets": {
+        "title": "Sword & Shield era"
+      },
+      "galarSpecialSets": {
+        "title": "Galar specials"
       }
     },
     "desc": {
@@ -4780,7 +5008,60 @@
         "kahili": "Elite Four Kahili’s team in Sun and Moon: own Skarmory, Toucannon, Mandibuzz, Crobat and Oricorio",
         "lusamine": "Lusamine’s team in Ultra Space in Sun and Moon: own Clefable, Lilligant, Bewear, Milotic and Mismagius",
         "guzma": "Guzma’s team in his last battle in Sun and Moon: own Golisopod, Ariados, Masquerain, Scizor and Pinsir",
-        "kukui": "Professor Kukui’s team at the League in Sun and Moon (his sixth Pokémon, which depends on your starter, aside): own Lycanroc, Snorlax, Ninetales, Magnezone and Braviary"
+        "kukui": "Professor Kukui’s team at the League in Sun and Moon (his sixth Pokémon, which depends on your starter, aside): own Lycanroc, Snorlax, Ninetales, Magnezone and Braviary",
+        "skwovetLine": "Own the whole line: Skwovet and Greedent",
+        "rookideeLine": "Own the whole line: Rookidee, Corvisquire and Corviknight",
+        "blipbugLine": "Own the whole line: Blipbug, Dottler and Orbeetle",
+        "nickitLine": "Own the whole line: Nickit and Thievul",
+        "gossifleurLine": "Own the whole line: Gossifleur and Eldegoss",
+        "woolooLine": "Own the whole line: Wooloo and Dubwool",
+        "chewtleLine": "Own the whole line: Chewtle and Drednaw",
+        "yamperLine": "Own the whole line: Yamper and Boltund",
+        "rolycolyLine": "Own the whole line: Rolycoly, Carkol and Coalossal",
+        "applinLine": "Own the whole line: Applin, Flapple and Appletun",
+        "silicobraLine": "Own the whole line: Silicobra and Sandaconda",
+        "arrokudaLine": "Own the whole line: Arrokuda and Barraskewda",
+        "toxelLine": "Own the whole line: Toxel and Toxtricity",
+        "sizzlipedeLine": "Own the whole line: Sizzlipede and Centiskorch",
+        "clobbopusLine": "Own the whole line: Clobbopus and Grapploct",
+        "sinisteaLine": "Own the whole line: Sinistea and Polteageist",
+        "hatennaLine": "Own the whole line: Hatenna, Hattrem and Hatterene",
+        "impidimpLine": "Own the whole line: Impidimp, Morgrem and Grimmsnarl",
+        "milceryLine": "Own the whole line: Milcery and Alcremie",
+        "snomLine": "Own the whole line: Snom and Frosmoth",
+        "cufantLine": "Own the whole line: Cufant and Copperajah",
+        "galarRoute1": "Own the Pokémon found there in Sword and Shield: Caterpie, Hoothoot, Grubbin, Skwovet, Rookidee, Blipbug, Nickit and Wooloo",
+        "galarRoute2": "Own the Pokémon found there in Sword and Shield: Gyarados, Lapras, Hoothoot, Zigzagoon, Lotad, Seedot, Purrloin, Skwovet, Rookidee, Blipbug, Nickit, Gossifleur, Chewtle, Drednaw, Yamper, Arrokuda, Barraskewda and Obstagoon",
+        "galarRoute3": "Own the Pokémon found there in Sword and Shield: Vulpix, Growlithe, Machop, Tyrogue, Zigzagoon, Stunky, Trubbish, Klink, Pancham, Mudbray, Rookidee, Gossifleur, Rolycoly and Sizzlipede",
+        "galarRoute4": "Own the Pokémon found there in Sword and Shield: Pikachu, Meowth, Eevee, Electrike, Budew, Joltik, Ferroseed, Pumpkaboo, Cutiefly, Wooloo, Yamper and Milcery",
+        "galarRoute5": "Own the Pokémon found there in Sword and Shield: Farfetch’d, Wobbuffet, Lombre, Nuzleaf, Nincada, Drifloon, Minccino, Espurr, Spritzee, Swirlix, Dewpider, Stufful, Dottler, Eldegoss and Applin",
+        "galarRoute6": "Own the Pokémon found there in Sword and Shield: Dugtrio, Torkoal, Trapinch, Duskull, Hippopotas, Skorupi, Maractus, Yamask, Axew, Heatmor, Durant, Helioptile, Hawlucha and Silicobra",
+        "galarRoute7": "Own the Pokémon found there in Sword and Shield: Liepard, Seismitoad, Karrablast, Galvantula, Shelmet, Meowstic, Inkay, Corviknight, Thievul, Toxel, Perrserker and Morpeko",
+        "galarRoute8": "Own the Pokémon found there in Sword and Shield: Haunter, Rhyhorn, Sneasel, Delibird, Lunatone, Solrock, Dusclops, Snorunt, Bronzong, Hippowdon, Drapion, Snover, Boldore, Gurdurr, Throh, Sawk, Darumaka, Crustle, Vanillish, Golett, Pawniard, Rufflet, Vullaby, Togedemaru, Sandaconda, Falinks and Snom",
+        "galarRoute9": "Own the Pokémon found there in Sword and Shield: Kingler, Qwilfish, Remoraid, Octillery, Mantine, Pelipper, Wailmer, Glalie, Gastrodon, Mantyke, Liepard, Jellicent, Inkay, Barbaracle, Bergmite, Mareanie, Toxapex, Pyukumuku, Dhelmise, Thievul, Cramorant, Clobbopus, Perrserker, Pincurchin and Morpeko",
+        "galarRoute10": "Own the Pokémon found there in Sword and Shield: Rhydon, Mr. Mime, Sneasel, Glalie, Snover, Abomasnow, Darumaka, Vanillish, Vanilluxe, Klang, Cubchoo, Beartic, Snom, Stonjourner, Eiscue and Duraludon",
+        "slumberingWeald": "Own the Pokémon found there in Sword and Shield: Butterfree, Weezing, Hoothoot, Munna, Stunfisk, Grubbin, Skwovet, Rookidee, Corviknight, Blipbug and Orbeetle",
+        "galarMine": "Own the Pokémon found there in Sword and Shield: Diglett, Roggenrola, Woobat, Drilbur, Timburr and Rolycoly",
+        "motostokeOutskirts": "Own the Pokémon found there in Sword and Shield: Koffing, Noctowl, Sudowoodo, Croagunk, Roggenrola, Throh, Sawk, Scraggy, Pawniard, Salandit, Chewtle, Hatenna and Impidimp",
+        "galarMineNo2": "Own the Pokémon found there in Sword and Shield: Shuckle, Shellos, Gastrodon, Croagunk, Scraggy, Binacle, Noibat, Wimpod, Chewtle and Drednaw",
+        "glimwoodTangle": "Own the Pokémon found there in Sword and Shield: Ponyta, Spritzee, Swirlix, Phantump, Shiinotic, Oranguru, Passimian, Sinistea, Hattrem, Morgrem and Indeedee",
+        "galarSolos": "Own the 12 Galar Pokémon that don’t evolve in Sword and Shield, legendaries and mythicals aside: Cramorant, Falinks, Pincurchin, Stonjourner, Eiscue, Indeedee, Morpeko, Dracozolt, Arctozolt, Dracovish, Arctovish and Duraludon",
+        "galarFossils": "Own the four fossil Pokémon put together from two halves: Dracozolt, Arctozolt, Dracovish and Arctovish",
+        "galarNewEvolutions": "Own the evolutions Scarlet and Violet gave Galar Pokémon: Dipplin, Archaludon and Hydrapple",
+        "galarGrassBadge": "Gym leader Milo’s team: own Gossifleur and Eldegoss",
+        "galarWaterBadge": "Gym leader Nessa’s team: own Goldeen, Arrokuda and Drednaw",
+        "galarFireBadge": "Gym leader Kabu’s team: own Ninetales, Arcanine and Centiskorch",
+        "galarFightingBadge": "Gym leader Bea’s team (Pokémon Sword): own Hitmontop, Sirfetch’d, Pangoro and Machamp",
+        "galarGhostBadge": "Gym leader Allister’s team (Pokémon Shield): own Yamask, Cursola, Mimikyu and Gengar",
+        "galarFairyBadge": "Gym leader Opal’s team: own Weezing, Togekiss, Mawile and Alcremie",
+        "galarRockBadge": "Gym leader Gordie’s team (Pokémon Sword): own Barbaracle, Stonjourner, Shuckle and Coalossal",
+        "galarIceBadge": "Gym leader Melony’s team (Pokémon Shield): own Frosmoth, Eiscue, Darmanitan and Lapras",
+        "galarDarkBadge": "Gym leader Piers’s team: own Scrafty, Skuntank, Malamar and Obstagoon",
+        "galarDragonBadge": "Gym leader Raihan’s team: own Gigalith, Sandaconda, Flygon and Duraludon",
+        "marnie": "Marnie’s team in the Champion Cup in Sword and Shield: own Liepard, Morpeko, Toxicroak, Grimmsnarl and Scrafty",
+        "bede": "Bede’s team in the Champion Cup in Sword and Shield: own Mawile, Rapidash, Gardevoir and Hatterene",
+        "rose": "Chairman Rose’s team in Sword and Shield: own Escavalier, Klinklang, Ferrothorn, Copperajah and Perrserker",
+        "oleana": "Oleana’s team at the top of Rose Tower in Sword and Shield: own Froslass, Milotic, Tsareena, Garbodor and Salazzle"
       },
       "families": "Complete {count} evolution line | Complete {count} evolution lines",
       "allStarters": "Own the {count} starter Pokémon, Kanto to Paldea",
@@ -4924,7 +5205,28 @@
       "tc_alolaFriends": "Own a card of Hau and of Gladion",
       "tc_aether": "Own {count} different Aether Foundation cards (Lusamine, Faba, Wicke, their employees and Aether Paradise)",
       "tc_teamSkull": "Own {count} different Team Skull cards (Guzma, Plumeria, their grunts and Po Town)",
-      "smSets": "Own a card from each numbered Sun & Moon set: Sun & Moon, Guardians Rising, Burning Shadows, Crimson Invasion, Ultra Prism, Forbidden Light, Celestial Storm, Lost Thunder, Team Up, Unbroken Bonds, Unified Minds and Cosmic Eclipse"
+      "smSets": "Own a card from each numbered Sun & Moon set: Sun & Moon, Guardians Rising, Burning Shadows, Crimson Invasion, Ultra Prism, Forbidden Light, Celestial Storm, Lost Thunder, Team Up, Unbroken Bonds, Unified Minds and Cosmic Eclipse",
+      "galarLines": "Complete {count} evolution lines of Galar",
+      "galarDex": "Own {count} different Pokémon of Galar (#810 to #905)",
+      "galarBadges": "Complete the teams of Galar’s {count} gym leaders (both versions)",
+      "galarRoutes": "Own every Pokémon of every Galar route of Sword and Shield, from Route 1 to Route 10",
+      "galarLandmarks": "Own every Pokémon of Galar’s forests and mines",
+      "postwick": "Own a Postwick card (its card)",
+      "turffield": "Own a Turffield card (its stadium)",
+      "circhester": "Own a Circhester card (its bath)",
+      "spikemuth": "Own a Spikemuth card (the town or its gym)",
+      "wyndon": "Own a Wyndon card (its stadium)",
+      "galarCities": "Own a card of each Galar town that has one: Postwick, Turffield, Circhester, Spikemuth and Wyndon",
+      "galarPlaceCards": "Own the Galar places printed as Stadium cards: Galar Mine, Glimwood Tangle, Rose Tower, Dyna Tree Hill, the Tower of Darkness, the Tower of Waters and Path to the Peak",
+      "tc_galarGymLeaders": "Own a card of each Galar gym leader: Milo, Nessa, Kabu, Bea, Allister, Opal, Gordie, Melony, Piers and Raihan",
+      "tc_leon": "Own a Leon card",
+      "tc_galarRivals": "Own a card of Hop, of Marnie and of Bede (theirs or one of their Pokémon)",
+      "tc_sonia": "Own a Sonia card",
+      "tc_macroCosmos": "Own a card of Chairman Rose and of Oleana",
+      "tc_teamYell": "Own {count} different Team Yell cards (their grunts, their towel and their cheer)",
+      "tc_isleOfArmor": "Own a card of Klara, Avery and Honey (Isle of Armor)",
+      "galarSets": "Own a card from each Sword & Shield set set in Galar: Sword & Shield, Rebel Clash, Darkness Ablaze, Vivid Voltage, Battle Styles, Chilling Reign, Evolving Skies and Fusion Strike",
+      "galarSpecialSets": "Own a card from each special Sword & Shield set: Champion’s Path, Shining Fates and Crown Zenith"
     },
     "subs": {
       "allLines": "All regions",
@@ -4974,7 +5276,14 @@
       "alolaGyms": "Alola grand trials",
       "alolaTrainerCards": "Alola trainers on cards",
       "alolaRoutes": "Alola routes (Sun and Moon)",
-      "alolaLandmarks": "Alola caves, meadows and mountains"
+      "alolaLandmarks": "Alola caves, meadows and mountains",
+      "galarLines": "Galar lines (Sword and Shield)",
+      "galarMore": "Galar, beyond the lines",
+      "galarGyms": "Galar gyms",
+      "galarTrainerCards": "Galar trainers on cards",
+      "galarRoutes": "Galar routes (Sword and Shield)",
+      "galarLandmarks": "Galar forests and mines",
+      "galarCities": "Galar towns on cards"
     }
   },
   "beta": {

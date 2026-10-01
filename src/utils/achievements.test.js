@@ -9,6 +9,7 @@ import sinnoh from './sinnoh'
 import unova from './unova'
 import kalos from './kalos'
 import alola from './alola'
+import galar from './galar'
 import { LEGENDARIES, LEGENDS, MYTHICALS, ULTRA_BEASTS } from './pokemonGroups'
 
 const card = (id, fields = {}) => ({
@@ -334,12 +335,13 @@ describe('Pokémon groups', () => {
 
 describe('no duplicates', () => {
   // The same Pokémon behind two achievements of different meaning, kept on
-  // purpose: Morty's and Misty's teams are one evolution line each,
+  // purpose: Morty's, Misty's and Milo's teams are one evolution line each,
   // Diglett's Cave only has the Diglett line and the Lake of Rage the
   // Magikarp line (its red Gyarados)
   const SAME_MEMBERS_OK = [
     ['ghostLine', 'fogBadge'],
     ['staryuLine', 'cascadeBadge'],
+    ['gossifleurLine', 'galarGrassBadge'],
     ['diglettLine', 'diglettsCave'],
     ['magikarpLine', 'lakeOfRage'],
   ].map((pair) => pair.sort().join('+'))
@@ -417,6 +419,17 @@ describe('no duplicates', () => {
     const legends = [...LEGENDARIES, ...MYTHICALS, ...ULTRA_BEASTS].filter((n) => n >= 722 && n <= 809)
     const all = [...lines, ...alola.extras.alolaSolos, ...legends].sort((a, b) => a - b)
     expect(all).toEqual(Array.from({ length: 88 }, (_, i) => i + 722))
+  })
+
+  it('split every Galar Pokémon into lines, loners, legends and older regions’ groups', () => {
+    const inGalar = (n) => n >= 810 && n <= 905
+    const lines = Object.values(galar.lines).flat()
+    const legends = [...LEGENDARIES, ...MYTHICALS].filter(inGalar)
+    // New evolutions of older Pokémon (Obstagoon, Sirfetch'd...) and Hisui's
+    const older = [...Object.values(KANTO_EXTRAS), ...[johto, hoenn, sinnoh, unova].flatMap((r) => Object.values(r.extras))].flat().filter(inGalar)
+    const all = [...new Set([...lines, ...galar.extras.galarSolos, ...legends, ...older])].sort((a, b) => a - b)
+    expect(all).toEqual(Array.from({ length: 96 }, (_, i) => i + 810))
+    expect(lines.length + galar.extras.galarSolos.length + new Set([...legends, ...older]).size).toBe(96) // lines and loners stay apart
   })
 })
 
@@ -685,5 +698,38 @@ describe('Alola', () => {
   it('counts the Sun & Moon sets', () => {
     const a = byId(achievements([entry('sm1-1'), entry('sm12-1'), entry('sm115-1'), entry('sm35-1')], sets))
     expect(a.smSets.current).toBe(2) // Hidden Fates and Shining Legends aside
+  })
+})
+
+describe('Galar', () => {
+  const dex = (...numbers) => numbers.map((n) => entry(`swsh1-${n}`, { national_pokedex_number: n }))
+  const named = (...names) => names.map((name, i) => entry(`swsh3-${i}`, { name }))
+
+  it('counts complete Galar lines, gyms and the rivals', () => {
+    const a = byId(achievements(dex(819, 820, 237, 865, 675, 68, 303, 78, 282, 858, 845), sets))
+    expect(a.skwovetLine).toMatchObject({ unlocked: true, sub: 'galarLines', tags: ['galar'] })
+    expect(a.grookeyLine.sub).toBe('galarLines') // moved from the other regions' lines
+    expect(a.galarFightingBadge).toMatchObject({ unlocked: true, sub: 'galarGyms' })
+    expect(a.bede.unlocked).toBe(true)
+    expect(a.galarSolos.current).toBe(1) // Cramorant
+    expect(a.galarDex25.current).toBe(5) // Sirfetch’d too
+  })
+
+  it('reads Galar trainers’, towns’ and places’ cards from their names', () => {
+    const cards = named('Milo', 'Bea', "Hop's Wooloo", 'Hoppip', "Marnie's Pride", 'Team Yell Grunt', 'Team Yell Towel', 'Spikemuth Gym', 'Wyndon Stadium', 'Rose Tower', 'Rose', 'Roselia')
+    const a = byId(achievements(cards, sets))
+    expect(a.tc_galarGymLeaders.current).toBe(2)
+    expect(a.tc_galarRivals.current).toBe(2) // Hop's Wooloo, not Hoppip
+    expect(a.tc_teamYell.current).toBe(2)
+    expect(a.tc_macroCosmos.current).toBe(1) // Rose, not Roselia
+    expect(a.spikemuth.unlocked).toBe(true)
+    expect(a.galarCities).toMatchObject({ current: 2, sub: 'galarCities' })
+    expect(a.galarPlaceCards).toMatchObject({ current: 1, sub: 'galarCities' })
+  })
+
+  it('counts the Galar sets', () => {
+    const a = byId(achievements([entry('swsh1-1'), entry('swsh8-1'), entry('swsh9-1'), entry('swsh35-1')], sets))
+    expect(a.galarSets.current).toBe(2) // Brilliant Stars is Hisui's
+    expect(a.galarSpecialSets.current).toBe(1)
   })
 })

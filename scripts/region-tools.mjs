@@ -6,7 +6,8 @@
 //     solos, babies and later evolutions.
 //   node scripts/region-tools.mjs encounters <pokeapi region id> <version,version>
 //     Wild Pokémon of the region's first games per location (every area of a
-//     location together): walk, surf, Super Rod and one-off encounters; Old
+//     location together): walk, surf, Super Rod, one-off encounters and the
+//     visible Pokémon of Sword/Shield on; Old
 //     and Good Rods, Headbutt, Rock Smash, gifts, trades and roamers are left
 //     out (the Kanto rules). Forms count as their species (Alolan Rattata =
 //     #19). Locations with the same Pokémon are grouped.
@@ -86,7 +87,24 @@ async function lines(from, to) {
   saveCache()
 }
 
-const KEPT_METHODS = ['walk', 'surf', 'super-rod', 'static', 'only-one', 'squirt-bottle', 'wailmer-pail', 'devon-scope', 'seaweed', 'feebas-tile-fishing']
+// overworld* = the Pokémon seen walking around from Sword/Shield on (they
+// don't exist in older games); wanderers (strong ones) and Max Raids are out
+const KEPT_METHODS = [
+  'walk',
+  'surf',
+  'super-rod',
+  'static',
+  'only-one',
+  'squirt-bottle',
+  'wailmer-pail',
+  'devon-scope',
+  'seaweed',
+  'feebas-tile-fishing',
+  'overworld',
+  'overworld-water',
+  'overworld-flying',
+  'overworld-dirt',
+]
 
 // Forms (Alolan Rattata, Oricorio's styles) have their own ids past 10000
 const speciesOf = async (url) => (idOf(url) > 10000 ? idOf((await get(url)).species.url) : idOf(url))

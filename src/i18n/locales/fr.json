@@ -4024,6 +4024,234 @@
       },
       "smSets": {
         "title": "L’ère Soleil et Lune"
+      },
+      "skwovetLine": {
+        "title": "Lignée de Rongrigou"
+      },
+      "rookideeLine": {
+        "title": "Lignée de Corvaillus"
+      },
+      "blipbugLine": {
+        "title": "Lignée d’Astronelle"
+      },
+      "nickitLine": {
+        "title": "Lignée de Roublenard"
+      },
+      "gossifleurLine": {
+        "title": "Lignée de Blancoton"
+      },
+      "woolooLine": {
+        "title": "Lignée de Moumouflon"
+      },
+      "chewtleLine": {
+        "title": "Lignée de Torgamord"
+      },
+      "yamperLine": {
+        "title": "Lignée de Fulgudog"
+      },
+      "rolycolyLine": {
+        "title": "Lignée de Monthracite"
+      },
+      "applinLine": {
+        "title": "Lignée de Verpom"
+      },
+      "silicobraLine": {
+        "title": "Lignée de Dunaconda"
+      },
+      "arrokudaLine": {
+        "title": "Lignée d’Hastacuda"
+      },
+      "toxelLine": {
+        "title": "Lignée de Salarsen"
+      },
+      "sizzlipedeLine": {
+        "title": "Lignée de Scolocendre"
+      },
+      "clobbopusLine": {
+        "title": "Lignée de Krakos"
+      },
+      "sinisteaLine": {
+        "title": "Lignée de Polthégeist"
+      },
+      "hatennaLine": {
+        "title": "Lignée de Sorcilence"
+      },
+      "impidimpLine": {
+        "title": "Lignée d’Angoliath"
+      },
+      "milceryLine": {
+        "title": "Lignée de Charmilly"
+      },
+      "snomLine": {
+        "title": "Lignée de Beldeneige"
+      },
+      "cufantLine": {
+        "title": "Lignée de Pachyradjah"
+      },
+      "galarRoute1": {
+        "title": "Route 1 de Galar"
+      },
+      "galarRoute2": {
+        "title": "Route 2 de Galar"
+      },
+      "galarRoute3": {
+        "title": "Route 3 de Galar"
+      },
+      "galarRoute4": {
+        "title": "Route 4 de Galar"
+      },
+      "galarRoute5": {
+        "title": "Route 5 de Galar"
+      },
+      "galarRoute6": {
+        "title": "Route 6 de Galar"
+      },
+      "galarRoute7": {
+        "title": "Route 7 de Galar"
+      },
+      "galarRoute8": {
+        "title": "Route 8 de Galar"
+      },
+      "galarRoute9": {
+        "title": "Route 9 de Galar"
+      },
+      "galarRoute10": {
+        "title": "Route 10 de Galar"
+      },
+      "slumberingWeald": {
+        "title": "Forêt de Sleepwood"
+      },
+      "galarMine": {
+        "title": "Mine de Galar"
+      },
+      "motostokeOutskirts": {
+        "title": "Abords de Motorby"
+      },
+      "glimwoodTangle": {
+        "title": "Forêt de Lumirinth"
+      },
+      "galarMineNo2": {
+        "title": "Mine de Galar n° 2"
+      },
+      "galarSolos": {
+        "title": "Solitaires de Galar"
+      },
+      "galarFossils": {
+        "title": "Fossiles de Galar"
+      },
+      "galarNewEvolutions": {
+        "title": "Galar, évolué plus tard"
+      },
+      "galarLines10": {
+        "title": "Album de famille de Galar"
+      },
+      "galarLines25": {
+        "title": "Toutes les lignées de Galar"
+      },
+      "galarDex25": {
+        "title": "Débutant de Galar"
+      },
+      "galarDex50": {
+        "title": "Dresseur de Galar"
+      },
+      "galarGrassBadge": {
+        "title": "Badge Plante (Galar)"
+      },
+      "galarWaterBadge": {
+        "title": "Badge Eau (Galar)"
+      },
+      "galarFireBadge": {
+        "title": "Badge Feu (Galar)"
+      },
+      "galarFightingBadge": {
+        "title": "Badge Combat (Galar)"
+      },
+      "galarGhostBadge": {
+        "title": "Badge Spectre (Galar)"
+      },
+      "galarFairyBadge": {
+        "title": "Badge Fée (Galar)"
+      },
+      "galarRockBadge": {
+        "title": "Badge Roche (Galar)"
+      },
+      "galarIceBadge": {
+        "title": "Badge Glace (Galar)"
+      },
+      "galarDarkBadge": {
+        "title": "Badge Ténèbres (Galar)"
+      },
+      "galarDragonBadge": {
+        "title": "Badge Dragon (Galar)"
+      },
+      "galarBadges": {
+        "title": "Boîte à badges de Galar"
+      },
+      "marnie": {
+        "title": "Rosemary"
+      },
+      "bede": {
+        "title": "Travis"
+      },
+      "rose": {
+        "title": "Le président Shehroz"
+      },
+      "oleana": {
+        "title": "Liv, au sommet de la tour"
+      },
+      "galarRoutes": {
+        "title": "Toutes les routes de Galar"
+      },
+      "galarLandmarks": {
+        "title": "Explorateur de Galar"
+      },
+      "postwick": {
+        "title": "Paddoxton"
+      },
+      "turffield": {
+        "title": "Greenbury"
+      },
+      "circhester": {
+        "title": "Ludester"
+      },
+      "spikemuth": {
+        "title": "Smashings"
+      },
+      "wyndon": {
+        "title": "Winscor"
+      },
+      "galarCities": {
+        "title": "Tour de Galar"
+      },
+      "galarPlaceCards": {
+        "title": "Galar en cartes"
+      },
+      "tc_galarGymLeaders": {
+        "title": "Champions de Galar dans le classeur"
+      },
+      "tc_leon": {
+        "title": "Le Maître invaincu"
+      },
+      "tc_galarRivals": {
+        "title": "Les rivaux de Galar en cartes"
+      },
+      "tc_sonia": {
+        "title": "Les recherches de Sonya"
+      },
+      "tc_macroCosmos": {
+        "title": "Macro Cosmos"
+      },
+      "tc_teamYell": {
+        "title": "Les encouragements de la Team Yell"
+      },
+      "tc_isleOfArmor": {
+        "title": "Le dojo de Mustar"
+      },
+      "galarSets": {
+        "title": "L’ère Épée et Bouclier"
+      },
+      "galarSpecialSets": {
+        "title": "Les spéciales de Galar"
       }
     },
     "desc": {
@@ -4780,7 +5008,60 @@
         "kahili": "L’équipe de Kahili, membre du Conseil 4 dans Soleil et Lune : possède Airmure, Bazoucan, Vaututrice, Nostenfer et Plumeline",
         "lusamine": "L’équipe d’Elsa-Mina dans l’Ultra-Dimension dans Soleil et Lune : possède Mélodelfe, Fragilady, Chelours, Milobellus et Magirêve",
         "guzma": "L’équipe de Guzma lors de son dernier combat dans Soleil et Lune : possède Sarmuraï, Migalos, Maskadra, Cizayox et Scarabrute",
-        "kukui": "L’équipe du Professeur Euphorbe à la Ligue dans Soleil et Lune (sans son sixième Pokémon, qui dépend de ton starter) : possède Lougaroc, Ronflex, Feunard, Magnézone et Gueriaigle"
+        "kukui": "L’équipe du Professeur Euphorbe à la Ligue dans Soleil et Lune (sans son sixième Pokémon, qui dépend de ton starter) : possède Lougaroc, Ronflex, Feunard, Magnézone et Gueriaigle",
+        "skwovetLine": "Possède toute la lignée : Rongourmand et Rongrigou",
+        "rookideeLine": "Possède toute la lignée : Minisange, Bleuseille et Corvaillus",
+        "blipbugLine": "Possède toute la lignée : Larvadar, Coléodôme et Astronelle",
+        "nickitLine": "Possède toute la lignée : Goupilou et Roublenard",
+        "gossifleurLine": "Possède toute la lignée : Tournicoton et Blancoton",
+        "woolooLine": "Possède toute la lignée : Moumouton et Moumouflon",
+        "chewtleLine": "Possède toute la lignée : Khélocrok et Torgamord",
+        "yamperLine": "Possède toute la lignée : Voltoutou et Fulgudog",
+        "rolycolyLine": "Possède toute la lignée : Charbi, Wagomine et Monthracite",
+        "applinLine": "Possède toute la lignée : Verpom, Pomdrapi et Dratatin",
+        "silicobraLine": "Possède toute la lignée : Dunaja et Dunaconda",
+        "arrokudaLine": "Possède toute la lignée : Embrochet et Hastacuda",
+        "toxelLine": "Possède toute la lignée : Toxizap et Salarsen",
+        "sizzlipedeLine": "Possède toute la lignée : Grillepattes et Scolocendre",
+        "clobbopusLine": "Possède toute la lignée : Poulpaf et Krakos",
+        "sinisteaLine": "Possède toute la lignée : Théffroi et Polthégeist",
+        "hatennaLine": "Possède toute la lignée : Bibichut, Chapotus et Sorcilence",
+        "impidimpLine": "Possède toute la lignée : Grimalin, Fourbelin et Angoliath",
+        "milceryLine": "Possède toute la lignée : Crèmy et Charmilly",
+        "snomLine": "Possède toute la lignée : Frissonille et Beldeneige",
+        "cufantLine": "Possède toute la lignée : Charibari et Pachyradjah",
+        "galarRoute1": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Chenipan, Hoothoot, Larvibule, Rongourmand, Minisange, Larvadar, Goupilou et Moumouton",
+        "galarRoute2": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Léviator, Lokhlass, Hoothoot, Zigzaton, Nénupiot, Grainipiot, Chacripan, Rongourmand, Minisange, Larvadar, Goupilou, Tournicoton, Khélocrok, Torgamord, Voltoutou, Embrochet, Hastacuda et Ixon",
+        "galarRoute3": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Goupix, Caninos, Machoc, Debugant, Zigzaton, Moufouette, Miamiasme, Tic, Pandespiègle, Tiboudet, Minisange, Tournicoton, Charbi et Grillepattes",
+        "galarRoute4": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Pikachu, Miaouss, Évoli, Dynavolt, Rozbouton, Statitik, Grindur, Pitrouille, Bombydou, Moumouton, Voltoutou et Crèmy",
+        "galarRoute5": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Canarticho, Qulbutoké, Lombre, Pifeuil, Ningale, Baudrive, Chinchidou, Psystigri, Fluvetin, Sucroquin, Araqua, Nounourson, Coléodôme, Blancoton et Verpom",
+        "galarRoute6": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Triopikeur, Chartor, Kraknoix, Skelénox, Hippopotas, Rapion, Maracachi, Tutafeh, Coupenotte, Aflamanoir, Fermite, Galvaran, Brutalibré et Dunaja",
+        "galarRoute7": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Léopardus, Crapustule, Carabing, Mygavolt, Escargaume, Mistigrix, Sepiatop, Corvaillus, Roublenard, Toxizap, Berserkatt et Morpeko",
+        "galarRoute8": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Spectrum, Rhinocorne, Farfuret, Cadoizo, Séléroc, Solaroc, Téraclope, Stalgamin, Archéodong, Hippodocus, Drascore, Blizzi, Géolithe, Ouvrifier, Judokrak, Karaclée, Darumarond, Crabaraque, Sorboul, Gringolem, Scalpion, Furaiglon, Vostourno, Togedemaru, Dunaconda, Hexadron et Frissonille",
+        "galarRoute9": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Krabboss, Qwilfish, Rémoraid, Octillery, Démanta, Bekipan, Wailmer, Oniglali, Tritosor, Babimanta, Léopardus, Moyade, Sepiatop, Golgopathe, Grelaçon, Vorastérie, Prédastérie, Concombaffe, Sinistrail, Roublenard, Nigosier, Poulpaf, Berserkatt, Wattapik et Morpeko",
+        "galarRoute10": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Rhinoféros, M. Mime, Farfuret, Oniglali, Blizzi, Blizzaroi, Darumarond, Sorboul, Sorbouboul, Clic, Polarhume, Polagriffe, Frissonille, Dolman, Bekaglaçon et Duralugon",
+        "slumberingWeald": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Papilusion, Smogogo, Hoothoot, Munna, Limonde, Larvibule, Rongourmand, Minisange, Corvaillus, Larvadar et Astronelle",
+        "galarMine": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Taupiqueur, Nodulithe, Chovsourir, Rototaupe, Charpenti et Charbi",
+        "motostokeOutskirts": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Smogo, Noarfang, Simularbre, Cradopaud, Nodulithe, Judokrak, Karaclée, Baggiguane, Scalpion, Tritox, Khélocrok, Bibichut et Grimalin",
+        "galarMineNo2": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Caratroc, Sancoki, Tritosor, Cradopaud, Baggiguane, Opermine, Sonistrelle, Sovkipou, Khélocrok et Torgamord",
+        "glimwoodTangle": "Possède les Pokémon qu’on y trouve dans Épée et Bouclier : Ponyta, Fluvetin, Sucroquin, Brocélôme, Lampignon, Gouroutan, Quartermac, Théffroi, Chapotus, Fourbelin et Wimessir",
+        "galarSolos": "Possède les 12 Pokémon de Galar qui n’évoluent pas dans Épée et Bouclier, légendaires et fabuleux à part : Nigosier, Hexadron, Wattapik, Dolman, Bekaglaçon, Wimessir, Morpeko, Galvagon, Galvagla, Hydragon, Hydragla et Duralugon",
+        "galarFossils": "Possède les quatre Pokémon Fossiles assemblés à partir de deux moitiés : Galvagon, Galvagla, Hydragon et Hydragla",
+        "galarNewEvolutions": "Possède les évolutions qu’Écarlate et Violet ont données aux Pokémon de Galar : Pomdramour, Pondralugon et Pomdorochi",
+        "galarGrassBadge": "L’équipe de Percy, champion d’arène : possède Tournicoton et Blancoton",
+        "galarWaterBadge": "L’équipe de Donna, championne d’arène : possède Poissirène, Embrochet et Torgamord",
+        "galarFireBadge": "L’équipe de Kabu, champion d’arène : possède Feunard, Arcanin et Scolocendre",
+        "galarFightingBadge": "L’équipe de Faïza, championne d’arène (Pokémon Épée) : possède Kapoera, Palarticho, Pandarbare et Mackogneur",
+        "galarGhostBadge": "L’équipe d’Alistair, champion d’arène (Pokémon Bouclier) : possède Tutafeh, Corayôme, Mimiqui et Ectoplasma",
+        "galarFairyBadge": "L’équipe de Sally, championne d’arène : possède Smogogo, Togekiss, Mysdibule et Charmilly",
+        "galarRockBadge": "L’équipe de Chaz, champion d’arène (Pokémon Épée) : possède Golgopathe, Dolman, Caratroc et Monthracite",
+        "galarIceBadge": "L’équipe de Lona, championne d’arène (Pokémon Bouclier) : possède Beldeneige, Bekaglaçon, Darumacho et Lokhlass",
+        "galarDarkBadge": "L’équipe de Peterson, champion d’arène : possède Baggaïd, Moufflair, Sepiatroce et Ixon",
+        "galarDragonBadge": "L’équipe de Roy, champion d’arène : possède Gigalithe, Dunaconda, Libégon et Duralugon",
+        "marnie": "L’équipe de Rosemary à la Coupe des Champions dans Épée et Bouclier : possède Léopardus, Morpeko, Coatox, Angoliath et Baggaïd",
+        "bede": "L’équipe de Travis à la Coupe des Champions dans Épée et Bouclier : possède Mysdibule, Galopa, Gardevoir et Sorcilence",
+        "rose": "L’équipe du président Shehroz dans Épée et Bouclier : possède Lançargot, Cliticlic, Noacier, Pachyradjah et Berserkatt",
+        "oleana": "L’équipe de Liv au sommet de la Shehroz Tower dans Épée et Bouclier : possède Momartik, Milobellus, Sucreine, Miasmax et Malamandre"
       },
       "families": "Complète {count} lignée d’évolution | Complète {count} lignées d’évolution",
       "allStarters": "Possède les {count} Pokémon de départ, de Kanto à Paldea",
@@ -4924,7 +5205,28 @@
       "tc_alolaFriends": "Possède une carte de Tili et de Gladio",
       "tc_aether": "Possède {count} cartes différentes de la Fondation Æther (Elsa-Mina, Saubohne, Vicky, leurs employés et le Paradis Æther)",
       "tc_teamSkull": "Possède {count} cartes différentes de la Team Skull (Guzma, Apocyne, leurs sbires et Kokohio)",
-      "smSets": "Possède une carte de chaque série Soleil et Lune numérotée : Soleil et Lune, Gardiens Ascendants, Ombres Ardentes, Invasion Carmin, Ultra-Prisme, Lumière Interdite, Tempête Céleste, Tonnerre Perdu, Duo de Choc, Alliance Infaillible, Harmonie des Esprits et Éclipse Cosmique"
+      "smSets": "Possède une carte de chaque série Soleil et Lune numérotée : Soleil et Lune, Gardiens Ascendants, Ombres Ardentes, Invasion Carmin, Ultra-Prisme, Lumière Interdite, Tempête Céleste, Tonnerre Perdu, Duo de Choc, Alliance Infaillible, Harmonie des Esprits et Éclipse Cosmique",
+      "galarLines": "Complète {count} lignées d’évolution de Galar",
+      "galarDex": "Possède {count} Pokémon différents de Galar (n° 810 à 905)",
+      "galarBadges": "Complète les équipes des {count} champions d’arène de Galar (des deux versions)",
+      "galarRoutes": "Possède tous les Pokémon de toutes les routes de Galar d’Épée et Bouclier, de la route 1 à la route 10",
+      "galarLandmarks": "Possède tous les Pokémon des forêts et des mines de Galar",
+      "postwick": "Possède une carte de Paddoxton (la ville)",
+      "turffield": "Possède une carte de Greenbury (son stade)",
+      "circhester": "Possède une carte de Ludester (ses bains)",
+      "spikemuth": "Possède une carte de Smashings (la ville ou son arène)",
+      "wyndon": "Possède une carte de Winscor (son stade)",
+      "galarCities": "Possède une carte de chaque ville de Galar qui en a une : Paddoxton, Greenbury, Ludester, Smashings et Winscor",
+      "galarPlaceCards": "Possède les lieux de Galar imprimés en cartes Stade : Mine de Galar, Forêt de Lumirinth, Shehroz Tower, Butte du Dynarbre, Tour des Ténèbres, Tour de l’Eau et Sentier Blanche-Cime",
+      "tc_galarGymLeaders": "Possède une carte de chaque champion d’arène de Galar : Percy, Donna, Kabu, Faïza, Alistair, Sally, Chaz, Lona, Peterson et Roy",
+      "tc_leon": "Possède une carte de Tarak",
+      "tc_galarRivals": "Possède une carte de Nabil, de Rosemary et de Travis (la leur ou celle d’un de leurs Pokémon)",
+      "tc_sonia": "Possède une carte de Sonya",
+      "tc_macroCosmos": "Possède une carte du président Shehroz et de Liv",
+      "tc_teamYell": "Possède {count} cartes différentes de la Team Yell (ses sbires, sa serviette et ses encouragements)",
+      "tc_isleOfArmor": "Possède une carte de Sophora, de Saturnin et d’Apia (L’Île Solitaire de l’Armure)",
+      "galarSets": "Possède une carte de chaque série Épée et Bouclier qui se passe à Galar : Épée et Bouclier, Clash des Rebelles, Ténèbres Embrasées, Voltage Éclatant, Styles de Combat, Règne de Glace, Évolution Céleste et Poing de Fusion",
+      "galarSpecialSets": "Possède une carte de chaque série spéciale Épée et Bouclier : La Voie du Maître, Destinées Radieuses et Zénith Suprême"
     },
     "subs": {
       "allLines": "Toutes régions",
@@ -4974,7 +5276,14 @@
       "alolaGyms": "Grandes épreuves d’Alola",
       "alolaTrainerCards": "Dresseurs d’Alola en cartes",
       "alolaRoutes": "Routes d’Alola (Soleil et Lune)",
-      "alolaLandmarks": "Grottes, jardins et monts d’Alola"
+      "alolaLandmarks": "Grottes, jardins et monts d’Alola",
+      "galarLines": "Lignées de Galar (Épée et Bouclier)",
+      "galarMore": "Galar, au-delà des lignées",
+      "galarGyms": "Arènes de Galar",
+      "galarTrainerCards": "Dresseurs de Galar en cartes",
+      "galarRoutes": "Routes de Galar (Épée et Bouclier)",
+      "galarLandmarks": "Forêts et mines de Galar",
+      "galarCities": "Villes de Galar en cartes"
     }
   },
   "beta": {
