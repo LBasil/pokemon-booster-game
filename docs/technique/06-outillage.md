@@ -113,6 +113,18 @@ secrets de dépôt : `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
 jour celui de minuit) : deux jours d'import suffisent pour qu'une courbe
 apparaisse.
 
+**Données des succès régionaux** :
+[scripts/region-tools.mjs](../../scripts/region-tools.mjs), outil de
+développement (jamais dans le bundle), cache PokéAPI dans
+`scripts/.cache/` (ignoré par git), `NODE_USE_SYSTEM_CA=1` sur cette
+machine. `lines <de> <à>` : chaînes d'évolution ; `encounters <id de
+région> <versions>` : Pokémon sauvages des premiers jeux par lieu
+(herbe, surf, Super Canne, rencontres uniques), lieux identiques
+regroupés ; `cards <regex>` : noms de cartes de la base (clé service
+role de `scripts/.env.local`) ; `texts <région>` : écrit les textes EN/FR
+manquants des lignées, routes et lieux avec les noms officiels de
+PokéAPI. Le reste (arènes, dresseurs, séries) s'écrit à la main.
+
 ---
 
 ## 4. Intégration continue et déploiement

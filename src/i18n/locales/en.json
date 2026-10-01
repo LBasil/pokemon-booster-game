@@ -2443,6 +2443,327 @@
       },
       "hgssSets": {
         "title": "Back to Johto"
+      },
+      "poochyenaLine": {
+        "title": "Mightyena line"
+      },
+      "zigzagoonLine": {
+        "title": "Linoone line"
+      },
+      "wurmpleLine": {
+        "title": "Wurmple family"
+      },
+      "lotadLine": {
+        "title": "Ludicolo line"
+      },
+      "seedotLine": {
+        "title": "Shiftry line"
+      },
+      "taillowLine": {
+        "title": "Swellow line"
+      },
+      "wingullLine": {
+        "title": "Pelipper line"
+      },
+      "surskitLine": {
+        "title": "Masquerain line"
+      },
+      "shroomishLine": {
+        "title": "Breloom line"
+      },
+      "slakothLine": {
+        "title": "Slaking line"
+      },
+      "nincadaLine": {
+        "title": "Nincada family"
+      },
+      "whismurLine": {
+        "title": "Exploud line"
+      },
+      "makuhitaLine": {
+        "title": "Hariyama line"
+      },
+      "skittyLine": {
+        "title": "Delcatty line"
+      },
+      "medititeLine": {
+        "title": "Medicham line"
+      },
+      "electrikeLine": {
+        "title": "Manectric line"
+      },
+      "gulpinLine": {
+        "title": "Swalot line"
+      },
+      "carvanhaLine": {
+        "title": "Sharpedo line"
+      },
+      "wailmerLine": {
+        "title": "Wailord line"
+      },
+      "numelLine": {
+        "title": "Camerupt line"
+      },
+      "spoinkLine": {
+        "title": "Grumpig line"
+      },
+      "trapinchLine": {
+        "title": "Flygon line"
+      },
+      "cacneaLine": {
+        "title": "Cacturne line"
+      },
+      "swabluLine": {
+        "title": "Altaria line"
+      },
+      "barboachLine": {
+        "title": "Whiscash line"
+      },
+      "corphishLine": {
+        "title": "Crawdaunt line"
+      },
+      "baltoyLine": {
+        "title": "Claydol line"
+      },
+      "lileepLine": {
+        "title": "Cradily line"
+      },
+      "anorithLine": {
+        "title": "Armaldo line"
+      },
+      "feebasLine": {
+        "title": "Milotic line"
+      },
+      "shuppetLine": {
+        "title": "Banette line"
+      },
+      "duskullLine": {
+        "title": "Dusclops line"
+      },
+      "snoruntLine": {
+        "title": "Glalie line"
+      },
+      "sphealLine": {
+        "title": "Walrein line"
+      },
+      "clamperlLine": {
+        "title": "Clamperl family"
+      },
+      "route101": {
+        "title": "Route 101"
+      },
+      "route102": {
+        "title": "Route 102"
+      },
+      "route103": {
+        "title": "Route 103"
+      },
+      "route104": {
+        "title": "Route 104"
+      },
+      "route110": {
+        "title": "Route 110"
+      },
+      "route111": {
+        "title": "Route 111"
+      },
+      "route112": {
+        "title": "Route 112"
+      },
+      "route113": {
+        "title": "Route 113"
+      },
+      "route114": {
+        "title": "Route 114"
+      },
+      "route115": {
+        "title": "Route 115"
+      },
+      "route116": {
+        "title": "Route 116"
+      },
+      "route117": {
+        "title": "Route 117"
+      },
+      "route118": {
+        "title": "Route 118"
+      },
+      "route120": {
+        "title": "Route 120"
+      },
+      "route121and123": {
+        "title": "Routes 121 and 123"
+      },
+      "route124and126": {
+        "title": "Routes 124 and 126"
+      },
+      "route128": {
+        "title": "Route 128"
+      },
+      "route129": {
+        "title": "Route 129"
+      },
+      "route130": {
+        "title": "Route 130"
+      },
+      "route105to109": {
+        "title": "Routes 105 to 109"
+      },
+      "route132to134": {
+        "title": "Routes 132 to 134"
+      },
+      "graniteCave": {
+        "title": "Granite Cave"
+      },
+      "fieryPath": {
+        "title": "Fiery Path"
+      },
+      "jaggedPass": {
+        "title": "Jagged Pass"
+      },
+      "newMauville": {
+        "title": "New Mauville"
+      },
+      "mtPyre": {
+        "title": "Mt. Pyre"
+      },
+      "hoennSafariZone": {
+        "title": "Hoenn Safari Zone"
+      },
+      "shoalCave": {
+        "title": "Shoal Cave"
+      },
+      "seafloorCavern": {
+        "title": "Seafloor Cavern"
+      },
+      "caveOfOrigin": {
+        "title": "Cave of Origin"
+      },
+      "skyPillar": {
+        "title": "Sky Pillar"
+      },
+      "hoennVictoryRoad": {
+        "title": "Hoenn Victory Road"
+      },
+      "stoneBadge": {
+        "title": "Stone Badge"
+      },
+      "knuckleBadge": {
+        "title": "Knuckle Badge"
+      },
+      "dynamoBadge": {
+        "title": "Dynamo Badge"
+      },
+      "heatBadge": {
+        "title": "Heat Badge"
+      },
+      "balanceBadge": {
+        "title": "Balance Badge"
+      },
+      "featherBadge": {
+        "title": "Feather Badge"
+      },
+      "mindBadge": {
+        "title": "Mind Badge"
+      },
+      "rainBadge": {
+        "title": "Rain Badge"
+      },
+      "hoennBadges": {
+        "title": "Hoenn badge case"
+      },
+      "sidney": {
+        "title": "Sidney"
+      },
+      "phoebe": {
+        "title": "Phoebe"
+      },
+      "glacia": {
+        "title": "Glacia"
+      },
+      "drake": {
+        "title": "Drake"
+      },
+      "hoennEliteFour": {
+        "title": "Ever Grande City"
+      },
+      "wally": {
+        "title": "Rival Wally"
+      },
+      "maxie": {
+        "title": "Team Magma’s Maxie"
+      },
+      "archie": {
+        "title": "Team Aqua’s Archie"
+      },
+      "hoennSolos": {
+        "title": "Hoenn loners"
+      },
+      "hoennBabies": {
+        "title": "Hoenn nursery"
+      },
+      "hoennNewEvolutions": {
+        "title": "Hoenn late bloomers"
+      },
+      "hoennForms": {
+        "title": "Galarian rush"
+      },
+      "hoennLines10": {
+        "title": "Hoenn family album"
+      },
+      "hoennLines25": {
+        "title": "Hoenn evolution researcher"
+      },
+      "hoennLines42": {
+        "title": "Every Hoenn line"
+      },
+      "hoennDex25": {
+        "title": "Hoenn rookie"
+      },
+      "hoennDex50": {
+        "title": "Hoenn trainer"
+      },
+      "hoennDex100": {
+        "title": "Hoenn ace"
+      },
+      "hoennOpenSea": {
+        "title": "Open sea"
+      },
+      "hoennRoutes": {
+        "title": "Every Hoenn route"
+      },
+      "hoennLandmarks": {
+        "title": "Hoenn spelunker"
+      },
+      "hoennPlaceCards": {
+        "title": "Hoenn on cards"
+      },
+      "tc_hoennGymLeaders": {
+        "title": "Hoenn leaders in the binder"
+      },
+      "tc_hoennEliteFour": {
+        "title": "Hoenn’s Elite Four on cards"
+      },
+      "tc_steven": {
+        "title": "Steven’s collection"
+      },
+      "tc_wally": {
+        "title": "Wally grew up"
+      },
+      "tc_birch": {
+        "title": "Birch’s fieldwork"
+      },
+      "tc_teamMagma": {
+        "title": "Magma rising"
+      },
+      "tc_teamAqua": {
+        "title": "Aqua tide"
+      },
+      "exHoennSets": {
+        "title": "The EX era begins"
+      },
+      "orasSets": {
+        "title": "Primal power"
       }
     },
     "desc": {
@@ -2622,9 +2943,6 @@
         "ceruleanCave": "Own the Pokémon found there in Red and Blue: Arbok, Raichu, Sandslash, Wigglytuff, Golbat, Parasect, Venomoth, Kadabra, Slowbro, Magneton, Dodrio, Hypno, Kingler, Electrode, Marowak, Rhydon, Chansey, Seadra, Seaking, Ditto and Mewtwo",
         "victoryRoad": "Own the Pokémon found there in Red and Blue: Zubat, Golbat, Venomoth, Machop, Machoke, Geodude, Graveler, Onix, Marowak and Moltres",
         "nationalPark": "Own the Pokémon of its Bug-Catching Contest in Gold and Silver: Scyther, Pinsir, Butterfree, Beedrill, Venonat and Paras",
-        "petalburgWoods": "Own the Pokémon found there: Wurmple, Shroomish and Slakoth",
-        "meteorFalls": "Own the Pokémon found there: Lunatone, Solrock and Bagon",
-        "route119": "Own the Pokémon found there: Feebas and Milotic",
         "kantoStarters": "Own Bulbasaur, Charmander and Squirtle",
         "johtoStarters": "Own Chikorita, Cyndaquil and Totodile",
         "hoennStarters": "Own Treecko, Torchic and Mudkip",
@@ -2770,7 +3088,96 @@
         "johtoKoga": "Elite Four Koga’s team in Gold and Silver: own Ariados, Venomoth, Forretress, Muk and Crobat",
         "johtoBruno": "Elite Four Bruno’s team in Gold and Silver: own Hitmontop, Hitmonlee, Hitmonchan, Onix and Machamp",
         "karen": "Elite Four Karen’s team in Gold and Silver: own Umbreon, Vileplume, Gengar, Murkrow and Houndoom",
-        "lanceJohto": "Lance’s team as champion (Gold and Silver): own Gyarados, Dragonite, Aerodactyl and Charizard"
+        "lanceJohto": "Lance’s team as champion (Gold and Silver): own Gyarados, Dragonite, Aerodactyl and Charizard",
+        "poochyenaLine": "Own the whole line: Poochyena and Mightyena",
+        "zigzagoonLine": "Own the whole line: Zigzagoon and Linoone",
+        "wurmpleLine": "Own the whole line: Wurmple, Silcoon, Beautifly, Cascoon and Dustox",
+        "lotadLine": "Own the whole line: Lotad, Lombre and Ludicolo",
+        "seedotLine": "Own the whole line: Seedot, Nuzleaf and Shiftry",
+        "taillowLine": "Own the whole line: Taillow and Swellow",
+        "wingullLine": "Own the whole line: Wingull and Pelipper",
+        "surskitLine": "Own the whole line: Surskit and Masquerain",
+        "shroomishLine": "Own the whole line: Shroomish and Breloom",
+        "slakothLine": "Own the whole line: Slakoth, Vigoroth and Slaking",
+        "nincadaLine": "Own the whole line: Nincada, Ninjask and Shedinja",
+        "whismurLine": "Own the whole line: Whismur, Loudred and Exploud",
+        "makuhitaLine": "Own the whole line: Makuhita and Hariyama",
+        "skittyLine": "Own the whole line: Skitty and Delcatty",
+        "medititeLine": "Own the whole line: Meditite and Medicham",
+        "electrikeLine": "Own the whole line: Electrike and Manectric",
+        "gulpinLine": "Own the whole line: Gulpin and Swalot",
+        "carvanhaLine": "Own the whole line: Carvanha and Sharpedo",
+        "wailmerLine": "Own the whole line: Wailmer and Wailord",
+        "numelLine": "Own the whole line: Numel and Camerupt",
+        "spoinkLine": "Own the whole line: Spoink and Grumpig",
+        "trapinchLine": "Own the whole line: Trapinch, Vibrava and Flygon",
+        "cacneaLine": "Own the whole line: Cacnea and Cacturne",
+        "swabluLine": "Own the whole line: Swablu and Altaria",
+        "barboachLine": "Own the whole line: Barboach and Whiscash",
+        "corphishLine": "Own the whole line: Corphish and Crawdaunt",
+        "baltoyLine": "Own the whole line: Baltoy and Claydol",
+        "lileepLine": "Own the whole line: Lileep and Cradily",
+        "anorithLine": "Own the whole line: Anorith and Armaldo",
+        "feebasLine": "Own the whole line: Feebas and Milotic",
+        "shuppetLine": "Own the whole line: Shuppet and Banette",
+        "duskullLine": "Own the whole line: Duskull and Dusclops",
+        "snoruntLine": "Own the whole line: Snorunt and Glalie",
+        "sphealLine": "Own the whole line: Spheal, Sealeo and Walrein",
+        "clamperlLine": "Own the whole line: Clamperl, Huntail and Gorebyss",
+        "route101": "Own the Pokémon found there in Ruby and Sapphire: Poochyena, Zigzagoon and Wurmple",
+        "route102": "Own the Pokémon found there in Ruby and Sapphire: Marill, Poochyena, Zigzagoon, Wurmple, Lotad, Seedot, Ralts, Surskit and Corphish",
+        "route103": "Own the Pokémon found there in Ruby and Sapphire: Tentacool, Poochyena, Zigzagoon, Wingull, Pelipper, Sharpedo and Wailmer",
+        "route104": "Own the Pokémon found there in Ruby and Sapphire: Magikarp, Zigzagoon, Wurmple, Taillow, Wingull and Pelipper",
+        "route105to109": "Own the Pokémon found there in Ruby and Sapphire: Tentacool, Wingull, Pelipper and Wailmer",
+        "route110": "Own the Pokémon found there in Ruby and Sapphire: Oddish, Tentacool, Zigzagoon, Wingull, Pelipper, Electrike, Plusle, Minun, Gulpin and Wailmer",
+        "route111": "Own the Pokémon found there in Ruby and Sapphire: Sandshrew, Marill, Surskit, Trapinch, Cacnea, Barboach and Baltoy",
+        "route112": "Own the Pokémon found there in Ruby and Sapphire: Machop and Numel",
+        "route113": "Own the Pokémon found there in Ruby and Sapphire: Sandshrew, Skarmory and Spinda",
+        "route114": "Own the Pokémon found there in Ruby and Sapphire: Marill, Lotad, Lombre, Seedot, Nuzleaf, Surskit, Swablu, Zangoose, Seviper and Barboach",
+        "route115": "Own the Pokémon found there in Ruby and Sapphire: Jigglypuff, Tentacool, Taillow, Swellow, Wingull, Pelipper, Wailmer and Swablu",
+        "route116": "Own the Pokémon found there in Ruby and Sapphire: Zigzagoon, Taillow, Nincada, Whismur and Skitty",
+        "route117": "Own the Pokémon found there in Ruby and Sapphire: Oddish, Marill, Zigzagoon, Surskit, Volbeat, Illumise, Roselia and Corphish",
+        "route118": "Own the Pokémon found there in Ruby and Sapphire: Tentacool, Zigzagoon, Linoone, Wingull, Pelipper, Electrike, Manectric, Carvanha, Sharpedo and Kecleon",
+        "route119": "Own the Pokémon found there in Ruby and Sapphire: Oddish, Tentacool, Zigzagoon, Linoone, Wingull, Pelipper, Carvanha, Feebas, Kecleon and Tropius",
+        "route120": "Own the Pokémon found there in Ruby and Sapphire: Oddish, Marill, Zigzagoon, Linoone, Surskit, Barboach, Kecleon and Absol",
+        "route121and123": "Own the Pokémon found there in Ruby and Sapphire: Oddish, Gloom, Tentacool, Zigzagoon, Linoone, Wingull, Pelipper, Wailmer, Kecleon, Shuppet and Duskull",
+        "hoennOpenSea": "Own the Pokémon of Routes 122, 125, 127 and 131 in Ruby and Sapphire: Tentacool, Wingull, Pelipper, Sharpedo and Wailmer",
+        "route124and126": "Own the Pokémon found there in Ruby and Sapphire: Tentacool, Chinchou, Wingull, Pelipper, Sharpedo, Wailmer, Clamperl and Relicanth",
+        "route128": "Own the Pokémon found there in Ruby and Sapphire: Tentacool, Corsola, Wingull, Pelipper, Wailmer and Luvdisc",
+        "route129": "Own the Pokémon found there in Ruby and Sapphire: Tentacool, Wingull, Pelipper, Sharpedo, Wailmer and Wailord",
+        "route130": "Own the Pokémon found there in Ruby and Sapphire: Tentacool, Wingull, Pelipper, Sharpedo, Wailmer and Wynaut",
+        "route132to134": "Own the Pokémon found there in Ruby and Sapphire: Tentacool, Horsea, Wingull, Pelipper, Sharpedo and Wailmer",
+        "petalburgWoods": "Own the Pokémon found there in Ruby and Sapphire: Zigzagoon, Wurmple, Silcoon, Cascoon, Taillow, Shroomish and Slakoth",
+        "graniteCave": "Own the Pokémon found there in Ruby and Sapphire: Zubat, Abra, Geodude, Makuhita, Sableye, Mawile and Aron",
+        "fieryPath": "Own the Pokémon found there in Ruby and Sapphire: Machop, Grimer, Koffing, Slugma, Numel and Torkoal",
+        "jaggedPass": "Own the Pokémon found there in Ruby and Sapphire: Machop, Numel and Spoink",
+        "meteorFalls": "Own the Pokémon found there in Ruby and Sapphire: Zubat, Golbat, Lunatone, Solrock, Barboach, Whiscash and Bagon",
+        "newMauville": "Own the Pokémon found there in Ruby and Sapphire: Magnemite, Magneton, Voltorb and Electrode",
+        "mtPyre": "Own the Pokémon found there in Ruby and Sapphire: Vulpix, Wingull, Meditite, Shuppet, Duskull and Chimecho",
+        "hoennSafariZone": "Own the Pokémon found there in Ruby and Sapphire: Pikachu, Oddish, Gloom, Psyduck, Golduck, Doduo, Dodrio, Rhyhorn, Goldeen, Seaking, Pinsir, Natu, Xatu, Wobbuffet, Girafarig, Heracross and Phanpy",
+        "shoalCave": "Own the Pokémon found there in Ruby and Sapphire: Zubat, Golbat, Tentacool, Wailmer, Snorunt and Spheal",
+        "seafloorCavern": "Own the Pokémon found there in Ruby and Sapphire: Zubat, Golbat, Tentacool and Wailmer",
+        "caveOfOrigin": "Own the Pokémon found there in Ruby and Sapphire: Zubat, Golbat, Sableye, Mawile, Kyogre and Groudon",
+        "skyPillar": "Own the Pokémon found there in Ruby and Sapphire: Golbat, Sableye, Mawile, Altaria, Claydol, Banette, Dusclops and Rayquaza",
+        "hoennVictoryRoad": "Own the Pokémon found there in Ruby and Sapphire: Zubat, Golbat, Whismur, Loudred, Makuhita, Hariyama, Sableye, Mawile, Aron, Lairon, Meditite, Medicham, Barboach and Whiscash",
+        "stoneBadge": "Gym leader Roxanne’s team: own Geodude and Nosepass",
+        "knuckleBadge": "Gym leader Brawly’s team: own Machop and Makuhita",
+        "dynamoBadge": "Gym leader Wattson’s team: own Magnemite, Voltorb and Magneton",
+        "heatBadge": "Gym leader Flannery’s team: own Slugma and Torkoal",
+        "balanceBadge": "Gym leader Norman’s team: own Slaking and Vigoroth",
+        "featherBadge": "Gym leader Winona’s team: own Swellow, Pelipper, Skarmory and Altaria",
+        "mindBadge": "Gym leaders Tate & Liza’s team: own Lunatone and Solrock",
+        "rainBadge": "Gym leader Wallace’s team: own Luvdisc, Whiscash, Sealeo, Seaking and Milotic",
+        "sidney": "Elite Four Sidney’s team in Ruby and Sapphire: own Mightyena, Shiftry, Cacturne, Crawdaunt and Absol",
+        "phoebe": "Elite Four Phoebe’s team in Ruby and Sapphire: own Dusclops, Banette and Sableye",
+        "glacia": "Elite Four Glacia’s team in Ruby and Sapphire: own Sealeo, Glalie and Walrein",
+        "drake": "Elite Four Drake’s team in Ruby and Sapphire: own Shelgon, Altaria, Kingdra, Flygon and Salamence",
+        "wally": "Wally’s team at Victory Road: own Altaria, Delcatty, Roselia, Magneton and Gardevoir",
+        "maxie": "Maxie’s team in Ruby: own Mightyena, Crobat and Camerupt",
+        "archie": "Archie’s team in Sapphire: own Mightyena, Crobat and Sharpedo",
+        "hoennSolos": "Own the 21 Hoenn Pokémon that don’t evolve in Ruby and Sapphire, legendaries aside: Nosepass, Sableye, Mawile, Plusle, Minun, Volbeat, Illumise, Roselia, Torkoal, Spinda, Zangoose, Seviper, Lunatone, Solrock, Castform, Kecleon, Tropius, Chimecho, Absol, Relicanth and Luvdisc",
+        "hoennBabies": "Own the babies later added to Hoenn Pokémon: Budew and Chingling",
+        "hoennNewEvolutions": "Own the evolutions later games gave Hoenn Pokémon: Roserade, Gallade, Probopass, Dusknoir, Froslass and Obstagoon"
       },
       "families": "Complete {count} evolution line | Complete {count} evolution lines",
       "allStarters": "Own the {count} starter Pokémon, Kanto to Paldea",
@@ -2831,7 +3238,24 @@
       "tc_elm": "Own {count} different Professor Elm cards",
       "tc_rocketExecutives": "Own a card of each Team Rocket executive back in Johto: Archer, Ariana, Petrel and Proton",
       "neoSets": "Own a card from each Neo set, the first ones set in Johto: Neo Genesis, Neo Discovery, Neo Revelation and Neo Destiny",
-      "hgssSets": "Own a card from each HeartGold & SoulSilver set: HeartGold & SoulSilver, Unleashed, Undaunted, Triumphant and Call of Legends"
+      "hgssSets": "Own a card from each HeartGold & SoulSilver set: HeartGold & SoulSilver, Unleashed, Undaunted, Triumphant and Call of Legends",
+      "hoennBadges": "Complete the teams of Hoenn’s {count} gym leaders",
+      "hoennEliteFour": "Complete the teams of Hoenn’s Elite Four (Ruby and Sapphire)",
+      "hoennForms": "Own the Galarian forms of Zigzagoon and Linoone",
+      "hoennLines": "Complete {count} evolution lines of Hoenn",
+      "hoennDex": "Own {count} different Pokémon of Hoenn (#252 to #386)",
+      "hoennRoutes": "Own every Pokémon of every Hoenn route, from Route 101 to Route 134",
+      "hoennLandmarks": "Own every Pokémon of Hoenn’s caves, forests and peaks",
+      "hoennPlaceCards": "Own the Hoenn places printed as Stadium cards: Granite Cave, Meteor Falls, Sky Pillar, Desert Ruins, Island Cave, Ancient Tomb, Team Magma Hideout, Team Aqua Hideout and Battle Frontier (no Hoenn city has a card)",
+      "tc_hoennGymLeaders": "Own a card of each Hoenn gym leader who has one: Roxanne, Brawly, Flannery, Norman, Winona, Tate & Liza and Wallace (no Wattson card yet)",
+      "tc_hoennEliteFour": "Own a card of each member of Hoenn’s Elite Four: Sidney, Phoebe, Glacia and Drake (their Stadiums count)",
+      "tc_steven": "Own {count} different cards bearing Steven’s name, like Steven’s Metagross ex",
+      "tc_wally": "Own {count} different Wally cards",
+      "tc_birch": "Own {count} different Professor Birch cards",
+      "tc_teamMagma": "Own {count} different Team Magma cards (their Pokémon, Maxie and their schemes)",
+      "tc_teamAqua": "Own {count} different Team Aqua cards (their Pokémon, Archie and their schemes)",
+      "exHoennSets": "Own a card from each of the first EX sets, set in Hoenn: Ruby & Sapphire, Sandstorm, Dragon, Team Magma vs Team Aqua and Hidden Legends",
+      "orasSets": "Own a card from each Omega Ruby & Alpha Sapphire era set: Primal Clash, Roaring Skies and Double Crisis"
     },
     "subs": {
       "allLines": "All regions",
@@ -2839,20 +3263,25 @@
       "kantoMore": "Kanto, beyond the lines",
       "johtoLines": "Johto lines (Gold and Silver)",
       "johtoMore": "Johto, beyond the lines",
+      "hoennLines": "Hoenn lines (Ruby and Sapphire)",
+      "hoennMore": "Hoenn, beyond the lines",
       "otherLines": "Other regions",
       "kantoGyms": "Kanto gyms",
       "johtoGyms": "Johto gyms",
+      "hoennGyms": "Hoenn gyms",
       "league": "Pokémon League",
       "rivals": "Rivals and heroes",
       "trainerCards": "Kanto trainers on cards",
       "johtoTrainerCards": "Johto trainers on cards",
+      "hoennTrainerCards": "Hoenn trainers on cards",
       "allPlaces": "All places",
       "kantoRoutes": "Kanto routes (Red and Blue)",
       "kantoLandmarks": "Kanto caves, forests and buildings",
       "kantoCities": "Kanto cities on cards",
       "johtoRoutes": "Johto routes (Gold and Silver)",
       "johtoLandmarks": "Johto caves, towers and buildings",
-      "otherPlaces": "Other regions"
+      "hoennRoutes": "Hoenn routes (Ruby and Sapphire)",
+      "hoennLandmarks": "Hoenn caves, forests and peaks"
     }
   },
   "beta": {

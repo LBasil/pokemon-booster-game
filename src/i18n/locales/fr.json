@@ -1824,7 +1824,7 @@
         "title": "Bois Clémenti"
       },
       "meteorFalls": {
-        "title": "Cascade Météore"
+        "title": "Site Météore"
       },
       "route119": {
         "title": "Route 119"
@@ -2443,6 +2443,327 @@
       },
       "hgssSets": {
         "title": "Retour à Johto"
+      },
+      "poochyenaLine": {
+        "title": "Lignée de Grahyèna"
+      },
+      "zigzagoonLine": {
+        "title": "Lignée de Linéon"
+      },
+      "wurmpleLine": {
+        "title": "Famille de Chenipotte"
+      },
+      "lotadLine": {
+        "title": "Lignée de Ludicolo"
+      },
+      "seedotLine": {
+        "title": "Lignée de Tengalice"
+      },
+      "taillowLine": {
+        "title": "Lignée d’Hélédelle"
+      },
+      "wingullLine": {
+        "title": "Lignée de Bekipan"
+      },
+      "surskitLine": {
+        "title": "Lignée de Maskadra"
+      },
+      "shroomishLine": {
+        "title": "Lignée de Chapignon"
+      },
+      "slakothLine": {
+        "title": "Lignée de Monaflèmit"
+      },
+      "nincadaLine": {
+        "title": "Famille de Ningale"
+      },
+      "whismurLine": {
+        "title": "Lignée de Brouhabam"
+      },
+      "makuhitaLine": {
+        "title": "Lignée d’Hariyama"
+      },
+      "skittyLine": {
+        "title": "Lignée de Delcatty"
+      },
+      "medititeLine": {
+        "title": "Lignée de Charmina"
+      },
+      "electrikeLine": {
+        "title": "Lignée d’Élecsprint"
+      },
+      "gulpinLine": {
+        "title": "Lignée d’Avaltout"
+      },
+      "carvanhaLine": {
+        "title": "Lignée de Sharpedo"
+      },
+      "wailmerLine": {
+        "title": "Lignée de Wailord"
+      },
+      "numelLine": {
+        "title": "Lignée de Camérupt"
+      },
+      "spoinkLine": {
+        "title": "Lignée de Groret"
+      },
+      "trapinchLine": {
+        "title": "Lignée de Libégon"
+      },
+      "cacneaLine": {
+        "title": "Lignée de Cacturne"
+      },
+      "swabluLine": {
+        "title": "Lignée d’Altaria"
+      },
+      "barboachLine": {
+        "title": "Lignée de Barbicha"
+      },
+      "corphishLine": {
+        "title": "Lignée de Colhomard"
+      },
+      "baltoyLine": {
+        "title": "Lignée de Kaorine"
+      },
+      "lileepLine": {
+        "title": "Lignée de Vacilys"
+      },
+      "anorithLine": {
+        "title": "Lignée d’Armaldo"
+      },
+      "feebasLine": {
+        "title": "Lignée de Milobellus"
+      },
+      "shuppetLine": {
+        "title": "Lignée de Branette"
+      },
+      "duskullLine": {
+        "title": "Lignée de Téraclope"
+      },
+      "snoruntLine": {
+        "title": "Lignée d’Oniglali"
+      },
+      "sphealLine": {
+        "title": "Lignée de Kaimorse"
+      },
+      "clamperlLine": {
+        "title": "Famille de Coquiperl"
+      },
+      "route101": {
+        "title": "Route 101"
+      },
+      "route102": {
+        "title": "Route 102"
+      },
+      "route103": {
+        "title": "Route 103"
+      },
+      "route104": {
+        "title": "Route 104"
+      },
+      "route110": {
+        "title": "Route 110"
+      },
+      "route111": {
+        "title": "Route 111"
+      },
+      "route112": {
+        "title": "Route 112"
+      },
+      "route113": {
+        "title": "Route 113"
+      },
+      "route114": {
+        "title": "Route 114"
+      },
+      "route115": {
+        "title": "Route 115"
+      },
+      "route116": {
+        "title": "Route 116"
+      },
+      "route117": {
+        "title": "Route 117"
+      },
+      "route118": {
+        "title": "Route 118"
+      },
+      "route120": {
+        "title": "Route 120"
+      },
+      "route121and123": {
+        "title": "Routes 121 et 123"
+      },
+      "route124and126": {
+        "title": "Routes 124 et 126"
+      },
+      "route128": {
+        "title": "Route 128"
+      },
+      "route129": {
+        "title": "Route 129"
+      },
+      "route130": {
+        "title": "Route 130"
+      },
+      "route105to109": {
+        "title": "Routes 105 à 109"
+      },
+      "route132to134": {
+        "title": "Routes 132 à 134"
+      },
+      "graniteCave": {
+        "title": "Grotte Granite"
+      },
+      "fieryPath": {
+        "title": "Chemin Ardent"
+      },
+      "jaggedPass": {
+        "title": "Sentier Sinuroc"
+      },
+      "newMauville": {
+        "title": "New Lavandia"
+      },
+      "mtPyre": {
+        "title": "Mont Mémoria"
+      },
+      "hoennSafariZone": {
+        "title": "Parc Safari de Hoenn"
+      },
+      "shoalCave": {
+        "title": "Grotte Tréfonds"
+      },
+      "seafloorCavern": {
+        "title": "Caverne Fondmer"
+      },
+      "caveOfOrigin": {
+        "title": "Grotte Origine"
+      },
+      "skyPillar": {
+        "title": "Pilier Céleste"
+      },
+      "hoennVictoryRoad": {
+        "title": "Route Victoire de Hoenn"
+      },
+      "stoneBadge": {
+        "title": "Badge Roche (Hoenn)"
+      },
+      "knuckleBadge": {
+        "title": "Badge Poing"
+      },
+      "dynamoBadge": {
+        "title": "Badge Dynamo"
+      },
+      "heatBadge": {
+        "title": "Badge Chaleur"
+      },
+      "balanceBadge": {
+        "title": "Badge Balance"
+      },
+      "featherBadge": {
+        "title": "Badge Plume"
+      },
+      "mindBadge": {
+        "title": "Badge Esprit"
+      },
+      "rainBadge": {
+        "title": "Badge Pluie"
+      },
+      "hoennBadges": {
+        "title": "Boîte à badges de Hoenn"
+      },
+      "sidney": {
+        "title": "Damien"
+      },
+      "phoebe": {
+        "title": "Spectra"
+      },
+      "glacia": {
+        "title": "Glacia"
+      },
+      "drake": {
+        "title": "Aragon"
+      },
+      "hoennEliteFour": {
+        "title": "Éternara"
+      },
+      "wally": {
+        "title": "Timmy, le rival"
+      },
+      "maxie": {
+        "title": "Max, chef de la Team Magma"
+      },
+      "archie": {
+        "title": "Arthur, chef de la Team Aqua"
+      },
+      "hoennSolos": {
+        "title": "Solitaires de Hoenn"
+      },
+      "hoennBabies": {
+        "title": "Pouponnière de Hoenn"
+      },
+      "hoennNewEvolutions": {
+        "title": "Évolutions tardives de Hoenn"
+      },
+      "hoennForms": {
+        "title": "Ruée vers Galar"
+      },
+      "hoennLines10": {
+        "title": "Album de famille de Hoenn"
+      },
+      "hoennLines25": {
+        "title": "Chercheur en évolution de Hoenn"
+      },
+      "hoennLines42": {
+        "title": "Toutes les lignées de Hoenn"
+      },
+      "hoennDex25": {
+        "title": "Débutant de Hoenn"
+      },
+      "hoennDex50": {
+        "title": "Dresseur de Hoenn"
+      },
+      "hoennDex100": {
+        "title": "As de Hoenn"
+      },
+      "hoennOpenSea": {
+        "title": "Le grand large"
+      },
+      "hoennRoutes": {
+        "title": "Toutes les routes de Hoenn"
+      },
+      "hoennLandmarks": {
+        "title": "Spéléologue de Hoenn"
+      },
+      "hoennPlaceCards": {
+        "title": "Hoenn en cartes"
+      },
+      "tc_hoennGymLeaders": {
+        "title": "Champions de Hoenn dans le classeur"
+      },
+      "tc_hoennEliteFour": {
+        "title": "Le Conseil 4 de Hoenn en cartes"
+      },
+      "tc_steven": {
+        "title": "La collection de Pierre Rochard"
+      },
+      "tc_wally": {
+        "title": "Timmy a grandi"
+      },
+      "tc_birch": {
+        "title": "Sur le terrain avec le Prof. Seko"
+      },
+      "tc_teamMagma": {
+        "title": "Montée de magma"
+      },
+      "tc_teamAqua": {
+        "title": "Marée Aqua"
+      },
+      "exHoennSets": {
+        "title": "Le début de l’ère EX"
+      },
+      "orasSets": {
+        "title": "Puissance primitive"
       }
     },
     "desc": {
@@ -2622,9 +2943,6 @@
         "ceruleanCave": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Arbok, Raichu, Sablaireau, Grodoudou, Nosferalto, Parasect, Aéromite, Kadabra, Flagadoss, Magnéton, Dodrio, Hypnomade, Krabboss, Électrode, Ossatueur, Rhinoféros, Leveinard, Hypocéan, Poissoroy, Métamorph et Mewtwo",
         "victoryRoad": "Possède les Pokémon qu’on y trouve dans Rouge et Bleu : Nosferapti, Nosferalto, Aéromite, Machoc, Machopeur, Racaillou, Gravalanch, Onix, Ossatueur et Sulfura",
         "nationalPark": "Possède les Pokémon de son Concours de Capture d’Insecte dans Or et Argent : Insécateur, Scarabrute, Papilusion, Dardargnan, Mimitoss et Paras",
-        "petalburgWoods": "Possède les Pokémon qu’on y trouve : Chenipotte, Balignon et Parecool",
-        "meteorFalls": "Possède les Pokémon qu’on y trouve : Séléroc, Solaroc et Draby",
-        "route119": "Possède les Pokémon qu’on y trouve : Barpau et Milobellus",
         "kantoStarters": "Possède Bulbizarre, Salamèche et Carapuce",
         "johtoStarters": "Possède Germignon, Héricendre et Kaiminus",
         "hoennStarters": "Possède Arcko, Poussifeu et Gobou",
@@ -2770,7 +3088,96 @@
         "johtoKoga": "L’équipe de Koga, membre du Conseil 4 dans Or et Argent : possède Migalos, Aéromite, Foretress, Grotadmorv et Nostenfer",
         "johtoBruno": "L’équipe d’Aldo, membre du Conseil 4 dans Or et Argent : possède Kapoera, Kicklee, Tygnon, Onix et Mackogneur",
         "karen": "L’équipe de Marion, membre du Conseil 4 dans Or et Argent : possède Noctali, Rafflesia, Ectoplasma, Cornèbre et Démolosse",
-        "lanceJohto": "L’équipe de Peter, maître de la Ligue (Or et Argent) : possède Léviator, Dracolosse, Ptéra et Dracaufeu"
+        "lanceJohto": "L’équipe de Peter, maître de la Ligue (Or et Argent) : possède Léviator, Dracolosse, Ptéra et Dracaufeu",
+        "poochyenaLine": "Possède toute la lignée : Medhyèna et Grahyèna",
+        "zigzagoonLine": "Possède toute la lignée : Zigzaton et Linéon",
+        "wurmpleLine": "Possède toute la lignée : Chenipotte, Armulys, Charmillon, Blindalys et Papinox",
+        "lotadLine": "Possède toute la lignée : Nénupiot, Lombre et Ludicolo",
+        "seedotLine": "Possède toute la lignée : Grainipiot, Pifeuil et Tengalice",
+        "taillowLine": "Possède toute la lignée : Nirondelle et Hélédelle",
+        "wingullLine": "Possède toute la lignée : Goélise et Bekipan",
+        "surskitLine": "Possède toute la lignée : Arakdo et Maskadra",
+        "shroomishLine": "Possède toute la lignée : Balignon et Chapignon",
+        "slakothLine": "Possède toute la lignée : Parecool, Vigoroth et Monaflèmit",
+        "nincadaLine": "Possède toute la lignée : Ningale, Ninjask et Munja",
+        "whismurLine": "Possède toute la lignée : Chuchmur, Ramboum et Brouhabam",
+        "makuhitaLine": "Possède toute la lignée : Makuhita et Hariyama",
+        "skittyLine": "Possède toute la lignée : Skitty et Delcatty",
+        "medititeLine": "Possède toute la lignée : Méditikka et Charmina",
+        "electrikeLine": "Possède toute la lignée : Dynavolt et Élecsprint",
+        "gulpinLine": "Possède toute la lignée : Gloupti et Avaltout",
+        "carvanhaLine": "Possède toute la lignée : Carvanha et Sharpedo",
+        "wailmerLine": "Possède toute la lignée : Wailmer et Wailord",
+        "numelLine": "Possède toute la lignée : Chamallot et Camérupt",
+        "spoinkLine": "Possède toute la lignée : Spoink et Groret",
+        "trapinchLine": "Possède toute la lignée : Kraknoix, Vibraninf et Libégon",
+        "cacneaLine": "Possède toute la lignée : Cacnea et Cacturne",
+        "swabluLine": "Possède toute la lignée : Tylton et Altaria",
+        "barboachLine": "Possède toute la lignée : Barloche et Barbicha",
+        "corphishLine": "Possède toute la lignée : Écrapince et Colhomard",
+        "baltoyLine": "Possède toute la lignée : Balbuto et Kaorine",
+        "lileepLine": "Possède toute la lignée : Lilia et Vacilys",
+        "anorithLine": "Possède toute la lignée : Anorith et Armaldo",
+        "feebasLine": "Possède toute la lignée : Barpau et Milobellus",
+        "shuppetLine": "Possède toute la lignée : Polichombr et Branette",
+        "duskullLine": "Possède toute la lignée : Skelénox et Téraclope",
+        "snoruntLine": "Possède toute la lignée : Stalgamin et Oniglali",
+        "sphealLine": "Possède toute la lignée : Obalie, Phogleur et Kaimorse",
+        "clamperlLine": "Possède toute la lignée : Coquiperl, Serpang et Rosabyss",
+        "route101": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Medhyèna, Zigzaton et Chenipotte",
+        "route102": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Marill, Medhyèna, Zigzaton, Chenipotte, Nénupiot, Grainipiot, Tarsal, Arakdo et Écrapince",
+        "route103": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Tentacool, Medhyèna, Zigzaton, Goélise, Bekipan, Sharpedo et Wailmer",
+        "route104": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Magicarpe, Zigzaton, Chenipotte, Nirondelle, Goélise et Bekipan",
+        "route105to109": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Tentacool, Goélise, Bekipan et Wailmer",
+        "route110": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Mystherbe, Tentacool, Zigzaton, Goélise, Bekipan, Dynavolt, Posipi, Négapi, Gloupti et Wailmer",
+        "route111": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Sabelette, Marill, Arakdo, Kraknoix, Cacnea, Barloche et Balbuto",
+        "route112": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Machoc et Chamallot",
+        "route113": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Sabelette, Airmure et Spinda",
+        "route114": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Marill, Nénupiot, Lombre, Grainipiot, Pifeuil, Arakdo, Tylton, Mangriff, Séviper et Barloche",
+        "route115": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Rondoudou, Tentacool, Nirondelle, Hélédelle, Goélise, Bekipan, Wailmer et Tylton",
+        "route116": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Zigzaton, Nirondelle, Ningale, Chuchmur et Skitty",
+        "route117": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Mystherbe, Marill, Zigzaton, Arakdo, Muciole, Lumivole, Rosélia et Écrapince",
+        "route118": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Tentacool, Zigzaton, Linéon, Goélise, Bekipan, Dynavolt, Élecsprint, Carvanha, Sharpedo et Kecleon",
+        "route119": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Mystherbe, Tentacool, Zigzaton, Linéon, Goélise, Bekipan, Carvanha, Barpau, Kecleon et Tropius",
+        "route120": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Mystherbe, Marill, Zigzaton, Linéon, Arakdo, Barloche, Kecleon et Absol",
+        "route121and123": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Mystherbe, Ortide, Tentacool, Zigzaton, Linéon, Goélise, Bekipan, Wailmer, Kecleon, Polichombr et Skelénox",
+        "hoennOpenSea": "Possède les Pokémon des routes 122, 125, 127 et 131 dans Rubis et Saphir : Tentacool, Goélise, Bekipan, Sharpedo et Wailmer",
+        "route124and126": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Tentacool, Loupio, Goélise, Bekipan, Sharpedo, Wailmer, Coquiperl et Relicanth",
+        "route128": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Tentacool, Corayon, Goélise, Bekipan, Wailmer et Lovdisc",
+        "route129": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Tentacool, Goélise, Bekipan, Sharpedo, Wailmer et Wailord",
+        "route130": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Tentacool, Goélise, Bekipan, Sharpedo, Wailmer et Okéoké",
+        "route132to134": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Tentacool, Hypotrempe, Goélise, Bekipan, Sharpedo et Wailmer",
+        "petalburgWoods": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Zigzaton, Chenipotte, Armulys, Blindalys, Nirondelle, Balignon et Parecool",
+        "graniteCave": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Nosferapti, Abra, Racaillou, Makuhita, Ténéfix, Mysdibule et Galekid",
+        "fieryPath": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Machoc, Tadmorv, Smogo, Limagma, Chamallot et Chartor",
+        "jaggedPass": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Machoc, Chamallot et Spoink",
+        "meteorFalls": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Nosferapti, Nosferalto, Séléroc, Solaroc, Barloche, Barbicha et Draby",
+        "newMauville": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Magnéti, Magnéton, Voltorbe et Électrode",
+        "mtPyre": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Goupix, Goélise, Méditikka, Polichombr, Skelénox et Éoko",
+        "hoennSafariZone": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Pikachu, Mystherbe, Ortide, Psykokwak, Akwakwak, Doduo, Dodrio, Rhinocorne, Poissirène, Poissoroy, Scarabrute, Natu, Xatu, Qulbutoké, Girafarig, Scarhino et Phanpy",
+        "shoalCave": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Nosferapti, Nosferalto, Tentacool, Wailmer, Stalgamin et Obalie",
+        "seafloorCavern": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Nosferapti, Nosferalto, Tentacool et Wailmer",
+        "caveOfOrigin": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Nosferapti, Nosferalto, Ténéfix, Mysdibule, Kyogre et Groudon",
+        "skyPillar": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Nosferalto, Ténéfix, Mysdibule, Altaria, Kaorine, Branette, Téraclope et Rayquaza",
+        "hoennVictoryRoad": "Possède les Pokémon qu’on y trouve dans Rubis et Saphir : Nosferapti, Nosferalto, Chuchmur, Ramboum, Makuhita, Hariyama, Ténéfix, Mysdibule, Galekid, Galegon, Méditikka, Charmina, Barloche et Barbicha",
+        "stoneBadge": "L’équipe de Roxanne, championne d’arène : possède Racaillou et Tarinor",
+        "knuckleBadge": "L’équipe de Bastien, champion d’arène : possède Machoc et Makuhita",
+        "dynamoBadge": "L’équipe de Voltère, champion d’arène : possède Magnéti, Voltorbe et Magnéton",
+        "heatBadge": "L’équipe d’Adriane, championne d’arène : possède Limagma et Chartor",
+        "balanceBadge": "L’équipe de Norman, champion d’arène : possède Monaflèmit et Vigoroth",
+        "featherBadge": "L’équipe d’Alizée, championne d’arène : possède Hélédelle, Bekipan, Airmure et Altaria",
+        "mindBadge": "L’équipe de Lévy et Tatia, champions d’arène : possède Séléroc et Solaroc",
+        "rainBadge": "L’équipe de Marc, champion d’arène : possède Lovdisc, Barbicha, Phogleur, Poissoroy et Milobellus",
+        "sidney": "L’équipe de Damien, membre du Conseil 4 dans Rubis et Saphir : possède Grahyèna, Tengalice, Cacturne, Colhomard et Absol",
+        "phoebe": "L’équipe de Spectra, membre du Conseil 4 dans Rubis et Saphir : possède Téraclope, Branette et Ténéfix",
+        "glacia": "L’équipe de Glacia, membre du Conseil 4 dans Rubis et Saphir : possède Phogleur, Oniglali et Kaimorse",
+        "drake": "L’équipe d’Aragon, membre du Conseil 4 dans Rubis et Saphir : possède Drackhaus, Altaria, Hyporoi, Libégon et Drattak",
+        "wally": "L’équipe de Timmy sur la Route Victoire : possède Altaria, Delcatty, Rosélia, Magnéton et Gardevoir",
+        "maxie": "L’équipe de Max dans Rubis : possède Grahyèna, Nostenfer et Camérupt",
+        "archie": "L’équipe d’Arthur dans Saphir : possède Grahyèna, Nostenfer et Sharpedo",
+        "hoennSolos": "Possède les 21 Pokémon de Hoenn qui n’évoluent pas dans Rubis et Saphir, légendaires à part : Tarinor, Ténéfix, Mysdibule, Posipi, Négapi, Muciole, Lumivole, Rosélia, Chartor, Spinda, Mangriff, Séviper, Séléroc, Solaroc, Morphéo, Kecleon, Tropius, Éoko, Absol, Relicanth et Lovdisc",
+        "hoennBabies": "Possède les bébés ajoutés plus tard aux Pokémon de Hoenn : Rozbouton et Korillon",
+        "hoennNewEvolutions": "Possède les évolutions que les jeux suivants ont données aux Pokémon de Hoenn : Roserade, Gallame, Tarinorme, Noctunoir, Momartik et Ixon"
       },
       "families": "Complète {count} lignée d’évolution | Complète {count} lignées d’évolution",
       "allStarters": "Possède les {count} Pokémon de départ, de Kanto à Paldea",
@@ -2831,7 +3238,24 @@
       "tc_elm": "Possède {count} cartes différentes du Professeur Orme",
       "tc_rocketExecutives": "Possède une carte de chaque admin de la Team Rocket de retour à Johto : Amos, Ariane, Lance et Lambda",
       "neoSets": "Possède une carte de chaque série Neo, les premières à Johto : Neo Genesis, Neo Discovery, Neo Revelation et Neo Destiny",
-      "hgssSets": "Possède une carte de chaque série HeartGold SoulSilver : HeartGold SoulSilver, Déchaînement, Indomptable, Triomphe et L’Appel des Légendes"
+      "hgssSets": "Possède une carte de chaque série HeartGold SoulSilver : HeartGold SoulSilver, Déchaînement, Indomptable, Triomphe et L’Appel des Légendes",
+      "hoennBadges": "Complète les équipes des {count} champions d’arène de Hoenn",
+      "hoennEliteFour": "Complète les équipes du Conseil 4 de Hoenn (Rubis et Saphir)",
+      "hoennForms": "Possède les formes de Galar de Zigzaton et Linéon",
+      "hoennLines": "Complète {count} lignées d’évolution de Hoenn",
+      "hoennDex": "Possède {count} Pokémon différents de Hoenn (n° 252 à 386)",
+      "hoennRoutes": "Possède tous les Pokémon de toutes les routes de Hoenn, de la route 101 à la route 134",
+      "hoennLandmarks": "Possède tous les Pokémon des grottes, forêts et sommets de Hoenn",
+      "hoennPlaceCards": "Possède les lieux de Hoenn imprimés en cartes Stade : Grotte Granite, Site Météore, Pilier Céleste, Ruines Désert, Caverne Insulaire, Tombeau Antique, la planque de la Team Magma, celle de la Team Aqua et la Zone de Combat (aucune ville de Hoenn n’a de carte)",
+      "tc_hoennGymLeaders": "Possède une carte de chaque champion d’arène de Hoenn qui en a une : Roxanne, Bastien, Adriane, Norman, Alizée, Lévy et Tatia et Marc (pas encore de carte de Voltère)",
+      "tc_hoennEliteFour": "Possède une carte de chaque membre du Conseil 4 de Hoenn : Damien, Spectra, Glacia et Aragon (leurs Stades comptent)",
+      "tc_steven": "Possède {count} cartes différentes au nom de Pierre Rochard, comme Métalosse-ex de Pierre Rochard",
+      "tc_wally": "Possède {count} cartes différentes de Timmy",
+      "tc_birch": "Possède {count} cartes différentes du Professeur Seko",
+      "tc_teamMagma": "Possède {count} cartes différentes de la Team Magma (leurs Pokémon, Max, leurs coups tordus)",
+      "tc_teamAqua": "Possède {count} cartes différentes de la Team Aqua (leurs Pokémon, Arthur, leurs coups tordus)",
+      "exHoennSets": "Possède une carte de chacune des premières séries EX, à Hoenn : Rubis & Saphir, Tempête de Sable, Dragon, Team Magma vs Team Aqua et Légendes Oubliées",
+      "orasSets": "Possède une carte de chaque série de l’époque Rubis Oméga et Saphir Alpha : Primo-Choc, Ciel Rugissant et Double Danger"
     },
     "subs": {
       "allLines": "Toutes régions",
@@ -2839,20 +3263,25 @@
       "kantoMore": "Kanto, au-delà des lignées",
       "johtoLines": "Lignées de Johto (Or et Argent)",
       "johtoMore": "Johto, au-delà des lignées",
+      "hoennLines": "Lignées de Hoenn (Rubis et Saphir)",
+      "hoennMore": "Hoenn, au-delà des lignées",
       "otherLines": "Autres régions",
       "kantoGyms": "Arènes de Kanto",
       "johtoGyms": "Arènes de Johto",
+      "hoennGyms": "Arènes de Hoenn",
       "league": "Ligue Pokémon",
       "rivals": "Rivaux et héros",
       "trainerCards": "Dresseurs de Kanto en cartes",
       "johtoTrainerCards": "Dresseurs de Johto en cartes",
+      "hoennTrainerCards": "Dresseurs de Hoenn en cartes",
       "allPlaces": "Tous les lieux",
       "kantoRoutes": "Routes de Kanto (Rouge et Bleu)",
       "kantoLandmarks": "Grottes, forêts et bâtiments de Kanto",
       "kantoCities": "Villes de Kanto en cartes",
       "johtoRoutes": "Routes de Johto (Or et Argent)",
       "johtoLandmarks": "Grottes, tours et bâtiments de Johto",
-      "otherPlaces": "Autres régions"
+      "hoennRoutes": "Routes de Hoenn (Rubis et Saphir)",
+      "hoennLandmarks": "Grottes, forêts et sommets de Hoenn"
     }
   },
   "beta": {

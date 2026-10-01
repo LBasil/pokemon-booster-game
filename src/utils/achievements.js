@@ -5,13 +5,10 @@ import {
   CHAMPIONS,
   ELITE_FOUR,
   FAMILIES,
-  JOHTO_ELITE_FOUR,
-  JOHTO_GYMS,
   KANTO_GYMS,
   LEGENDARIES,
   LEGENDS,
   MYTHICALS,
-  PLACES,
   PSEUDO_LEGENDS,
   RIVALS,
   STARTER_FINALS,
@@ -36,21 +33,8 @@ import {
   RIVAL_CARDS,
   TEAM_ROCKET_CARDS,
 } from '@/utils/kanto'
-import {
-  ELM_CARDS,
-  ETHAN_CARDS,
-  HGSS_SETS,
-  JOHTO_ELITE_FOUR_CARDS,
-  JOHTO_EXTRAS,
-  JOHTO_FORMS,
-  JOHTO_GYM_LEADER_CARDS,
-  JOHTO_LANDMARKS,
-  JOHTO_LINES,
-  JOHTO_PLACE_CARDS,
-  JOHTO_ROUTES,
-  NEO_SETS,
-  ROCKET_EXECUTIVES_CARDS,
-} from '@/utils/johto'
+import johto from '@/utils/johto'
+import hoenn from '@/utils/hoenn'
 
 // Achievements are computed from the (unlimited) collection alone, so they
 // work on public profiles too, and a newly added achievement unlocks at once
@@ -284,7 +268,16 @@ function groups(category, map, { perId = {}, ...extra } = {}) {
 const complete = (map) => (s) => Object.values(map).filter((list) => list.every((number) => s.dex.has(number))).length
 
 const kanto = { tags: ['kanto'] }
-const johto = { tags: ['johto'] }
+
+// Regions after Kanto, each in a file of the same shape (fields: hoenn.js).
+// Their achievements sit right after Kanto's in each category, region by
+// region, under subcategories named after the region (<region>Lines,
+// <region>More, <region>Gyms, <region>TrainerCards, <region>Routes,
+// <region>Landmarks, <region>Cities).
+const REGION_FOCUS = [johto, hoenn]
+const lineIds = (focus) => Object.keys(focus.lines)
+const placesOf = (focus) => ({ ...focus.routes, ...focus.landmarks })
+const setsOwned = (ids) => (s) => ids.filter((id) => s.perSet.has(id)).length
 
 // Packs
 tiers('packs', 'boosters', (s) => s.boosters, [1, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000])
@@ -324,7 +317,7 @@ one('sets', 'classic', (s) => s.subsets.get('classic') ?? 0)
 const range = (from, to) => Array.from({ length: to - from + 1 }, (_, i) => from + i)
 tiers('pokedex', 'dex', (s) => s.dex.size, [10, 50, 151, 251, 386, 500, 750, 1025])
 tiers('pokedex', 'kantoDex', owns(range(1, 151)), [25, 50, 100], kanto)
-tiers('pokedex', 'johtoDex', owns(range(152, 251)), [25, 50], johto)
+for (const { region, dex: [from, to], dexTiers } of REGION_FOCUS) tiers('pokedex', `${region}Dex`, owns(range(from, to)), dexTiers, { tags: [region] })
 for (const [region, from, to] of REGIONS) {
   DEFINITIONS.push({
     id: `region_${region}`,
@@ -344,8 +337,9 @@ one('starters', 'allStarters', owns(STARTERS), STARTERS.length)
 one('starters', 'starterFinals', owns(STARTER_FINALS), STARTER_FINALS.length)
 
 // Evolution lines: all regions, then Kanto's (every line of Red and Blue and
-// what surrounds them), Johto's (Gold and Silver, same way), then the other regions'
-const ALL_LINES = { ...KANTO_LINES, ...JOHTO_LINES, ...FAMILIES }
+// what surrounds them), the other regions' with a file of their own (same
+// way), then the rest
+const ALL_LINES = { ...KANTO_LINES, ...Object.assign({}, ...REGION_FOCUS.map((focus) => focus.lines)), ...FAMILIES }
 tiers('families', 'families', complete(ALL_LINES), [5, 15, 30, 60], { sub: 'allLines' })
 DEFINITIONS.push({ id: 'pseudoLegends', category: 'families', metric: owns(PSEUDO_LEGENDS), target: PSEUDO_LEGENDS.length, desc: 'groups.pseudoLegends', sub: 'allLines' })
 groups('families', KANTO_LINES, { sub: 'kantoLines', ...kanto })
@@ -355,10 +349,14 @@ const formTags = { alolanForms: ['kanto', 'alola'], galarianForms: ['kanto', 'ga
 for (const [id, forms] of Object.entries(REGIONAL_FORMS)) {
   one('families', id, formsOwned(forms), forms.length, { sub: 'kantoMore', tags: formTags[id] })
 }
-groups('families', JOHTO_LINES, { sub: 'johtoLines', ...johto })
-tiers('families', 'johtoLines', complete(JOHTO_LINES), [10, Object.keys(JOHTO_LINES).length], { sub: 'johtoLines', ...johto })
-groups('families', JOHTO_EXTRAS, { sub: 'johtoMore', ...johto })
-one('families', 'johtoForms', formsOwned(JOHTO_FORMS), JOHTO_FORMS.length, { sub: 'johtoMore', tags: ['johto', 'galar', 'sinnoh', 'paldea'] })
+for (const focus of REGION_FOCUS) {
+  const { region } = focus
+  const tags = [region]
+  groups('families', focus.lines, { sub: `${region}Lines`, tags })
+  tiers('families', `${region}Lines`, complete(focus.lines), [...focus.lineTiers, lineIds(focus).length], { sub: `${region}Lines`, tags })
+  groups('families', focus.extras, { sub: `${region}More`, tags })
+  for (const [id, form] of Object.entries(focus.forms ?? {})) one('families', id, formsOwned(form.names), form.names.length, { sub: `${region}More`, tags: form.tags })
+}
 groups('families', FAMILIES, { sub: 'otherLines' })
 
 // Legends
@@ -371,17 +369,24 @@ one('legends', 'ultraBeasts', owns(ULTRA_BEASTS), ULTRA_BEASTS.length, { tags: [
 // League, rivals, then Kanto's trainers on their own cards
 groups('people', KANTO_GYMS, { sub: 'kantoGyms', icon: 'gyms', ...kanto })
 one('people', 'kantoBadges', complete(KANTO_GYMS), Object.keys(KANTO_GYMS).length, { sub: 'kantoGyms', icon: 'gyms', ...kanto })
-groups('people', JOHTO_GYMS, { sub: 'johtoGyms', icon: 'gyms', tags: ['johto'] })
-one('people', 'johtoBadges', complete(JOHTO_GYMS), Object.keys(JOHTO_GYMS).length, { sub: 'johtoGyms', icon: 'gyms', tags: ['johto'] })
+for (const { region, gyms } of REGION_FOCUS) {
+  if (!gyms) continue
+  groups('people', gyms, { sub: `${region}Gyms`, icon: 'gyms', tags: [region] })
+  one('people', `${region}Badges`, complete(gyms), Object.keys(gyms).length, { sub: `${region}Gyms`, icon: 'gyms', tags: [region] })
+}
 const league = { sub: 'league', icon: 'league' }
 groups('people', ELITE_FOUR, { ...league, ...kanto })
 one('people', 'eliteFour', complete(ELITE_FOUR), Object.keys(ELITE_FOUR).length, { ...league, ...kanto })
-groups('people', JOHTO_ELITE_FOUR, { ...league, ...johto })
-one('people', 'johtoEliteFour', complete(JOHTO_ELITE_FOUR), Object.keys(JOHTO_ELITE_FOUR).length, { ...league, ...johto })
+for (const { region, eliteFour } of REGION_FOCUS) {
+  if (!eliteFour) continue
+  groups('people', eliteFour, { ...league, tags: [region] })
+  one('people', `${region}EliteFour`, complete(eliteFour), Object.keys(eliteFour).length, { ...league, tags: [region] })
+}
 const championRegions = { blue: 'kanto', lanceJohto: 'johto', steven: 'hoenn', wallace: 'hoenn', cynthia: 'sinnoh', alder: 'unova', iris: 'unova', diantha: 'kalos', leon: 'galar' }
 groups('people', CHAMPIONS, { ...league, perId: Object.fromEntries(Object.entries(championRegions).map(([id, region]) => [id, { tags: [region] }])) })
 tiers('people', 'champions', complete(CHAMPIONS), [1, 4, 8], league)
 groups('people', RIVALS, { sub: 'rivals', icon: 'rivals', perId: { teamRocket: { hidden: true }, ashChampion: { tags: [] } } })
+for (const { region, people } of REGION_FOCUS) if (people) groups('people', people, { sub: 'rivals', icon: 'rivals', tags: [region] })
 const trainerCards = { sub: 'trainerCards', icon: 'trainers', ...kanto }
 one('people', 'tc_gymLeaders', covered(Object.values(GYM_LEADER_CARDS)), Object.keys(GYM_LEADER_CARDS).length, trainerCards)
 for (const [leader, pattern] of Object.entries(GYM_LEADER_CARDS)) one('people', `tc_${leader}`, namedCount(pattern), 10, trainerCards)
@@ -390,16 +395,17 @@ one('people', 'tc_redBlue', covered(RIVAL_CARDS), RIVAL_CARDS.length, trainerCar
 one('people', 'tc_oak', namedCount(OAK_CARDS), 3, trainerCards)
 one('people', 'tc_bill', namedCount(BILL_CARDS), 1, trainerCards)
 one('people', 'tc_teamRocket', namedCount(TEAM_ROCKET_CARDS), 25, trainerCards)
-const johtoTrainerCards = { sub: 'johtoTrainerCards', icon: 'trainers', ...johto }
-one('people', 'tc_johtoGymLeaders', covered(JOHTO_GYM_LEADER_CARDS), JOHTO_GYM_LEADER_CARDS.length, johtoTrainerCards)
-one('people', 'tc_johtoEliteFour', covered(JOHTO_ELITE_FOUR_CARDS), JOHTO_ELITE_FOUR_CARDS.length, johtoTrainerCards)
-one('people', 'tc_ethan', namedCount(ETHAN_CARDS), 5, johtoTrainerCards)
-one('people', 'tc_elm', namedCount(ELM_CARDS), 3, johtoTrainerCards)
-one('people', 'tc_rocketExecutives', covered(ROCKET_EXECUTIVES_CARDS), ROCKET_EXECUTIVES_CARDS.length, johtoTrainerCards)
+for (const { region, trainerCards } of REGION_FOCUS) {
+  const extra = { sub: `${region}TrainerCards`, icon: 'trainers', tags: [region] }
+  for (const [id, { patterns, pattern, target }] of Object.entries(trainerCards)) {
+    if (patterns) one('people', id, covered(patterns), patterns.length, extra)
+    else one('people', id, namedCount(pattern), target, extra)
+  }
+}
 
 // Places and their wild Pokémon: all of them, Kanto (routes, caves and
-// buildings, cities on cards), Johto (same, places on cards), then the other regions
-const ALL_PLACES = { ...KANTO_ROUTES, ...KANTO_LANDMARKS, ...JOHTO_ROUTES, ...JOHTO_LANDMARKS, ...PLACES }
+// buildings, cities on cards), then the other regions with a file (same way)
+const ALL_PLACES = { ...KANTO_ROUTES, ...KANTO_LANDMARKS, ...Object.assign({}, ...REGION_FOCUS.map(placesOf)) }
 tiers('places', 'places', complete(ALL_PLACES), [3, 7, 14, 25], { sub: 'allPlaces' })
 groups('places', KANTO_ROUTES, { sub: 'kantoRoutes', ...kanto })
 one('places', 'kantoRoutes', complete(KANTO_ROUTES), Object.keys(KANTO_ROUTES).length, { sub: 'kantoRoutes', ...kanto })
@@ -409,12 +415,19 @@ const cityCards = { sub: 'kantoCities', ...kanto }
 for (const [city, pattern] of Object.entries(KANTO_CITIES)) one('places', city, namedCount(pattern), 1, cityCards)
 one('places', 'kantoCities', covered(Object.values(KANTO_CITIES)), Object.keys(KANTO_CITIES).length, cityCards)
 one('places', 'kantoPlaceCards', covered(KANTO_PLACE_CARDS), KANTO_PLACE_CARDS.length, cityCards)
-groups('places', JOHTO_ROUTES, { sub: 'johtoRoutes', ...johto })
-one('places', 'johtoRoutes', complete(JOHTO_ROUTES), Object.keys(JOHTO_ROUTES).length, { sub: 'johtoRoutes', ...johto })
-groups('places', JOHTO_LANDMARKS, { sub: 'johtoLandmarks', ...johto })
-one('places', 'johtoLandmarks', complete(JOHTO_LANDMARKS), Object.keys(JOHTO_LANDMARKS).length, { sub: 'johtoLandmarks', ...johto })
-one('places', 'johtoPlaceCards', covered(JOHTO_PLACE_CARDS), JOHTO_PLACE_CARDS.length, { sub: 'johtoLandmarks', ...johto })
-groups('places', PLACES, { sub: 'otherPlaces' })
+for (const focus of REGION_FOCUS) {
+  const { region, routes, landmarks, cities, placeCards } = focus
+  const tags = [region]
+  groups('places', routes, { sub: `${region}Routes`, tags })
+  one('places', `${region}Routes`, complete(routes), Object.keys(routes).length, { sub: `${region}Routes`, tags })
+  groups('places', landmarks, { sub: `${region}Landmarks`, tags })
+  one('places', `${region}Landmarks`, complete(landmarks), Object.keys(landmarks).length, { sub: `${region}Landmarks`, tags })
+  // Places on cards: with the cities when some have a card, else with the landmarks
+  const cardsSub = cities ? `${region}Cities` : `${region}Landmarks`
+  for (const [city, pattern] of Object.entries(cities ?? {})) one('places', city, namedCount(pattern), 1, { sub: cardsSub, tags })
+  if (cities) one('places', `${region}Cities`, covered(Object.values(cities)), Object.keys(cities).length, { sub: cardsSub, tags })
+  one('places', `${region}PlaceCards`, covered(placeCards), placeCards.length, { sub: cardsSub, tags })
+}
 
 // Types
 one('types', 'allTypes', (s) => TYPES.filter((type) => s.perType.has(type)).length, TYPES.length)
@@ -454,8 +467,9 @@ tiers('treasure', 'bestCard', (s) => Math.floor(s.bestCard), [20, 100, 250, 500,
 // History (set release dates)
 one('history', 'baseSet', (s) => s.perSet.get('base1') ?? 0, 1, kanto)
 one('history', 'originalSets', (s) => ORIGINAL_SETS.filter((id) => s.perSet.has(id)).length, ORIGINAL_SETS.length, kanto)
-one('history', 'neoSets', (s) => NEO_SETS.filter((id) => s.perSet.has(id)).length, NEO_SETS.length, johto)
-one('history', 'hgssSets', (s) => HGSS_SETS.filter((id) => s.perSet.has(id)).length, HGSS_SETS.length, johto)
+for (const { region, sets } of REGION_FOCUS) {
+  for (const [id, ids] of Object.entries(sets)) one('history', id, setsOwned(ids), ids.length, { tags: [region] })
+}
 one('history', 'wotc', (s) => (s.oldestYear < 2003 ? 1 : 0))
 one('history', 'decade2000', (s) => (s.decades.has(2000) ? 1 : 0))
 one('history', 'decade2010', (s) => (s.decades.has(2010) ? 1 : 0))

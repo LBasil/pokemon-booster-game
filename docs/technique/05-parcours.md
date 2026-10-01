@@ -431,7 +431,7 @@ sequenceDiagram
 ## 7. Succès
 
 Définitions : [src/utils/achievements.js](../../src/utils/achievements.js)
-(~540, 20 catégories, sous-catégories `sub` dans les grosses, tags de
+(~650, 20 catégories, sous-catégories `sub` dans les grosses, tags de
 région `tags` pour le filtre « Région », `?region=`). Les groupes de Pokémon (lignées d'évolution,
 légendaires et fabuleux, équipes des champions d'arène de Kanto et Johto,
 Conseil 4, Maîtres de la Ligue, rivaux et héros, lieux et leurs Pokémon
@@ -439,10 +439,15 @@ sauvages) sont des listes de numéros du Pokédex dans
 [src/utils/pokemonGroups.js](../../src/utils/pokemonGroups.js), et tout
 Kanto (lignées de Rouge/Bleu, routes, lieux, villes et dresseurs sur leurs
 cartes, reconnus par le nom de la carte) dans
-[src/utils/kanto.js](../../src/utils/kanto.js), tout Johto sur le même
-modèle (lignées d'Or/Argent, routes 29 à 46, grottes et tours, Conseil 4
-et Maître Peter, lieux et dresseurs en cartes, séries Neo et HGSS) dans
-[src/utils/johto.js](../../src/utils/johto.js) ; leur
+[src/utils/kanto.js](../../src/utils/kanto.js), puis une région par
+fichier sur le même modèle : Johto
+([src/utils/johto.js](../../src/utils/johto.js) : lignées d'Or/Argent,
+routes 29 à 46, grottes et tours, Conseil 4 et Maître Peter, lieux et
+dresseurs en cartes, séries Neo et HGSS) et Hoenn
+([src/utils/hoenn.js](../../src/utils/hoenn.js) : lignées de
+Rubis/Saphir, routes 101 à 134, grottes et sommets, badges, Conseil 4,
+Timmy, Max et Arthur, Team Magma et Team Aqua en cartes, premières séries
+EX et époque ROSA) ; leur
 description nomme les membres (`achievements.desc.groups.<id>`), donc
 changer une liste = changer ses deux textes. **Calculés dans le navigateur, par mode.** Le
 Défi est mis en avant, c'est celui qui compte.

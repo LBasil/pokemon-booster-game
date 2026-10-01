@@ -39,6 +39,7 @@ e2e/                        Playwright tests; e2e/support/supabase.js mocks the 
 supabase/migrations/        SQL run manually in the Supabase SQL editor (no CLI/MCP access to the DB)
 supabase/tests/             PGlite suites for the migrations (npm run test:db)
 scripts/populate.mjs        admin-only Node script: sets/cards/prices from pokemontcg.io — never bundled to the client
+scripts/region-tools.mjs    dev helper for the regional achievements (PokéAPI data, card names, texts)
 .github/workflows/          ci.yml (unit + build + e2e) and sync-cards.yml (populate:sync at 00:07 + 12:07 Paris)
 docs/manual-testing.md      checklist for a real-account click-through
 docs/technique/             technical doc (French, user choice): overview, front-end, database,
@@ -394,7 +395,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   a background `load({ force: true })`). Resetting it once hid the whole
   challenge hub — and unmounted the component that was supposed to
   trigger the reload (Vue drops `emit` from unmounted components).
-- **Achievements** (`src/utils/achievements.js`): ~540 definitions in 20
+- **Achievements** (`src/utils/achievements.js`): ~650 definitions in 20
   categories, **per game mode** (user decision: separate, the challenge
   put first — it's the one that counts). Computed client side from that
   mode's collection + sets in one pass (`collectorStats`), plus the
@@ -418,24 +419,39 @@ docs/technique/             technical doc (French, user choice): overview, front
   Red/Blue from PokéAPI; identical routes share one: "Routes 4 and 9"),
   Mt. Silver (Gold/Silver), cities with a card (Pallet Town has none) and
   trainers' cards (name patterns on `s.names`).
-  **Johto focus** (user, 2026-10-01): `src/utils/johto.js`, same model:
-  Gold/Silver lines (the 5 Johto lines of `FAMILIES` moved there, same
-  ids), solos (Hitmontop included), Routes 29-46 + caves/towers (same
-  PokéAPI methods + Sudowoodo; `nationalPark` moved there, keeping its
-  Bug-Catching Contest list), places on cards (no Johto city has a
-  card), trainers' cards (only Falkner/Whitney/Morty/Jasmine have one),
-  Neo + HGSS sets; Johto Elite Four (`JOHTO_ELITE_FOUR`) and `lanceJohto`
-  champion in pokemonGroups.js. Two partition tests check every Kanto /
-  Johto dex number lands in exactly one group. No duplicates: the test
+  **Other regions** (user, 2026-10-01: Johto, then Hoenn; the rest when
+  asked): one file per region (`src/utils/johto.js`, `hoenn.js`), a
+  default-exported object of one shape (fields documented at the top of
+  hoenn.js: lines, extras, forms, gyms, eliteFour, people, trainerCards,
+  routes, landmarks, cities?, placeCards, sets), listed in `REGION_FOCUS`
+  in achievements.js, whose loops add every region's achievements right
+  after Kanto's in each category, under `<region>Lines/More/Gyms/
+  TrainerCards/Routes/Landmarks/Cities` subcategories. Adding a region =
+  its file + `REGION_FOCUS` + a partition test + texts. The region's
+  lines/places that used to be in `FAMILIES` / `PLACES` move there with
+  their ids (`PLACES` is gone; `nationalPark` kept its Bug-Catching
+  Contest list, the Hoenn ones got their real wild Pokémon).
+  `scripts/region-tools.mjs` (dev, PokéAPI cache in `scripts/.cache/`,
+  gitignored): `lines <from> <to>` (evolution chains), `encounters
+  <region id> <versions>` (wild Pokémon of the first games: walk, surf,
+  Super Rod, one-offs, no Old/Good Rod / Headbutt / Rock Smash; same
+  lists grouped), `cards <regex>` (DB card names, decides trainers' and
+  places' cards: many leaders have none), `texts <region>` (writes the
+  missing EN/FR line/route/place texts with PokéAPI's official names;
+  gyms, trainers, sets by hand; rename branched lines after their first
+  member). Each region's partition test checks every dex number of its
+  range lands in exactly one group (lines, solos, legends, or an earlier
+  region's babies/evolutions). No duplicates: the test
   fails when two groups ask for the same Pokémon (4 whitelisted pairs,
-  incl. `lakeOfRage` = the Magikarp line);
+  incl. `lakeOfRage` = the Magikarp line; places equal to a line or a
+  legend group, like Southern Island, are left out instead);
   removed as duplicates on 2026-09-30: `cards*` (= boosters x 10),
   `setsOpened*`, `days100`, `secretPulls1`, `hitPacks1`. `teams` became
   `starters` (lines -> families, legend groups -> legends); gyms, league
   and rivals are subcategories of `people`. "Own them all" groups
-  (families, legends, gyms = one badge per Kanto/Johto leader, league =
+  (families, legends, gyms = one badge per leader, league =
   Elite Four + champions, rivals, places) are dex lists in
-  `src/utils/pokemonGroups.js`, `kanto.js` and `johto.js`; their
+  `src/utils/pokemonGroups.js`, `kanto.js` and the region files; their
   EN/FR descriptions name the members (`desc.groups.<id>`, official FR
   names): change a list, change both texts. No Gen 9 trainers yet (unsure
   of the FR names). Add a
@@ -469,7 +485,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   and reads `achievement_rates(mode)`; `src/api/achievements.js` falls
   back to the 0008 signatures and hides what a missing migration can't
   give. Deliberate, documented exception to rule 9:
-  the ids are client-claimed (the server can't recheck ~540 JS
+  the ids are client-claimed (the server can't recheck ~650 JS
   definitions), acceptable because it only nudges an anonymous
   percentage that nothing ranks or rewards on.
 - **Sounds/haptics**: `src/lib/sfx.js` synthesizes everything with Web Audio
@@ -511,7 +527,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   Wishlist, URL filters, card detail with price chart), set binders,
   history (exact totals, "With a hit" filter), community (live feed +
   leaderboards), profiles + public profiles (incl. the challenge
-  collection with "Ask for it"), ~540 achievements per mode (collapsible, region filter, Kanto + Johto focus,
+  collection with "Ask for it"), ~650 achievements per mode (collapsible, region filter, Kanto, Johto + Hoenn focus,
   categories, rates, unlock toasts), challenge mode (coins, daily reward,
   daily + weekly missions, recycle, craft, god packs, mini-games "Higher
   or lower", "Shiny Electrode Flip" (needs 0014), "Super effective!"
@@ -538,7 +554,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   verified locally with PGlite before being handed over; 0010-0019 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 172 unit tests, `npm run test:db` 291 database
+- Tests: `npm test` 176 unit tests, `npm run test:db` 291 database
   checks, `npm run test:e2e` 234 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
@@ -585,7 +601,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   active players. Live HP bar through Realtime (not e2e-testable).
 - **Regional achievements for every region** (user, 2026-09-30: noted,
   **don't start until asked**): repeat the Kanto focus (`src/utils/kanto.js`)
-  (Johto done 2026-10-01 on request: `src/utils/johto.js`) for Hoenn, Sinnoh, Unova, Kalos, Alola, Galar, Paldea: one
+  (Johto + Hoenn done 2026-10-01 on request, see "Other regions") for Sinnoh, Unova, Kalos, Alola, Galar, Paldea: one
   achievement per evolution line + all of them, the Pokémon that don't
   evolve, routes and places with their wild Pokémon (PokéAPI, the region's
   first games), cities that have a card, trainers' cards (gym leaders,

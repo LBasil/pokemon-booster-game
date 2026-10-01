@@ -3,16 +3,9 @@
 // (achievements.items.<id>.title) and description naming the members
 // (achievements.desc.groups.<id>): change the list, change both texts.
 
-// Whole evolution lines (first stage to last) outside Kanto and Johto
-// (KANTO_LINES in kanto.js, JOHTO_LINES in johto.js)
+// Whole evolution lines (first stage to last) of the regions without a
+// file of their own yet (Kanto: kanto.js, Johto: johto.js, Hoenn: hoenn.js)
 export const FAMILIES = {
-  treeckoLine: [252, 253, 254],
-  torchicLine: [255, 256, 257],
-  mudkipLine: [258, 259, 260],
-  raltsLine: [280, 281, 282],
-  aronLine: [304, 305, 306],
-  bagonLine: [371, 372, 373],
-  beldumLine: [374, 375, 376],
   turtwigLine: [387, 388, 389],
   chimcharLine: [390, 391, 392],
   piplupLine: [393, 394, 395],
@@ -92,7 +85,7 @@ export const LEGENDS = {
   paldeaLegends: [1007, 1008],
 }
 
-// Gym leaders' teams: Kanto (Red/Blue) and Johto (Gold/Silver), by badge
+// Kanto gym leaders' teams (Red/Blue), by badge. Other regions': their file (johto.js...)
 export const KANTO_GYMS = {
   boulderBadge: [74, 95], // Brock
   cascadeBadge: [120, 121], // Misty
@@ -103,29 +96,13 @@ export const KANTO_GYMS = {
   volcanoBadge: [58, 77, 78, 59], // Blaine
   earthBadge: [111, 51, 31, 34, 112], // Giovanni
 }
-export const JOHTO_GYMS = {
-  zephyrBadge: [16, 17], // Falkner
-  hiveBadge: [11, 14, 123], // Bugsy
-  plainBadge: [35, 241], // Whitney
-  fogBadge: [92, 93, 94], // Morty
-  stormBadge: [57, 62], // Chuck
-  mineralBadge: [81, 208], // Jasmine
-  glacierBadge: [86, 87, 221], // Pryce
-  risingBadge: [148, 230], // Clair
-}
 
-// Kanto's Elite Four (Red/Blue), Johto's (Gold/Silver), then champions' teams (their games' final battle)
+// Kanto's Elite Four (Red/Blue), then champions' teams (their games' final battle)
 export const ELITE_FOUR = {
   lorelei: [87, 91, 80, 124, 131],
   bruno: [95, 107, 106, 68],
   agatha: [94, 42, 93, 24],
   lance: [130, 148, 142, 149],
-}
-export const JOHTO_ELITE_FOUR = {
-  will: [178, 124, 103, 80],
-  johtoKoga: [168, 49, 205, 89, 169],
-  johtoBruno: [237, 106, 107, 95, 68],
-  karen: [197, 45, 94, 198, 229],
 }
 export const CHAMPIONS = {
   blue: [18, 65, 112, 130, 59, 103], // HeartGold/SoulSilver
@@ -146,12 +123,4 @@ export const RIVALS = {
   ashKanto: [25, 12, 17, 1, 6, 7], // the anime's first season
   ashChampion: [25, 448, 149, 94, 865, 882], // world champion (Journeys)
   teamRocket: [23, 109, 52, 24, 110, 202], // Jessie, James and Meowth
-}
-
-// Places outside Kanto and Johto and their wild Pokémon (Ruby/Sapphire).
-// Kanto's and Johto's: kanto.js and johto.js
-export const PLACES = {
-  petalburgWoods: [265, 285, 287],
-  meteorFalls: [337, 338, 371],
-  route119: [349, 350],
 }

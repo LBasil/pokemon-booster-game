@@ -3,7 +3,8 @@ import en from '@/i18n/locales/en.json'
 import fr from '@/i18n/locales/fr.json'
 import { CATEGORIES, DEFINITIONS, achievementProgress, achievements, collectorStats, filterAchievements, MAX_TOASTS, newlyUnlocked, nextUp, rateOf, sortForToasts, tagsOf, TAGS, toastBatch } from './achievements'
 import { KANTO_EXTRAS, KANTO_LINES } from './kanto'
-import { JOHTO_EXTRAS, JOHTO_LINES } from './johto'
+import johto from './johto'
+import hoenn from './hoenn'
 import { LEGENDS, MYTHICALS } from './pokemonGroups'
 
 const card = (id, fields = {}) => ({
@@ -365,12 +366,20 @@ describe('no duplicates', () => {
   })
 
   it('split every Johto Pokémon into lines, loners, legends and Kanto’s groups', () => {
-    const lines = Object.values(JOHTO_LINES).flat()
+    const lines = Object.values(johto.lines).flat()
     const johtoLegends = [...LEGENDS.legendaryBeasts, ...LEGENDS.towerDuo, ...MYTHICALS.filter((n) => n >= 152 && n <= 251)]
     // Babies and new evolutions of Kanto Pokémon (Pichu, Crobat, Espeon...)
     const kantos = [...KANTO_EXTRAS.kantoBabies, ...KANTO_EXTRAS.kantoNewEvolutions, ...KANTO_EXTRAS.eeveelutions].filter((n) => n >= 152 && n <= 251)
-    const all = [...lines, ...JOHTO_EXTRAS.johtoSolos, ...johtoLegends, ...kantos].sort((a, b) => a - b)
+    const all = [...lines, ...johto.extras.johtoSolos, ...johtoLegends, ...kantos].sort((a, b) => a - b)
     expect(all).toEqual(Array.from({ length: 100 }, (_, i) => i + 152))
+  })
+
+  it('split every Hoenn Pokémon into lines, loners, legends and Johto’s babies', () => {
+    const lines = Object.values(hoenn.lines).flat()
+    const legends = [...LEGENDS.regiTrio, ...LEGENDS.eonDuo, ...LEGENDS.weatherTrio, 385, 386]
+    const johtos = johto.extras.johtoBabies.filter((n) => n >= 252 && n <= 386) // Azurill, Wynaut
+    const all = [...lines, ...hoenn.extras.hoennSolos, ...legends, ...johtos].sort((a, b) => a - b)
+    expect(all).toEqual(Array.from({ length: 135 }, (_, i) => i + 252))
   })
 })
 
@@ -471,5 +480,39 @@ describe('Johto', () => {
     const johto = filterAchievements(achievements([], sets), { tag: 'johto' })
     expect(johto.length).toBeGreaterThan(80)
     expect(johto.some((a) => a.sub === 'johtoTrainerCards')).toBe(true)
+  })
+})
+
+describe('Hoenn', () => {
+  const dex = (...numbers) => numbers.map((n) => entry(`ex1-${n}`, { national_pokedex_number: n }))
+  const named = (...names) => names.map((name, i) => entry(`ex4-${i}`, { name }))
+
+  it('counts complete Hoenn lines, routes, gyms and rivals', () => {
+    const a = byId(achievements(dex(261, 262, 263, 265, 74, 299, 334, 301, 315, 82, 282), sets))
+    expect(a.poochyenaLine).toMatchObject({ unlocked: true, sub: 'hoennLines', tags: ['hoenn'] })
+    expect(a.treeckoLine.sub).toBe('hoennLines') // moved from the other regions' lines
+    expect(a.route101.unlocked).toBe(true)
+    expect(a.hoennRoutes.target).toBe(Object.keys(hoenn.routes).length)
+    expect(a.stoneBadge).toMatchObject({ unlocked: true, sub: 'hoennGyms' })
+    expect(a.hoennBadges.current).toBe(1)
+    expect(a.wally).toMatchObject({ unlocked: true, sub: 'rivals', tags: ['hoenn'] })
+    expect(a.hoennDex25.current).toBe(9) // Geodude and Magneton are Kanto's
+  })
+
+  it('reads Hoenn trainers’ and places’ cards from their names', () => {
+    const cards = named('Roxanne', 'Tate & Liza', "Drake's Stadium", 'Drakloak', "Steven's Beldum", "Team Magma's Groudon", 'Maxie', 'Team Aqua Hideout', 'Galarian Linoone')
+    const a = byId(achievements(cards, sets))
+    expect(a.tc_hoennGymLeaders.current).toBe(2)
+    expect(a.tc_hoennEliteFour.current).toBe(1) // Drake, not Drakloak
+    expect(a.tc_steven.current).toBe(1)
+    expect(a.tc_teamMagma.current).toBe(2)
+    expect(a.hoennPlaceCards.current).toBe(1)
+    expect(a.hoennForms).toMatchObject({ current: 1, target: 2 })
+  })
+
+  it('counts the Hoenn sets', () => {
+    const a = byId(achievements([entry('ex1-1'), entry('ex4-1'), entry('xy5-1')], sets))
+    expect(a.exHoennSets.current).toBe(2)
+    expect(a.orasSets.current).toBe(1)
   })
 })

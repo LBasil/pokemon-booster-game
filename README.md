@@ -102,9 +102,9 @@ How it works inside (every table, RPC and flow, in French):
   touch screens, drops the 3D flip and the glow layers that stuttered on
   phones), and an
   "install the app" button.
-- **Achievements**: ~540 of them in 20 categories (boosters, luck, pulls, sets,
+- **Achievements**: ~650 of them in 20 categories (boosters, luck, pulls, sets,
   Pokédex regions, starters, evolution lines, legends and mythicals,
-  famous trainers (gym badges = each Kanto/Johto gym leader's team, the
+  famous trainers (gym badges = each Kanto/Johto/Hoenn gym leader's team, the
   Pokémon League, rivals & heroes, Kanto's trainers on their own cards),
   places, types, mechanics, treasure, illustrators,
   subsets, daily streaks, a challenge-only "coins & trades" one, a few
@@ -127,7 +127,11 @@ How it works inside (every table, RPC and flow, in French):
   and every cave, tower and building (Pokémon found there in Gold/Silver),
   Johto's Elite Four and champion Lance, Johto places and trainers on
   cards (gym leaders, Elite Four, Ethan, Professor Elm, Team Rocket's
-  executives), the Neo and HeartGold & SoulSilver sets.
+  executives), the Neo and HeartGold & SoulSilver sets. **Hoenn (Gen 3)**
+  too: Ruby/Sapphire lines and more, Routes 101 to 134, caves and peaks,
+  gym badges, Elite Four, Wally, Maxie and Archie, Steven, Team Magma and
+  Team Aqua on cards, the first EX sets and the ORAS era. Data for a new
+  region: `node scripts/region-tools.mjs` (PokéAPI, dev only).
   A Steam-style **"Achievement unlocked" pop-up** (with a chime) shows at the
   end of an opening — never mid-reveal, so nothing is spoiled — and each
   achievement shows the **share of players** who have it.
