@@ -4,7 +4,6 @@ import { subsetKind } from '@/utils/sets'
 import {
   CHAMPIONS,
   ELITE_FOUR,
-  FAMILIES,
   KANTO_GYMS,
   LEGENDARIES,
   LEGENDS,
@@ -40,6 +39,7 @@ import unova from '@/utils/unova'
 import kalos from '@/utils/kalos'
 import alola from '@/utils/alola'
 import galar from '@/utils/galar'
+import paldea from '@/utils/paldea'
 
 // Achievements are computed from the (unlimited) collection alone, so they
 // work on public profiles too, and a newly added achievement unlocks at once
@@ -279,7 +279,7 @@ const kanto = { tags: ['kanto'] }
 // region, under subcategories named after the region (<region>Lines,
 // <region>More, <region>Gyms, <region>TrainerCards, <region>Routes,
 // <region>Landmarks, <region>Cities).
-const REGION_FOCUS = [johto, hoenn, sinnoh, unova, kalos, alola, galar]
+const REGION_FOCUS = [johto, hoenn, sinnoh, unova, kalos, alola, galar, paldea]
 const lineIds = (focus) => Object.keys(focus.lines)
 const placesOf = (focus) => ({ ...focus.routes, ...focus.landmarks })
 const setsOwned = (ids) => (s) => ids.filter((id) => s.perSet.has(id)).length
@@ -342,9 +342,8 @@ one('starters', 'allStarters', owns(STARTERS), STARTERS.length)
 one('starters', 'starterFinals', owns(STARTER_FINALS), STARTER_FINALS.length)
 
 // Evolution lines: all regions, then Kanto's (every line of Red and Blue and
-// what surrounds them), the other regions' with a file of their own (same
-// way), then the rest
-const ALL_LINES = { ...KANTO_LINES, ...Object.assign({}, ...REGION_FOCUS.map((focus) => focus.lines)), ...FAMILIES }
+// what surrounds them), then the other regions' (same way)
+const ALL_LINES = { ...KANTO_LINES, ...Object.assign({}, ...REGION_FOCUS.map((focus) => focus.lines)) }
 tiers('families', 'families', complete(ALL_LINES), [5, 15, 30, 60], { sub: 'allLines' })
 DEFINITIONS.push({ id: 'pseudoLegends', category: 'families', metric: owns(PSEUDO_LEGENDS), target: PSEUDO_LEGENDS.length, desc: 'groups.pseudoLegends', sub: 'allLines' })
 groups('families', KANTO_LINES, { sub: 'kantoLines', ...kanto })
@@ -362,7 +361,6 @@ for (const focus of REGION_FOCUS) {
   groups('families', focus.extras, { sub: `${region}More`, tags })
   for (const [id, form] of Object.entries(focus.forms ?? {})) one('families', id, formsOwned(form.names), form.names.length, { sub: `${region}More`, tags: form.tags })
 }
-groups('families', FAMILIES, { sub: 'otherLines' })
 
 // Legends
 tiers('legends', 'legendaries', owns(LEGENDARIES), [3, 10, 25, 50])
@@ -387,7 +385,7 @@ for (const { region, eliteFour } of REGION_FOCUS) {
   groups('people', eliteFour, { ...league, tags: [region] })
   one('people', `${region}EliteFour`, complete(eliteFour), Object.keys(eliteFour).length, { ...league, tags: [region] })
 }
-const championRegions = { blue: 'kanto', lanceJohto: 'johto', steven: 'hoenn', wallace: 'hoenn', cynthia: 'sinnoh', alder: 'unova', iris: 'unova', diantha: 'kalos', leon: 'galar' }
+const championRegions = { blue: 'kanto', lanceJohto: 'johto', steven: 'hoenn', wallace: 'hoenn', cynthia: 'sinnoh', alder: 'unova', iris: 'unova', diantha: 'kalos', leon: 'galar', geeta: 'paldea' }
 groups('people', CHAMPIONS, { ...league, perId: Object.fromEntries(Object.entries(championRegions).map(([id, region]) => [id, { tags: [region] }])) })
 tiers('people', 'champions', complete(CHAMPIONS), [1, 4, 8], league)
 groups('people', RIVALS, { sub: 'rivals', icon: 'rivals', perId: { teamRocket: { hidden: true }, ashChampion: { tags: [] } } })
@@ -423,10 +421,15 @@ one('places', 'kantoPlaceCards', covered(KANTO_PLACE_CARDS), KANTO_PLACE_CARDS.l
 for (const focus of REGION_FOCUS) {
   const { region, routes, landmarks, cities, placeCards } = focus
   const tags = [region]
-  groups('places', routes, { sub: `${region}Routes`, tags })
-  one('places', `${region}Routes`, complete(routes), Object.keys(routes).length, { sub: `${region}Routes`, tags })
-  groups('places', landmarks, { sub: `${region}Landmarks`, tags })
-  one('places', `${region}Landmarks`, complete(landmarks), Object.keys(landmarks).length, { sub: `${region}Landmarks`, tags })
+  // No routes or landmarks when the wild Pokémon aren't known (Paldea)
+  if (routes) {
+    groups('places', routes, { sub: `${region}Routes`, tags })
+    one('places', `${region}Routes`, complete(routes), Object.keys(routes).length, { sub: `${region}Routes`, tags })
+  }
+  if (landmarks) {
+    groups('places', landmarks, { sub: `${region}Landmarks`, tags })
+    one('places', `${region}Landmarks`, complete(landmarks), Object.keys(landmarks).length, { sub: `${region}Landmarks`, tags })
+  }
   // Places on cards: with the cities when some have a card, else with the landmarks
   const cardsSub = cities ? `${region}Cities` : `${region}Landmarks`
   for (const [city, pattern] of Object.entries(cities ?? {})) one('places', city, namedCount(pattern), 1, { sub: cardsSub, tags })

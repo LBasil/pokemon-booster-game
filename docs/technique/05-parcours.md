@@ -431,7 +431,7 @@ sequenceDiagram
 ## 7. Succès
 
 Définitions : [src/utils/achievements.js](../../src/utils/achievements.js)
-(~1150, 20 catégories, sous-catégories `sub` dans les grosses, tags de
+(~1210, 20 catégories, sous-catégories `sub` dans les grosses, tags de
 région `tags` pour le filtre « Région », `?region=`). Les groupes de Pokémon (lignées d'évolution,
 légendaires et fabuleux, équipes des champions d'arène de Kanto et Johto,
 Conseil 4, Maîtres de la Ligue, rivaux et héros, lieux et leurs Pokémon
@@ -473,7 +473,14 @@ solitaires, fossiles, routes 1 à 10 (`galarRoute<n>`), Forêt de Sleepwood,
 mines et Forêt de Lumirinth (pas les zones de la Zone Sauvage, jusqu'à 87
 Pokémon chacune), les 10 badges des deux versions, Rosemary, Travis,
 Shehroz et Liv, champions, Tarak, rivaux, Team Yell et 5 villes en
-cartes, séries Épée et Bouclier). Équipes et noms officiels vérifiés sur PokéAPI et Poképédia ; leur
+cartes, séries Épée et Bouclier) et Paldea
+([src/utils/paldea.js](../../src/utils/paldea.js) : lignées d'Écarlate/Violet,
+solitaires, Pokémon Dominants d'« Un parfum de légende », Pokémon Paradoxe
+du passé et du futur, arènes, Conseil 4, Alisma, Pepper, Pania et les IA
+des professeurs, champions, Conseil 4, amis, Team Star et personnel de
+l'Académie en cartes, Mesaledo, Cuencia et Levalendura, séries Écarlate et
+Violet ; pas de routes ni de lieux : PokéAPI n'a pas les Pokémon sauvages
+d'Écarlate/Violet, `routes` et `landmarks` sont donc facultatifs). Équipes et noms officiels vérifiés sur PokéAPI et Poképédia ; leur
 description nomme les membres (`achievements.desc.groups.<id>`), donc
 changer une liste = changer ses deux textes. **Calculés dans le navigateur, par mode.** Le
 Défi est mis en avant, c'est celui qui compte.

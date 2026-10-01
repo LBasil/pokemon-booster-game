@@ -10,6 +10,7 @@ import unova from './unova'
 import kalos from './kalos'
 import alola from './alola'
 import galar from './galar'
+import paldea from './paldea'
 import { LEGENDARIES, LEGENDS, MYTHICALS, ULTRA_BEASTS } from './pokemonGroups'
 
 const card = (id, fields = {}) => ({
@@ -431,6 +432,17 @@ describe('no duplicates', () => {
     expect(all).toEqual(Array.from({ length: 96 }, (_, i) => i + 810))
     expect(lines.length + galar.extras.galarSolos.length + new Set([...legends, ...older]).size).toBe(96) // lines and loners stay apart
   })
+
+  it('split every Paldea Pokémon into lines, loners, legends, Paradox Pokémon and older regions’ groups', () => {
+    const inPaldea = (n) => n >= 906 && n <= 1025
+    const lines = Object.values(paldea.lines).flat()
+    const legends = [...LEGENDARIES, ...MYTHICALS].filter(inPaldea)
+    const paradox = [...paldea.extras.ancientParadox, ...paldea.extras.futureParadox]
+    // New evolutions of older Pokémon (Annihilape, Clodsire, Archaludon...)
+    const older = [...Object.values(KANTO_EXTRAS), ...[johto, unova, galar].flatMap((r) => Object.values(r.extras))].flat().filter(inPaldea)
+    const all = [...lines, ...paldea.extras.paldeaSolos, ...legends, ...paradox, ...older].sort((a, b) => a - b)
+    expect(all).toEqual(Array.from({ length: 120 }, (_, i) => i + 906))
+  })
 })
 
 describe('Kanto', () => {
@@ -731,5 +743,40 @@ describe('Galar', () => {
     const a = byId(achievements([entry('swsh1-1'), entry('swsh8-1'), entry('swsh9-1'), entry('swsh35-1')], sets))
     expect(a.galarSets.current).toBe(2) // Brilliant Stars is Hisui's
     expect(a.galarSpecialSets.current).toBe(1)
+  })
+})
+
+describe('Paldea', () => {
+  const dex = (...numbers) => numbers.map((n) => entry(`sv1-${n}`, { national_pokedex_number: n }))
+  const named = (...names) => names.map((name, i) => entry(`sv2-${i}`, { name }))
+
+  it('counts complete Paldea lines, gyms, the League, Geeta and the professors', () => {
+    const a = byId(achievements(dex(915, 916, 919, 917, 216, 956, 983, 673, 976, 713, 970, 988, 986, 985, 989, 987, 1005), sets))
+    expect(a.lechonkLine).toMatchObject({ unlocked: true, sub: 'paldeaLines', tags: ['paldea'] })
+    expect(a.sprigatitoLine.sub).toBe('paldeaLines') // moved from the other regions' lines
+    expect(a.cortondoGym).toMatchObject({ unlocked: true, sub: 'paldeaGyms' })
+    expect(a.geeta).toMatchObject({ unlocked: true, tags: ['paldea'] })
+    expect(a.sada.unlocked).toBe(true)
+    expect(a.ancientParadox.current).toBe(6)
+    expect(a.paldeaRoutes).toBeUndefined() // no wild Pokémon known
+  })
+
+  it('reads Paldea trainers’, towns’ and places’ cards from their names', () => {
+    const cards = named('Katy', "Iono's Bellibolt ex", "Larry's Skill", "Arven's Sandwich", 'Penny', 'Professor Sada’s Vitality', "Professor Turo's Scenario", 'Giacomo', 'Jacq', 'Mesagoza', 'Area Zero Underdepths', 'Erika')
+    const a = byId(achievements(cards, sets))
+    expect(a.tc_paldeaGymLeaders.current).toBe(3) // Katy, Iono, Larry
+    expect(a.tc_paldeaEliteFour.current).toBe(1) // Larry
+    expect(a.tc_paldeaFriends.current).toBe(2)
+    expect(a.tc_paldeaProfessors.current).toBe(2)
+    expect(a.tc_teamStar.current).toBe(1) // Giacomo, not Erika
+    expect(a.tc_academy.current).toBe(1)
+    expect(a.paldeaCities).toMatchObject({ current: 1, sub: 'paldeaCities' })
+    expect(a.paldeaPlaceCards.current).toBe(1)
+  })
+
+  it('counts the Paldea sets', () => {
+    const a = byId(achievements([entry('sv1-1'), entry('sv10-1'), entry('sv3pt5-1'), entry('sv8pt5-1'), entry('zsv10pt5-1')], sets))
+    expect(a.paldeaSets.current).toBe(2) // 151 is Kanto's, Black Bolt Unova's
+    expect(a.paldeaSpecialSets.current).toBe(1)
   })
 })

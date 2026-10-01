@@ -3,14 +3,7 @@
 // (achievements.items.<id>.title) and description naming the members
 // (achievements.desc.groups.<id>): change the list, change both texts.
 
-// Whole evolution lines (first stage to last) of the regions without a
-// file of their own yet (Kanto: kanto.js, then johto.js, hoenn.js, sinnoh.js, unova.js, kalos.js, alola.js, galar.js)
-export const FAMILIES = {
-  sprigatitoLine: [906, 907, 908],
-  fuecocoLine: [909, 910, 911],
-  quaxlyLine: [912, 913, 914],
-  frigibaxLine: [996, 997, 998],
-}
+// Evolution lines are in each region's file (kanto.js, johto.js... paldea.js)
 
 // Every region's three starters (first stage), Kanto to Paldea
 export const STARTERS = [1, 4, 7, 152, 155, 158, 252, 255, 258, 387, 390, 393, 495, 498, 501, 650, 653, 656, 722, 725, 728, 810, 813, 816, 906, 909, 912]
@@ -93,6 +86,7 @@ export const CHAMPIONS = {
   iris: [635, 621, 306, 567, 131, 612], // Black 2/White 2
   diantha: [701, 697, 699, 711, 706, 282], // X/Y
   leon: [681, 887, 612, 6], // Sword/Shield (his team's constant members)
+  geeta: [956, 983, 673, 976, 713, 970], // Scarlet/Violet
 }
 
 // Rivals and famous trainers

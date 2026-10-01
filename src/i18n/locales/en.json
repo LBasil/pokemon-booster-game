@@ -4252,6 +4252,216 @@
       },
       "galarSpecialSets": {
         "title": "Galar specials"
+      },
+      "lechonkLine": {
+        "title": "Oinkologne line"
+      },
+      "tarountulaLine": {
+        "title": "Spidops line"
+      },
+      "nymbleLine": {
+        "title": "Lokix line"
+      },
+      "pawmiLine": {
+        "title": "Pawmot line"
+      },
+      "tandemausLine": {
+        "title": "Maushold line"
+      },
+      "fidoughLine": {
+        "title": "Dachsbun line"
+      },
+      "smolivLine": {
+        "title": "Arboliva line"
+      },
+      "nacliLine": {
+        "title": "Garganacl line"
+      },
+      "charcadetLine": {
+        "title": "Charcadet line"
+      },
+      "tadbulbLine": {
+        "title": "Bellibolt line"
+      },
+      "wattrelLine": {
+        "title": "Kilowattrel line"
+      },
+      "maschiffLine": {
+        "title": "Mabosstiff line"
+      },
+      "shroodleLine": {
+        "title": "Grafaiai line"
+      },
+      "bramblinLine": {
+        "title": "Brambleghast line"
+      },
+      "toedscoolLine": {
+        "title": "Toedscruel line"
+      },
+      "capsakidLine": {
+        "title": "Scovillain line"
+      },
+      "rellorLine": {
+        "title": "Rabsca line"
+      },
+      "flittleLine": {
+        "title": "Espathra line"
+      },
+      "tinkatinkLine": {
+        "title": "Tinkaton line"
+      },
+      "wiglettLine": {
+        "title": "Wugtrio line"
+      },
+      "finizenLine": {
+        "title": "Palafin line"
+      },
+      "varoomLine": {
+        "title": "Revavroom line"
+      },
+      "glimmetLine": {
+        "title": "Glimmora line"
+      },
+      "greavardLine": {
+        "title": "Houndstone line"
+      },
+      "cetoddleLine": {
+        "title": "Cetitan line"
+      },
+      "gimmighoulLine": {
+        "title": "Gholdengo line"
+      },
+      "poltchageistLine": {
+        "title": "Sinistcha line"
+      },
+      "paldeaSolos": {
+        "title": "Paldea loners"
+      },
+      "paldeaTitans": {
+        "title": "Path of Legends"
+      },
+      "ancientParadox": {
+        "title": "Echoes of the past"
+      },
+      "futureParadox": {
+        "title": "Visions of the future"
+      },
+      "paldeaLines10": {
+        "title": "Paldea family album"
+      },
+      "paldeaLines20": {
+        "title": "Paldea family tree"
+      },
+      "paldeaLines31": {
+        "title": "Every Paldea line"
+      },
+      "paldeaDex25": {
+        "title": "Paldea rookie"
+      },
+      "paldeaDex50": {
+        "title": "Paldea trainer"
+      },
+      "paldeaDex100": {
+        "title": "Paldea expert"
+      },
+      "cortondoGym": {
+        "title": "Cortondo Gym"
+      },
+      "artazonGym": {
+        "title": "Artazon Gym"
+      },
+      "levinciaGym": {
+        "title": "Levincia Gym"
+      },
+      "cascarrafaGym": {
+        "title": "Cascarrafa Gym"
+      },
+      "medaliGym": {
+        "title": "Medali Gym"
+      },
+      "monteneveraGym": {
+        "title": "Montenevera Gym"
+      },
+      "alfornadaGym": {
+        "title": "Alfornada Gym"
+      },
+      "glaseadoGym": {
+        "title": "Glaseado Mountain Gym"
+      },
+      "paldeaBadges": {
+        "title": "Paldea badge case"
+      },
+      "rika": {
+        "title": "Rika"
+      },
+      "poppy": {
+        "title": "Poppy"
+      },
+      "larry": {
+        "title": "Larry"
+      },
+      "hassel": {
+        "title": "Hassel"
+      },
+      "paldeaEliteFour": {
+        "title": "Paldea’s League"
+      },
+      "geeta": {
+        "title": "Top Champion Geeta"
+      },
+      "arven": {
+        "title": "Arven"
+      },
+      "penny": {
+        "title": "Penny, alias Cassiopeia"
+      },
+      "sada": {
+        "title": "Professor Sada’s AI"
+      },
+      "turo": {
+        "title": "Professor Turo’s AI"
+      },
+      "mesagoza": {
+        "title": "Mesagoza"
+      },
+      "artazon": {
+        "title": "Artazon"
+      },
+      "levincia": {
+        "title": "Levincia"
+      },
+      "paldeaCities": {
+        "title": "Paldea tour"
+      },
+      "paldeaPlaceCards": {
+        "title": "Paldea on cards"
+      },
+      "tc_paldeaGymLeaders": {
+        "title": "Paldea leaders in the binder"
+      },
+      "tc_paldeaEliteFour": {
+        "title": "Paldea’s Elite Four on cards"
+      },
+      "tc_geeta": {
+        "title": "The Top Champion’s card"
+      },
+      "tc_paldeaFriends": {
+        "title": "Academy friends"
+      },
+      "tc_paldeaProfessors": {
+        "title": "The two professors"
+      },
+      "tc_teamStar": {
+        "title": "Team Star bosses"
+      },
+      "tc_academy": {
+        "title": "Back to school"
+      },
+      "paldeaSets": {
+        "title": "Scarlet & Violet era"
+      },
+      "paldeaSpecialSets": {
+        "title": "Paldea specials"
       }
     },
     "desc": {
@@ -5061,7 +5271,55 @@
         "marnie": "Marnie’s team in the Champion Cup in Sword and Shield: own Liepard, Morpeko, Toxicroak, Grimmsnarl and Scrafty",
         "bede": "Bede’s team in the Champion Cup in Sword and Shield: own Mawile, Rapidash, Gardevoir and Hatterene",
         "rose": "Chairman Rose’s team in Sword and Shield: own Escavalier, Klinklang, Ferrothorn, Copperajah and Perrserker",
-        "oleana": "Oleana’s team at the top of Rose Tower in Sword and Shield: own Froslass, Milotic, Tsareena, Garbodor and Salazzle"
+        "oleana": "Oleana’s team at the top of Rose Tower in Sword and Shield: own Froslass, Milotic, Tsareena, Garbodor and Salazzle",
+        "lechonkLine": "Own the whole line: Lechonk and Oinkologne",
+        "tarountulaLine": "Own the whole line: Tarountula and Spidops",
+        "nymbleLine": "Own the whole line: Nymble and Lokix",
+        "pawmiLine": "Own the whole line: Pawmi, Pawmo and Pawmot",
+        "tandemausLine": "Own the whole line: Tandemaus and Maushold",
+        "fidoughLine": "Own the whole line: Fidough and Dachsbun",
+        "smolivLine": "Own the whole line: Smoliv, Dolliv and Arboliva",
+        "nacliLine": "Own the whole line: Nacli, Naclstack and Garganacl",
+        "charcadetLine": "Own the whole line: Charcadet, Armarouge and Ceruledge",
+        "tadbulbLine": "Own the whole line: Tadbulb and Bellibolt",
+        "wattrelLine": "Own the whole line: Wattrel and Kilowattrel",
+        "maschiffLine": "Own the whole line: Maschiff and Mabosstiff",
+        "shroodleLine": "Own the whole line: Shroodle and Grafaiai",
+        "bramblinLine": "Own the whole line: Bramblin and Brambleghast",
+        "toedscoolLine": "Own the whole line: Toedscool and Toedscruel",
+        "capsakidLine": "Own the whole line: Capsakid and Scovillain",
+        "rellorLine": "Own the whole line: Rellor and Rabsca",
+        "flittleLine": "Own the whole line: Flittle and Espathra",
+        "tinkatinkLine": "Own the whole line: Tinkatink, Tinkatuff and Tinkaton",
+        "wiglettLine": "Own the whole line: Wiglett and Wugtrio",
+        "finizenLine": "Own the whole line: Finizen and Palafin",
+        "varoomLine": "Own the whole line: Varoom and Revavroom",
+        "glimmetLine": "Own the whole line: Glimmet and Glimmora",
+        "greavardLine": "Own the whole line: Greavard and Houndstone",
+        "cetoddleLine": "Own the whole line: Cetoddle and Cetitan",
+        "gimmighoulLine": "Own the whole line: Gimmighoul and Gholdengo",
+        "poltchageistLine": "Own the whole line: Poltchageist and Sinistcha",
+        "paldeaSolos": "Own the 9 Paldea Pokémon that don’t evolve, legendaries, mythicals and Paradox Pokémon aside: Squawkabilly, Klawf, Bombirdier, Cyclizar, Orthworm, Flamigo, Veluza, Dondozo and Tatsugiri",
+        "paldeaTitans": "Own the Titans of the Path of Legends (Great Tusk in Scarlet, Iron Treads in Violet, both counted): Klawf, Bombirdier, Orthworm, Great Tusk, Iron Treads, Dondozo and Tatsugiri",
+        "ancientParadox": "Own the 10 ancient Paradox Pokémon: Great Tusk, Scream Tail, Brute Bonnet, Flutter Mane, Slither Wing, Sandy Shocks, Roaring Moon, Walking Wake, Gouging Fire and Raging Bolt",
+        "futureParadox": "Own the 10 future Paradox Pokémon: Iron Treads, Iron Bundle, Iron Hands, Iron Jugulis, Iron Moth, Iron Thorns, Iron Valiant, Iron Leaves, Iron Boulder and Iron Crown",
+        "cortondoGym": "Gym leader Katy’s team: own Nymble, Tarountula and Teddiursa",
+        "artazonGym": "Gym leader Brassius’s team: own Petilil, Smoliv and Sudowoodo",
+        "levinciaGym": "Gym leader Iono’s team: own Wattrel, Luxio, Bellibolt and Mismagius",
+        "cascarrafaGym": "Gym leader Kofu’s team: own Veluza, Wugtrio and Crabominable",
+        "medaliGym": "Gym leader Larry’s team: own Komala, Dudunsparce and Staraptor",
+        "monteneveraGym": "Gym leader Ryme’s team: own Mimikyu, Houndstone, Banette and Toxtricity",
+        "alfornadaGym": "Gym leader Tulip’s team: own Farigiraf, Espathra, Gardevoir and Florges",
+        "glaseadoGym": "Gym leader Grusha’s team: own Frosmoth, Cetitan, Beartic and Altaria",
+        "rika": "Elite Four Rika’s team in Scarlet and Violet: own Whiscash, Dugtrio, Camerupt, Clodsire and Donphan",
+        "poppy": "Elite Four Poppy’s team in Scarlet and Violet: own Copperajah, Magnezone, Corviknight, Tinkaton and Bronzong",
+        "larry": "Elite Four Larry’s team in Scarlet and Violet: own Tropius, Altaria, Oricorio, Flamigo and Staraptor",
+        "hassel": "Elite Four Hassel’s team in Scarlet and Violet: own Noivern, Flapple, Dragalge, Baxcalibur and Haxorus",
+        "geeta": "Geeta’s team as Top Champion (Scarlet and Violet): own Espathra, Kingambit, Gogoat, Veluza, Avalugg and Glimmora",
+        "arven": "Arven’s team in his last battle in Scarlet and Violet: own Greedent, Scovillain, Garganacl, Cloyster, Toedscruel and Mabosstiff",
+        "penny": "Penny’s team as Team Star’s big boss in Scarlet and Violet: own Umbreon, Flareon, Vaporeon, Leafeon, Jolteon and Sylveon",
+        "sada": "The AI Professor Sada’s team at the Zero Lab in Scarlet: own Slither Wing, Brute Bonnet, Scream Tail, Sandy Shocks, Flutter Mane and Roaring Moon",
+        "turo": "The AI Professor Turo’s team at the Zero Lab in Violet: own Iron Moth, Iron Jugulis, Iron Thorns, Iron Hands, Iron Bundle and Iron Valiant"
       },
       "families": "Complete {count} evolution line | Complete {count} evolution lines",
       "allStarters": "Own the {count} starter Pokémon, Kanto to Paldea",
@@ -5226,7 +5484,25 @@
       "tc_teamYell": "Own {count} different Team Yell cards (their grunts, their towel and their cheer)",
       "tc_isleOfArmor": "Own a card of Klara, Avery and Honey (Isle of Armor)",
       "galarSets": "Own a card from each Sword & Shield set set in Galar: Sword & Shield, Rebel Clash, Darkness Ablaze, Vivid Voltage, Battle Styles, Chilling Reign, Evolving Skies and Fusion Strike",
-      "galarSpecialSets": "Own a card from each special Sword & Shield set: Champion’s Path, Shining Fates and Crown Zenith"
+      "galarSpecialSets": "Own a card from each special Sword & Shield set: Champion’s Path, Shining Fates and Crown Zenith",
+      "paldeaLines": "Complete {count} evolution lines of Paldea",
+      "paldeaDex": "Own {count} different Pokémon of Paldea (#906 to #1025)",
+      "paldeaBadges": "Complete the teams of Paldea’s {count} gym leaders",
+      "paldeaEliteFour": "Complete the teams of Paldea’s Elite Four (Scarlet and Violet)",
+      "mesagoza": "Own a Mesagoza card",
+      "artazon": "Own a Artazon card",
+      "levincia": "Own a Levincia card",
+      "paldeaCities": "Own a card of each Paldea town that has one: Mesagoza, Artazon and Levincia",
+      "paldeaPlaceCards": "Own the Paldea places printed as Stadium cards: Area Zero Underdepths and Academy at Night",
+      "tc_paldeaGymLeaders": "Own a card of each Paldea gym leader: Katy, Brassius, Iono, Kofu, Larry, Ryme, Tulip and Grusha (theirs or one of their Pokémon)",
+      "tc_paldeaEliteFour": "Own a card of each member of Paldea’s Elite Four: Rika, Poppy, Larry and Hassel",
+      "tc_geeta": "Own a Geeta card",
+      "tc_paldeaFriends": "Own a card of Nemona, of Arven and of Penny (theirs or one of their Pokémon)",
+      "tc_paldeaProfessors": "Own a card of Professor Sada and of Professor Turo",
+      "tc_teamStar": "Own a card of each Team Star squad boss: Giacomo, Mela, Atticus, Ortega and Eri",
+      "tc_academy": "Own a card of each Academy staff member who has one: Clavell, Jacq, Dendra, Saguaro, Raifort, Tyme, Salvatore and Miriam",
+      "paldeaSets": "Own a card from each numbered Scarlet & Violet set: Scarlet & Violet, Paldea Evolved, Obsidian Flames, Paradox Rift, Temporal Forces, Twilight Masquerade, Stellar Crown, Surging Sparks, Journey Together and Destined Rivals",
+      "paldeaSpecialSets": "Own a card from each special Scarlet & Violet set: Paldean Fates, Shrouded Fable and Prismatic Evolutions"
     },
     "subs": {
       "allLines": "All regions",
@@ -5238,7 +5514,6 @@
       "hoennMore": "Hoenn, beyond the lines",
       "sinnohLines": "Sinnoh lines (Diamond and Pearl)",
       "sinnohMore": "Sinnoh, beyond the lines",
-      "otherLines": "Other regions",
       "kantoGyms": "Kanto gyms",
       "johtoGyms": "Johto gyms",
       "hoennGyms": "Hoenn gyms",
@@ -5283,7 +5558,12 @@
       "galarTrainerCards": "Galar trainers on cards",
       "galarRoutes": "Galar routes (Sword and Shield)",
       "galarLandmarks": "Galar forests and mines",
-      "galarCities": "Galar towns on cards"
+      "galarCities": "Galar towns on cards",
+      "paldeaLines": "Paldea lines (Scarlet and Violet)",
+      "paldeaMore": "Paldea, beyond the lines",
+      "paldeaGyms": "Paldea gyms",
+      "paldeaTrainerCards": "Paldea trainers on cards",
+      "paldeaCities": "Paldea towns on cards"
     }
   },
   "beta": {

@@ -4252,6 +4252,216 @@
       },
       "galarSpecialSets": {
         "title": "Les spéciales de Galar"
+      },
+      "lechonkLine": {
+        "title": "Lignée de Fragroin"
+      },
+      "tarountulaLine": {
+        "title": "Lignée de Filentrappe"
+      },
+      "nymbleLine": {
+        "title": "Lignée de Gambex"
+      },
+      "pawmiLine": {
+        "title": "Lignée de Pohmarmotte"
+      },
+      "tandemausLine": {
+        "title": "Lignée de Famignol"
+      },
+      "fidoughLine": {
+        "title": "Lignée de Briochien"
+      },
+      "smolivLine": {
+        "title": "Lignée d’Arboliva"
+      },
+      "nacliLine": {
+        "title": "Lignée de Gigansel"
+      },
+      "charcadetLine": {
+        "title": "Lignée de Charbambin"
+      },
+      "tadbulbLine": {
+        "title": "Lignée d’Ampibidou"
+      },
+      "wattrelLine": {
+        "title": "Lignée de Fulgulairo"
+      },
+      "maschiffLine": {
+        "title": "Lignée de Dogrino"
+      },
+      "shroodleLine": {
+        "title": "Lignée de Tag-Tag"
+      },
+      "bramblinLine": {
+        "title": "Lignée de Virevorreur"
+      },
+      "toedscoolLine": {
+        "title": "Lignée de Terracruel"
+      },
+      "capsakidLine": {
+        "title": "Lignée de Scovilain"
+      },
+      "rellorLine": {
+        "title": "Lignée de Bérasca"
+      },
+      "flittleLine": {
+        "title": "Lignée de Cléopsytra"
+      },
+      "tinkatinkLine": {
+        "title": "Lignée de Forgelina"
+      },
+      "wiglettLine": {
+        "title": "Lignée de Triopikeau"
+      },
+      "finizenLine": {
+        "title": "Lignée de Superdofin"
+      },
+      "varoomLine": {
+        "title": "Lignée de Vrombotor"
+      },
+      "glimmetLine": {
+        "title": "Lignée de Floréclat"
+      },
+      "greavardLine": {
+        "title": "Lignée de Tomberro"
+      },
+      "cetoddleLine": {
+        "title": "Lignée de Balbalèze"
+      },
+      "gimmighoulLine": {
+        "title": "Lignée de Gromago"
+      },
+      "poltchageistLine": {
+        "title": "Lignée de Théffroyable"
+      },
+      "paldeaSolos": {
+        "title": "Solitaires de Paldea"
+      },
+      "paldeaTitans": {
+        "title": "Un parfum de légende"
+      },
+      "ancientParadox": {
+        "title": "Échos du passé"
+      },
+      "futureParadox": {
+        "title": "Visions du futur"
+      },
+      "paldeaLines10": {
+        "title": "Album de famille de Paldea"
+      },
+      "paldeaLines20": {
+        "title": "Arbre généalogique de Paldea"
+      },
+      "paldeaLines31": {
+        "title": "Toutes les lignées de Paldea"
+      },
+      "paldeaDex25": {
+        "title": "Débutant de Paldea"
+      },
+      "paldeaDex50": {
+        "title": "Dresseur de Paldea"
+      },
+      "paldeaDex100": {
+        "title": "Expert de Paldea"
+      },
+      "cortondoGym": {
+        "title": "Arène de Sevaro"
+      },
+      "artazonGym": {
+        "title": "Arène de Cuencia"
+      },
+      "levinciaGym": {
+        "title": "Arène de Levalendura"
+      },
+      "cascarrafaGym": {
+        "title": "Arène de Jarramanca"
+      },
+      "medaliGym": {
+        "title": "Arène de Mezclamora"
+      },
+      "monteneveraGym": {
+        "title": "Arène de Frigao"
+      },
+      "alfornadaGym": {
+        "title": "Arène d’Alforneira"
+      },
+      "glaseadoGym": {
+        "title": "Arène du Mont Nappé"
+      },
+      "paldeaBadges": {
+        "title": "Boîte à badges de Paldea"
+      },
+      "rika": {
+        "title": "Cayenn"
+      },
+      "poppy": {
+        "title": "Popi"
+      },
+      "larry": {
+        "title": "Okuba"
+      },
+      "hassel": {
+        "title": "Hassa"
+      },
+      "paldeaEliteFour": {
+        "title": "La Ligue de Paldea"
+      },
+      "geeta": {
+        "title": "Alisma, Maîtresse en Chef"
+      },
+      "arven": {
+        "title": "Pepper"
+      },
+      "penny": {
+        "title": "Pania, alias Cassiopée"
+      },
+      "sada": {
+        "title": "L’IA de la Professeure Olim"
+      },
+      "turo": {
+        "title": "L’IA du Professeur Turum"
+      },
+      "mesagoza": {
+        "title": "Mesaledo"
+      },
+      "artazon": {
+        "title": "Cuencia"
+      },
+      "levincia": {
+        "title": "Levalendura"
+      },
+      "paldeaCities": {
+        "title": "Tour de Paldea"
+      },
+      "paldeaPlaceCards": {
+        "title": "Paldea en cartes"
+      },
+      "tc_paldeaGymLeaders": {
+        "title": "Champions de Paldea dans le classeur"
+      },
+      "tc_paldeaEliteFour": {
+        "title": "Le Conseil 4 de Paldea en cartes"
+      },
+      "tc_geeta": {
+        "title": "La carte de la Maîtresse en Chef"
+      },
+      "tc_paldeaFriends": {
+        "title": "Amis de l’Académie"
+      },
+      "tc_paldeaProfessors": {
+        "title": "Les deux professeurs"
+      },
+      "tc_teamStar": {
+        "title": "Les boss de la Team Star"
+      },
+      "tc_academy": {
+        "title": "La rentrée des classes"
+      },
+      "paldeaSets": {
+        "title": "L’ère Écarlate et Violet"
+      },
+      "paldeaSpecialSets": {
+        "title": "Les spéciales de Paldea"
       }
     },
     "desc": {
@@ -5061,7 +5271,55 @@
         "marnie": "L’équipe de Rosemary à la Coupe des Champions dans Épée et Bouclier : possède Léopardus, Morpeko, Coatox, Angoliath et Baggaïd",
         "bede": "L’équipe de Travis à la Coupe des Champions dans Épée et Bouclier : possède Mysdibule, Galopa, Gardevoir et Sorcilence",
         "rose": "L’équipe du président Shehroz dans Épée et Bouclier : possède Lançargot, Cliticlic, Noacier, Pachyradjah et Berserkatt",
-        "oleana": "L’équipe de Liv au sommet de la Shehroz Tower dans Épée et Bouclier : possède Momartik, Milobellus, Sucreine, Miasmax et Malamandre"
+        "oleana": "L’équipe de Liv au sommet de la Shehroz Tower dans Épée et Bouclier : possède Momartik, Milobellus, Sucreine, Miasmax et Malamandre",
+        "lechonkLine": "Possède toute la lignée : Gourmelet et Fragroin",
+        "tarountulaLine": "Possède toute la lignée : Tissenboule et Filentrappe",
+        "nymbleLine": "Possède toute la lignée : Lilliterelle et Gambex",
+        "pawmiLine": "Possède toute la lignée : Pohm, Pohmotte et Pohmarmotte",
+        "tandemausLine": "Possède toute la lignée : Compagnol et Famignol",
+        "fidoughLine": "Possède toute la lignée : Pâtachiot et Briochien",
+        "smolivLine": "Possède toute la lignée : Olivini, Olivado et Arboliva",
+        "nacliLine": "Possède toute la lignée : Selutin, Amassel et Gigansel",
+        "charcadetLine": "Possède toute la lignée : Charbambin, Carmadura et Malvalame",
+        "tadbulbLine": "Possède toute la lignée : Têtampoule et Ampibidou",
+        "wattrelLine": "Possède toute la lignée : Zapétrel et Fulgulairo",
+        "maschiffLine": "Possède toute la lignée : Grondogue et Dogrino",
+        "shroodleLine": "Possède toute la lignée : Gribouraigne et Tag-Tag",
+        "bramblinLine": "Possède toute la lignée : Virovent et Virevorreur",
+        "toedscoolLine": "Possède toute la lignée : Terracool et Terracruel",
+        "capsakidLine": "Possède toute la lignée : Pimito et Scovilain",
+        "rellorLine": "Possède toute la lignée : Léboulérou et Bérasca",
+        "flittleLine": "Possède toute la lignée : Flotillon et Cléopsytra",
+        "tinkatinkLine": "Possède toute la lignée : Forgerette, Forgella et Forgelina",
+        "wiglettLine": "Possède toute la lignée : Taupikeau et Triopikeau",
+        "finizenLine": "Possède toute la lignée : Dofin et Superdofin",
+        "varoomLine": "Possède toute la lignée : Vrombi et Vrombotor",
+        "glimmetLine": "Possède toute la lignée : Germéclat et Floréclat",
+        "greavardLine": "Possède toute la lignée : Toutombe et Tomberro",
+        "cetoddleLine": "Possède toute la lignée : Piétacé et Balbalèze",
+        "gimmighoulLine": "Possède toute la lignée : Mordudor et Gromago",
+        "poltchageistLine": "Possède toute la lignée : Poltchageist et Théffroyable",
+        "paldeaSolos": "Possède les 9 Pokémon de Paldea qui n’évoluent pas, légendaires, fabuleux et Pokémon Paradoxe à part : Tapatoès, Craparoi, Lestombaile, Motorizard, Ferdeter, Flamenroule, Délestin, Oyacata et Nigirigon",
+        "paldeaTitans": "Possède les Pokémon Dominants d’Un parfum de légende (Fort-Ivoire dans Écarlate, Roue-de-Fer dans Violet, les deux comptent) : Craparoi, Lestombaile, Ferdeter, Fort-Ivoire, Roue-de-Fer, Oyacata et Nigirigon",
+        "ancientParadox": "Possède les 10 Pokémon Paradoxe du passé : Fort-Ivoire, Hurle-Queue, Fongus-Furie, Flotte-Mèche, Rampe-Ailes, Pelage-Sablé, Rugit-Lune, Serpente-Eau, Feu-Perçant et Ire-Foudre",
+        "futureParadox": "Possède les 10 Pokémon Paradoxe du futur : Roue-de-Fer, Hotte-de-Fer, Paume-de-Fer, Têtes-de-Fer, Mite-de-Fer, Épine-de-Fer, Garde-de-Fer, Vert-de-Fer, Roc-de-Fer et Chef-de-Fer",
+        "cortondoGym": "L’équipe d’Éra, championne d’arène : possède Lilliterelle, Tissenboule et Teddiursa",
+        "artazonGym": "L’équipe de Colza, champion d’arène : possède Chlorobule, Olivini et Simularbre",
+        "levinciaGym": "L’équipe de Mashynn, championne d’arène : possède Zapétrel, Luxio, Ampibidou et Magirêve",
+        "cascarrafaGym": "L’équipe de Kombu, champion d’arène : possède Délestin, Triopikeau et Crabominable",
+        "medaliGym": "L’équipe d’Okuba, champion d’arène : possède Dodoala, Deusolourdo et Étouraptor",
+        "monteneveraGym": "L’équipe de Laïm, championne d’arène : possède Mimiqui, Tomberro, Branette et Salarsen",
+        "alfornadaGym": "L’équipe de Tully, championne d’arène : possède Farigiraf, Cléopsytra, Gardevoir et Florges",
+        "glaseadoGym": "L’équipe de Grusha, champion d’arène : possède Beldeneige, Balbalèze, Polagriffe et Altaria",
+        "rika": "L’équipe de Cayenn, membre du Conseil 4 dans Écarlate et Violet : possède Barbicha, Triopikeur, Camérupt, Terraiste et Donphan",
+        "poppy": "L’équipe de Popi, membre du Conseil 4 dans Écarlate et Violet : possède Pachyradjah, Magnézone, Corvaillus, Forgelina et Archéodong",
+        "larry": "L’équipe d’Okuba, membre du Conseil 4 dans Écarlate et Violet : possède Tropius, Altaria, Plumeline, Flamenroule et Étouraptor",
+        "hassel": "L’équipe de Hassa, membre du Conseil 4 dans Écarlate et Violet : possède Bruyverne, Pomdrapi, Kravarech, Glaivodo et Tranchodon",
+        "geeta": "L’équipe d’Alisma, Maîtresse en Chef de la Ligue (Écarlate et Violet) : possède Cléopsytra, Scalpereur, Chevroum, Délestin, Séracrawl et Floréclat",
+        "arven": "L’équipe de Pepper lors de son dernier combat dans Écarlate et Violet : possède Rongrigou, Scovilain, Gigansel, Crustabri, Terracruel et Dogrino",
+        "penny": "L’équipe de Pania, à la tête de la Team Star, dans Écarlate et Violet : possède Noctali, Pyroli, Aquali, Phyllali, Voltali et Nymphali",
+        "sada": "L’équipe de l’IA de la Professeure Olim au Laboratoire Zéro dans Écarlate : possède Rampe-Ailes, Fongus-Furie, Hurle-Queue, Pelage-Sablé, Flotte-Mèche et Rugit-Lune",
+        "turo": "L’équipe de l’IA du Professeur Turum au Laboratoire Zéro dans Violet : possède Mite-de-Fer, Têtes-de-Fer, Épine-de-Fer, Paume-de-Fer, Hotte-de-Fer et Garde-de-Fer"
       },
       "families": "Complète {count} lignée d’évolution | Complète {count} lignées d’évolution",
       "allStarters": "Possède les {count} Pokémon de départ, de Kanto à Paldea",
@@ -5226,7 +5484,25 @@
       "tc_teamYell": "Possède {count} cartes différentes de la Team Yell (ses sbires, sa serviette et ses encouragements)",
       "tc_isleOfArmor": "Possède une carte de Sophora, de Saturnin et d’Apia (L’Île Solitaire de l’Armure)",
       "galarSets": "Possède une carte de chaque série Épée et Bouclier qui se passe à Galar : Épée et Bouclier, Clash des Rebelles, Ténèbres Embrasées, Voltage Éclatant, Styles de Combat, Règne de Glace, Évolution Céleste et Poing de Fusion",
-      "galarSpecialSets": "Possède une carte de chaque série spéciale Épée et Bouclier : La Voie du Maître, Destinées Radieuses et Zénith Suprême"
+      "galarSpecialSets": "Possède une carte de chaque série spéciale Épée et Bouclier : La Voie du Maître, Destinées Radieuses et Zénith Suprême",
+      "paldeaLines": "Complète {count} lignées d’évolution de Paldea",
+      "paldeaDex": "Possède {count} Pokémon différents de Paldea (n° 906 à 1025)",
+      "paldeaBadges": "Complète les équipes des {count} champions d’arène de Paldea",
+      "paldeaEliteFour": "Complète les équipes du Conseil 4 de Paldea (Écarlate et Violet)",
+      "mesagoza": "Possède une carte de Mesaledo",
+      "artazon": "Possède une carte de Cuencia",
+      "levincia": "Possède une carte de Levalendura",
+      "paldeaCities": "Possède une carte de chaque ville de Paldea qui en a une : Mesaledo, Cuencia et Levalendura",
+      "paldeaPlaceCards": "Possède les lieux de Paldea imprimés en cartes Stade : les profondeurs de la Zone Zéro et l’Académie de nuit",
+      "tc_paldeaGymLeaders": "Possède une carte de chaque champion d’arène de Paldea : Éra, Colza, Mashynn, Kombu, Okuba, Laïm, Tully et Grusha (la leur ou celle d’un de leurs Pokémon)",
+      "tc_paldeaEliteFour": "Possède une carte de chaque membre du Conseil 4 de Paldea : Cayenn, Popi, Okuba et Hassa",
+      "tc_geeta": "Possède une carte d’Alisma",
+      "tc_paldeaFriends": "Possède une carte de Menzi, de Pepper et de Pania (la leur ou celle d’un de leurs Pokémon)",
+      "tc_paldeaProfessors": "Possède une carte de la Professeure Olim et du Professeur Turum",
+      "tc_teamStar": "Possède une carte de chaque boss de groupe de la Team Star : Brome, Meloco, Erio, Ortiga et Nèflie",
+      "tc_academy": "Possède une carte de chaque membre du personnel de l’Académie qui en a une : Clavel, Jacq, Élige, Saguaro, Mora, Thaïm, Salvio et Mimosa",
+      "paldeaSets": "Possède une carte de chaque série Écarlate et Violet numérotée : Écarlate et Violet, Évolutions à Paldea, Flammes Obsidiennes, Faille Paradoxe, Forces Temporelles, Mascarade Crépusculaire, Couronne Stellaire, Étincelles Déferlantes, Aventures Ensemble et Rivalités Destinées",
+      "paldeaSpecialSets": "Possède une carte de chaque série spéciale Écarlate et Violet : Destinées de Paldea, Fable Nébuleuse et Évolutions Prismatiques"
     },
     "subs": {
       "allLines": "Toutes régions",
@@ -5238,7 +5514,6 @@
       "hoennMore": "Hoenn, au-delà des lignées",
       "sinnohLines": "Lignées de Sinnoh (Diamant et Perle)",
       "sinnohMore": "Sinnoh, au-delà des lignées",
-      "otherLines": "Autres régions",
       "kantoGyms": "Arènes de Kanto",
       "johtoGyms": "Arènes de Johto",
       "hoennGyms": "Arènes de Hoenn",
@@ -5283,7 +5558,12 @@
       "galarTrainerCards": "Dresseurs de Galar en cartes",
       "galarRoutes": "Routes de Galar (Épée et Bouclier)",
       "galarLandmarks": "Forêts et mines de Galar",
-      "galarCities": "Villes de Galar en cartes"
+      "galarCities": "Villes de Galar en cartes",
+      "paldeaLines": "Lignées de Paldea (Écarlate et Violet)",
+      "paldeaMore": "Paldea, au-delà des lignées",
+      "paldeaGyms": "Arènes de Paldea",
+      "paldeaTrainerCards": "Dresseurs de Paldea en cartes",
+      "paldeaCities": "Villes de Paldea en cartes"
     }
   },
   "beta": {

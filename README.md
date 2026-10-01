@@ -102,9 +102,9 @@ How it works inside (every table, RPC and flow, in French):
   touch screens, drops the 3D flip and the glow layers that stuttered on
   phones), and an
   "install the app" button.
-- **Achievements**: ~1150 of them in 20 categories (boosters, luck, pulls, sets,
+- **Achievements**: ~1210 of them in 20 categories (boosters, luck, pulls, sets,
   Pokédex regions, starters, evolution lines, legends and mythicals,
-  famous trainers (gym badges = each Kanto to Kalos gym leader's team, Alola's grand trials, Galar's gym leaders, the
+  famous trainers (gym badges = each Kanto to Kalos gym leader's team, Alola's grand trials, Galar's and Paldea's gym leaders, the
   Pokémon League, rivals & heroes, Kanto's trainers on their own cards),
   places, types, mechanics, treasure, illustrators,
   subsets, daily streaks, a challenge-only "coins & trades" one, a few
@@ -149,7 +149,12 @@ How it works inside (every table, RPC and flow, in French):
   Moon sets. **Galar (Gen 8)** as well: Sword/Shield lines, loners, fossils,
   Routes 1 to 10, the Slumbering Weald, the mines and Glimwood Tangle, all 10
   gym badges (both versions), Marnie, Bede, Rose and Oleana, gym leaders,
-  Leon, rivals, Team Yell and five towns on cards, the Sword & Shield sets. Data for a new
+  Leon, rivals, Team Yell and five towns on cards, the Sword & Shield sets.
+  And **Paldea (Gen 9)**: Scarlet/Violet lines, loners, the Titans, the
+  Paradox Pokémon, gym leaders, Elite Four, Geeta, Arven, Penny and both AI
+  professors, the League, friends, Team Star and Academy staff on cards,
+  Mesagoza, Artazon and Levincia, the Scarlet & Violet sets (no routes:
+  the wild Pokémon of Scarlet/Violet aren't in PokéAPI). Data for a new
   region: `node scripts/region-tools.mjs` (PokéAPI, dev only).
   A Steam-style **"Achievement unlocked" pop-up** (with a chime) shows at the
   end of an opening — never mid-reveal, so nothing is spoiled — and each

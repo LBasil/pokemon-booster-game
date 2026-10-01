@@ -6,8 +6,9 @@
 //   dex ([from, to]) + dexTiers, lines + lineTiers (the last tier = all
 //   lines is added), extras (more "own them all" groups), forms (by card
 //   name, with their tags), gyms (one team per badge), eliteFour, people
-//   (rivals and villains, "Rivals and heroes"), trainerCards, routes,
-//   landmarks, cities? ({ id: pattern }), placeCards, sets ({ id: set ids }).
+//   (rivals and villains, "Rivals and heroes"), trainerCards, routes?,
+//   landmarks? (both left out when the wild Pokémon aren't known: Paldea),
+//   cities? ({ id: pattern }), placeCards, sets ({ id: set ids }).
 export default {
   region: 'hoenn',
   games: { en: 'Ruby and Sapphire', fr: 'Rubis et Saphir' },
