@@ -42,27 +42,65 @@ function tone(ac, { freq, start, duration = 0.25, type = 'sine', peak = 0.2, sli
 }
 
 /**
- * Foil tearing: a band-passed noise burst sweeping upward. Kept soft (user,
- * 2026-10-02: "c'est violent"): it used to peak at 0.5 (5x a card flip),
- * sweep up to 4200 Hz unfiltered and start in 50ms; now a quieter, lower
- * sweep under a lowpass that fades in.
+ * Crackle texture of a foil tear: many tiny noise bursts (~2.5ms each) at
+ * random times, more and more of them as the strip speeds up, over a faint
+ * continuous rip, then one stronger snap as the strip comes off.
  */
-export function tear(enabled) {
+function crackles(ac, duration, { from, to }) {
+  const rate = ac.sampleRate
+  const length = Math.floor(rate * duration)
+  const buffer = ac.createBuffer(1, length, rate)
+  const data = buffer.getChannelData(0)
+  const decay = Math.exp(-1 / (rate * 0.0025))
+  const snapAt = Math.floor(length * 0.9)
+  let burst = 0
+  for (let i = 0; i < length; i++) {
+    const t = i / length
+    const density = from + (to - from) * t * t // crackles per second, accelerating
+    if (Math.random() < density / rate) burst = Math.max(burst, 0.3 + Math.random() * 0.7)
+    if (i === snapAt) burst = 1.4
+    burst *= decay
+    const rip = 0.1 * Math.sin(Math.PI * Math.min(t / 0.9, 1))
+    data[i] = (Math.random() * 2 - 1) * (burst + rip)
+  }
+  const source = ac.createBufferSource()
+  source.buffer = buffer
+  return source
+}
+
+/**
+ * Foil tearing, synced with the strip peeling (BoosterPack: 0.15s -> 0.85s,
+ * accelerating; lite: 0.2s -> 0.55s). History (user, 2026-10-02): a plain
+ * noise sweep at 0.5 was "violent", the same quieter under a 2800 Hz lowpass
+ * was "étouffé et sourd". Foil reads as crisp transients in the 2-8 kHz
+ * range with gaps between them, so it stays bright without being harsh:
+ * highpass the body away, a small presence bump, the fizz above 10 kHz cut.
+ */
+export function tear(enabled, { lite = false } = {}) {
   const ac = enabled && audio()
   if (!ac) return
-  const now = ac.currentTime + 0.15 // lines up with the strip starting to peel
-  const src = noise(ac, 0.65)
-  const filter = ac.createBiquadFilter()
-  filter.type = 'bandpass'
-  filter.Q.value = 0.9
-  filter.frequency.setValueAtTime(600, now)
-  filter.frequency.exponentialRampToValueAtTime(2200, now + 0.55)
-  const soft = ac.createBiquadFilter()
-  soft.type = 'lowpass'
-  soft.frequency.value = 2800
-  src.connect(filter).connect(soft).connect(envelope(ac, 1, now, 0.12, 0.45, 0.14)).connect(ac.destination)
+  const now = ac.currentTime + (lite ? 0.2 : 0.15)
+  const duration = lite ? 0.36 : 0.7
+  const src = crackles(ac, duration, lite ? { from: 150, to: 450 } : { from: 70, to: 380 })
+  const low = ac.createBiquadFilter()
+  low.type = 'highpass'
+  low.frequency.value = 1400
+  const presence = ac.createBiquadFilter()
+  presence.type = 'peaking'
+  presence.frequency.value = 4500
+  presence.Q.value = 0.9
+  presence.gain.value = 4
+  const fizz = ac.createBiquadFilter()
+  fizz.type = 'lowpass'
+  fizz.frequency.value = 10000
+  const level = ac.createGain()
+  level.gain.setValueAtTime(0.0001, now)
+  level.gain.exponentialRampToValueAtTime(0.22, now + 0.03)
+  level.gain.setValueAtTime(0.22, now + duration - 0.05)
+  level.gain.exponentialRampToValueAtTime(0.0001, now + duration)
+  src.connect(low).connect(presence).connect(fizz).connect(level).connect(ac.destination)
   src.start(now)
-  src.stop(now + 0.65)
+  src.stop(now + duration)
 }
 
 /**

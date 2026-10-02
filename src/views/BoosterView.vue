@@ -323,7 +323,7 @@ function preloadImages(cards) {
 function tearPack() {
   if (packState.value !== 'ready') return
   packState.value = 'tearing'
-  sfx.tear(settings.sound)
+  sfx.tear(settings.sound, { lite: settings.liteAnimations })
   tearTimer = setTimeout(
     () => {
       step.value = 'reveal'
