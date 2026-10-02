@@ -1199,8 +1199,16 @@ function openRules() {
 
   .ch-wallet,
   .ch-games,
-  .ch-achievements {
+  .ch-achievements,
+  .ch-trades {
     grid-column: 1 / -1;
+  }
+
+  /* Daily + weekly missions make a tall tile: the daily reward and the
+     collection share its height (side by side, the daily reward tile was
+     mostly empty once its claim button moved to the top) */
+  .ch-missions {
+    grid-row: span 2;
   }
 
   .ch-games-list {

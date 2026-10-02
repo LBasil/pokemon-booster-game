@@ -1027,9 +1027,20 @@ function rarityChip(card) {
 /* ---------- Breakpoints ---------- */
 
 @media (min-width: 768px) {
+  /* The pool progress (with its set goal) on the left, the three counts
+     in two rows beside it: in one row they stretched to its height */
   .coll-stats {
-    grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
+  }
+
+  .coll-stat-main {
+    grid-column: auto;
+    grid-row: span 2;
+  }
+
+  .coll-stat:last-child {
+    grid-column: span 2;
   }
 
   .coll-stat {

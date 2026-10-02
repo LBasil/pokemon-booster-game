@@ -1694,6 +1694,47 @@ async function shareBest() {
     position: sticky;
     top: 1rem;
   }
+
+  /* Computers: the count beside the button, one short bar (stacked, the
+     block covered the set's description on a 1280x720 laptop) */
+  .select-actions {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 1rem;
+    max-width: 560px;
+  }
+
+  .select-actions .count-picker {
+    flex-shrink: 0;
+    align-items: flex-start;
+    margin-bottom: 0;
+  }
+
+  .select-actions .count-picker .form-label {
+    margin-bottom: 0.35rem;
+    font-size: 0.85rem;
+  }
+
+  .select-actions .open-button {
+    flex: 1;
+    max-width: none;
+  }
+
+  /* Summary: "Open again", "Other set" and the links on one line again */
+  .done-layout {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 0.75rem;
+  }
+
+  .done-head,
+  .done-body {
+    grid-column: 1 / -1;
+  }
+
+  .done-links {
+    margin-top: 0;
+  }
 }
 
 /* Short computer screens (after the 992px rule it overrides): a smaller pack */

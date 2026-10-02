@@ -153,7 +153,9 @@ docs/technique/             technical doc (French, user choice): overview, front
   `.open-actions`: that's the open phase's skip row, sharing the name drew
   an empty bar under the pack; sticky at the window's bottom on larger
   screens too, so a 1280x720 laptop sees it; the button
-  alone stuck over the count), and short screens (max-height 760px) put
+  alone stuck over the count; >= 992px the count sits beside the button,
+  one short bar: stacked, it covered the set's description at 1280x720),
+  and short screens (max-height 760px) put
   a small pack next to its name (`.preview-row`) so nothing hides behind
   it; `booster.spec.js` checks it with `elementFromPoint` on Pixel 7 and
   375x667. The summary's achievement check waits 1.5s (`check(mode, {
@@ -221,6 +223,12 @@ docs/technique/             technical doc (French, user choice): overview, front
   page at phone width; add new pages there. Check 320px too (narrowest
   supported): tab counts, the challenge wallet art and the mode strip
   icon hide below 375px.
+  **PC too** (user, 2026-10-02: the phone QOL passes "impacted the PC
+  display"): after a phone layout change, screenshot 1440x900 and
+  1280x720. Found then: the challenge hub's daily tile left empty beside
+  the missions (`.ch-missions` now spans 2 rows, `.ch-trades` full
+  width), the collection's 3 counts stretched to the SetGoal tile's
+  height (now 2 rows beside it), the summary's links on their own line.
 - **Leaderboards** (Community): a Challenge | Unlimited switch
   (user, 2026-09-28: "ce serait plus propre"), then that mode's boards
   (`LEADERBOARDS[mode]` in `src/api/social.js`). Opens on `routeMode`,
