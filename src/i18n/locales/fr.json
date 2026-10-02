@@ -439,7 +439,8 @@
       "nothing_to_cash": "Retourne au moins une case avant d'encaisser.",
       "super_effective_unavailable": "Aucune carte à proposer pour l'instant. Réessaie plus tard.",
       "evolution_chain_unavailable": "Aucune lignée à proposer pour l'instant. Réessaie plus tard.",
-      "recycle_copies_unavailable": "Choisir combien de copies recycler n'est pas encore disponible. Recycle toutes les copies en trop d'une carte, ou réessaie plus tard."
+      "recycle_copies_unavailable": "Choisir combien de copies recycler n'est pas encore disponible. Recycle toutes les copies en trop d'une carte, ou réessaie plus tard.",
+      "counter_unavailable": "Les contre-offres ne sont pas encore disponibles. Accepte ou refuse cette offre, ou réessaie plus tard."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -467,6 +468,11 @@
     "seeCollection": "Tout voir",
     "recycleable": "{count} doublon à recycler | {count} doublons à recycler",
     "noDuplicates": "Aucun doublon à recycler.",
+    "keep": {
+      "label": "Garder",
+      "option": "{count} exemplaire de chaque | {count} exemplaires de chaque",
+      "nothing": "Aucune carte en plus de {count} exemplaire. | Aucune carte en plus de {count} exemplaires."
+    },
     "recycleAll": "Recycler les doublons",
     "recycleConfirm": "Oui, recycler",
     "rulesTitle": "Comment marche le défi",
@@ -523,7 +529,7 @@
     "pick": {
       "choose": "Choisir…",
       "title": "Choisis les doublons à recycler",
-      "hint": "Coche les cartes à recycler (toutes leurs copies en trop), ou choisis combien avec − et +. Un exemplaire de chaque reste toujours dans ta collection.",
+      "hint": "Coche les cartes à recycler (toutes leurs copies en trop), ou choisis combien avec − et +. Les exemplaires gardés restent dans ta collection.",
       "buckets": {
         "common": "Communes",
         "uncommon": "Peu communes",
@@ -555,6 +561,13 @@
     "accept": "Accepter",
     "decline": "Refuser",
     "cancel": "Annuler l'offre",
+    "counter": "Contre-proposer",
+    "counterTag": "Contre-offre",
+    "counterTitle": "Contre-offre à {name}",
+    "counterHint": "Son offre est chargée, côtés inversés. Change les cartes puis envoie : ta contre-offre remplace son offre.",
+    "counterStop": "Faire une nouvelle offre à la place",
+    "counterSend": "Envoyer la contre-offre à {name}",
+    "counterSent": "Contre-offre envoyée à {name} !",
     "waiting": "En attente de sa réponse…",
     "to": "À",
     "from": "De",
@@ -564,6 +577,7 @@
     "find": "Chercher",
     "partnerEmpty": "{name} n'est pas un dresseur public avec une collection Défi.",
     "search": "Rechercher une carte…",
+    "showMore": "Voir plus ({count} restantes)",
     "searchMine": "Rechercher dans tes cartes",
     "searchTheirs": "Rechercher dans ses cartes",
     "noCards": "Ta collection Défi est vide : ouvre d'abord des boosters.",
@@ -583,7 +597,8 @@
       "cancelled": "Annulé",
       "failed": "Échoué",
       "expired": "Expiré",
-      "pending": "En attente"
+      "pending": "En attente",
+      "countered": "Contre-offre"
     },
     "lockCard": "Ne pas échanger",
     "lockedCard": "Pas à échanger",
@@ -631,6 +646,11 @@
         "eyebrow": "Échange raté",
         "title": "Ton offre à {name} n’a pas pu se faire",
         "desc": "Une carte n’était plus là, rien n’a bougé."
+      },
+      "counter": {
+        "eyebrow": "Contre-offre",
+        "title": "{name} a répondu à ton offre par une autre",
+        "desc": "Touche pour la voir et répondre."
       }
     }
   },

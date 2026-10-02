@@ -182,3 +182,40 @@ test('weekly missions show under the daily ones and can be claimed', async ({ pa
   await expect(page.locator('.ch-coins')).toContainText('1,400')
   await expect(page.locator('.ch-mission').filter({ hasText: 'Pull 2 ultra rares or better' }).getByRole('button')).toBeDisabled()
 })
+
+test('recycling can keep more than one copy of each card, remembered on this device', async ({ page }) => {
+  const backend = await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4', 5), collectionEntry('sv3pt5-199', 2)] })
+  await page.goto('/challenge/collection')
+  await expect(page.getByText('5 duplicates to recycle')).toBeVisible()
+  await page.getByLabel('Keep').selectOption('2')
+  await expect(page.getByText('3 duplicates to recycle')).toBeVisible()
+
+  // "Choose" lists only what's past the copies kept
+  await page.getByRole('button', { name: 'Choose…' }).click()
+  const pick = page.getByRole('group', { name: 'Choose the duplicates to recycle' })
+  await expect(pick.getByRole('checkbox')).toHaveCount(1)
+  await pick.getByRole('button', { name: 'Cancel' }).click()
+
+  await page.getByRole('button', { name: 'Recycle duplicates' }).click()
+  await page.getByRole('button', { name: 'Yes, recycle them' }).click()
+  await expect(page.getByText('3 duplicates recycled: +3 coins')).toBeVisible()
+  expect(JSON.parse(rpcCalls(backend, 'recycle_card_copies')[0].body)).toEqual({ p_picks: { 'sv3pt5-4': 3 } })
+  await expect(page.getByText('No card with more than 2 copies.')).toBeVisible()
+
+  await page.reload()
+  await expect(page.getByLabel('Keep')).toHaveValue('2')
+})
+
+test('a card detail recycles only the copies asked for', async ({ page }) => {
+  const backend = await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4', 4)] })
+  await page.goto('/challenge/collection')
+  await page.locator('.coll-card', { hasText: 'Charmander' }).click()
+  await expect(page.getByRole('button', { name: /Recycle 3 duplicates/ })).toBeVisible()
+  await page.getByRole('button', { name: 'One copy less of Charmander' }).click()
+  await page.getByRole('button', { name: 'One copy less of Charmander' }).click()
+  await expect(page.getByRole('button', { name: 'One copy less of Charmander' })).toBeDisabled()
+  await page.getByRole('button', { name: /Recycle 1 duplicate/ }).click()
+  await expect(page.getByText('1 duplicate recycled: +1 coins')).toBeVisible()
+  expect(JSON.parse(rpcCalls(backend, 'recycle_card_copies')[0].body)).toEqual({ p_picks: { 'sv3pt5-4': 1 } })
+  expect(backend.state.challengeCollection[0].quantity).toBe(3)
+})

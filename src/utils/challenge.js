@@ -21,19 +21,24 @@ export const dailyReward = (streak) => 200 + 50 * Math.min(Math.max(streak, 1) -
 /** How many packs `coins` can buy. */
 export const affordablePacks = (coins) => Math.max(0, Math.floor((coins ?? 0) / PACK_PRICE))
 
+// How many copies of each card recycling may keep (Settings: "Keep")
+export const RECYCLE_KEEP_OPTIONS = [1, 2, 3, 4]
+export const recycleKeep = (value) => (RECYCLE_KEEP_OPTIONS.includes(value) ? value : 1)
+
 /**
- * What recycling would give: every copy beyond the first.
+ * What recycling would give: every copy beyond the first `keep`.
  * @param {{ card_id: string, quantity: number, cards: object }[]} entries - collection rows
  * @param {Map<string, number> | null} [picked] - only these card ids, and that
- *   many copies of each, capped at the duplicates (recycle_card_copies, migration 0020)
+ *   many copies of each, capped at the extra copies (recycle_card_copies, migration 0020)
+ * @param {number} [keep] - copies of each card kept
  * @returns {{ cards: number, coins: number }}
  */
-export function recyclePreview(entries, picked = null) {
+export function recyclePreview(entries, picked = null, keep = 1) {
   let cards = 0
   let coins = 0
   for (const entry of entries) {
     if (picked && !picked.get(entry.card_id)) continue
-    const extra = picked ? Math.min(entry.quantity - 1, picked.get(entry.card_id)) : entry.quantity - 1
+    const extra = picked ? Math.min(entry.quantity - keep, picked.get(entry.card_id)) : entry.quantity - keep
     if (extra > 0) {
       cards += extra
       coins += extra * recycleValue(entry.cards)
@@ -43,14 +48,14 @@ export function recyclePreview(entries, picked = null) {
 }
 
 /**
- * The cards that have duplicates, grouped by rarity bucket (commons first,
+ * The cards with more than `keep` copies, grouped by rarity bucket (commons first,
  * the cheapest to let go), each group by name: the "Choose" recycle list.
  * @returns {{ bucket: string, entries: object[] }[]} only non-empty buckets
  */
-export function duplicateGroups(entries) {
+export function duplicateGroups(entries, keep = 1) {
   const groups = new Map(BUCKETS.map((bucket) => [bucket, []]))
   for (const entry of entries) {
-    if (entry.quantity > 1) groups.get(rarityLabelKey(entry.cards) ?? 'common')?.push(entry)
+    if (entry.quantity > keep) groups.get(rarityLabelKey(entry.cards) ?? 'common')?.push(entry)
   }
   return [...groups]
     .filter(([, list]) => list.length)

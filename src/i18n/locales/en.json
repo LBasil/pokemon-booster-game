@@ -439,7 +439,8 @@
       "nothing_to_cash": "Flip at least one tile before cashing out.",
       "super_effective_unavailable": "No cards to ask about right now. Try again later.",
       "evolution_chain_unavailable": "No evolution lines to ask about right now. Try again later.",
-      "recycle_copies_unavailable": "Picking how many copies to recycle isn't available yet. Recycle all the extra copies of a card, or try again later."
+      "recycle_copies_unavailable": "Picking how many copies to recycle isn't available yet. Recycle all the extra copies of a card, or try again later.",
+      "counter_unavailable": "Counter-offers aren't available yet. Accept or decline this offer, or try again later."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -467,6 +468,11 @@
     "seeCollection": "See all",
     "recycleable": "{count} duplicate to recycle | {count} duplicates to recycle",
     "noDuplicates": "No duplicates to recycle.",
+    "keep": {
+      "label": "Keep",
+      "option": "{count} copy of each | {count} copies of each",
+      "nothing": "No card with more than {count} copies. | No card with more than {count} copies."
+    },
     "recycleAll": "Recycle duplicates",
     "recycleConfirm": "Yes, recycle them",
     "rulesTitle": "How the challenge works",
@@ -523,7 +529,7 @@
     "pick": {
       "choose": "Choose…",
       "title": "Choose the duplicates to recycle",
-      "hint": "Tick the cards to recycle (every extra copy), or pick how many with − and +. One of each always stays in your collection.",
+      "hint": "Tick the cards to recycle (every extra copy), or pick how many with − and +. The copies you keep stay in your collection.",
       "buckets": {
         "common": "Commons",
         "uncommon": "Uncommons",
@@ -555,6 +561,13 @@
     "accept": "Accept",
     "decline": "Decline",
     "cancel": "Cancel offer",
+    "counter": "Counter",
+    "counterTag": "Counter-offer",
+    "counterTitle": "Counter-offer to {name}",
+    "counterHint": "Their offer is loaded with the sides swapped. Change the cards, then send it: it replaces their offer.",
+    "counterStop": "Make a new offer instead",
+    "counterSend": "Send the counter-offer to {name}",
+    "counterSent": "Counter-offer sent to {name}!",
     "waiting": "Waiting for their answer…",
     "to": "To",
     "from": "From",
@@ -564,6 +577,7 @@
     "find": "Find",
     "partnerEmpty": "{name} isn't a public trainer with a challenge collection.",
     "search": "Search a card…",
+    "showMore": "Show more ({count} left)",
     "searchMine": "Search your cards",
     "searchTheirs": "Search their cards",
     "noCards": "Your challenge collection is empty: open some boosters first.",
@@ -583,7 +597,8 @@
       "cancelled": "Cancelled",
       "failed": "Failed",
       "expired": "Expired",
-      "pending": "Pending"
+      "pending": "Pending",
+      "countered": "Countered"
     },
     "lockCard": "Keep out of trades",
     "lockedCard": "Not for trade",
@@ -631,6 +646,11 @@
         "eyebrow": "Trade failed",
         "title": "Your offer to {name} couldn’t happen",
         "desc": "A card was no longer there, nothing moved."
+      },
+      "counter": {
+        "eyebrow": "Counter-offer",
+        "title": "{name} answered your offer with another one",
+        "desc": "Tap to see it and answer."
       }
     }
   },

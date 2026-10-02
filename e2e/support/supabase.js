@@ -54,7 +54,7 @@ export const MINIGAME_PAIRS = [
  * @param {{ collection?: object[], challengeCollection?: object[], challenge?: object, godPack?: boolean,
  *   trades?: object[], partners?: Record<string, object[]>, badge?: { rewards: number, trades: number },
  *   profile?: object, feed?: object[], leaderboard?: object[], takenUsernames?: string[],
- *   achievementRates?: object[] | 'missing', sets?: object[], stats?: Record<string, object> }} [options] - rates rows may carry a `mode` (default unlimited);
+ *   achievementRates?: object[] | 'missing', sets?: object[], stats?: Record<string, object>, counterTrade?: 'missing' }} [options] - rates rows may carry a `mode` (default unlimited);
  *   sets replaces SETS; stats = player_achievements().stats per mode (migration 0010)
  */
 // "Shiny Electrode Flip" (migration 0014): every board the mock deals, row
@@ -117,6 +117,8 @@ export async function mockSupabase(page, options = {}) {
     // Trades page views that marked answers as seen (migration 0017)
     answersMarked: 0,
     nextTradeId: 100,
+    // counter_trade() (migration 0021), or 'missing'
+    counterTrade: options.counterTrade ?? 'ok',
     // Achievements (migrations 0008 + 0009): achievement_rates() rows (with an
     // optional mode), or 'missing' = not applied; recorded ids and packs per mode
     achievementRates: options.achievementRates ?? [],
@@ -569,6 +571,27 @@ export async function mockSupabase(page, options = {}) {
         created_at: new Date().toISOString(),
         resolved_at: null,
       })
+      return json(id)
+    }
+    if (path === '/rest/v1/rpc/counter_trade') {
+      if (state.counterTrade === 'missing') return json({ code: 'PGRST202', message: 'Could not find the function', details: null, hint: null }, 404)
+      const first = state.trades.find((x) => x.id === args.p_trade_id && x.direction === 'received')
+      if (!first) return raise('trade_not_found')
+      if (first.status !== 'pending') return raise('trade_closed')
+      Object.assign(first, { status: 'countered', resolved_at: new Date().toISOString() })
+      const id = state.nextTradeId++
+      state.trades.unshift({
+        id,
+        direction: 'sent',
+        partner: first.partner,
+        offer: args.p_offer.map((cardId) => byId[cardId]),
+        request: args.p_request.map((cardId) => byId[cardId]),
+        status: 'pending',
+        counter_of: first.id,
+        created_at: new Date().toISOString(),
+        resolved_at: null,
+      })
+      state.badge.trades = state.trades.filter((x) => x.direction === 'received' && x.status === 'pending').length
       return json(id)
     }
     if (path === '/rest/v1/rpc/respond_trade') {

@@ -299,7 +299,17 @@ docs/technique/             technical doc (French, user choice): overview, front
   card with 2+ extras, `picked` = Map id -> copies, sent to 0020
   `recycle_card_copies({id: n})` (capped server side); without 0020 a
   full pick falls back to `recycle_cards`, a partial one errors
-  `recycle_copies_unavailable`.
+  `recycle_copies_unavailable`. Same `CopyStepper.vue` in CardDetail.
+  **Keep** (`settings.recycleKeep`, 1-4, per device): what counts as
+  extra in RecycleDuplicates; past 1 every recycle goes through
+  `recycle_card_copies` (the server only knows "keep 1").
+  **Counter-offers** (0021, user 2026-10-02): "Counter" on a received
+  offer loads it into TradesView's composer, sides swapped
+  (`countering`); `counter_trade(id, offer, request)` ends the first one
+  as `countered` (answer_seen = true: the counter-offer, pending for
+  them, is the news, `tradeNews` -> 'counter') and links the new one
+  (`counter_of`). It skips the partner's accepts_trades (they made the
+  first offer). Missing RPC -> `counter_unavailable`.
   Public profiles list the collection of the mode picked in their
   Challenge | Unlimited switch (user, 2026-09-28: "faudrait pouvoir voir
   les deux"); the challenge one has "Ask for it" ->
@@ -540,8 +550,8 @@ docs/technique/             technical doc (French, user choice): overview, front
 
 - **Live**: deployed on Vercel (`VITE_*` env vars set there; `vercel.json`
   has the SPA rewrite and serves `sw.js` uncached), used by the user on a
-  real account ("tout fonctionne", 2026-09-26). **Migrations 0001-0013 are
-  all applied** (checked 2026-09-27 through the REST API with the service
+  real account ("tout fonctionne", 2026-09-26). **Migrations 0001-0020 are
+  all applied** (0021 written 2026-10-02, not yet) (checked 2026-10-02 through the REST API with the service
   role key). `cards` has 20,670 rows, `sets` 176 (9 subsets linked to
   their parent).
 - Features: landing (auth, forgot password), hub, boosters (per-set packs,
@@ -554,8 +564,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   collection with "Ask for it"), ~1210 achievements per mode (collapsible, region filter, Kanto to Paldea focus,
   categories, rates, unlock toasts), challenge mode (coins, daily reward,
   daily + weekly missions, recycle, craft, god packs, mini-games "Higher
-  or lower", "Shiny Electrode Flip" (needs 0014), "Super effective!"
-  (needs 0015 + a card import) and "Evolution chain" (needs 0018 + a
+  or lower", "Shiny Electrode Flip", "Super effective!" and "Evolution chain" (needs 0018 + a
   card import), trades with live
   updates, opt-out and cards kept out of trades), PWA, EN/FR, both themes.
 - What each migration does (details in each file's header comment):
@@ -565,22 +574,22 @@ docs/technique/             technical doc (French, user choice): overview, front
   timer · 0007 trades, challenge boards, badge · 0008 achievement rates ·
   0009 achievements per mode · 0010 subsets + pack stats · 0011 weekly
   missions + realtime trades · 0012 trade preferences · 0013 "Higher or
-  lower" mini-game · 0014 "Shiny Electrode Flip" mini-game (**written
-  2026-09-27, not applied yet**: hand it to the user) · 0015
-  `cards.weaknesses` + "Super effective!" mini-game (**written
-  2026-09-28, not applied yet**; after it, re-run the card import to
-  fill the weaknesses) · 0016 feed holos for sets with no ultra/secret
-  (**written 2026-09-29, not applied yet**) · 0017 trade answers seen +
-  `recycle_cards` (**written 2026-09-30, not applied yet**) · 0018
+  lower" mini-game · 0014 "Shiny Electrode Flip" mini-game (written
+  2026-09-27, applied) · 0015
+  `cards.weaknesses` + "Super effective!" mini-game (written
+  2026-09-28, applied, weaknesses filled) · 0016 feed holos for sets with no ultra/secret
+  (written 2026-09-29, applied) · 0017 trade answers seen +
+  `recycle_cards` (written 2026-09-30, applied) · 0018
   `cards.evolves_from` + "Evolution chain" mini-game (applied + synced
   2026-09-30, user: "ÇA MARCHE") · 0019 two-stage lines + Stop for
-  "Evolution chain" (**written 2026-09-30, not applied yet**) · 0020 `recycle_card_copies`,
-  some copies of a card (**written 2026-10-02, not applied yet**). Every one was
-  verified locally with PGlite before being handed over; 0010-0020 have
+  "Evolution chain" (written 2026-09-30, applied) · 0020 `recycle_card_copies`,
+  some copies of a card (written 2026-10-02, applied) · 0021
+  counter-offers (**written 2026-10-02, not applied yet**). Every one was
+  verified locally with PGlite before being handed over; 0010-0021 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 200 unit tests, `npm run test:db` 305 database
-  checks, `npm run test:e2e` 236 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 201 unit tests, `npm run test:db` 328 database
+  checks, `npm run test:e2e` 246 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.
@@ -627,10 +636,10 @@ docs/technique/             technical doc (French, user choice): overview, front
 - Regional achievements: done for every region (Johto to Paldea,
   2026-10-01, see "Other regions"). Paldea's routes and places could come
   back if a source of Scarlet/Violet wild Pokémon turns up.
-- Parked (user, 2026-09-26: "on s'en fiche pour l'instant"): counter-offers,
-  real subset pull rates (Classic Collection guessed at 1 pack in 3). Not
-  wanted: push notifications (it's a website, not really an app). Not
-  urgent: rotating the pokemontcg.io key.
+- Not wanted: real subset pull rates (Classic Collection guessed at 1
+  pack in 3; user, 2026-10-02: "on fera jamais"), push notifications
+  (it's a website, not really an app). Not urgent: rotating the
+  pokemontcg.io key.
 
 ## Known gaps
 
@@ -649,7 +658,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   history — rotate it if the repo is ever made public.
 - The collection is fetched in one query; the grids render progressively.
   Revisit with server-side paging past tens of thousands of distinct cards.
-  Trade pickers show 60 matches at most (search narrows them).
+  Trade pickers show 60 matches, then "Show more" (60 at a time).
 
 ## Machine notes
 

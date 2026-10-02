@@ -3,36 +3,45 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useChallengeStore } from '@/stores/challenge'
 import { useChallengeCollectionStore } from '@/stores/collection'
+import { useSettingsStore } from '@/stores/settings'
 import { useTradesStore } from '@/stores/trades'
-import { duplicateGroups, recyclePreview, recycleValue } from '@/utils/challenge'
+import { RECYCLE_KEEP_OPTIONS, duplicateGroups, recycleKeep, recyclePreview, recycleValue } from '@/utils/challenge'
 import CoinAmount from '@/components/CoinAmount.vue'
+import CopyStepper from '@/components/CopyStepper.vue'
 
 // Challenge mode: "N duplicates → +X coins", then either a two-step button
-// that recycles every copy beyond the first (recycle_duplicates, migration
-// 0005), or "Choose": a list of the cards with duplicates, by rarity, to
-// tick the ones to recycle, all their extra copies or, with − / +, only
-// some (recycle_card_copies, migration 0020). One copy of each card is
-// always kept.
+// that recycles every copy beyond the ones kept, or "Choose": a list of the
+// cards with extra copies, by rarity, to tick the ones to recycle, all
+// their extra copies or, with − / +, only some (recycle_card_copies,
+// migration 0020). "Keep" (1 to 4 copies of each card, remembered on this
+// device) sets what counts as extra; 1 = recycle_duplicates (0005).
 const emit = defineEmits(['recycled', 'error'])
 
 const { t, locale } = useI18n()
 const challenge = useChallengeStore()
 const collection = useChallengeCollectionStore()
 const trades = useTradesStore()
+const settings = useSettingsStore()
 
-const preview = computed(() => recyclePreview(collection.entries))
+const keep = computed(() => recycleKeep(settings.recycleKeep))
+function setKeep(value) {
+  settings.set('recycleKeep', recycleKeep(Number(value)))
+  picked.value = new Map()
+}
+
+const preview = computed(() => recyclePreview(collection.entries, null, keep.value))
 const confirming = ref(false)
 const busy = ref(false)
 
 // ---------- Choose ----------
 
 const choosing = ref(false)
-// card id -> copies to recycle (1 to its duplicates)
+// card id -> copies to recycle (1 to its extra copies)
 const picked = ref(new Map())
-const groups = computed(() => duplicateGroups(collection.entries))
-const pickedPreview = computed(() => recyclePreview(collection.entries, picked.value))
+const groups = computed(() => duplicateGroups(collection.entries, keep.value))
+const pickedPreview = computed(() => recyclePreview(collection.entries, picked.value, keep.value))
 
-const extraOf = (entry) => entry.quantity - 1
+const extraOf = (entry) => Math.max(0, entry.quantity - keep.value)
 const copiesOf = (entry) => picked.value.get(entry.card_id) ?? 0
 
 function startChoosing() {
@@ -80,12 +89,18 @@ async function run(cards) {
   }
 }
 
-const recycleAll = () => run(null)
-function recyclePicked() {
-  const extras = Object.fromEntries(collection.entries.map((entry) => [entry.card_id, extraOf(entry)]))
-  const picks = Object.fromEntries([...picked.value].map(([id, copies]) => [id, Math.min(copies, extras[id] ?? 0)]))
+// The server only knows "keep 1": past that, every extra copy goes as a pick
+function recycleCopies(copies) {
+  const extras = Object.fromEntries(collection.entries.map((entry) => [entry.card_id, entry.quantity - 1]))
+  const picks = Object.fromEntries([...copies].map(([id, count]) => [id, Math.min(count, extras[id] ?? 0)]))
   run({ picks, extras })
 }
+
+function recycleAll() {
+  if (keep.value === 1) return run(null)
+  recycleCopies(new Map(collection.entries.filter((entry) => extraOf(entry) > 0).map((entry) => [entry.card_id, extraOf(entry)])))
+}
+const recyclePicked = () => recycleCopies(picked.value)
 </script>
 
 <template>
@@ -96,8 +111,14 @@ function recyclePicked() {
           {{ t('challenge.recycleable', { count: preview.cards.toLocaleString(locale) }, preview.cards) }}
           <CoinAmount class="recycle-coins" :amount="preview.coins" signed />
         </template>
-        <template v-else>{{ t('challenge.noDuplicates') }}</template>
+        <template v-else>{{ keep > 1 ? t('challenge.keep.nothing', { count: keep }, keep) : t('challenge.noDuplicates') }}</template>
       </p>
+      <label class="recycle-keep">
+        <span>{{ t('challenge.keep.label') }}</span>
+        <select class="form-select form-select-sm" :value="keep" :disabled="busy" @change="setKeep($event.target.value)">
+          <option v-for="n in RECYCLE_KEEP_OPTIONS" :key="n" :value="n">{{ t('challenge.keep.option', { count: n }, n) }}</option>
+        </select>
+      </label>
       <template v-if="preview.cards && !choosing">
         <div v-if="confirming" class="recycle-actions">
           <button type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="recycleAll">
@@ -156,27 +177,13 @@ function recyclePicked() {
               </label>
               <div class="pick-side">
                 <!-- How many copies, when there's more than one to choose from -->
-                <div v-if="extraOf(entry) > 1" class="pick-stepper">
-                  <button
-                    type="button"
-                    class="pick-step"
-                    :disabled="!copiesOf(entry)"
-                    :aria-label="t('challenge.pick.less', { name: entry.cards.name })"
-                    @click="setCopies(entry, copiesOf(entry) - 1)"
-                  >
-                    −
-                  </button>
-                  <span class="pick-copies">{{ t('challenge.pick.copies', { count: copiesOf(entry), total: extraOf(entry) }) }}</span>
-                  <button
-                    type="button"
-                    class="pick-step"
-                    :disabled="copiesOf(entry) >= extraOf(entry)"
-                    :aria-label="t('challenge.pick.more', { name: entry.cards.name })"
-                    @click="setCopies(entry, copiesOf(entry) + 1)"
-                  >
-                    +
-                  </button>
-                </div>
+                <CopyStepper
+                  v-if="extraOf(entry) > 1"
+                  :model-value="copiesOf(entry)"
+                  :max="extraOf(entry)"
+                  :name="entry.cards.name"
+                  @update:model-value="setCopies(entry, $event)"
+                />
                 <CoinAmount class="pick-coins" :amount="(copiesOf(entry) || extraOf(entry)) * recycleValue(entry.cards)" signed />
               </div>
             </li>
@@ -217,6 +224,20 @@ function recyclePicked() {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+}
+
+.recycle-keep {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--pb-text-muted);
+}
+
+.recycle-keep .form-select {
+  width: auto;
 }
 
 .recycle-text {
@@ -366,50 +387,6 @@ function recyclePicked() {
   align-items: center;
   gap: 0.65rem;
   margin-left: auto;
-}
-
-.pick-stepper {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--pb-border-strong);
-  border-radius: 999px;
-  background: var(--pb-surface);
-}
-
-.pick-step {
-  width: 2rem;
-  height: 2rem;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--pb-text);
-  font-size: 1.05rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.pick-step:disabled {
-  color: var(--pb-text-muted);
-  opacity: 0.5;
-}
-
-@media (hover: hover) {
-  .pick-step:not(:disabled):hover {
-    background: var(--pb-selected);
-  }
-}
-
-.pick-copies {
-  min-width: 2.6rem;
-  text-align: center;
-  font-size: 0.82rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.pick-row.picked {
-  border-color: var(--pb-border-strong);
-  background: var(--pb-selected);
 }
 
 .pick-label .form-check-input {

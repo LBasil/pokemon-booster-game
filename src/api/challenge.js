@@ -34,6 +34,8 @@ export const CHALLENGE_ERRORS = [
   'evolution_chain_unavailable',
   // recycling some copies (migration 0020)
   'recycle_copies_unavailable',
+  // counter-offers (migration 0021)
+  'counter_unavailable',
 ]
 
 // PostgREST's answer for an RPC that doesn't exist yet
@@ -122,7 +124,9 @@ export async function fetchChallengeBadge() {
 
 /**
  * The player's 50 latest offers: { id, direction, partner, offer, request,
- * status, unseen, created_at, resolved_at }. unseen (migration 0017) = an
+ * status, unseen, counter_of, created_at, resolved_at }. counter_of
+ * (migration 0021) = the offer this one answers, status 'countered' = answered
+ * by a counter-offer. unseen (migration 0017) = an
  * answer to one of my offers I haven't seen yet.
  */
 export const fetchTrades = () => call('my_trades')
@@ -133,6 +137,20 @@ export const fetchChallengeCollectionOf = (username) => call('challenge_collecti
 /** @returns {Promise<number>} the new offer's id */
 export const proposeTrade = (username, offerIds, requestIds) =>
   call('propose_trade', { p_username: username, p_offer: offerIds, p_request: requestIds })
+
+/**
+ * Answers an offer I received with another one (migration 0021): the first
+ * one ends as 'countered'. Before 0021: counter_unavailable.
+ * @returns {Promise<number>} the counter-offer's id
+ */
+export async function counterTrade(tradeId, offerIds, requestIds) {
+  try {
+    return await call('counter_trade', { p_trade_id: tradeId, p_offer: offerIds, p_request: requestIds })
+  } catch (err) {
+    if (err?.code === MISSING_FUNCTION) throw Object.assign(new Error('counter_unavailable'), { code: 'counter_unavailable' })
+    throw err
+  }
+}
 
 /** @returns {Promise<{ status: 'accepted' | 'declined' | 'failed' }>} */
 export const respondTrade = (tradeId, accept) => call('respond_trade', { p_trade_id: tradeId, p_accept: accept })

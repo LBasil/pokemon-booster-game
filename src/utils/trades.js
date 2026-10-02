@@ -16,7 +16,7 @@ export function toggleCard(selection, cardId, max = TRADE_MAX_CARDS) {
 /**
  * Splits my_trades() rows into what needs an answer, what's waiting on the
  * other player, and the finished ones (accepted, declined, cancelled,
- * failed, expired), each keeping the server's newest-first order.
+ * failed, expired, countered), each keeping the server's newest-first order.
  */
 export function groupTrades(trades) {
   const received = []
@@ -44,12 +44,14 @@ export const ANSWERED = ['accepted', 'declined', 'failed']
 
 /**
  * What a live trade_offers row means for the signed-in player: 'offer' (a new
- * offer for me), 'accepted' / 'declined' / 'failed' (an answer to my offer I
- * haven't seen, migration 0017's answer_seen), or null (nothing to tell).
+ * offer for me), 'counter' (a counter-offer to mine, migration 0021: the
+ * countered offer itself is silent), 'accepted' / 'declined' / 'failed' (an
+ * answer to my offer I haven't seen, migration 0017's answer_seen), or null
+ * (nothing to tell).
  */
 export function tradeNews(row, userId) {
   if (!row?.id || !userId) return null
-  if (row.to_user === userId && row.status === 'pending') return 'offer'
+  if (row.to_user === userId && row.status === 'pending') return row.counter_of ? 'counter' : 'offer'
   if (row.from_user === userId && ANSWERED.includes(row.status) && !row.answer_seen) return row.status
   return null
 }

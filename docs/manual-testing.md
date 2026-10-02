@@ -69,6 +69,8 @@ address** for the sign-up part.
       card is kept and the coins match the preview.
 - [ ] After 0020: "Choose…", − / + on a card with 2+ extra copies → only
       that many are recycled (the rest stay), coins match the total.
+      Same − / + on a card's detail. "Keep: 2 copies of each" → recycling
+      leaves 2 of every card.
 - [ ] In a challenge binder, a missing card shows its price and can be
       crafted when you have enough coins.
 - [ ] A challenge hit shows up in the Community feed with the "Challenge"
@@ -158,6 +160,10 @@ address** for the sign-up part.
 - [ ] A offers a card, then recycles/trades it away before B answers →
       B's Accept ends as "Failed" and nothing moves.
 - [ ] Offering to a private profile or an unknown name → friendly error.
+- [ ] After 0021: B taps "Counter" on A's offer → the composer has it with
+      sides swapped; B changes a card and sends → A gets it under "Offers
+      for you" tagged "Counter-offer" (live toast), A's first offer shows
+      "Countered" in B's and A's past trades.
 
 ## App & themes
 

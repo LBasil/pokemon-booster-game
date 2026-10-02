@@ -12,6 +12,7 @@ import { cardNumber } from '@/utils/collection'
 import { rarityLabelKey, rarityTier } from '@/utils/rarity'
 import { setLogoUrl } from '@/utils/sets'
 import CoinAmount from '@/components/CoinAmount.vue'
+import CopyStepper from '@/components/CopyStepper.vue'
 import HoloCard from '@/components/HoloCard.vue'
 import PriceChart from '@/components/PriceChart.vue'
 
@@ -65,7 +66,10 @@ const challenge = useChallengeStore()
 const isChallenge = computed(() => props.mode === 'challenge')
 const price = computed(() => (card.value ? craftPrice(card.value) : 0))
 const duplicates = computed(() => Math.max(0, (props.entry?.quantity ?? 0) - 1))
-const recycleGain = computed(() => (card.value ? duplicates.value * recycleValue(card.value) : 0))
+// How many duplicates to recycle: all of them unless − says otherwise (migration 0020)
+const recycleCount = ref(0)
+watch(duplicates, (count) => (recycleCount.value = count), { immediate: true })
+const recycleGain = computed(() => (card.value ? recycleCount.value * recycleValue(card.value) : 0))
 const coinBusy = ref(false)
 const coinNotice = ref('')
 
@@ -110,7 +114,11 @@ async function toggleLock() {
 
 const recycle = () =>
   coinAction(async () => {
-    const result = await challenge.recycle(card.value.id)
+    const count = Math.min(recycleCount.value, duplicates.value)
+    const result =
+      count === duplicates.value
+        ? await challenge.recycle(card.value.id)
+        : await challenge.recycle({ picks: { [card.value.id]: count }, extras: { [card.value.id]: duplicates.value } })
     return t('challenge.recycledNotice', { cards: result.recycled, coins: result.gained.toLocaleString(locale.value) }, result.recycled)
   })
 
@@ -254,10 +262,13 @@ function onPointerUp(event) {
             <span class="detail-price"><CoinAmount :amount="price" /></span>
           </button>
           <template v-else>
-            <button v-if="duplicates" type="button" class="btn btn-outline-secondary" :disabled="coinBusy" @click="recycle">
-              {{ t('challenge.recycleCard', { count: duplicates }, duplicates) }}
-              <span class="detail-price"><CoinAmount :amount="recycleGain" signed /></span>
-            </button>
+            <div v-if="duplicates" class="detail-recycle">
+              <button type="button" class="btn btn-outline-secondary" :disabled="coinBusy" @click="recycle">
+                {{ t('challenge.recycleCard', { count: recycleCount }, recycleCount) }}
+                <span class="detail-price"><CoinAmount :amount="recycleGain" signed /></span>
+              </button>
+              <CopyStepper v-if="duplicates > 1" v-model="recycleCount" :min="1" :max="duplicates" :name="card.name" />
+            </div>
             <RouterLink
               v-if="!trades.isLocked(card.id)"
               :to="{ name: 'challenge-trades', query: { give: card.id } }"
@@ -536,6 +547,13 @@ function onPointerUp(event) {
 
 .btn-icon .filled {
   fill: currentColor;
+}
+
+.detail-recycle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .detail-price {

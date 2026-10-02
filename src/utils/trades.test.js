@@ -44,6 +44,8 @@ describe('trades', () => {
     expect(tradeNews(mine({ status: 'declined', answer_seen: true }), me)).toBe(null) // already seen
     expect(tradeNews(mine({ status: 'accepted', answer_seen: undefined }), me)).toBe('accepted') // before 0017
     expect(tradeNews(mine({ status: 'cancelled' }), me)).toBe(null)
+    expect(tradeNews(row({ counter_of: 7 }), me)).toBe('counter') // their answer to my offer
+    expect(tradeNews(mine({ status: 'countered', answer_seen: true }), me)).toBe(null) // the counter-offer tells it
     expect(tradeNews(null, me)).toBe(null)
     expect(tradeNews(row({}), null)).toBe(null)
   })

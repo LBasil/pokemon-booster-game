@@ -336,6 +336,8 @@ mini-jeux ; un minuteur recharge l'état juste après 00:00 UTC.
 | Récompense quotidienne | `challenge.claimDaily()` → `claim_daily_reward` | Série +1 si réclamée hier, sinon 1 ; 200 + 50 × (série − 1), plafond 500 ; journal `daily` |
 | Réclamer une mission | `challenge.claimMission(id)` → `claim_mission` | Vérifie progression ≥ objectif et pas déjà réclamée (index unique du journal) ; crédite ; journal `mission` |
 | Recycler les doublons | `challenge.recycle(cardId?)` → `recycle_duplicates` | Ramène chaque carte à 1 exemplaire ; crédite selon la rareté ; journal `recycle` avec la quantité (compte pour la mission) |
+| Garder plus d'un exemplaire | « Garder » (1 à 4 exemplaires de chaque, `settings.recycleKeep`, par appareil) dans `RecycleDuplicates` : au-delà de 1, « Recycler » envoie les copies en trop de chaque carte à `recycle_card_copies` | Ramène chaque carte au nombre gardé |
+| Recycler depuis une carte | Fiche de la carte : − / + (`CopyStepper`) puis « Recycler N doublons » ; tous → `recycle_duplicates(id)`, une partie → `recycle_card_copies` | Retire ce nombre d'exemplaires |
 | Recycler une sélection | « Choisir… » dans `RecycleDuplicates` (case par carte = tous ses doublons, − / + pour n'en prendre que certains, puces par rareté, `duplicateGroups`) → `challenge.recycle({ picks, extras })` → `recycle_card_copies` (0020) | Retire le nombre d'exemplaires choisi de chaque carte (au plus ses doublons) |
 | Fabriquer une carte | `challenge.craft(card)` → `craft_card` | Débite le prix de la rareté ; +1 exemplaire ; journal `craft` |
 
@@ -398,8 +400,8 @@ sequenceDiagram
   (`UsernameCombobox`, ceux qui refusent les échanges sont signalés) ;
   choisir une suggestion charge directement sa collection. La collection du
   partenaire vient de `challenge_collection_of`. Sélecteurs : 5 cartes au
-  maximum par côté (`toggleCard`), 60 résultats affichés (la recherche
-  affine). Chaque carte des deux côtés dit combien d'exemplaires on en a
+  maximum par côté (`toggleCard`), 60 résultats affichés puis 60 de plus
+  par « Voir plus » (une nouvelle recherche repart à 60). Chaque carte des deux côtés dit combien d'exemplaires on en a
   dans sa collection Défi (« Tu en as 2 », « Nouvelle pour toi »).
 - **Règles** (serveur) : 1 à 5 cartes offertes, 0 à 5 demandées (0 =
   cadeau), un exemplaire de chaque, 10 offres en attente au maximum,
@@ -408,6 +410,13 @@ sequenceDiagram
   ou si l'expéditeur a verrouillé une carte offerte entre-temps, l'offre
   finit en `failed`, sans rien déplacer. `move_challenge_cards` supprime
   le dernier exemplaire ou décrémente, puis ajoute chez l'autre.
+- **Contre-offre** (0021) : « Contre-proposer » sur une offre reçue la
+  charge dans le formulaire, côtés inversés (`countering`) ; on change les
+  cartes et on envoie → `trades.counter(id, …)` → `counter_trade`. L'offre
+  d'origine finit en « Contre-offre » (`countered`), la nouvelle arrive
+  chez l'autre joueur marquée « Contre-offre » (toast `counter`), et peut
+  elle-même recevoir une contre-offre. « Faire une nouvelle offre à la
+  place » quitte ce mode.
 - **Préférences** : « Accepter les échanges » (`profiles.accepts_trades`) ;
   les offres déjà reçues restent possibles à accepter. Cartes verrouillées :
   `trades.toggleLock(id)` (optimiste, annulé en cas d'erreur).

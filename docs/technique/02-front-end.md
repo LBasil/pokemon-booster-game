@@ -156,13 +156,13 @@ ne recharge pas si c'est déjà chargé (sauf `force`), et expose `loading`,
 | `sets` | Les 176 sets, `byId` | presque toutes les vues | Chargé une fois ; les appels simultanés partagent la même requête |
 | `wishlist` | Cartes recherchées (Illimité) | collection, boosters | `toggle(card)` ; le serveur retire la carte quand elle est tirée |
 | `challenge` | `challenge_state()` : pièces, récompense quotidienne, missions ; `badge` | pages du Défi, en-tête | `openBooster`, `claimDaily`, `claimMission`, `recycle`, `craft`. `stale` après un pack (missions à recompter) |
-| `trades` | Offres d'échange, cartes verrouillées, toasts d'échange | `TradesView`, `App.vue` (direct), `AchievementToasts` | `propose`, `respond`, `cancel`, `toggleLock` (optimiste), `live(userId)`, `markSeen` |
+| `trades` | Offres d'échange, cartes verrouillées, toasts d'échange | `TradesView`, `App.vue` (direct), `AchievementToasts` | `propose`, `respond`, `counter` (0021), `cancel`, `toggleLock` (optimiste), `live(userId)`, `markSeen` |
 | `minigame` | État de « Plus ou moins » | page du jeu, hub des jeux | `unavailable` si la migration 0013 manque ; répercute le solde de pièces dans `challenge` |
 | `electrodeFlip` | État d'« Électrode Shiny Flip » : niveau, pièces restantes, records, plateau en cours | page du jeu, hub des jeux | `flip(index)`, `cashOut()` ; `unavailable` si la migration 0014 manque ; répercute le solde de pièces |
 | `superEffective` | État de « Super efficace ! » : parties payées restantes, record, partie en cours | page du jeu, hub des jeux | `unavailable` si la migration 0015 manque **ou** si aucune carte n'a encore ses faiblesses (`ready: false`) ; répercute le solde de pièces |
 | `evolutionChain` | État de « Chaîne d'évolution » : parties payées restantes, record, partie en cours | page du jeu, hub des jeux | `answer(order)`, `stop()` (sans la RPC de 0019 : la partie s'arrête à l'écran et expire côté serveur) ; `unavailable` si la migration 0018 manque **ou** si aucune lignée complète n'est encore connue (`ready: false`) ; répercute le solde de pièces |
 | `achievements` | Toasts, taux par mode, données serveur par mode | `check(mode)` un peu partout | Voir [Parcours > Succès](05-parcours.md#7-succès) |
-| `settings` | `sound`, `vibration`, `effects`, `animations` | — | Par appareil (`localStorage`). `liteAnimations` = animations légères sur écran tactile en mode `auto` |
+| `settings` | `sound`, `vibration`, `effects`, `animations`, `recycleKeep` (exemplaires gardés au recyclage, 1 à 4) | — | Par appareil (`localStorage`). `liteAnimations` = animations légères sur écran tactile en mode `auto` |
 | `theme` | `isLight` | `main.js` | Pose `data-bs-theme` sur `<html>` (Bootstrap + tokens suivent) |
 
 ---
@@ -251,6 +251,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `SetPicker` | Grille de sets cherchable, groupée par année (sous-sets masqués), avec la complétion de chaque set commencé (prop `owned`) |
 | `PriceChart` | Courbe du prix d'une carte (un relevé par jour d'import) |
 | `PokedexGrid`, `WishlistGrid`, `ShowcasePicker`, `RecycleDuplicates` | Onglets Pokédex et souhaits, choix de la vitrine, recyclage (tout, ou « Choisir… » par carte ou par rareté, − / + pour le nombre d'exemplaires) |
+| `CopyStepper` | − n/max + : nombre d'exemplaires à recycler (liste « Choisir… » et fiche d'une carte) |
 | `BetaBadge` | Pastille « Bêta-testeur » (bordure holo + reflet qui passe, coupé sans effets / mouvement réduit), `compact` = juste « β ». Profil et tuile profil du hub |
 | `UsernameCombobox` | Champ pseudo avec suggestions des dresseurs publics (`searchUsernames`, 200 ms après la frappe, 8 au maximum, flèches + Entrée, Échap). Événement `pick` au choix d'une suggestion. Partenaire d'échange |
 | `AchievementTile`, `AchievementToasts` | Tuile d'un succès, notifications « succès débloqué » (et, dans la même pile, les toasts d'échange du store `trades`) |

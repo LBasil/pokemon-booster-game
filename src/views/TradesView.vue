@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { fetchChallengeCollectionOf } from '@/api/challenge'
@@ -19,7 +19,9 @@ import UsernameCombobox from '@/components/UsernameCombobox.vue'
 // from a public profile, ?want=<card id> one of their cards, ?give=<card
 // id> one of mine, e.g. from a card's detail). The server checks and swaps
 // the cards. Answers to my offers I hadn't seen (migration 0017) come first,
-// then count as seen: the badge clears.
+// then count as seen: the badge clears. "Counter" on a received offer
+// (migration 0021) loads it into the composer, sides swapped, to send back
+// changed: the first offer ends as "countered".
 const { t, locale } = useI18n()
 const route = useRoute()
 const trades = useTradesStore()
@@ -120,9 +122,15 @@ const giveQuery = ref('')
 const askQuery = ref('')
 const sending = ref(false)
 
+// The received offer being answered with a counter-offer (migration 0021)
+const countering = ref(null)
+const composerEl = ref(null)
+
 async function findPartner() {
   const name = partnerName.value.trim()
   if (!name) return
+  // Another trainer: a new offer, not a counter-offer any more
+  if (countering.value && name.toLowerCase() !== countering.value.partner.toLowerCase()) countering.value = null
   partnerState.value = 'loading'
   partner.value = null
   asking.value = []
@@ -130,7 +138,8 @@ async function findPartner() {
   try {
     const [entries, profile] = await Promise.all([fetchChallengeCollectionOf(name), fetchPublicProfile(name).catch(() => null)])
     partner.value = { username: profile?.username ?? name, entries }
-    if (profile && profile.accepts_trades === false) {
+    // They made the first offer: a counter-offer ignores their "accepts trades"
+    if (profile && profile.accepts_trades === false && !countering.value) {
       partnerState.value = 'closed'
       return
     }
@@ -157,10 +166,17 @@ watch(
   },
 )
 
-// Pickers show 60 matches at most: search narrows big collections
-const PICKER_LIMIT = 60
-const giveOptions = computed(() => searchEntries(myCollection.entries, giveQuery.value).slice(0, PICKER_LIMIT))
-const askOptions = computed(() => searchEntries(partner.value?.entries ?? [], askQuery.value).slice(0, PICKER_LIMIT))
+// Pickers show 60 matches, then 60 more per "Show more" (a new search or
+// partner starts over)
+const PICKER_PAGE = 60
+const giveLimit = ref(PICKER_PAGE)
+const askLimit = ref(PICKER_PAGE)
+watch(giveQuery, () => (giveLimit.value = PICKER_PAGE))
+watch([askQuery, partner], () => (askLimit.value = PICKER_PAGE))
+const giveMatches = computed(() => searchEntries(myCollection.entries, giveQuery.value))
+const askMatches = computed(() => searchEntries(partner.value?.entries ?? [], askQuery.value))
+const giveOptions = computed(() => giveMatches.value.slice(0, giveLimit.value))
+const askOptions = computed(() => askMatches.value.slice(0, askLimit.value))
 
 // How many copies of each card I own (challenge collection), shown on both
 // pickers: don't give away a last copy, don't ask for one you already have
@@ -188,6 +204,35 @@ watch(
   { immediate: true },
 )
 
+/** Their offer in the composer, sides swapped: what they asked for, what they offered. */
+async function startCounter(trade) {
+  countering.value = trade
+  notice.value = ''
+  partnerName.value = trade.partner
+  giveQuery.value = ''
+  askQuery.value = ''
+  await findPartner()
+  if (countering.value !== trade) return
+  const mine = new Set(myCollection.entries.map((entry) => entry.card_id))
+  giving.value = trade.request.map((card) => card.id).filter((id) => mine.has(id) && !trades.isLocked(id))
+  const theirs = new Set((partner.value?.entries ?? []).filter((entry) => entry.tradable !== false).map((entry) => entry.card_id))
+  asking.value = trade.offer.map((card) => card.id).filter((id) => theirs.has(id))
+  await nextTick()
+  composerEl.value?.scrollIntoView({ block: 'start' })
+}
+
+function stopCounter() {
+  countering.value = null
+}
+
+// An answered or expired offer can't be countered any more
+watch(
+  () => trades.groups.received,
+  (received) => {
+    if (countering.value && !received.some((trade) => trade.id === countering.value.id)) countering.value = null
+  },
+)
+
 const canSend = computed(() => partner.value && giving.value.length > 0 && !sending.value)
 
 async function send() {
@@ -196,8 +241,14 @@ async function send() {
   notice.value = ''
   errorMessage.value = ''
   try {
-    await trades.propose(partner.value.username, giving.value, asking.value)
-    notice.value = t('trades.sentNotice', { name: partner.value.username })
+    if (countering.value) {
+      await trades.counter(countering.value.id, giving.value, asking.value)
+      notice.value = t('trades.counterSent', { name: partner.value.username })
+      countering.value = null
+    } else {
+      await trades.propose(partner.value.username, giving.value, asking.value)
+      notice.value = t('trades.sentNotice', { name: partner.value.username })
+    }
     giving.value = []
     asking.value = []
   } catch (err) {
@@ -280,9 +331,12 @@ const ago = (iso) => timeAgo(iso, locale.value)
             {{ t('trades.received') }} <span class="trades-count">{{ groups.received.length }}</span>
           </h2>
           <ul class="trades-list" role="list">
-            <li v-for="trade in groups.received" :key="trade.id" class="trade">
+            <li v-for="trade in groups.received" :key="trade.id" class="trade" :class="{ 'is-countering': countering?.id === trade.id }">
               <p class="trade-head">
-                <RouterLink :to="{ name: 'public-profile', params: { username: trade.partner } }" class="trade-partner">{{ trade.partner }}</RouterLink>
+                <span>
+                  <RouterLink :to="{ name: 'public-profile', params: { username: trade.partner } }" class="trade-partner">{{ trade.partner }}</RouterLink>
+                  <span v-if="trade.counter_of" class="trade-tag">{{ t('trades.counterTag') }}</span>
+                </span>
                 <span class="trade-time">{{ ago(trade.created_at) }}</span>
               </p>
               <div class="trade-sides">
@@ -312,17 +366,32 @@ const ago = (iso) => timeAgo(iso, locale.value)
                 <button type="button" class="btn btn-outline-secondary btn-sm" :disabled="busyId === trade.id" @click="respond(trade, false)">
                   {{ t('trades.decline') }}
                 </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary btn-sm"
+                  :disabled="busyId === trade.id || countering?.id === trade.id"
+                  @click="startCounter(trade)"
+                >
+                  {{ t('trades.counter') }}
+                </button>
               </div>
             </li>
           </ul>
         </section>
 
         <!-- ============ New offer ============ -->
-        <section class="composer" aria-labelledby="trades-new">
-          <h2 id="trades-new" class="pb-section-title">{{ t('trades.newTitle') }}</h2>
+        <section ref="composerEl" class="composer" aria-labelledby="trades-new">
+          <h2 id="trades-new" class="pb-section-title">
+            {{ countering ? t('trades.counterTitle', { name: countering.partner }) : t('trades.newTitle') }}
+          </h2>
+
+          <div v-if="countering" class="composer-counter">
+            <p class="composer-counter-text">{{ t('trades.counterHint', { name: countering.partner }) }}</p>
+            <button type="button" class="btn btn-outline-secondary btn-sm" @click="stopCounter">{{ t('trades.counterStop') }}</button>
+          </div>
 
           <!-- What others may ask me for (migration 0012) -->
-          <div class="trade-prefs">
+          <div v-if="!countering" class="trade-prefs">
             <label class="trade-pref form-switch">
               <span>
                 <span id="accept-trades-title" class="trade-pref-title">{{ t('trades.acceptLabel') }}</span>
@@ -359,7 +428,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
             </div>
           </div>
 
-          <form class="composer-find" @submit.prevent="findPartner">
+          <form v-if="!countering" class="composer-find" @submit.prevent="findPartner">
             <label for="trade-partner" class="form-label">{{ t('trades.partnerLabel') }}</label>
             <div class="composer-find-row">
               <UsernameCombobox
@@ -403,6 +472,9 @@ const ago = (iso) => timeAgo(iso, locale.value)
                   </button>
                 </li>
               </ul>
+              <button v-if="giveMatches.length > giveOptions.length" type="button" class="btn btn-outline-secondary btn-sm picker-more" @click="giveLimit += PICKER_PAGE">
+                {{ t('trades.showMore', { count: giveMatches.length - giveOptions.length }) }}
+              </button>
             </fieldset>
 
             <!-- Their cards -->
@@ -429,6 +501,9 @@ const ago = (iso) => timeAgo(iso, locale.value)
                   </button>
                 </li>
               </ul>
+              <button v-if="askMatches.length > askOptions.length" type="button" class="btn btn-outline-secondary btn-sm picker-more" @click="askLimit += PICKER_PAGE">
+                {{ t('trades.showMore', { count: askMatches.length - askOptions.length }) }}
+              </button>
             </fieldset>
 
             <div class="composer-summary">
@@ -442,7 +517,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
               </p>
               <button type="button" class="btn btn-primary glow-button" :disabled="!canSend" @click="send">
                 <span v-if="sending" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-                {{ t('trades.send', { name: partner.username }) }}
+                {{ countering ? t('trades.counterSend', { name: partner.username }) : t('trades.send', { name: partner.username }) }}
               </button>
             </div>
           </div>
@@ -454,7 +529,10 @@ const ago = (iso) => timeAgo(iso, locale.value)
           <ul class="trades-list" role="list">
             <li v-for="trade in groups.sent" :key="trade.id" class="trade">
               <p class="trade-head">
-                <span>{{ t('trades.to') }} <RouterLink :to="{ name: 'public-profile', params: { username: trade.partner } }" class="trade-partner">{{ trade.partner }}</RouterLink></span>
+                <span>
+                  {{ t('trades.to') }} <RouterLink :to="{ name: 'public-profile', params: { username: trade.partner } }" class="trade-partner">{{ trade.partner }}</RouterLink>
+                  <span v-if="trade.counter_of" class="trade-tag">{{ t('trades.counterTag') }}</span>
+                </span>
                 <span class="trade-time">{{ ago(trade.created_at) }}</span>
               </p>
               <div class="trade-sides">
@@ -494,6 +572,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
             <li v-for="trade in groups.history" :key="trade.id" class="history-row">
               <span class="history-status" :data-status="trade.status">{{ statusLabel(trade.status) }}</span>
               <span class="history-text">
+                <template v-if="trade.counter_of">{{ t('trades.counterTag') }} ·</template>
                 {{ trade.direction === 'sent' ? t('trades.to') : t('trades.from') }}
                 <strong>{{ trade.partner }}</strong> ·
                 {{ trade.offer.map((card) => card.name).join(', ') }}
@@ -585,6 +664,24 @@ const ago = (iso) => timeAgo(iso, locale.value)
   font-weight: 800;
 }
 
+.trade.is-countering {
+  border-color: var(--pb-border-strong);
+  box-shadow: 0 0 0 2px var(--pb-ring);
+}
+
+.trade-tag {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--pb-border-strong);
+  color: var(--pb-text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  vertical-align: 0.1em;
+}
+
 .trade-time {
   flex-shrink: 0;
   color: var(--pb-text-muted);
@@ -672,6 +769,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
   border-radius: var(--pb-radius-lg);
   border: 1px solid var(--pb-border);
   background: var(--pb-surface);
+  scroll-margin-top: 5rem;
 }
 
 .trade-prefs {
@@ -752,6 +850,29 @@ const ago = (iso) => timeAgo(iso, locale.value)
   font-size: 0.6rem;
   font-weight: 800;
   text-align: center;
+}
+
+.composer-counter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--pb-radius-sm);
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-selected);
+}
+
+.composer-counter-text {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.picker-more {
+  margin-top: 0.5rem;
 }
 
 .composer-find {

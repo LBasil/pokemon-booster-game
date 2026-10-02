@@ -229,7 +229,8 @@ hebdomadaires le lundi à 00:00 UTC (`challenge_week_start()`).
 | `id`, `from_user`, `to_user` | Offre de `from_user` à `to_user` (jamais soi-même) |
 | `offer_cards` | 1 à 5 ids donnés (un exemplaire chacun) |
 | `request_cards` | 0 à 5 ids demandés (0 = cadeau) |
-| `status` | `pending`, `accepted`, `declined`, `cancelled`, `failed` |
+| `status` | `pending`, `accepted`, `declined`, `cancelled`, `failed`, `countered` (0021 : remplacée par une contre-offre) |
+| `counter_of` | Offre à laquelle celle-ci répond (contre-offre, 0021), `null` sinon |
 | `created_at`, `resolved_at` | Une offre en attente expire après 7 jours (`trade_ttl()`) |
 | `answer_seen` | L'expéditeur a vu la fin de son offre (acceptée, refusée, échouée) ; `false` jusqu'à sa visite de la page des échanges (0017). Les offres déjà finies à l'ajout de la colonne comptent comme vues |
 
@@ -345,13 +346,14 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0011 | `weekly_missions_live_trades` | Missions hebdomadaires, échanges en temps réel |
 | 0012 | `trade_preferences` | Refuser les échanges, cartes hors échange |
 | 0013 | `minigame_higher_lower` | Mini-jeu « Plus ou moins » |
-| 0014 | `minigame_electrode_flip` | Mini-jeu « Électrode Shiny Flip » (écrite le 2026-09-27, **à appliquer**) |
-| 0015 | `minigame_super_effective` | Colonne `cards.weaknesses` + mini-jeu « Super efficace ! » (écrite le 2026-09-28, **à appliquer**, puis relancer l'import) |
-| 0016 | `feed_top_rarity` | Les sets sans ultra ni secrète publient leurs holo dans le fil (écrite le 2026-09-29, **à appliquer**) |
-| 0017 | `trade_answers_recycle_picks` | Réponses aux offres signalées à l'expéditeur (`answer_seen`, badge), recyclage d'une sélection (`recycle_cards`) (écrite le 2026-09-30, **à appliquer**) |
+| 0014 | `minigame_electrode_flip` | Mini-jeu « Électrode Shiny Flip » (écrite le 2026-09-27, appliquée) |
+| 0015 | `minigame_super_effective` | Colonne `cards.weaknesses` + mini-jeu « Super efficace ! » (écrite le 2026-09-28, appliquée) |
+| 0016 | `feed_top_rarity` | Les sets sans ultra ni secrète publient leurs holo dans le fil (écrite le 2026-09-29, appliquée) |
+| 0017 | `trade_answers_recycle_picks` | Réponses aux offres signalées à l'expéditeur (`answer_seen`, badge), recyclage d'une sélection (`recycle_cards`) (écrite le 2026-09-30, appliquée) |
 | 0018 | `minigame_evolution_chain` | Colonne `cards.evolves_from` + mini-jeu « Chaîne d'évolution » (écrite le 2026-09-30, appliquée le jour même) |
-| 0019 | `evolution_chain_two_stages_stop` | « Chaîne d'évolution » : lignées à 2 stades, bouton Arrêter (`evolution_chain_stop`) (écrite le 2026-09-30, **à appliquer**) |
-| 0020 | `recycle_copies` | Recyclage d'une partie des exemplaires d'une carte (`recycle_card_copies`) (écrite le 2026-10-02, **à appliquer**) |
+| 0019 | `evolution_chain_two_stages_stop` | « Chaîne d'évolution » : lignées à 2 stades, bouton Arrêter (`evolution_chain_stop`) (écrite le 2026-09-30, appliquée) |
+| 0020 | `recycle_copies` | Recyclage d'une partie des exemplaires d'une carte (`recycle_card_copies`) (écrite le 2026-10-02, appliquée) |
+| 0021 | `trade_counter_offers` | Contre-offres (`counter_trade`, statut `countered`, `trade_offers.counter_of`) (écrite le 2026-10-02, **à appliquer**) |
 
-Les migrations 0001 à 0013 sont appliquées sur le projet réel (vérifié le
-2026-09-27).
+Les migrations 0001 à 0020 sont appliquées sur le projet réel (vérifié le
+2026-10-02).

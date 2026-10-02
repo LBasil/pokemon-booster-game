@@ -27,7 +27,8 @@ How it works inside (every table, RPC and flow, in French):
   daily reward that grows over a 7-day streak, three daily missions and
   four **weekly missions** (reset Monday 00:00 UTC, bigger rewards),
   recycle duplicates into coins (all of them, or **pick which ones**, card by
-  card or a whole rarity at once, and how many copies of each with − / +) and craft the cards you're missing. Earn
+  card or a whole rarity at once, and how many copies of each with − / +,
+  also from a card's detail; "Keep" 1 to 4 copies of each card) and craft the cards you're missing. Earn
   coins with the **mini-games** (`/challenge/games`, their own tab in the
   challenge and a tile near the top of its hub), starting with
   **"Higher or lower"**:
@@ -51,7 +52,8 @@ How it works inside (every table, RPC and flow, in French):
   a "god pack" (holos and better only). **Trade cards** with other
   trainers (up to 5 for 5, or as a gift; the trainer field suggests
   usernames as you type, and every card in the pickers says how many
-  copies you own; public profiles show their
+  copies you own, 60 at a time with "Show more"; answer an offer with a
+  **counter-offer**; public profiles show their
   **challenge collection** with an "Ask for it" button per card; offers
   and answers show up **live**, no reload, with a pop-up for a new offer and
   for an answer to yours (accepted, declined or failed); answers you haven't
@@ -297,6 +299,9 @@ its **SQL editor** and run, in order:
 20. `supabase/migrations/0020_recycle_copies.sql` — recycling only some
    copies of a card (the − / + in "Choose…"). Run it after 0017; until
    then only "every extra copy" works and a partial pick shows an error.
+21. `supabase/migrations/0021_trade_counter_offers.sql` — counter-offers
+   (answer a trade offer with another one). Run it after 0020; until then
+   "Counter" shows an error.
 
 Then in **Authentication**:
 

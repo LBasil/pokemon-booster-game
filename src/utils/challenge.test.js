@@ -8,6 +8,7 @@ import {
   duplicateGroups,
   msUntilReset,
   msUntilWeeklyReset,
+  recycleKeep,
   recyclePreview,
   recycleValue,
 } from './challenge'
@@ -59,6 +60,21 @@ describe('challenge economy', () => {
     // capped at the duplicates, one copy always stays
     expect(recyclePreview(entries, new Map([['a', 9], ['b', 0]]))).toEqual({ cards: 3, coins: 3 })
     expect(recyclePreview(entries, new Map())).toEqual({ cards: 0, coins: 0 })
+  })
+
+  it('keeps more than one copy of each card when asked', () => {
+    const entries = [
+      { card_id: 'a', quantity: 4, cards: card('common') },
+      { card_id: 'b', quantity: 2, cards: card('ultra') },
+    ]
+    expect(recyclePreview(entries, null, 2)).toEqual({ cards: 2, coins: 2 })
+    expect(recyclePreview(entries, new Map([['a', 9]]), 3)).toEqual({ cards: 1, coins: 1 })
+    expect(duplicateGroups(entries, 2).map((group) => group.entries.map((entry) => entry.card_id))).toEqual([['a']])
+    expect(duplicateGroups(entries, 4)).toEqual([])
+    expect(recycleKeep(3)).toBe(3)
+    expect(recycleKeep(0)).toBe(1)
+    expect(recycleKeep('2')).toBe(1)
+    expect(recycleKeep(undefined)).toBe(1)
   })
 
   it('groups the cards with duplicates by rarity, then name', () => {

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import {
   cancelTrade,
+  counterTrade,
   fetchTradeLocks,
   fetchTrades,
   lockCard,
@@ -33,7 +34,7 @@ export const useTradesStore = defineStore('trades', {
     // Challenge cards kept out of trades (migration 0012), by card id
     locks: [],
     locksLoaded: false,
-    toasts: [], // [{ key, news: 'offer' | 'accepted' | 'declined' | 'failed', partner }]
+    toasts: [], // [{ key, news: 'offer' | 'counter' | 'accepted' | 'declined' | 'failed', partner }]
   }),
   getters: {
     groups: (state) => groupTrades(state.trades),
@@ -61,6 +62,12 @@ export const useTradesStore = defineStore('trades', {
 
     async propose(username, offerIds, requestIds) {
       await proposeTrade(username, offerIds, requestIds)
+      await this.refresh()
+    },
+
+    /** Answers a received offer with another one (migration 0021). */
+    async counter(tradeId, offerIds, requestIds) {
+      await counterTrade(tradeId, offerIds, requestIds)
       await this.refresh()
     },
 

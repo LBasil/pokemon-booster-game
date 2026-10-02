@@ -233,3 +233,68 @@ test('a card of my challenge collection can be offered in a trade from its detai
   await expect(give.getByText('1/5')).toBeVisible()
   await expect(give.getByRole('button', { name: /Charmander/ })).toHaveAttribute('aria-pressed', 'true')
 })
+
+test('an offer can be answered with a counter-offer', async ({ page }) => {
+  const backend = await mockSupabase(page, {
+    challengeCollection: [collectionEntry('sv3pt5-4', 2), collectionEntry('sv3pt5-7')],
+    trades: [received()],
+    badge: { trades: 1 },
+  })
+  await page.goto('/challenge/trades')
+  await page.locator('.trade').filter({ hasText: 'Misty' }).getByRole('button', { name: 'Counter' }).click()
+
+  // Their offer, sides swapped
+  await expect(page.getByRole('heading', { name: 'Counter-offer to Misty' })).toBeVisible()
+  const give = page.getByRole('group', { name: /You give/ })
+  const ask = page.getByRole('group', { name: /You ask Misty for/ })
+  await expect(give.getByRole('button', { name: /Charmander/ })).toHaveAttribute('aria-pressed', 'true')
+  await expect(ask.getByRole('button', { name: /Charizard/ })).toHaveAttribute('aria-pressed', 'true')
+  await give.getByRole('button', { name: /Squirtle/ }).click()
+
+  await page.getByRole('button', { name: 'Send the counter-offer to Misty' }).click()
+  await expect(page.getByText('Counter-offer sent to Misty!')).toBeVisible()
+  expect(JSON.parse(rpcCalls(backend, 'counter_trade')[0].body)).toEqual({
+    p_trade_id: 7,
+    p_offer: ['sv3pt5-4', 'sv3pt5-7'],
+    p_request: ['base1-4'],
+  })
+  // Mine is waiting, theirs is over, and the composer is a new offer again
+  const sent = page.locator('section', { has: page.getByRole('heading', { name: 'Waiting for an answer' }) })
+  await expect(sent.getByText('Counter-offer')).toBeVisible()
+  await expect(page.locator('.history-status')).toHaveText('Countered')
+  await expect(page.getByRole('heading', { name: 'New offer' })).toBeVisible()
+})
+
+test('a counter-offer can be dropped for a new offer, and says so when the server lacks it', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4')], trades: [received()], counterTrade: 'missing' })
+  await page.goto('/challenge/trades')
+  await page.getByRole('button', { name: 'Counter' }).click()
+  await page.getByRole('button', { name: 'Make a new offer instead' }).click()
+  await expect(page.getByRole('heading', { name: 'New offer' })).toBeVisible()
+  await expect(page.getByLabel('Trainer')).toHaveValue('Misty')
+
+  await page.getByRole('button', { name: 'Counter' }).click()
+  await page.getByRole('button', { name: 'Send the counter-offer to Misty' }).click()
+  await expect(page.getByRole('alert')).toContainText("Counter-offers aren't available yet")
+  await expect(page.locator('.trade').filter({ hasText: 'Misty' }).getByRole('button', { name: 'Accept' })).toBeVisible()
+})
+
+test('big collections show 60 cards in the pickers, then more on demand', async ({ page }) => {
+  const many = Array.from({ length: 130 }, (_, i) => ({
+    ...collectionEntry('sv3pt5-1'),
+    card_id: `x-${i}`,
+    cards: { ...byId['sv3pt5-1'], id: `x-${i}`, name: `Card ${i}` },
+  }))
+  await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4')], partners: { misty: many } })
+  await page.goto('/challenge/trades?to=Misty')
+  const ask = page.getByRole('group', { name: /You ask Misty for/ })
+  await expect(ask.locator('.picker-card')).toHaveCount(60)
+  await ask.getByRole('button', { name: 'Show more (70 left)' }).click()
+  await expect(ask.locator('.picker-card')).toHaveCount(120)
+  await ask.getByRole('button', { name: 'Show more (10 left)' }).click()
+  await expect(ask.locator('.picker-card')).toHaveCount(130)
+  await expect(ask.getByRole('button', { name: /Show more/ })).toHaveCount(0)
+  // A new search starts over
+  await ask.getByRole('searchbox').fill('Card 1')
+  await expect(ask.locator('.picker-card')).toHaveCount(41) // 1, 10-19, 100-129
+})
