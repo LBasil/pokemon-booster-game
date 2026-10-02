@@ -32,6 +32,12 @@ address** for the sign-up part.
 - [ ] Summary: "Open again" / "Change set" stay stuck above the tab bar
       while scrolling the 10 cards; achievement pop-ups show above them,
       never over the title. Card flips sound soft (no harsh hiss).
+- [ ] New account: the booster page offers "Base · 1999", "151 · 2023"
+      and the newest set; they're gone once a pack is opened.
+- [ ] On a small phone (iPhone SE size), in both modes: the set name, the
+      1/3/5/10 choice and "Open" are all visible without scrolling.
+- [ ] First pack's summary: the best card shows first, then (after a
+      moment) one achievement pop-up with "+N more achievements".
 
 ## Collection
 
@@ -44,6 +50,12 @@ address** for the sign-up part.
 - [ ] Card detail shows a price chart once `populate:cards` has run on at
       least two different days.
 - [ ] Booster history lists the packs just opened.
+- [ ] Searching "Dracaufeu" finds the Charizard cards; in French, a
+      Charizard's detail says "En français : Dracaufeu".
+- [ ] Under the unique cards count, "Most advanced set" names a set and
+      links to its binder (also on both hubs).
+- [ ] Profile > Settings > "Larger text": every page reads bigger and
+      nothing scrolls sideways on the phone.
 
 ## Social
 
@@ -65,7 +77,10 @@ address** for the sign-up part.
 ## Challenge mode (after migration 0005)
 
 - [ ] Hub → "Take on the challenge": 1,000 coins, empty challenge
-      collection; the unlimited collection is unchanged.
+      collection; the unlimited collection is unchanged. "How the
+      challenge works" is open at the top the first time, folded the next.
+- [ ] Trades with an empty challenge collection: "open a few challenge
+      boosters" + trainers to pick from (never yourself).
 - [ ] Claim the daily reward (+200) → the button turns into a countdown;
       reloading doesn't let you claim it again.
 - [ ] Open 3 challenge boosters → 300 coins spent, the cards are in the

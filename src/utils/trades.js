@@ -1,3 +1,5 @@
+import { cardNameMatches, searchNeedle } from '@/utils/collection'
+
 // Trades between players (challenge mode, migration 0007): limits mirrored
 // from propose_trade() — change both together.
 export const TRADE_MAX_CARDS = 5
@@ -30,12 +32,11 @@ export function groupTrades(trades) {
   return { received, sent, history }
 }
 
-/** Collection rows whose card name contains `query` (case/accent-insensitive). */
+/** Collection rows whose card name (or Pokémon's French name) contains `query` (case/accent-insensitive). */
 export function searchEntries(entries, query) {
-  const normalize = (text) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
-  const needle = normalize(query.trim())
+  const needle = searchNeedle(query)
   if (!needle) return entries
-  return entries.filter((entry) => normalize(entry.cards.name).includes(needle))
+  return entries.filter((entry) => cardNameMatches(entry.cards, needle))
 }
 
 // How an offer I sent can end that I should hear about (cancelled is my own

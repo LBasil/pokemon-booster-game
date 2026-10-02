@@ -302,6 +302,7 @@ const isActive = (name, inTabBar = false) =>
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  min-width: 0;
   color: var(--pb-text);
   font-family: var(--pb-font-display);
   font-size: 0.8rem;
@@ -367,16 +368,17 @@ const isActive = (name, inTabBar = false) =>
   white-space: nowrap;
 }
 
-/* Narrow phones (320px): tighter so the three parts fit on one line */
+/* Narrow phones (320px): tighter so the three parts fit on one line
+   (px, not rem: larger text must not push the strip off screen) */
 @media (max-width: 374.98px) {
   .mode-strip {
     gap: 0.5rem;
     padding-left: 0.7rem;
-    font-size: 0.78rem;
+    font-size: 12.5px;
   }
 
   .mode-strip-name {
-    font-size: 0.7rem;
+    font-size: 11px;
     letter-spacing: 0.02em;
   }
 
@@ -432,7 +434,7 @@ const isActive = (name, inTabBar = false) =>
   bottom: calc(12px + env(safe-area-inset-bottom));
   z-index: 50;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   padding: 6px;
   border-radius: var(--pb-radius-lg);
   border: 1px solid var(--pb-border-strong);

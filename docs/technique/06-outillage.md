@@ -125,7 +125,10 @@ leur espèce (Rattata d'Alola = n° 19), lieux identiques regroupés ; `cards <r
 role de `scripts/.env.local`) ; `texts <région>` : écrit les textes EN/FR
 manquants des lignées, routes et lieux avec les noms officiels de
 PokéAPI (une route peut porter sa région : `unovaRoute5and16`). Le reste
-(arènes, dresseurs, séries) s'écrit à la main.
+(arènes, dresseurs, séries) s'écrit à la main. `fr-names` : réécrit
+`src/utils/pokemonNamesFr.js`, le nom français officiel de chaque Pokémon
+(n° 1 à 1025 à ce jour), utilisé par la recherche de la collection ; à
+relancer quand une génération sort.
 
 ---
 

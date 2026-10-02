@@ -6,6 +6,7 @@ import { modeRoutes } from '@/router/modes'
 import { useChallengeStore } from '@/stores/challenge'
 import { useCollectionStore, useModeCollectionStore } from '@/stores/collection'
 import { useSetsStore } from '@/stores/sets'
+import SetGoal from '@/components/SetGoal.vue'
 import { useTradesStore } from '@/stores/trades'
 import { RARITY_FILTERS, SORTS, collectionStats, filterEntries, setProgress, sortEntries } from '@/utils/collection'
 import { completionPercent } from '@/utils/progress'
@@ -252,6 +253,7 @@ function rarityChip(card) {
               <span :style="{ width: `${Math.max(poolPercent, 1.5)}%` }"></span>
             </div>
             <p class="coll-stat-note">{{ t('game.progress', { percent: formatPercent(poolPercent) }) }}</p>
+            <SetGoal :entries="collectionStore.entries" :sets="setsStore.sets" :to="(id) => ({ name: routes.binder, params: { setId: id } })" />
           </div>
           <div class="coll-stat">
             <dt>{{ t('collection.statPulled') }}</dt>

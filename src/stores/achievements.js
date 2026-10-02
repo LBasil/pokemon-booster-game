@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useModeCollectionStore } from '@/stores/collection'
 import { useSetsStore } from '@/stores/sets'
 import { useSettingsStore } from '@/stores/settings'
-import { achievements, newlyUnlocked, sortForToasts, toastBatch } from '@/utils/achievements'
+import { achievements, MAX_TOASTS, newlyUnlocked, sortForToasts, toastBatch } from '@/utils/achievements'
 
 // Achievements per game mode: unlock notifications ("Steam style" toasts),
 // what the server knows about the player, and rarity rates.
@@ -21,6 +21,8 @@ import { achievements, newlyUnlocked, sortForToasts, toastBatch } from '@/utils/
 const MODES = ['unlimited', 'challenge']
 const RATES_TTL = 10 * 60 * 1000
 const TOAST_MS = 6000
+// Phones and tablets (the tab bar layout): one toast per batch
+const compactToasts = () => window.matchMedia?.('(max-width: 991.98px)').matches ?? false
 
 // Unlimited keeps its original (pre-modes) keys
 const storageKey = (kind, mode, userId) =>
@@ -80,7 +82,9 @@ export const useAchievementsStore = defineStore('achievements', {
       return { userId, server, list: achievements(collection.entries, sets.sets, { mode, ...server }) }
     },
 
-    async check(mode = 'unlimited') {
+    // delay (ms): wait before toasting, e.g. so the pack summary's best card
+    // is seen before anything pops over it
+    async check(mode = 'unlimited', { delay = 0 } = {}) {
       if (this.paused) return
       const own = await this.own(mode)
       if (!own || this.paused) return
@@ -96,22 +100,28 @@ export const useAchievementsStore = defineStore('achievements', {
 
       if (fresh.length) {
         await this.loadRates(mode) // rarest first, and the toasts show the rates
-        this.notify(fresh, mode)
+        this.notify(fresh, mode, delay)
       }
       this.report(userId, mode, unlocked)
     },
 
-    notify(items, mode) {
+    notify(items, mode, delay = 0) {
       const settings = useSettingsStore()
-      sfx.achievement(settings.sound)
-      sfx.buzz(settings.vibration, [20, 60, 20])
-      toastBatch(sortForToasts(items, this.rates[mode])).forEach((toast, index) => {
+      setTimeout(() => {
+        sfx.achievement(settings.sound)
+        sfx.buzz(settings.vibration, [20, 60, 20])
+      }, delay)
+      const batch = toastBatch(sortForToasts(items, this.rates[mode]), compactToasts() ? 1 : MAX_TOASTS)
+      batch.forEach((toast, index) => {
         const key = ++toastId
         // They arrive one after the other
-        setTimeout(() => {
-          this.toasts.push({ key, mode, ...toast })
-          setTimeout(() => this.dismiss(key), TOAST_MS)
-        }, index * 450)
+        setTimeout(
+          () => {
+            this.toasts.push({ key, mode, ...toast })
+            setTimeout(() => this.dismiss(key), TOAST_MS)
+          },
+          delay + index * 450,
+        )
       })
     },
 

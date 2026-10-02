@@ -125,6 +125,19 @@ describe('pokedexSlots', () => {
   })
 })
 
+describe('filterEntries by French name', () => {
+  it('matches the Pokémon French name too (card names are English only)', () => {
+    const entries = [
+      { card_id: 'a', quantity: 1, cards: { id: 'a', name: 'Charizard ex', national_pokedex_number: 6, set_id: 'x' } },
+      { card_id: 'b', quantity: 1, cards: { id: 'b', name: "Farfetch'd", national_pokedex_number: 83, set_id: 'x' } },
+      { card_id: 'c', quantity: 1, cards: { id: 'c', name: 'Professor Oak', national_pokedex_number: null, set_id: 'x' } },
+    ]
+    expect(filterEntries(entries, { query: 'Dracaufeu' }).map((e) => e.card_id)).toEqual(['a'])
+    expect(filterEntries(entries, { query: 'canartich' }).map((e) => e.card_id)).toEqual(['b'])
+    expect(filterEntries(entries, { query: 'oak' }).map((e) => e.card_id)).toEqual(['c'])
+  })
+})
+
 describe('filterEntries by Pokédex number', () => {
   it('keeps only that species', () => {
     const entries = [

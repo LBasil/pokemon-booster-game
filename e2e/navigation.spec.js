@@ -142,6 +142,21 @@ test('no page scrolls sideways', async ({ page }, info) => {
   }
 })
 
+test('no page scrolls sideways with larger text on the narrowest phone', async ({ page }, info) => {
+  test.skip(info.project.name !== 'mobile', 'phone layout')
+  await page.addInitScript(() => localStorage.setItem('settings', JSON.stringify({ largeText: true })))
+  await page.setViewportSize({ width: 320, height: 640 })
+  await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4')] })
+  const pages = ['/game', '/boosters', '/collection', '/profile', '/community', ...CHALLENGE_PAGES]
+  for (const path of pages) {
+    await page.goto(path)
+    await page.waitForLoadState('networkidle')
+    await expect(page.locator('html')).toHaveClass(/pb-text-large/)
+    const [scroll, width] = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth])
+    expect(scroll, path).toBeLessThanOrEqual(width)
+  }
+})
+
 // Silent breakage (a thrown error in a computed, a failed request nobody
 // shows...) never makes a page fail visibly: catch it here
 test('no page logs an error', async ({ page }) => {

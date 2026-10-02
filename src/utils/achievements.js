@@ -673,13 +673,16 @@ export function sortForToasts(items, rates) {
 export const MAX_TOASTS = 3
 
 /**
- * The toasts for a batch of new unlocks: all of them up to MAX_TOASTS,
- * otherwise the first MAX_TOASTS - 1 and a "+N more" one.
- * @returns {({ item: object } | { more: number })[]}
+ * The toasts for a batch of new unlocks: all of them up to `max`, otherwise
+ * the first `max` - 1 and a "+N more" one. Phones pass max = 1: a single
+ * toast (the first item, `extra` = how many more), since a stack of them
+ * hid half the pack summary.
+ * @returns {({ item: object, extra?: number } | { more: number })[]}
  */
-export function toastBatch(items) {
-  if (items.length <= MAX_TOASTS) return items.map((item) => ({ item }))
-  const shown = items.slice(0, MAX_TOASTS - 1)
+export function toastBatch(items, max = MAX_TOASTS) {
+  if (items.length <= max) return items.map((item) => ({ item }))
+  if (max <= 1) return [{ item: items[0], extra: items.length - 1 }]
+  const shown = items.slice(0, max - 1)
   return [...shown.map((item) => ({ item })), { more: items.length - shown.length }]
 }
 

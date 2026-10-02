@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { boosterSets, groupSetsByYear, packSetId, setLogoUrl, subsetKind, subsetsOf } from './sets'
+import { boosterSets, groupSetsByYear, packSetId, setLogoUrl, starterSets, subsetKind, subsetsOf } from './sets'
 
 const SETS = [
   { id: 'base1', name: 'Base', release_date: '1999-01-09' },
@@ -62,5 +62,17 @@ describe('subsets', () => {
   it("lists a set's subsets and names their kind", () => {
     expect(subsetsOf('swsh9', sets).map((set) => set.id)).toEqual(['swsh9tg'])
     expect(sets.map(subsetKind)).toEqual([null, 'gallery', 'vault', 'classic', null])
+  })
+})
+
+describe('starterSets', () => {
+  it('suggests Base, 151 and the newest set, subsets skipped', () => {
+    const sets = [...SETS, { id: 'sv4tg', name: 'Gallery', release_date: '2024-01-01', parent_set_id: 'sv4' }]
+    expect(starterSets(sets).map((set) => set.id)).toEqual(['base1', 'sv3pt5', 'sv4'])
+  })
+
+  it('lists a set once when the newest is already suggested, and skips missing ones', () => {
+    expect(starterSets([SETS[1]]).map((set) => set.id)).toEqual(['sv3pt5'])
+    expect(starterSets([])).toEqual([])
   })
 })

@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useChallengeStore } from '@/stores/challenge'
 import { useChallengeCollectionStore } from '@/stores/collection'
+import { useSetsStore } from '@/stores/sets'
 import { BUCKETS } from '@/utils/rarity'
 import {
   CRAFT_PRICE,
@@ -25,6 +26,7 @@ import AppHeader from '@/components/AppHeader.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
 import ModeSwitch from '@/components/ModeSwitch.vue'
+import SetGoal from '@/components/SetGoal.vue'
 import RecycleDuplicates from '@/components/RecycleDuplicates.vue'
 
 // Challenge mode hub: coins, daily reward, missions, the separate
@@ -32,6 +34,7 @@ import RecycleDuplicates from '@/components/RecycleDuplicates.vue'
 const { t, locale } = useI18n()
 const challenge = useChallengeStore()
 const collection = useChallengeCollectionStore()
+const setsStore = useSetsStore()
 const { games, load: loadGames } = useGames()
 
 const firstLoad = computed(() => !challenge.loaded && !challenge.error)
@@ -54,6 +57,7 @@ let resetTimer = null
 onMounted(() => {
   challenge.load({ force: true })
   collection.load()
+  setsStore.load()
   loadGames()
   clock = setInterval(() => (now.value = Date.now()), 30_000)
   // Reload right after the reset so new missions and the reward show up
@@ -168,6 +172,27 @@ function onRecycleError(err) {
 }
 
 const formatNumber = (value) => value.toLocaleString(locale.value)
+
+// ---------- Rules ----------
+
+// "How the challenge works" sits at the top, open on the first visit on this
+// device (it used to be the last thing on a 10-screen page), folded after
+const RULES_SEEN_KEY = 'pb-challenge-rules-seen'
+function rulesSeen() {
+  try {
+    return localStorage.getItem(RULES_SEEN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+const rulesOpen = ref(!rulesSeen())
+onMounted(() => {
+  try {
+    localStorage.setItem(RULES_SEEN_KEY, '1')
+  } catch {
+    // private mode: open again next time
+  }
+})
 </script>
 
 <template>
@@ -193,10 +218,11 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
         </p>
         <div v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
 
-        <ul v-if="state.daily_available || finishedMissions.length || challenge.tradeNews" class="ch-waiting" role="list">
+        <ul v-if="state.daily_available || finishedMissions.length || challenge.tradeNews" id="ch-top" class="ch-waiting" role="list">
           <li v-if="state.daily_available">
             <span>{{ t('challenge.waitingDaily') }}</span>
-            <button type="button" class="btn btn-primary btn-sm ch-claim" :disabled="busy === 'daily'" @click="claimDaily">
+            <button type="button" class="btn btn-primary btn-sm glow-button ch-claim" :disabled="busy === 'daily'" @click="claimDaily">
+              <span v-if="busy === 'daily'" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
               {{ t('challenge.claim') }} <CoinAmount :amount="state.daily_reward" signed />
             </button>
           </li>
@@ -213,6 +239,40 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
             <RouterLink :to="{ name: 'challenge-trades' }" class="btn btn-outline-secondary btn-sm">{{ t('challenge.seeAnswers') }}</RouterLink>
           </li>
         </ul>
+
+        <!-- ============ Rules (open on the first visit, then folded) ============ -->
+        <details class="ch-rules" :open="rulesOpen" @toggle="rulesOpen = $event.target.open">
+          <summary>{{ t('challenge.rulesTitle') }}</summary>
+          <ul class="ch-rules-list">
+            <li>{{ t('challenge.rules.start', { coins: formatNumber(START_COINS) }) }}</li>
+            <li>{{ t('challenge.rules.pack', { coins: formatNumber(PACK_PRICE) }) }}</li>
+            <li>{{ t('challenge.rules.daily') }}</li>
+            <li>{{ t('challenge.rules.rates') }}</li>
+            <li>{{ t('challenge.rules.godPack', { odds: formatNumber(GOD_PACK_ODDS) }) }}</li>
+            <li>{{ t('challenge.rules.recycle') }}</li>
+            <li>{{ t('challenge.rules.minigame') }}</li>
+            <li>{{ t('challenge.rules.separate') }}</li>
+          </ul>
+          <div class="ch-table-wrap">
+            <table class="ch-table">
+              <caption class="visually-hidden">{{ t('challenge.rules.tableCaption') }}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{{ t('challenge.rules.rarity') }}</th>
+                  <th scope="col">{{ t('challenge.rules.recycleCol') }}</th>
+                  <th scope="col">{{ t('challenge.rules.craftCol') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="bucket in BUCKETS" :key="bucket">
+                  <th scope="row"><span class="ch-swatch" :style="{ background: `var(--pb-bucket-${bucket})` }"></span>{{ t(`challenge.buckets.${bucket}`) }}</th>
+                  <td><CoinAmount :amount="RECYCLE_VALUE[bucket]" /></td>
+                  <td><CoinAmount :amount="CRAFT_PRICE[bucket]" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
 
         <div class="ch-grid">
           <!-- ============ Wallet ============ -->
@@ -274,16 +334,10 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
                 <span class="ch-streak-reward">{{ formatNumber(day.reward) }}</span>
               </li>
             </ol>
-            <button
-              v-if="state.daily_available"
-              type="button"
-              class="btn btn-primary glow-button ch-claim"
-              :disabled="busy === 'daily'"
-              @click="claimDaily"
-            >
-              <span v-if="busy === 'daily'" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-              {{ t('challenge.claim') }} <CoinAmount :amount="state.daily_reward" signed />
-            </button>
+            <!-- Claimed from the callout at the top (it was here twice) -->
+            <p v-if="state.daily_available" class="ch-daily-ready">
+              <a href="#ch-top">{{ t('challenge.dailyReady') }}</a>
+            </p>
             <p v-else class="ch-claimed">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg>
               {{ t('challenge.dailyClaimed', { time: resetIn }) }}
@@ -372,6 +426,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
               <span :style="{ width: `${Math.max(percent, collection.entries.length ? 1.5 : 0)}%` }"></span>
             </div>
             <p class="ch-muted mt-2">{{ t('game.progress', { percent: percentLabel }) }}</p>
+            <SetGoal :entries="collection.entries" :sets="setsStore.sets" :to="(id) => ({ name: 'challenge-binder', params: { setId: id } })" />
 
             <RecycleDuplicates class="ch-recycle" @recycled="onRecycled" @error="onRecycleError" />
           </section>
@@ -414,7 +469,7 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
             >
               <span :style="{ width: `${achievementsPercent}%` }"></span>
             </div>
-            <template v-if="achievementsNext.length">
+            <template v-if="achievementsNext.length && !narrow">
               <h3 class="ch-label mt-3 mb-2">{{ t('achievements.ui.almostThere') }}</h3>
               <ul class="ch-achievements-next" role="list">
                 <AchievementTile v-for="item in achievementsNext" :key="item.id" :item="item" :rate="modeAchievements.rate(item)" />
@@ -422,40 +477,6 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
             </template>
           </section>
         </div>
-
-        <!-- ============ Rules ============ -->
-        <details class="ch-rules">
-          <summary>{{ t('challenge.rulesTitle') }}</summary>
-          <ul class="ch-rules-list">
-            <li>{{ t('challenge.rules.start', { coins: formatNumber(START_COINS) }) }}</li>
-            <li>{{ t('challenge.rules.pack', { coins: formatNumber(PACK_PRICE) }) }}</li>
-            <li>{{ t('challenge.rules.daily') }}</li>
-            <li>{{ t('challenge.rules.rates') }}</li>
-            <li>{{ t('challenge.rules.godPack', { odds: formatNumber(GOD_PACK_ODDS) }) }}</li>
-            <li>{{ t('challenge.rules.recycle') }}</li>
-            <li>{{ t('challenge.rules.minigame') }}</li>
-            <li>{{ t('challenge.rules.separate') }}</li>
-          </ul>
-          <div class="ch-table-wrap">
-            <table class="ch-table">
-              <caption class="visually-hidden">{{ t('challenge.rules.tableCaption') }}</caption>
-              <thead>
-                <tr>
-                  <th scope="col">{{ t('challenge.rules.rarity') }}</th>
-                  <th scope="col">{{ t('challenge.rules.recycleCol') }}</th>
-                  <th scope="col">{{ t('challenge.rules.craftCol') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="bucket in BUCKETS" :key="bucket">
-                  <th scope="row"><span class="ch-swatch" :style="{ background: `var(--pb-bucket-${bucket})` }"></span>{{ t(`challenge.buckets.${bucket}`) }}</th>
-                  <td><CoinAmount :amount="RECYCLE_VALUE[bucket]" /></td>
-                  <td><CoinAmount :amount="CRAFT_PRICE[bucket]" /></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </details>
 
         <RouterLink :to="{ name: 'game' }" class="ch-back"><span aria-hidden="true">←</span> {{ t('challenge.backToUnlimited') }}</RouterLink>
       </template>
@@ -564,9 +585,10 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 
 .ch-tile-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.25rem 1rem;
   margin-bottom: 0.75rem;
 }
 
@@ -754,6 +776,16 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   color: var(--pb-success-text);
   font-weight: 700;
   font-size: 0.9rem;
+}
+
+.ch-daily-ready {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+#ch-top {
+  scroll-margin-top: 1.5rem;
 }
 
 .ch-claimed svg,

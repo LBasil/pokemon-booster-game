@@ -15,7 +15,10 @@ How it works inside (every table, RPC and flow, in French):
 - **Unlimited boosters, any type**: pick a specific Pokémon set (searchable,
   grouped by year, each pack shows the set's logo and chase card, and how
   much of it you've collected in that mode, with a "Complete" badge) or "any
-  set" (one random set per pack), and how many boosters to open. Tear each
+  set" (one random set per pack), and how many boosters to open (a first
+  visit suggests Base, 151 and the newest set; on phones the count and the
+  open button stay together above the tab bar, and short phones show the
+  pack next to its name). Tear each
   pack open, flip or swipe the cards one by one (rarest last, with rarity,
   "New!" and "Wanted!" badges; hits charge up and flash), or open them all
   at once. Packs follow real pull rates: 10 cards, one guaranteed rare, a
@@ -63,8 +66,12 @@ How it works inside (every table, RPC and flow, in French):
   or keep chosen cards **out of trades** from their detail), follow your challenge booster history, and climb the two
   challenge leaderboards. Badges in the navigation show rewards to claim,
   offers to answer and answers to read; on phones the challenge strip has a
-  Trades shortcut. Every coin and card moves server-side, and the
-  unlimited collection is never touched.
+  Trades shortcut. "How the challenge works" sits at the top of its hub,
+  open on the first visit; the daily reward has one claim button (the
+  callout at the top). A new player's trades page says to open challenge
+  boosters first and suggests trainers with big collections. Every coin
+  and card moves server-side, and the unlimited collection is never
+  touched.
 - **Two modes, never mixed up**: an "Unlimited | Challenge" switch on both
   hubs, and a "Challenge mode" strip (coins + "Leave") on every challenge
   page.
@@ -75,7 +82,11 @@ How it works inside (every table, RPC and flow, in French):
 - **Collection**: every card you've pulled with completion stats and an
   estimated value (Cardmarket, or TCGplayer converted to euros for recent
   sets that have no Cardmarket price); search, filter by set, rarity or duplicates,
-  and sort — all kept in the URL. Tabs for:
+  and sort — all kept in the URL. The search knows the **French Pokémon
+  names** too ("Dracaufeu" finds Charizard; card names are English only),
+  and the card detail says the French name. Next to the overall progress,
+  the **most advanced set** ("Base: 1 / 102") is a goal within reach (also
+  on both hubs). Tabs for:
   - **Sets**: per-set completion, each opening a **binder** with every card
     of the set in number order and the missing ones greyed out in their slot;
   - **Pokédex**: national Pokédex progress (caught species in color, the
@@ -100,7 +111,8 @@ How it works inside (every table, RPC and flow, in French):
   with the boosters you open, a holo **Beta tester** badge (every account
   created before the beta ends — `BETA_END` in `src/utils/beta.js`), a showcase card, stats, rarity breakdown
   (level, stats, rarity and achievements per game mode: Challenge | Unlimited),
-  public/private switch, sound / vibration / visual effects settings, a
+  public/private switch, sound / vibration / visual effects / **larger
+  text** (bigger letters, darker secondary text) settings, a
   **booster animations** setting (Auto / Full / Light — Light, the default on
   touch screens, drops the 3D flip and the glow layers that stuttered on
   phones), and an
@@ -158,9 +170,13 @@ How it works inside (every table, RPC and flow, in French):
   professors, the League, friends, Team Star and Academy staff on cards,
   Mesagoza, Artazon and Levincia, the Scarlet & Violet sets (no routes:
   the wild Pokémon of Scarlet/Violet aren't in PokéAPI). Data for a new
-  region: `node scripts/region-tools.mjs` (PokéAPI, dev only).
+  region: `node scripts/region-tools.mjs` (PokéAPI, dev only; `fr-names`
+  rewrites `src/utils/pokemonNamesFr.js`, the French names the collection
+  search uses).
   A Steam-style **"Achievement unlocked" pop-up** (with a chime) shows at the
-  end of an opening — never mid-reveal, so nothing is spoiled — and each
+  end of an opening — never mid-reveal, so nothing is spoiled, and only
+  after a moment so the best pull is seen first; on phones a batch is one
+  pop-up ("+3 more achievements") — and each
   achievement shows the **share of players** who have it.
 - **Community**: public profiles at `/u/<username>` (readable signed out,
   so the link can be shared), a **live feed** of the latest ultra/secret

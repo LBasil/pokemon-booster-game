@@ -625,6 +625,13 @@ async function logout() {
                 </span>
                 <input type="checkbox" class="form-check-input pb-switch" role="switch" :checked="settings.effects" @change="settings.set('effects', $event.target.checked)" />
               </label>
+              <label class="switch-row form-switch">
+                <span>
+                  <span class="switch-title">{{ t('profile.largeTextLabel') }}</span>
+                  <span class="switch-desc">{{ t('profile.largeTextDesc') }}</span>
+                </span>
+                <input type="checkbox" class="form-check-input pb-switch" role="switch" :checked="settings.largeText" @change="settings.set('largeText', $event.target.checked)" />
+              </label>
               <div class="switch-row switch-row-wrap">
                 <span>
                   <span id="animations-label" class="switch-title">{{ t('profile.animationsLabel') }}</span>

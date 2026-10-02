@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { fetchChallengeCollectionOf } from '@/api/challenge'
 import { fetchPublicProfile } from '@/api/profiles'
+import { fetchLeaderboard } from '@/api/social'
 import { useAuthStore } from '@/stores/auth'
 import { useChallengeCollectionStore } from '@/stores/collection'
 import { useProfileStore } from '@/stores/profile'
@@ -35,7 +36,31 @@ onMounted(() => {
   trades.loadLocks()
   myCollection.load()
   profileStore.load()
+  loadSuggestions()
 })
+
+// A new player knows nobody: suggest the public trainers with the biggest
+// challenge collections (the "Most cards" board), the ones most likely to
+// have something to swap. Failures just leave the field on its own.
+const SUGGESTED_TRAINERS = 6
+const suggestions = ref([])
+async function loadSuggestions() {
+  try {
+    const rows = await fetchLeaderboard('challenge_unique', SUGGESTED_TRAINERS + 1)
+    await profileStore.load()
+    const me = profileStore.profile?.username?.toLowerCase()
+    suggestions.value = rows
+      .map((row) => row.username)
+      .filter((name) => name.toLowerCase() !== me)
+      .slice(0, SUGGESTED_TRAINERS)
+  } catch {
+    suggestions.value = []
+  }
+}
+function pickSuggestion(name) {
+  partnerName.value = name
+  findPartner()
+}
 
 // ---------- Trade preferences (migration 0012) ----------
 
@@ -390,6 +415,12 @@ const ago = (iso) => timeAgo(iso, locale.value)
             <button type="button" class="btn btn-outline-secondary btn-sm" @click="stopCounter">{{ t('trades.counterStop') }}</button>
           </div>
 
+          <!-- Nothing to give yet: say so before the player picks a partner -->
+          <div v-if="!countering && myCollection.loaded && !myCollection.entries.length" class="composer-empty">
+            <p>{{ t('trades.noCardsYet') }}</p>
+            <RouterLink :to="{ name: 'challenge-boosters' }" class="btn btn-primary btn-sm">{{ t('trades.openFirst') }}</RouterLink>
+          </div>
+
           <!-- What others may ask me for (migration 0012) -->
           <div v-if="!countering" class="trade-prefs">
             <label class="trade-pref form-switch">
@@ -441,6 +472,14 @@ const ago = (iso) => timeAgo(iso, locale.value)
               <button type="submit" class="btn btn-outline-secondary" :disabled="!partnerName.trim() || partnerState === 'loading'">
                 {{ t('trades.find') }}
               </button>
+            </div>
+            <div v-if="suggestions.length && !partner && partnerState !== 'loading'" class="composer-suggest">
+              <span id="trade-suggest-label" class="composer-suggest-label">{{ t('trades.suggestTitle') }}</span>
+              <ul class="composer-suggest-list" role="list" aria-labelledby="trade-suggest-label">
+                <li v-for="name in suggestions" :key="name">
+                  <button type="button" class="composer-suggest-chip" @click="pickSuggestion(name)">{{ name }}</button>
+                </li>
+              </ul>
             </div>
             <p v-if="partnerState === 'empty'" class="composer-hint">{{ t('trades.partnerEmpty', { name: partnerName.trim() }) }}</p>
             <p v-if="partnerState === 'closed'" class="composer-hint">{{ t('trades.partnerClosed', { name: partner.username }) }}</p>
@@ -889,6 +928,63 @@ const ago = (iso) => timeAgo(iso, locale.value)
   margin: 0.5rem 0 0;
   color: var(--pb-text-muted);
   font-size: 0.9rem;
+}
+
+.composer-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.75rem 0.75rem 1rem;
+  border-radius: var(--pb-radius-md);
+  border: 1px solid color-mix(in srgb, var(--pb-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--pb-accent) 12%, var(--pb-bg-elevated));
+  font-weight: 700;
+}
+
+.composer-empty p {
+  margin: 0;
+}
+
+.composer-suggest {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.composer-suggest-label {
+  color: var(--pb-text-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.composer-suggest-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.composer-suggest-chip {
+  min-height: 36px;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-surface);
+  color: var(--pb-text);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+@media (hover: hover) {
+  .composer-suggest-chip:hover {
+    border-color: var(--pb-ring);
+  }
 }
 
 .composer-pickers {

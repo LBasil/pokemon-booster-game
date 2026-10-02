@@ -57,3 +57,20 @@ export function groupSetsByYear(sets, query = '') {
 
   return [...groups].map(([year, list]) => ({ year, sets: list }))
 }
+
+// Sets suggested on a first visit to the booster page: the one every
+// nostalgic player looks for, the Kanto favourite, and the newest set
+export const STARTER_SET_IDS = ['base1', 'sv3pt5']
+
+/**
+ * Up to 3 sets to suggest to a player who never opened a pack: Base, 151,
+ * then the newest openable set (subsets skipped), each listed once.
+ * @param {{ id: string, release_date: string|null, parent_set_id?: string|null }[]} sets
+ */
+export function starterSets(sets) {
+  const openable = boosterSets(sets)
+  const picks = STARTER_SET_IDS.map((id) => openable.find((set) => set.id === id)).filter(Boolean)
+  const newest = [...openable].sort((a, b) => (b.release_date ?? '').localeCompare(a.release_date ?? ''))[0]
+  if (newest && !picks.includes(newest)) picks.push(newest)
+  return picks
+}

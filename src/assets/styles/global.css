@@ -130,6 +130,13 @@
   --pb-electrode-edge: #1e293b;
 }
 
+/* Larger text (Profile > Settings, settings.largeText): every rem grows,
+   and secondary text gets closer to the main color, in both themes */
+html.pb-text-large {
+  font-size: 112.5%;
+  --pb-text-muted: color-mix(in srgb, var(--pb-text) 78%, var(--pb-bg));
+}
+
 /* Map tokens onto Bootstrap so its components follow the design system */
 :root,
 [data-bs-theme='light'],

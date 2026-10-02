@@ -88,3 +88,14 @@ test('players who joined during the beta wear the beta tester badge', async ({ p
   await page.goto('/u/misty')
   await expect(page.locator('.trainer-card .beta-badge')).toContainText('Beta tester')
 })
+
+test('larger text can be turned on, and stays on', async ({ page }) => {
+  await signIn(page)
+  await mockSupabase(page)
+  await page.goto('/profile')
+  await expect(page.locator('html')).not.toHaveClass(/pb-text-large/)
+  await page.getByRole('switch', { name: /Larger text/ }).check()
+  await expect(page.locator('html')).toHaveClass(/pb-text-large/)
+  await page.reload()
+  await expect(page.locator('html')).toHaveClass(/pb-text-large/)
+})

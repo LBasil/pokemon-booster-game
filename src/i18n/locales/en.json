@@ -130,7 +130,8 @@
     "bonusCards": "+{count} bonus cards",
     "completion": "{owned} / {total} cards collected ({percent}%)",
     "completionLabel": "Set completion",
-    "complete": "Complete"
+    "complete": "Complete",
+    "starterTitle": "Not sure? Start with"
   },
   "collection": {
     "title": "My collection",
@@ -210,7 +211,11 @@
     "share": "Share",
     "shareText": "{name} pulled {card} on PokéBooster!",
     "shareDownloaded": "Image downloaded. Share it wherever you like.",
-    "shareError": "Couldn't create the image."
+    "shareError": "Couldn't create the image.",
+    "frenchName": "In French: {name}",
+    "goalLabel": "Most advanced set:",
+    "goalCount": "{owned} / {total} ({percent}%)",
+    "goalAria": "{name} completion"
   },
   "profile": {
     "title": "Profile",
@@ -302,7 +307,9 @@
     "askForCard": "Ask for it",
     "unlimitedCollection": "Unlimited collection",
     "unlimitedDesc": "Cards from the unlimited boosters. Trades only happen in the challenge mode.",
-    "showMore": "Show more ({count})"
+    "showMore": "Show more ({count})",
+    "largeTextLabel": "Larger text",
+    "largeTextDesc": "Bigger letters and darker secondary text, easier to read."
   },
   "notFound": {
     "title": "This booster is empty",
@@ -553,7 +560,8 @@
       "copies": "{count}/{total}",
       "less": "One copy less of {name}",
       "more": "One copy more of {name}"
-    }
+    },
+    "dailyReady": "Ready to claim: tap the button at the top of the page"
   },
   "trades": {
     "title": "Trades",
@@ -669,7 +677,10 @@
       "ask": "Ask for it",
       "none": "Nobody has it in double right now. Try again later, or craft it.",
       "unavailable": "This search isn't available yet."
-    }
+    },
+    "noCardsYet": "Your challenge collection is empty: open a few challenge boosters to have cards to trade.",
+    "openFirst": "Open challenge boosters",
+    "suggestTitle": "Or pick a player with a big collection:"
   },
   "games": {
     "title": "Mini-games",

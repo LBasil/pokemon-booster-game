@@ -10,6 +10,7 @@ import { useTradesStore } from '@/stores/trades'
 import { useWishlistStore } from '@/stores/wishlist'
 import { craftPrice, recycleValue } from '@/utils/challenge'
 import { cardNumber } from '@/utils/collection'
+import { frenchName } from '@/utils/pokemonNamesFr'
 import { rarityLabelKey, rarityTier } from '@/utils/rarity'
 import { setLogoUrl } from '@/utils/sets'
 import CoinAmount from '@/components/CoinAmount.vue'
@@ -190,6 +191,13 @@ async function share() {
     sharing.value = false
   }
 }
+// Card names are English only: in French, name the Pokémon as players know
+// it ("Charizard ex" -> Dracaufeu), unless it's the same word (Pikachu)
+const frName = computed(() => {
+  if (!locale.value.startsWith('fr') || !card.value) return null
+  const name = frenchName(card.value.national_pokedex_number)
+  return name && !card.value.name.toLowerCase().includes(name.toLowerCase()) ? name : null
+})
 const tier = computed(() => (card.value ? rarityTier(card.value) : 'common'))
 const bucket = computed(() => (card.value ? rarityLabelKey(card.value) : 'common'))
 
@@ -264,6 +272,7 @@ function onPointerUp(event) {
         </div>
 
         <h2 class="detail-name">{{ card.name }}</h2>
+        <p v-if="frName" class="detail-fr-name">{{ t('collection.frenchName', { name: frName }) }}</p>
 
         <div class="detail-chips">
           <span v-if="bucket !== 'common' && bucket !== 'uncommon'" class="tier-chip" :data-tier="tier">
@@ -549,6 +558,12 @@ function onPointerUp(event) {
   font-size: clamp(1.6rem, 4vw, 2.2rem);
   font-weight: 800;
   overflow-wrap: anywhere;
+}
+
+.detail-fr-name {
+  margin: -0.35rem 0 0;
+  color: var(--pb-text-muted);
+  font-weight: 600;
 }
 
 .detail-chips {

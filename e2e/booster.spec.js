@@ -148,3 +148,41 @@ test('a long set name never pushes the "Complete" badge off screen', async ({ pa
   }
   await inView(page.locator('.set-option.selected .set-option-completion'))
 })
+
+test('a new player is offered a few well-known sets to start with', async ({ page }) => {
+  await mockSupabase(page, { collection: [] })
+  await page.goto('/boosters')
+  const starters = page.getByRole('radiogroup', { name: 'Not sure? Start with' })
+  await expect(starters.getByRole('radio')).toHaveText(['Base · 1999', '151 · 2023'])
+  await starters.getByRole('radio', { name: /Base/ }).click()
+  await expect(page.locator('.preview-name')).toHaveText('Base')
+  await expect(starters.getByRole('radio', { name: /Base/ })).toHaveAttribute('aria-checked', 'true')
+})
+
+test('a player who already has cards is not offered the starter sets', async ({ page }) => {
+  await mockSupabase(page)
+  await page.goto('/boosters')
+  await expect(page.locator('.preview-name')).toBeVisible()
+  await expect(page.locator('.starter-sets')).toHaveCount(0)
+})
+
+test('on phones the pack count and the set name are never hidden behind the stuck open button', async ({ page }, info) => {
+  test.skip(info.project.name !== 'mobile', 'phone layout')
+  await mockSupabase(page)
+  // Pixel 7, then a short phone (iPhone SE)
+  for (const size of [null, { width: 375, height: 667 }]) {
+    if (size) await page.setViewportSize(size)
+    for (const path of ['/boosters', '/challenge/boosters']) {
+      await page.goto(path)
+      for (const target of [page.getByRole('radio', { name: '3', exact: true }), page.locator('.preview-name')]) {
+        await expect(target).toBeVisible()
+        const covered = await target.evaluate((el) => {
+          const box = el.getBoundingClientRect()
+          const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+          return !el.contains(hit)
+        })
+        expect(covered, `${path} ${size ? 'short phone' : ''}`).toBe(false)
+      }
+    }
+  }
+})

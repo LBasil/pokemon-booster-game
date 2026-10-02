@@ -29,6 +29,8 @@ describe('trades', () => {
     expect(searchEntries(entries, 'flabebe')).toHaveLength(1)
     expect(searchEntries(entries, '  PIKA ')).toEqual([entries[1]])
     expect(searchEntries(entries, '')).toBe(entries)
+    expect(searchEntries([{ cards: { name: 'Pikachu', national_pokedex_number: 25 } }, { cards: { name: 'Charizard', national_pokedex_number: 6 } }], 'salameche')).toEqual([])
+    expect(searchEntries([{ cards: { name: 'Charmander', national_pokedex_number: 4 } }], 'salameche')).toHaveLength(1)
   })
 
   it('tells a new offer for me and unseen answers to mine, nothing else', () => {

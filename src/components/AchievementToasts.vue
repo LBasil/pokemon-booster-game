@@ -44,7 +44,7 @@ const eyebrow = (toast) => {
       </div>
       <div v-for="toast in store.toasts" :key="toast.key" class="ach-toast" role="status">
         <RouterLink
-          :to="{ name: modeRoutes(toast.mode).achievements, query: toast.item ? { cat: toast.item.category } : { status: 'unlocked' } }"
+          :to="{ name: modeRoutes(toast.mode).achievements, query: toast.item && !toast.extra ? { cat: toast.item.category } : { status: 'unlocked' } }"
           class="ach-toast-link"
           @click="store.dismiss(toast.key)"
         >
@@ -54,8 +54,9 @@ const eyebrow = (toast) => {
           <span v-if="toast.item" class="ach-toast-body">
             <span class="ach-toast-eyebrow">{{ eyebrow(toast) }}</span>
             <span class="ach-toast-title">{{ text.title(toast.item) }}</span>
-            <span class="ach-toast-desc">{{ text.desc(toast.item) }}</span>
-            <span v-if="rateOf(toast.item, store.rates[toast.mode], true) !== null" class="ach-toast-rate">
+            <span v-if="toast.extra" class="ach-toast-desc">{{ t('achievements.ui.moreUnlocked', { count: toast.extra }, toast.extra) }}</span>
+            <span v-else class="ach-toast-desc">{{ text.desc(toast.item) }}</span>
+            <span v-if="!toast.extra && rateOf(toast.item, store.rates[toast.mode], true) !== null" class="ach-toast-rate">
               {{ text.rate(rateOf(toast.item, store.rates[toast.mode], true)) }}
             </span>
           </span>

@@ -162,7 +162,7 @@ ne recharge pas si c'est déjà chargé (sauf `force`), et expose `loading`,
 | `superEffective` | État de « Super efficace ! » : parties payées restantes, record, partie en cours | page du jeu, hub des jeux | `unavailable` si la migration 0015 manque **ou** si aucune carte n'a encore ses faiblesses (`ready: false`) ; répercute le solde de pièces |
 | `evolutionChain` | État de « Chaîne d'évolution » : parties payées restantes, record, partie en cours | page du jeu, hub des jeux | `answer(order)`, `stop()` (sans la RPC de 0019 : la partie s'arrête à l'écran et expire côté serveur) ; `unavailable` si la migration 0018 manque **ou** si aucune lignée complète n'est encore connue (`ready: false`) ; répercute le solde de pièces |
 | `achievements` | Toasts, taux par mode, données serveur par mode | `check(mode)` un peu partout | Voir [Parcours > Succès](05-parcours.md#7-succès) |
-| `settings` | `sound`, `vibration`, `effects`, `animations`, `recycleKeep` (exemplaires gardés au recyclage, 1 à 4) | — | Par appareil (`localStorage`). `liteAnimations` = animations légères sur écran tactile en mode `auto` |
+| `settings` | `sound`, `vibration`, `effects`, `animations`, `recycleKeep` (exemplaires gardés au recyclage, 1 à 4), `largeText` (texte agrandi : `html.pb-text-large`, posé par `App.vue`) | — | Par appareil (`localStorage`). `liteAnimations` = animations légères sur écran tactile en mode `auto` |
 | `theme` | `isLight` | `main.js` | Pose `data-bs-theme` sur `<html>` (Bootstrap + tokens suivent) |
 
 ---
@@ -218,7 +218,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | Fichier | Contenu principal |
 | --- | --- |
 | `rarity.js` | `rarityBucket(label)` (**miroir** de `rarity_bucket()` en SQL), `BUCKETS`, `rarityTier` (3 niveaux visuels), `rarityRank`, `sortForReveal`, `bestPull` |
-| `collection.js` | `filterEntries`, `sortEntries`, `setProgress`, `collectionStats` (cartes, uniques, sets, valeur), `binderSlots`, `pokedexSlots`, `cardNumber` |
+| `collection.js` | `filterEntries` (la recherche compare aussi le nom français du Pokémon : `cardNameMatches`, `searchNeedle`), `sortEntries`, `setProgress`, `collectionStats` (cartes, uniques, sets, valeur), `binderSlots`, `pokedexSlots`, `cardNumber` |
 | `profile.js` | `boostersOpened`, `packSummary` (nombre exact de boosters par mode), `RANKS` + `rankFor` (niveau), `rarityBreakdown`, `validateUsername` |
 | `achievements.js` | Les ~1210 définitions (`REGION_FOCUS` : une boucle par catégorie ajoute les succès de chaque fichier de région) (catégorie, `sub` = sous-catégorie, `tags` = régions du filtre), `collectorStats` (tout en une passe), `achievements()`, `nextUp`, `achievementProgress`, filtres, taux, tri des toasts |
 | `pokemonGroups.js` | Listes de numéros du Pokédex des succès « possède-les tous » : lignées, starters, légendaires, fabuleux, Ultra-Chimères, badges d'arène, Conseil 4, Maîtres, rivaux (Kanto ; les lignées sont toutes dans les fichiers de région) |
@@ -231,7 +231,8 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `evolutionChain.js` | Règles de « Chaîne d'évolution » (**miroir** de `evolution_chain_rules()` / `evolution_chain_intruders()`) : intrus selon la série, pièces, `chainLength(run)` (2 ou 3 cartes, 3 avant 0019), `togglePick` (choisir / reprendre une carte) |
 | `cardPrice.js` | `cardPriceEur(card)` : prix en € d'une carte pokemontcg.io (Cardmarket, sinon TCGplayer converti). Utilisé par `scripts/populate.mjs` |
 | `trades.js` | Limites des échanges (**miroir** de `propose_trade`), `groupTrades`, `searchEntries`, `tradeNews` (ce qu'une ligne temps réel signifie pour le joueur) |
-| `sets.js` | URL des logos, sous-sets (`isSubset`, `packSetId`, `subsetsOf`), `groupSetsByYear` |
+| `sets.js` | URL des logos, sous-sets (`isSubset`, `packSetId`, `subsetsOf`), `groupSetsByYear`, `starterSets` (Set de base, 151 et le set le plus récent, proposés au premier booster) |
+| `pokemonNamesFr.js` | Généré par `node scripts/region-tools.mjs fr-names` (ne pas éditer) : `frenchName(dex)`, nom français officiel de chaque Pokémon (PokéAPI). Les noms de cartes sont en anglais ; la recherche et la fiche d'une carte s'en servent |
 | `games.js` | Registre des mini-jeux |
 | `beta.js` | `BETA_END` (null tant que la bêta dure) + `isBetaTester(createdAt)` : inscrit avant la fin de la bêta |
 | `cards.js`, `progress.js`, `time.js`, `tilt.js`, `appVersion.js`, `chunkError.js` | Petits utilitaires (regroupement, pourcentage, « il y a 3 min », inclinaison 3D, détection de build, erreur de chunk) |
@@ -251,6 +252,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `SetPicker` | Grille de sets cherchable, groupée par année (sous-sets masqués), avec la complétion de chaque set commencé (prop `owned`) |
 | `PriceChart` | Courbe du prix d'une carte (un relevé par jour d'import) |
 | `PokedexGrid`, `WishlistGrid`, `ShowcasePicker`, `RecycleDuplicates` | Onglets Pokédex et souhaits, choix de la vitrine, recyclage (tout, ou « Choisir… » par carte ou par rareté, − / + pour le nombre d'exemplaires) |
+| `SetGoal` | « Série la plus avancée : Base, 1 / 102 (1 %) » + barre : un objectif à portée du débutant, sous la progression globale (hubs Illimité et Défi, collection ; prop `to` = lien vers le classeur) |
 | `CopyStepper` | − n/max + : nombre d'exemplaires à recycler (liste « Choisir… » et fiche d'une carte) |
 | `BetaBadge` | Pastille « Bêta-testeur » (bordure holo + reflet qui passe, coupé sans effets / mouvement réduit), `compact` = juste « β ». Profil et tuile profil du hub |
 | `UsernameCombobox` | Champ pseudo avec suggestions des dresseurs publics (`searchUsernames`, 200 ms après la frappe, 8 au maximum, flèches + Entrée, Échap). Événement `pick` au choix d'une suggestion. Partenaire d'échange |

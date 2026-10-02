@@ -193,6 +193,10 @@ describe('toastBatch', () => {
     expect(batch).toHaveLength(MAX_TOASTS)
     expect(batch.at(-1)).toEqual({ more: 7 - (MAX_TOASTS - 1) })
   })
+  it('folds everything into one toast when max is 1 (phones)', () => {
+    expect(toastBatch(items(1), 1)).toEqual([{ item: { id: 'a0' } }])
+    expect(toastBatch(items(4), 1)).toEqual([{ item: { id: 'a0' }, extra: 3 }])
+  })
 })
 
 describe('newlyUnlocked', () => {

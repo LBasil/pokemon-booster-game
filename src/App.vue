@@ -27,6 +27,8 @@ watch(
 // page fade in global.css; PointerFx reads the setting itself
 const settings = useSettingsStore()
 watchEffect(() => document.documentElement.classList.toggle('pb-fx-off', !settings.effects))
+// Larger text (same page): bigger rems + darker secondary text
+watchEffect(() => document.documentElement.classList.toggle('pb-text-large', settings.largeText))
 </script>
 
 <template>

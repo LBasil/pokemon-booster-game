@@ -230,3 +230,26 @@ test('on phones the weekly missions fold under their title until opened', async 
   await toggle.click()
   await expect(page.locator('.ch-mission').filter({ hasText: 'Open 25 boosters' })).toBeVisible()
 })
+
+test('"How the challenge works" is open at the top on the first visit, folded after', async ({ page }) => {
+  await mockSupabase(page)
+  await page.goto('/challenge')
+  const rules = page.locator('details.ch-rules')
+  await expect(rules).toHaveAttribute('open', '')
+  // Above the tiles, below what's waiting
+  const [rulesTop, walletTop] = await Promise.all([
+    rules.evaluate((el) => el.getBoundingClientRect().top),
+    page.locator('.ch-wallet').evaluate((el) => el.getBoundingClientRect().top),
+  ])
+  expect(rulesTop).toBeLessThan(walletTop)
+  await page.reload()
+  await expect(rules).not.toHaveAttribute('open', '')
+})
+
+test('the daily reward is claimed from one button only, the tile points to it', async ({ page }) => {
+  await mockSupabase(page)
+  await page.goto('/challenge')
+  await expect(page.locator('.ch-daily button')).toHaveCount(0)
+  await expect(page.locator('.ch-daily')).toContainText('Ready to claim')
+  await expect(page.locator('.ch-waiting').getByRole('button', { name: /Claim/ })).toHaveCount(1)
+})

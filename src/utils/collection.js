@@ -1,3 +1,4 @@
+import { frenchName } from '@/utils/pokemonNamesFr'
 import { rarityBucket } from '@/utils/rarity'
 
 // Collection entries are { card_id, quantity, acquired_at, cards: {...} }
@@ -27,6 +28,19 @@ const normalize = (text) =>
     .trim()
 
 /**
+ * Whether a card's name contains `needle` (already normalized). Card names
+ * are English only, so the Pokémon's French name counts too: "dracaufeu"
+ * finds "Charizard ex".
+ */
+export function cardNameMatches(card, needle) {
+  if (!needle) return true
+  return normalize(card.name).includes(needle) || normalize(frenchName(card.national_pokedex_number)).includes(needle)
+}
+
+/** `query` lowercased, trimmed and without accents, for cardNameMatches(). */
+export const searchNeedle = (query) => normalize(query)
+
+/**
  * @param {object[]} entries
  * @param {{ query?: string, setId?: string, rarity?: string, duplicates?: boolean, dex?: number|null }} filters
  */
@@ -38,7 +52,7 @@ export function filterEntries(entries, { query = '', setId = '', rarity = 'all',
     if (dex && card.national_pokedex_number !== dex) return false
     if (rarity !== 'all' && FILTER_OF_BUCKET[bucketOf(card)] !== rarity) return false
     if (duplicates && entry.quantity < 2) return false
-    if (needle && !normalize(card.name).includes(needle)) return false
+    if (!cardNameMatches(card, needle)) return false
     return true
   })
 }

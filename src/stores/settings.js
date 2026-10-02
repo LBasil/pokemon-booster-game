@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 const STORAGE_KEY = 'settings'
-const KEYS = ['sound', 'vibration', 'effects', 'animations', 'recycleKeep']
+const KEYS = ['sound', 'vibration', 'effects', 'animations', 'recycleKeep', 'largeText']
 
 // Booster animations: 'full' (3D flip, tear along the zigzag, glows), 'light'
 // (2D only: fades and slides, no blur or blend layers — phones' GPUs choked on
@@ -28,6 +28,8 @@ export const useSettingsStore = defineStore('settings', {
     animations: 'auto',
     // Challenge recycling: copies of each card it always keeps (1 to 4)
     recycleKeep: 1,
+    // Bigger, higher-contrast text (html.pb-text-large in global.css)
+    largeText: false,
     ...readSaved(),
   }),
   getters: {

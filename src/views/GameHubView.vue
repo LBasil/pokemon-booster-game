@@ -11,15 +11,18 @@ import BoosterArt from '@/components/BoosterArt.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
 import HoloCard from '@/components/HoloCard.vue'
 import ModeSwitch from '@/components/ModeSwitch.vue'
+import SetGoal from '@/components/SetGoal.vue'
 import { fetchFeed } from '@/api/social'
 import { useChallengeStore } from '@/stores/challenge'
 import { useProfileStore } from '@/stores/profile'
+import { useSetsStore } from '@/stores/sets'
 import { timeAgo } from '@/utils/time'
 
 const { t, locale } = useI18n()
 const auth = useAuthStore()
 const profileStore = useProfileStore()
 const collectionStore = useCollectionStore()
+const setsStore = useSetsStore()
 // Coins only once the challenge was visited (loading it creates the wallet);
 // what's waiting comes from the navigation badge (AppHeader loads it)
 const challenge = useChallengeStore()
@@ -33,6 +36,7 @@ onMounted(async () => {
     .then((pulls) => (livePulls.value = pulls))
     .catch(() => {})
   collectionStore.load()
+  setsStore.load()
 })
 
 const formatNumber = (value) => value.toLocaleString(locale.value)
@@ -116,6 +120,7 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
             <p class="hub-tile-desc mb-0 mt-2">
               {{ t('game.progress', { percent: percentLabel }) }}
             </p>
+            <SetGoal :entries="collectionStore.entries" :sets="setsStore.sets" />
           </template>
         </RouterLink>
 

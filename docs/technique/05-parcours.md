@@ -116,7 +116,14 @@ sequenceDiagram
    nom et dans `SetPicker` (prop `owned`), avec un badge « Complète » à
    100 % ; elle suit les paquets ouverts pendant la visite. En Défi, le
    bouton affiche le coût (100 pièces par booster) et se désactive si le
-   solde est insuffisant.
+   solde est insuffisant. **Premier booster** : tant que la collection du
+   mode est vide, « Pas d'idée ? Commence par » propose le Set de base,
+   151 et le set le plus récent (`starterSets()` de `src/utils/sets.js`).
+   **Téléphone** : le choix 1/3/5/10 et le bouton « Ouvrir » forment un
+   bloc collé au-dessus de la barre d'onglets (`.open-actions`) ; avant,
+   le bouton seul restait collé et cachait le nombre. Sur un écran court
+   (hauteur ≤ 760 px, iPhone SE), le booster est réduit et placé à côté
+   de son nom (`.preview-row`), pour que le nom reste visible.
 3. **`startOpening()`** : retient le set et le nombre, passe en
    `phase = 'open'`, puis `prepareBooster()`.
 4. **`drawPack()`** : **un appel serveur par booster**. Le pack est tiré
@@ -148,8 +155,12 @@ sequenceDiagram
    téléphone, au-dessus de la barre d'onglets) montent au-dessus.
 10. **Succès** : tant que `phase === 'open'`, `achievements.paused` bloque
     toute vérification (même déclenchée ailleurs, par exemple un échange
-    accepté en direct) pour ne rien dévoiler. En `done`, `check(mode)`
-    affiche les succès débloqués.
+    accepté en direct) pour ne rien dévoiler. En `done`, `check(mode, {
+    delay: 1500 })` affiche les succès débloqués après 1,5 s, pour que la
+    meilleure carte soit vue avant. Sur téléphone et tablette, un lot de
+    succès tient en un seul toast (le plus rare, puis « +N autres succès »,
+    lien vers les succès débloqués) : deux ou trois toasts cachaient la
+    moitié du récapitulatif.
 
 Si un appel échoue (réseau, pièces insuffisantes), le message s'affiche
 et on revient à la sélection, ou au récapitulatif si des cartes ont déjà
@@ -288,7 +299,7 @@ l'Illimité (bug corrigé le 2026-09-27).
 | Changer de pseudo | `validateUsername` (2–24 caractères) puis `profileStore.update({ username })`. Pris → « déjà utilisé » (unicité sans tenir compte de la casse) |
 | Choisir la vitrine | `ShowcasePicker` → `update({ showcase_card_id })` ; le serveur refuse une carte non possédée |
 | Profil public/privé | `update({ is_public })`. Un profil privé disparaît du fil, des classements et de `/u/…` |
-| Réglages (son, vibration, effets, animations) | `settingsStore.set()`, par appareil, rien côté serveur |
+| Réglages (son, vibration, effets, texte agrandi, animations) | `settingsStore.set()`, par appareil, rien côté serveur. « Texte plus grand » (`largeText`) : `html.pb-text-large` agrandit tous les `rem` (112,5 %) et fonce `--pb-text-muted` |
 | Installer l'app | `promptInstall()` |
 | Déconnexion | `auth.signOut()` puis retour à l'accueil (bouton sur cette page uniquement) |
 
@@ -311,6 +322,15 @@ l'Illimité (bug corrigé le 2026-09-27).
 - Tout le filtrage/tri est local (`filterEntries`, `sortEntries`) : la
   collection est chargée en une requête, puis affichée 48 cartes à la fois
   au fil du défilement (`IntersectionObserver`).
+- **Recherche en français** : les noms de cartes sont en anglais ; la
+  recherche compare aussi le nom français du Pokémon (`frenchName()` de
+  `src/utils/pokemonNamesFr.js`, par numéro du Pokédex), donc
+  « Dracaufeu » trouve « Charizard ex ». Même chose dans les sélecteurs
+  d'échange (`searchEntries`). En français, la fiche d'une carte affiche
+  « En français : Dracaufeu » sous le nom (sauf si c'est le même mot).
+- **Objectif à portée** : sous « Cartes uniques 10 / 20 670 », `SetGoal`
+  affiche la série la plus avancée (`setProgress()[0]`) avec un lien vers
+  son classeur ; aussi sur les tuiles collection des deux hubs.
 - En Défi : `RecycleDuplicates` (« N doublons → +X pièces », en deux
   temps) ; la fiche carte propose de fabriquer ou recycler.
 - La fiche carte (`CardDetail`) charge l'historique de prix
@@ -333,6 +353,14 @@ Page : [ChallengeView.vue](../../src/views/ChallengeView.vue) (`/challenge`).
 Au chargement : `challenge.load({ force: true })` (**crée le portefeuille
 avec 1000 pièces au premier passage**), la collection Défi, le statut des
 mini-jeux ; un minuteur recharge l'état juste après 00:00 UTC.
+
+Ordre de la page : ce qui attend le joueur (`.ch-waiting` : récompense du
+jour, missions finies, offres), puis « Comment marche le défi »
+(`<details>`, **ouvert à la première visite** sur l'appareil, replié
+ensuite : `localStorage pb-challenge-rules-seen`), puis les tuiles. La
+récompense du jour ne se réclame que depuis l'encadré du haut ; la tuile
+garde la série de 7 jours et renvoie vers ce bouton. Sur téléphone, la
+tuile Succès n'affiche pas « Presque ! » (la page des succès les a).
 
 | Action | Store → RPC | Ce que fait le serveur |
 | --- | --- | --- |
@@ -380,6 +408,13 @@ la page où il mène (encadré `.ch-waiting` en haut de `/challenge`).
 Page : [TradesView.vue](../../src/views/TradesView.vue)
 (`/challenge/trades`). Uniquement avec la collection Défi (en Illimité,
 toute carte est à un booster près).
+
+**Nouveau joueur** : collection Défi vide → un encadré en haut de « Nouvelle
+offre » dit d'ouvrir d'abord des boosters du défi (lien). Sous le champ
+du partenaire, « Ou choisis un dresseur qui a une grosse collection »
+propose jusqu'à 6 pseudos du classement « Le plus de cartes »
+(`leaderboard('challenge_unique')`, jamais soi-même) ; un tap ouvre ses
+cartes comme une recherche.
 
 ```mermaid
 sequenceDiagram
@@ -536,7 +571,7 @@ flowchart TD
   C --> D["liste débloquée maintenant"]
   D --> E{"déjà vus sur cet appareil ?<br/>localStorage par compte et mode<br/>+ ids déjà enregistrés côté serveur"}
   E -- "première fois" --> F["référence silencieuse"]
-  E -- "nouveaux ids" --> G["toasts (3 max, les plus rares d'abord, puis « +N »)"]
+  E -- "nouveaux ids" --> G["toasts (3 max, les plus rares d'abord, puis « +N » ;<br/>téléphone : 1 seul, « +N autres succès »)"]
   F --> H["record_achievements(ids manquants, mode)"]
   G --> H
   H --> I["taux rafraîchis"]

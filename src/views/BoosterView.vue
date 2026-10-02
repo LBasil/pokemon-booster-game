@@ -19,7 +19,7 @@ import { groupCardsByQuantity } from '@/utils/cards'
 import { setCompletion } from '@/utils/collection'
 import { PACK_PRICE } from '@/utils/challenge'
 import { bestPull, rarityLabelKey, rarityRank, rarityTier, sortForReveal } from '@/utils/rarity'
-import { packSetId as parentPackOf, setLogoUrl, setSymbolUrl, subsetsOf } from '@/utils/sets'
+import { packSetId as parentPackOf, setLogoUrl, setSymbolUrl, starterSets, subsetsOf } from '@/utils/sets'
 import AppHeader from '@/components/AppHeader.vue'
 import BoosterArt from '@/components/BoosterArt.vue'
 import BoosterPack, { TEAR_MS, TEAR_MS_LITE } from '@/components/BoosterPack.vue'
@@ -162,6 +162,14 @@ function packArt(set) {
 const pack = computed(() => packArt(selectedSet.value))
 
 const releaseYear = computed(() => selectedSet.value?.release_date?.slice(0, 4) ?? null)
+
+// A player who never opened a pack in this mode gets a few well-known sets
+// to start with, instead of only the mystery "any set" pack
+const starters = computed(() => (owned.value?.size === 0 ? starterSets(sets.value) : []))
+function pickStarter(setId) {
+  selectedSetId.value = setId
+  markPicked()
+}
 
 // Desktop shows the picker inline; phones open it in a bottom sheet
 const desktopQuery = window.matchMedia('(min-width: 992px)')
@@ -391,11 +399,14 @@ function backToSelect() {
   pulled.value = []
 }
 
+const SUMMARY_TOAST_DELAY = 1500
+
 // Unlock toasts once every card is face up (never mid-reveal: no spoilers,
 // even from checks elsewhere, e.g. a trade accepted live)
 watch(phase, (value) => {
   achievements.paused = value === 'open'
-  if (value === 'done') achievements.check(props.mode)
+  // ...after a moment, so the best pull is seen before a toast pops over it
+  if (value === 'done') achievements.check(props.mode, { delay: SUMMARY_TOAST_DELAY })
   // Phones: the summary's buttons stick above the tab bar, toasts go above them
   document.documentElement.classList.toggle('pb-action-bar', value === 'done')
 })
@@ -508,6 +519,8 @@ async function shareBest() {
             </p>
           </div>
 
+          <!-- Pack above its description; side by side on short phones -->
+          <div class="preview-row">
           <div class="preview-stage" :style="{ '--stack': Math.min(count, 3) }" aria-hidden="true">
             <BoosterArt v-if="count > 2" class="preview-pack preview-pack-2" v-bind="pack" />
             <BoosterArt v-if="count > 1" class="preview-pack preview-pack-1" v-bind="pack" />
@@ -544,11 +557,35 @@ async function shareBest() {
             <p v-for="subset in selectedSubsets" :key="subset.name" class="preview-subset">
               {{ subset.every ? t('boosters.subsetOdds', { name: subset.name, every: subset.every }) : t('boosters.subsetIncluded', { name: subset.name }) }}
             </p>
+            <div v-if="starters.length" class="starter-sets">
+              <span id="starter-label" class="starter-label">{{ t('boosters.starterTitle') }}</span>
+              <div class="starter-options" role="radiogroup" aria-labelledby="starter-label">
+                <button
+                  v-for="set in starters"
+                  :key="set.id"
+                  type="button"
+                  role="radio"
+                  class="starter-chip"
+                  :aria-checked="selectedSetId === set.id"
+                  :class="{ active: selectedSetId === set.id }"
+                  @click="pickStarter(set.id)"
+                >
+                  {{ set.name }}<span v-if="set.release_date" class="starter-year"> · {{ set.release_date.slice(0, 4) }}</span>
+                </button>
+              </div>
+            </div>
             <button v-if="!isDesktop" type="button" class="btn btn-outline-secondary" @click="openPicker">
               {{ t('boosters.changeSet') }}
             </button>
           </div>
+          </div>
 
+          <div v-if="loadError" class="alert alert-danger" role="alert">{{ loadError }}</div>
+          <div v-if="openError" class="alert alert-danger" role="alert">{{ openError }}</div>
+
+          <!-- Count + open button stay together: on phones they stick above
+               the tab bar, so the count is never hidden behind the button -->
+          <div class="open-actions">
           <div class="count-picker">
             <span id="count-label" class="form-label">{{ t('boosters.countLabel') }}</span>
             <div class="count-options" role="radiogroup" aria-labelledby="count-label">
@@ -567,10 +604,6 @@ async function shareBest() {
             </div>
           </div>
 
-
-          <div v-if="loadError" class="alert alert-danger" role="alert">{{ loadError }}</div>
-          <div v-if="openError" class="alert alert-danger" role="alert">{{ openError }}</div>
-
           <button
             type="button"
             class="btn btn-primary btn-lg glow-button open-button"
@@ -580,6 +613,7 @@ async function shareBest() {
             {{ t('boosters.openButton', { count }, count) }}
             <span v-if="isChallenge" class="open-price"><CoinAmount :amount="cost" /></span>
           </button>
+          </div>
 
         </div>
 
@@ -797,6 +831,13 @@ async function shareBest() {
   margin-bottom: 1.5rem;
 }
 
+.preview-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .preview-stage {
   --booster-w: clamp(130px, 36vw, 200px);
   position: relative;
@@ -937,9 +978,61 @@ async function shareBest() {
   color: var(--pb-bg);
 }
 
+.open-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+}
+
 .open-button {
   width: 100%;
   max-width: 360px;
+}
+
+/* First visit: well-known sets to start with */
+.starter-sets {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.starter-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--pb-text-muted);
+}
+
+.starter-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.starter-chip {
+  min-height: 40px;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-surface);
+  color: var(--pb-text);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.starter-chip.active {
+  border-color: transparent;
+  background: var(--pb-text);
+  color: var(--pb-bg);
+}
+
+.starter-year {
+  font-weight: 500;
+  opacity: 0.75;
 }
 
 /* Challenge: balance and prices */
@@ -1009,13 +1102,91 @@ async function shareBest() {
   font-weight: 800;
 }
 
-/* Phones: keep the main action reachable above the tab bar */
+/* Phones: keep the main action (count + button) reachable above the tab
+   bar. The count used to stay behind a stuck button, out of sight. */
 @media (max-width: 767.98px) {
-  .open-button {
+  .open-actions {
     position: sticky;
     bottom: calc(92px + env(safe-area-inset-bottom));
     z-index: 5;
+    padding: 0.5rem;
+    border-radius: var(--pb-radius-lg);
+    border: 1px solid var(--pb-border-strong);
+    background: var(--pb-bg-elevated);
     box-shadow: var(--pb-shadow-lg);
+  }
+
+  .open-actions .count-picker {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .open-actions .count-picker .form-label {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .open-actions .count-options button {
+    min-width: 44px;
+    height: 38px;
+  }
+
+  /* Narrow phones: the numbers speak for themselves (the open button says
+     "Open 3 boosters"), the label stays for screen readers */
+  @media (max-width: 419.98px) {
+    .open-actions .count-picker {
+      justify-content: center;
+    }
+
+    .open-actions .count-picker .form-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+  }
+
+  .open-actions .open-button {
+    max-width: none;
+  }
+
+  /* Short phones (iPhone SE): a small pack next to its description, so
+     the set name shows above the stuck action bar */
+  @media (max-height: 760px) {
+    .select-main .boosters-title {
+      margin-bottom: 1rem;
+    }
+
+    .preview-row {
+      flex-direction: row;
+      align-items: center;
+      gap: 1rem;
+      text-align: left;
+    }
+
+    .preview-stage {
+      --booster-w: 84px;
+      flex-shrink: 0;
+      width: calc(var(--booster-w) * 1.5);
+    }
+
+    .preview-info {
+      align-items: flex-start;
+      margin: 0 0 1rem;
+    }
+
+    .preview-completion,
+    .starter-sets,
+    .starter-options {
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
   }
 }
 

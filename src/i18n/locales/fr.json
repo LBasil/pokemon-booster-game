@@ -130,7 +130,8 @@
     "bonusCards": "+{count} cartes bonus",
     "completion": "{owned} / {total} cartes collectionnées ({percent} %)",
     "completionLabel": "Complétion de la série",
-    "complete": "Complète"
+    "complete": "Complète",
+    "starterTitle": "Pas d’idée ? Commence par"
   },
   "collection": {
     "title": "Ma collection",
@@ -146,7 +147,7 @@
     "valueNote": "Prix moyen Cardmarket au moment de l'import",
     "tabCards": "Cartes",
     "tabSets": "Séries",
-    "searchPlaceholder": "Rechercher une carte…",
+    "searchPlaceholder": "Rechercher une carte (Dracaufeu, Pikachu…)",
     "searchLabel": "Rechercher dans tes cartes",
     "setFilter": "Filtrer par série",
     "allSets": "Toutes les séries",
@@ -210,7 +211,11 @@
     "share": "Partager",
     "shareText": "{name} a tiré {card} sur PokéBooster !",
     "shareDownloaded": "Image téléchargée. Partage-la où tu veux.",
-    "shareError": "Impossible de créer l'image."
+    "shareError": "Impossible de créer l'image.",
+    "frenchName": "En français : {name}",
+    "goalLabel": "Série la plus avancée :",
+    "goalCount": "{owned} / {total} ({percent} %)",
+    "goalAria": "Progression de {name}"
   },
   "profile": {
     "title": "Profil",
@@ -302,7 +307,9 @@
     "askForCard": "La demander",
     "unlimitedCollection": "Collection illimitée",
     "unlimitedDesc": "Les cartes des boosters illimités. Les échanges se font uniquement en mode défi.",
-    "showMore": "Voir plus ({count})"
+    "showMore": "Voir plus ({count})",
+    "largeTextLabel": "Texte plus grand",
+    "largeTextDesc": "Lettres plus grandes et textes secondaires plus foncés, plus faciles à lire."
   },
   "notFound": {
     "title": "Ce booster est vide",
@@ -553,7 +560,8 @@
       "copies": "{count}/{total}",
       "less": "Une copie de moins de {name}",
       "more": "Une copie de plus de {name}"
-    }
+    },
+    "dailyReady": "Prête : récupère-la avec le bouton en haut de la page"
   },
   "trades": {
     "title": "Échanges",
@@ -669,7 +677,10 @@
       "ask": "Demander",
       "none": "Personne ne l'a en double pour l'instant. Réessaie plus tard, ou fabrique-la.",
       "unavailable": "Cette recherche n'est pas encore disponible."
-    }
+    },
+    "noCardsYet": "Ta collection Défi est vide : ouvre quelques boosters du défi pour avoir des cartes à échanger.",
+    "openFirst": "Ouvrir des boosters du défi",
+    "suggestTitle": "Ou choisis un dresseur qui a une grosse collection :"
   },
   "games": {
     "title": "Mini-jeux",

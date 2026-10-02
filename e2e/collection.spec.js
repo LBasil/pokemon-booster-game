@@ -48,3 +48,30 @@ test('a long set name never pushes the "Complete" badge off screen', async ({ pa
   const tile = await page.locator('.coll-set.complete').boundingBox()
   expect(box.x + box.width).toBeLessThanOrEqual(tile.x + tile.width)
 })
+
+test('the search also knows the French names, and a card detail says it in French', async ({ page }) => {
+  await mockSupabase(page)
+  await page.goto('/collection')
+  await page.getByRole('searchbox', { name: 'Search your cards' }).fill('Dracaufeu')
+  await expect(page.locator('.coll-count')).toContainText('1 card')
+  await expect(page.locator('.coll-card')).toContainText('Charizard')
+
+  await page.getByRole('button', { name: 'FR', exact: true }).click()
+  await page.locator('.coll-card', { hasText: 'Charizard' }).click()
+  await expect(page.locator('.detail-fr-name')).toHaveText('En français : Dracaufeu')
+})
+
+test('the collection shows the most advanced set as a goal within reach', async ({ page }) => {
+  await mockSupabase(page)
+  await page.goto('/collection')
+  // Base: 1 card of 2, ahead of 151 (1 of 11)
+  const goal = page.locator('.set-goal')
+  await expect(goal).toContainText('Most advanced set:')
+  await expect(goal).toContainText('Base')
+  await expect(goal).toContainText('1 / 2 (50%)')
+  await goal.getByRole('link', { name: 'Base' }).click()
+  await expect(page).toHaveURL('/collection/set/base1')
+
+  await page.goto('/game')
+  await expect(page.locator('.hub-collection .set-goal')).toContainText('Base')
+})

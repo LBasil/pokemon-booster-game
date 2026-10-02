@@ -321,3 +321,17 @@ test('nobody with the card in double says so', async ({ page }) => {
   await page.getByRole('button', { name: 'Who has it in double?' }).click()
   await expect(page.getByText('Nobody has it in double right now.')).toBeVisible()
 })
+
+test('a new player is told to open challenge boosters first and gets trainers to pick from', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection: [] })
+  await page.goto('/challenge/trades')
+  await expect(page.locator('.composer-empty')).toContainText('Your challenge collection is empty')
+  await expect(page.locator('.composer-empty').getByRole('link', { name: 'Open challenge boosters' })).toHaveAttribute('href', '/challenge/boosters')
+
+  // Suggestions from the challenge board, never myself (Ash)
+  const suggest = page.getByRole('list', { name: 'Or pick a player with a big collection:' })
+  await expect(suggest.getByRole('button')).toHaveText(['Misty'])
+  await suggest.getByRole('button', { name: 'Misty' }).click()
+  await expect(page.getByRole('group', { name: /You ask Misty for/ })).toBeVisible()
+  await expect(suggest).toHaveCount(0)
+})

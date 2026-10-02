@@ -22,6 +22,10 @@
 //     their region: unovaRoute5and16). Everything else (trainers, sets...)
 //     is written by hand; a branched line (Wurmple) is better named after
 //     its first member.
+//   node scripts/region-tools.mjs fr-names
+//     Writes src/utils/pokemonNamesFr.js: the official French name of every
+//     Pokémon by national dex number, so the collection search finds
+//     "Dracaufeu" (card names are English only).
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -203,15 +207,38 @@ async function texts(regionName) {
   saveCache()
 }
 
+async function frNames() {
+  const last = (await get('pokemon-species/?limit=1')).count
+  const numbers = Array.from({ length: last }, (_, i) => i + 1)
+  const named = await names(numbers)
+  saveCache()
+  const list = numbers.map((n) => named[n].fr)
+  if (list.some((name) => !name || name.includes('|'))) throw new Error('unexpected French name')
+  const out = [
+    '// Official French Pokémon names by national dex number (index 0 = #1),',
+    '// from PokéAPI: written by `node scripts/region-tools.mjs fr-names`, do',
+    '// not edit by hand. Card names are English only; the collection search',
+    '// also matches these (src/utils/collection.js).',
+    `const NAMES = '${list.join('|').replaceAll("'", "\\'")}'.split('|')`,
+    '',
+    '/** French name of a national dex number, or null. */',
+    'export const frenchName = (dex) => (dex >= 1 && dex <= NAMES.length ? NAMES[dex - 1] : null)',
+    '',
+  ]
+  fs.writeFileSync(path.join(root, 'src/utils/pokemonNamesFr.js'), out.join('\n'))
+  console.log(`${list.length} names written`)
+}
+
 const [command, ...args] = process.argv.slice(2)
 const commands = {
   lines: () => lines(Number(args[0]), Number(args[1])),
   encounters: () => encounters(args[0], args[1].split(',')),
   cards: () => cards(args[0]),
   texts: () => texts(args[0]),
+  'fr-names': () => frNames(),
 }
 if (!commands[command]) {
-  console.error('Usage: node scripts/region-tools.mjs lines <from> <to> | encounters <region id> <versions> | cards <regex> | texts <region>')
+  console.error('Usage: node scripts/region-tools.mjs lines <from> <to> | encounters <region id> <versions> | cards <regex> | texts <region> | fr-names')
   process.exit(1)
 }
 await commands[command]()
