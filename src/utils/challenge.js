@@ -68,6 +68,15 @@ export function msUntilReset(now = new Date()) {
   return next - now.getTime()
 }
 
+/**
+ * The daily reset (00:00 UTC) in the player's own time, e.g. "02:00" in
+ * Paris in summer, "1:00 AM" in English: "midnight UTC" meant nothing to
+ * most players.
+ */
+export function resetTimeLabel(locale, now = new Date()) {
+  return new Date(now.getTime() + msUntilReset(now)).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })
+}
+
 /** Milliseconds until the weekly missions reset (Monday 00:00 UTC, migration 0011). */
 export function msUntilWeeklyReset(now = new Date()) {
   const daysLeft = (8 - now.getUTCDay()) % 7 || 7 // getUTCDay: 0 = Sunday

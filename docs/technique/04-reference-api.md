@@ -60,7 +60,7 @@ par `api/`.
 
 | Appel | Utilisé pour | Détail |
 | --- | --- | --- |
-| `auth.signUp({ email, password, options })` | Inscription | `options.data.username` = pseudo voulu (lu par le trigger qui crée le profil) ; `emailRedirectTo` = `<site>/game` |
+| `auth.signUp({ email, password, options })` | Inscription | `options.data.username` = pseudo voulu, obligatoire côté formulaire (lu par le trigger qui crée le profil ; absent → `Trainer-1234` depuis 0023) ; `emailRedirectTo` = `<site>/game` |
 | `auth.signInWithPassword({ email, password })` | Connexion | Renvoie la session |
 | `auth.resetPasswordForEmail(email, { redirectTo })` | Mot de passe oublié | Lien vers `<site>/reset-password` |
 | `auth.updateUser({ password })` | Nouveau mot de passe | Depuis `/reset-password` (session de récupération) |

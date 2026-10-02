@@ -36,7 +36,7 @@
     "emailLabel": "Email",
     "passwordLabel": "Password",
     "usernameLabel": "Username",
-    "usernamePlaceholder": "Optional, shown on your profile",
+    "usernamePlaceholder": "e.g. RedTrainer",
     "login": "Log in",
     "signup": "Sign up",
     "submitLogin": "Log in",
@@ -46,7 +46,7 @@
     "title": "Open Pokémon packs and fill your binder",
     "poolSize": "{sets} sets and {cards} cards so far.",
     "loginIntro": "Log in to get back to your collection.",
-    "signupIntro": "An email and a password are all it takes. It's free.",
+    "signupIntro": "A username, an email and a password. It's free.",
     "emailPlaceholder": "you{'@'}example.com",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
@@ -56,7 +56,8 @@
     "forgotIntro": "Enter your email and we'll send you a link to choose a new password.",
     "sendResetLink": "Send the link",
     "backToLogin": "Back to log in",
-    "resetSent": "If an account exists for this email, a reset link is on its way. Check your inbox (and spam)."
+    "resetSent": "If an account exists for this email, a reset link is on its way. Check your inbox (and spam).",
+    "usernameHint": "Shown to other players: better not your real name."
   },
   "game": {
     "greeting": "Hi {name}",
@@ -131,7 +132,8 @@
     "completion": "{owned} / {total} cards collected ({percent}%)",
     "completionLabel": "Set completion",
     "complete": "Complete",
-    "starterTitle": "Not sure? Start with"
+    "starterTitle": "Not sure? Start with",
+    "otherSet": "Other set"
   },
   "collection": {
     "title": "My collection",
@@ -215,7 +217,8 @@
     "frenchName": "In French: {name}",
     "goalLabel": "Most advanced set:",
     "goalCount": "{owned} / {total} ({percent}%)",
-    "goalAria": "{name} completion"
+    "goalAria": "{name} completion",
+    "printedRarity": "On the card:"
   },
   "profile": {
     "title": "Profile",
@@ -268,7 +271,7 @@
     "unlocked": "Unlocked",
     "locked": "Locked",
     "accountTitle": "Account",
-    "accountDesc": "Signed in with Supabase. Language and theme are in the top bar.",
+    "accountDesc": "Signed in with your email. Language and theme are in the top bar.",
     "join": "Create my account",
     "notFoundTitle": "Trainer not found",
     "notFound": "{name} doesn't exist or keeps their profile private.",
@@ -309,7 +312,10 @@
     "unlimitedDesc": "Cards from the unlimited boosters. Trades only happen in the challenge mode.",
     "showMore": "Show more ({count})",
     "largeTextLabel": "Larger text",
-    "largeTextDesc": "Bigger letters and darker secondary text, easier to read."
+    "largeTextDesc": "Bigger letters and darker secondary text, easier to read.",
+    "settingsJump": "Settings: sound, larger text…",
+    "nameFromEmail": "Your username comes from your email address, and everyone can see it. Pick another one?",
+    "nameFromEmailCta": "Change my username"
   },
   "notFound": {
     "title": "This booster is empty",
@@ -367,7 +373,7 @@
     "days": "{count} day | {count} days",
     "topSet": "Most opened set",
     "unloggedNote": "Details cover the {logged} boosters logged since {date}; {count} older booster was opened before logging started. | Details cover the {logged} boosters logged since {date}; {count} older boosters were opened before logging started.",
-    "since": "Since {date}. Days are counted in UTC, like the challenge.",
+    "since": "Since {date}. A day starts at {time} (your time), like in the challenge.",
     "filterLabel": "Filter the boosters",
     "filterAll": "All",
     "filterHits": "With a hit",
@@ -495,7 +501,7 @@
     "rules": {
       "start": "You start with {coins} coins and an empty binder. Your unlimited collection stays untouched.",
       "pack": "A booster costs {coins} coins, from any set.",
-      "daily": "The daily reward and missions reset every day at midnight UTC.",
+      "daily": "The daily reward and missions reset every day at {time} (your time).",
       "rates": "Same pull rates as real boosters: no pity timer, luck decides. A long run without an ultra rare can happen.",
       "godPack": "God pack: 1 booster in {odds} is holo rares and better only.",
       "recycle": "Recycling keeps one copy of each card and turns the others into coins. Crafting creates any card, for a lot more.",
@@ -561,7 +567,15 @@
       "less": "One copy less of {name}",
       "more": "One copy more of {name}"
     },
-    "dailyReady": "Ready to claim: tap the button at the top of the page"
+    "dailyReady": "Ready to claim: tap the button at the top of the page",
+    "brief": {
+      "title": "The challenge in short",
+      "coins": "You start with {coins} coins; a booster costs {price}.",
+      "earn": "Earn more every day: daily reward, missions and mini-games.",
+      "separate": "It's a separate collection: your unlimited cards stay where they are.",
+      "ok": "Got it",
+      "more": "All the rules"
+    }
   },
   "trades": {
     "title": "Trades",
@@ -748,7 +762,7 @@
       "pick": "Two cards show up: tap the one worth more (Cardmarket price). You have {seconds} seconds.",
       "run": "A run goes on until your first wrong answer (or until time runs out).",
       "paid": "{runs} paid runs a day: {coins} coins per right answer, for the first {answers} of the run ({max} coins max per run).",
-      "free": "After that, play as much as you like for the record, without coins. Paid runs come back at midnight UTC.",
+      "free": "After that, play as much as you like for the record, without coins. Paid runs come back at {time} (your time).",
       "harder": "The longer the streak, the closer the prices."
     }
   },
@@ -814,7 +828,7 @@
     "memo": "Memo",
     "memoPick": "Mark to place",
     "memoOn": "Memo: tap hidden tiles to note what you think they hide.",
-    "howTo": "Flip every 2 and 3. Right-click (or Memo) marks a tile.",
+    "howTo": "Flip every 2 and 3. Memo (or a right-click) marks a tile.",
     "markElectrode": "Electrode",
     "mark": "Mark {value}",
     "tileHidden": "Row {row}, column {col}: hidden",
@@ -844,8 +858,8 @@
       "points": "Your points multiply with every tile flipped. Flip every 2 and 3 to clear the board and move up a level ({levels} levels, more Electrodes each time).",
       "electrode": "An Electrode loses the board and its points. You can cash out at any time to keep them.",
       "level": "After a loss or a cash out, the level drops to the number of tiles you flipped, if that’s lower.",
-      "coins": "Points are paid in coins, up to {max} a day. After that, play for the record; the limit resets at midnight UTC.",
-      "memo": "Memo: note what you’ve worked out on hidden tiles (right-click marks an Electrode)."
+      "coins": "Points are paid in coins, up to {max} a day. After that, play for the record; the limit resets at {time} (your time).",
+      "memo": "Memo: turn on Memo to note what you’ve worked out on hidden tiles (a right-click works too on a computer)."
     }
   },
   "achievements": {

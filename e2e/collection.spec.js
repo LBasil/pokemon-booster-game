@@ -59,6 +59,13 @@ test('the search also knows the French names, and a card detail says it in Frenc
   await page.getByRole('button', { name: 'FR', exact: true }).click()
   await page.locator('.coll-card', { hasText: 'Charizard' }).click()
   await expect(page.locator('.detail-fr-name')).toHaveText('En français : Dracaufeu')
+  // The rarity in French, with the one printed on the card (English) as a note
+  await expect(page.locator('.detail-printed')).toContainText('Sur la carte (en anglais) : Rare Holo')
+  await page.keyboard.press('Escape')
+
+  // The Pokédex names the species in French too
+  await page.goto('/collection?view=pokedex')
+  await expect(page.getByRole('button', { name: /Salamèche/ })).toBeVisible()
 })
 
 test('the collection shows the most advanced set as a goal within reach', async ({ page }) => {

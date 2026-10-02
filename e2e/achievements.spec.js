@@ -79,7 +79,7 @@ test('public achievements are readable signed out', async ({ page }) => {
   await expect(page.locator('.achv.unlocked').filter({ hasText: 'Jackpot' })).toBeVisible()
 })
 
-test('opening a booster toasts the achievements it unlocks, once the cards are revealed', async ({ page }, testInfo) => {
+test('opening a booster toasts the achievements it unlocks, once the cards are revealed', async ({ page }) => {
   await signIn(page)
   const backend = await mockSupabase(page)
   await page.goto('/boosters')
@@ -98,16 +98,10 @@ test('opening a booster toasts the achievements it unlocks, once the cards are r
 
   // The pack's secret rare is a first; the Base Set Charizard was already owned (baseline)
   const toasts = page.locator('.ach-toast')
-  if (testInfo.project.name === 'mobile') {
-    // Phones: a single toast, with how many more (a stack hid the summary)
-    await expect(toasts).toHaveCount(1)
-    await expect(toasts).toContainText(/\+\d+ more achievements?/)
-    await expect(toasts).toContainText('Achievement unlocked')
-    expect(backend.state.recorded.unlimited.has('secret1')).toBe(true)
-    await toasts.getByRole('link').click()
-    await expect(page).toHaveURL(/\/achievements\?status=unlocked$/)
-    return
-  }
+  // Two toasts at most, the last one saying how many more (a first pack unlocks a lot)
+  await expect(toasts).toHaveCount(2)
+  await expect(toasts.last().locator('.ach-toast-extra')).toBeVisible()
+  await expect(toasts.last()).toContainText(/\+\d+ more achievements?/)
   await expect(toasts.filter({ hasText: 'Jackpot' })).toBeVisible()
   await expect(toasts.first()).toContainText('Achievement unlocked')
   await expect(toasts.filter({ hasText: 'Flame on' })).toHaveCount(0)
@@ -179,7 +173,7 @@ test('a challenge achievement stays unlocked once the server has it (recycling, 
   await expect(page.locator('.achv.unlocked').filter({ hasText: 'Warming up' })).toBeVisible()
 })
 
-test('a challenge opening toasts challenge achievements', async ({ page }, testInfo) => {
+test('a challenge opening toasts challenge achievements', async ({ page }) => {
   await signIn(page)
   const backend = await mockSupabase(page)
   await page.goto('/challenge/boosters')
@@ -191,17 +185,6 @@ test('a challenge opening toasts challenge achievements', async ({ page }, testI
   for (let i = 0; i < 30 && !(await page.locator('.done-layout').isVisible()); i++) {
     if (await stack.isVisible()) await stack.click({ force: true })
     await page.waitForTimeout(150)
-  }
-  if (testInfo.project.name === 'mobile') {
-    // Phones: one toast for the whole batch
-    const toast = page.locator('.ach-toast')
-    await expect(toast).toHaveCount(1)
-    await expect(toast).toContainText('Challenge achievement unlocked')
-    await expect.poll(() => backend.state.recorded.challenge.has('secret1')).toBe(true)
-    expect(backend.state.recorded.unlimited.has('secret1')).toBe(false)
-    await toast.getByRole('link').click()
-    await expect(page).toHaveURL(/\/challenge\/achievements\?status=unlocked$/)
-    return
   }
   const toast = page.locator('.ach-toast').filter({ hasText: 'Jackpot' })
   await expect(toast).toContainText('Challenge achievement unlocked')

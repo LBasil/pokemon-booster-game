@@ -186,3 +186,14 @@ test('on phones the pack count and the set name are never hidden behind the stuc
     }
   }
 })
+
+test('on a 1280x720 laptop the open button is on screen without scrolling', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'laptop layout')
+  await page.setViewportSize({ width: 1280, height: 720 })
+  await mockSupabase(page, { collection: [] })
+  for (const path of ['/boosters', '/challenge/boosters']) {
+    await page.goto(path)
+    await expect(page.getByRole('button', { name: /Open 1 booster/ })).toBeInViewport({ ratio: 1 })
+    await expect(page.getByRole('radio', { name: '3', exact: true })).toBeInViewport({ ratio: 1 })
+  }
+})

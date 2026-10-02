@@ -131,6 +131,13 @@ const nameError = ref('')
 const savingName = ref(false)
 const nameInput = ref(null)
 
+// Accounts created without a username got their email's first part (the
+// sign-up field was optional), shown to everyone on a public profile
+const nameFromEmail = computed(() => {
+  const local = auth.user?.email?.split('@')[0]?.toLowerCase()
+  return Boolean(isOwn.value && local && profile.value?.username?.toLowerCase() === local)
+})
+
 function startEditName() {
   nameDraft.value = profile.value?.username ?? displayName.value
   nameError.value = ''
@@ -374,6 +381,11 @@ async function logout() {
               </p>
             </div>
 
+            <div v-if="nameFromEmail && !editingName" class="name-warning" role="note">
+              <p>{{ t('profile.nameFromEmail') }}</p>
+              <button type="button" class="btn btn-primary btn-sm" @click="startEditName">{{ t('profile.nameFromEmailCta') }}</button>
+            </div>
+
             <dl class="trainer-facts">
               <div v-if="isOwn">
                 <dt>{{ t('profile.email') }}</dt>
@@ -384,6 +396,15 @@ async function logout() {
                 <dd>{{ memberSince }}</dd>
               </div>
             </dl>
+
+            <!-- The settings sit ten screens down on a phone: one tap away -->
+            <a v-if="isOwn" href="#profile-settings" class="settings-jump">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+                <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+              </svg>
+              {{ t('profile.settingsJump') }}
+            </a>
 
             <!-- Someone else's public profile: start a challenge trade with them -->
             <RouterLink
@@ -602,7 +623,7 @@ async function logout() {
               </div>
             </section>
 
-            <section class="panel">
+            <section id="profile-settings" class="panel">
               <h2 class="pb-section-title">{{ t('profile.settingsTitle') }}</h2>
               <label class="switch-row form-switch">
                 <span>
@@ -925,6 +946,45 @@ async function logout() {
   margin: 0.5rem 0 0;
   font-size: 0.85rem;
   color: var(--pb-text-muted);
+}
+
+.name-warning {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--pb-radius-md);
+  border: 1px solid color-mix(in srgb, var(--pb-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--pb-accent) 12%, var(--pb-bg-elevated));
+  font-weight: 600;
+}
+
+.name-warning p {
+  margin: 0;
+}
+
+.settings-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  font-weight: 700;
+}
+
+.settings-jump svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#profile-settings {
+  scroll-margin-top: 1rem;
 }
 
 .trainer-facts {

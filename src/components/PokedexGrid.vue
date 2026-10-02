@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { fetchPokedexSize } from '@/api/cards'
 import { pokedexSlots } from '@/utils/collection'
+import { frenchName } from '@/utils/pokemonNamesFr'
 
 // National Pokédex view of the collection: one slot per species, owned ones
 // with their sprite, others as silhouettes. Picking an owned slot emits its
@@ -14,6 +15,10 @@ const props = defineProps({
 const emit = defineEmits(['select'])
 
 const { t, locale } = useI18n()
+
+// Species name: the French one in French (card names are English only),
+// else the shortest card name seen for that number
+const speciesName = (slot) => (locale.value.startsWith('fr') && frenchName(slot.number)) || slot.name
 
 // Sprites from the public PokéAPI repository (tiny PNGs, CORS-enabled)
 const spriteUrl = (number) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${number}.png`
@@ -97,12 +102,12 @@ let cachedSize = 0
           class="dex-slot"
           :class="{ owned: slot.owned }"
           :disabled="!slot.owned"
-          :aria-label="slot.owned ? t('pokedex.showCards', { name: slot.name, count: slot.owned }, slot.owned) : t('pokedex.unknown', { number: pad(slot.number) })"
+          :aria-label="slot.owned ? t('pokedex.showCards', { name: speciesName(slot), count: slot.owned }, slot.owned) : t('pokedex.unknown', { number: pad(slot.number) })"
           @click="emit('select', slot.number)"
         >
           <img :src="spriteUrl(slot.number)" alt="" loading="lazy" width="72" height="72" />
           <span class="dex-number">#{{ pad(slot.number) }}</span>
-          <span class="dex-name">{{ slot.owned ? slot.name : '???' }}</span>
+          <span class="dex-name">{{ slot.owned ? speciesName(slot) : '???' }}</span>
         </button>
       </li>
     </ul>

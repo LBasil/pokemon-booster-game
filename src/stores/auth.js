@@ -18,6 +18,25 @@ function resetPlayerStores() {
   useAchievementsStore().$reset()
 }
 
+// "Someone signed in on this device before": the landing opens on "Log in"
+// for them, on "Sign up" for a newcomer (most visitors)
+const KNOWN_KEY = 'pb-has-account'
+function rememberAccount(session) {
+  if (!session) return
+  try {
+    localStorage.setItem(KNOWN_KEY, '1')
+  } catch {
+    // private mode: the landing opens on "Sign up"
+  }
+}
+export function hasAccountOnDevice() {
+  try {
+    return localStorage.getItem(KNOWN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     session: null,
@@ -34,11 +53,13 @@ export const useAuthStore = defineStore('auth', {
     async init() {
       const { data } = await supabase.auth.getSession()
       this.session = data.session
+      rememberAccount(data.session)
       this.ready = true
 
       supabase.auth.onAuthStateChange((_event, session) => {
         if (session?.user?.id !== this.session?.user?.id) resetPlayerStores()
         this.session = session
+        rememberAccount(session)
       })
     },
 
@@ -51,6 +72,7 @@ export const useAuthStore = defineStore('auth', {
       })
       if (error) throw error
       this.session = data.session
+      rememberAccount(data.user)
       return data
     },
 
@@ -58,6 +80,7 @@ export const useAuthStore = defineStore('auth', {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw error
       this.session = data.session
+      rememberAccount(data.session)
       return data
     },
 

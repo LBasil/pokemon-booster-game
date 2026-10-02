@@ -11,6 +11,7 @@ import {
   recycleKeep,
   recyclePreview,
   recycleValue,
+  resetTimeLabel,
 } from './challenge'
 
 const card = (rarity_bucket) => ({ id: rarity_bucket, rarity_bucket })
@@ -101,5 +102,16 @@ describe('challenge economy', () => {
     expect(msUntilWeeklyReset(new Date('2026-09-27T23:00:00Z'))).toBe(hour) // Sunday night
     expect(msUntilWeeklyReset(new Date('2026-09-28T00:00:00Z'))).toBe(7 * 24 * hour) // just reset
     expect(msUntilWeeklyReset(new Date('2026-09-26T12:00:00Z'))).toBe(36 * hour) // Saturday noon
+  })
+})
+
+describe('resetTimeLabel', () => {
+  it("is the next 00:00 UTC in the player's own time", () => {
+    const now = new Date('2026-10-02T10:00:00Z')
+    const expected = new Date('2026-10-03T00:00:00Z').toLocaleTimeString('fr', { hour: 'numeric', minute: '2-digit' })
+    expect(resetTimeLabel('fr', now)).toBe(expected)
+    expect(resetTimeLabel('en', new Date('2026-10-02T23:59:00Z'))).toBe(
+      new Date('2026-10-03T00:00:00Z').toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit' }),
+    )
   })
 })

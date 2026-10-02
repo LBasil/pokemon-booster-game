@@ -43,20 +43,20 @@ onMounted(() => {
 // challenge collections (the "Most cards" board), the ones most likely to
 // have something to swap. Failures just leave the field on its own.
 const SUGGESTED_TRAINERS = 6
-const suggestions = ref([])
+const boardNames = ref([])
 async function loadSuggestions() {
   try {
-    const rows = await fetchLeaderboard('challenge_unique', SUGGESTED_TRAINERS + 1)
-    await profileStore.load()
-    const me = profileStore.profile?.username?.toLowerCase()
-    suggestions.value = rows
-      .map((row) => row.username)
-      .filter((name) => name.toLowerCase() !== me)
-      .slice(0, SUGGESTED_TRAINERS)
+    boardNames.value = (await fetchLeaderboard('challenge_unique', SUGGESTED_TRAINERS + 1)).map((row) => row.username)
   } catch {
-    suggestions.value = []
+    boardNames.value = []
   }
 }
+// Never myself; reactive, as my profile may load after the board
+const suggestions = computed(() => {
+  const me = profileStore.profile?.username?.toLowerCase()
+  if (!me) return []
+  return boardNames.value.filter((name) => name.toLowerCase() !== me).slice(0, SUGGESTED_TRAINERS)
+})
 function pickSuggestion(name) {
   partnerName.value = name
   findPartner()

@@ -186,15 +186,11 @@ describe('rateOf', () => {
 describe('toastBatch', () => {
   const items = (n) => Array.from({ length: n }, (_, i) => ({ id: `a${i}` }))
   it('shows up to MAX_TOASTS one by one', () => {
-    expect(toastBatch(items(MAX_TOASTS))).toHaveLength(MAX_TOASTS)
+    expect(toastBatch(items(MAX_TOASTS))).toEqual(items(MAX_TOASTS).map((item) => ({ item })))
   })
-  it('sums up the rest beyond that', () => {
-    const batch = toastBatch(items(7))
-    expect(batch).toHaveLength(MAX_TOASTS)
-    expect(batch.at(-1)).toEqual({ more: 7 - (MAX_TOASTS - 1) })
-  })
-  it('folds everything into one toast when max is 1 (phones)', () => {
-    expect(toastBatch(items(1), 1)).toEqual([{ item: { id: 'a0' } }])
+  it('beyond that, the last one shown says how many more', () => {
+    expect(MAX_TOASTS).toBe(2)
+    expect(toastBatch(items(16))).toEqual([{ item: { id: 'a0' } }, { item: { id: 'a1' }, extra: 14 }])
     expect(toastBatch(items(4), 1)).toEqual([{ item: { id: 'a0' }, extra: 3 }])
   })
 })

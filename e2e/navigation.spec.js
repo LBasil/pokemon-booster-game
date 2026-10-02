@@ -125,7 +125,7 @@ test('after a challenge opening, another one can be started', async ({ page }) =
   await page.getByRole('radio', { name: '3', exact: true }).click()
   await page.getByRole('button', { name: /Open 3 boosters/ }).click()
   await page.getByRole('button', { name: /Open all 3 at once/ }).click()
-  await page.getByRole('button', { name: 'Change set' }).click()
+  await page.getByRole('button', { name: 'Other set' }).click()
   await expect(page.getByRole('button', { name: /Open 3 boosters/ })).toBeEnabled()
 })
 

@@ -115,9 +115,11 @@ commune (common, uncommon), rare (rare, holo), **hit** (ultra, secret).
 ### `profiles`
 
 Une ligne par compte, créée **par un trigger** à l'inscription
-(`handle_new_user` sur `auth.users`) avec le pseudo choisi à l'inscription,
-ou le début de l'e-mail. Si le pseudo est pris, `unique_username()` ajoute
-un suffixe numérique.
+(`handle_new_user` sur `auth.users`) avec le pseudo choisi à l'inscription
+(obligatoire dans le formulaire). Sans pseudo, c'était le début de
+l'e-mail (« jean.dupont », visible de tous sur un profil public) ; depuis
+0023 c'est `Trainer-1234`. Si le pseudo est pris, `unique_username()`
+ajoute un suffixe numérique.
 
 | Colonne | Type | Sens |
 | --- | --- | --- |
@@ -355,6 +357,7 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0020 | `recycle_copies` | Recyclage d'une partie des exemplaires d'une carte (`recycle_card_copies`) (écrite le 2026-10-02, appliquée) |
 | 0021 | `trade_counter_offers` | Contre-offres (`counter_trade`, statut `countered`, `trade_offers.counter_of`) (écrite le 2026-10-02, appliquée) |
 | 0022 | `my_rank_card_traders` | Son rang sous chaque classement (`my_leaderboard_rank`, le calcul passe dans `leaderboard_rows`), « Qui l'a en double ? » (`card_traders`) (écrite le 2026-10-02, **à appliquer**) |
+| 0023 | `username_not_from_email` | `handle_new_user` : sans pseudo, `Trainer-1234` au lieu du début de l'e-mail ; les comptes existants ne sont pas renommés (écrite le 2026-10-02, **à appliquer**) |
 
 Les migrations 0001 à 0021 sont appliquées sur le projet réel (vérifié le
 2026-10-02).

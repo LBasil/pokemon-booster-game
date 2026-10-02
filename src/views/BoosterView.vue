@@ -585,7 +585,7 @@ async function shareBest() {
 
           <!-- Count + open button stay together: on phones they stick above
                the tab bar, so the count is never hidden behind the button -->
-          <div class="open-actions">
+          <div class="select-actions">
           <div class="count-picker">
             <span id="count-label" class="form-label">{{ t('boosters.countLabel') }}</span>
             <div class="count-options" role="radiogroup" aria-labelledby="count-label">
@@ -785,7 +785,7 @@ async function shareBest() {
             <span v-if="isChallenge" class="open-price"><CoinAmount :amount="totalToOpen * PACK_PRICE" /></span>
           </button>
           <button type="button" class="btn btn-outline-secondary btn-lg" @click="backToSelect">
-            {{ t('boosters.changeSet') }}
+            {{ t('boosters.otherSet') }}
           </button>
         </div>
         <div class="done-links">
@@ -978,7 +978,7 @@ async function shareBest() {
   color: var(--pb-bg);
 }
 
-.open-actions {
+.select-actions {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1105,7 +1105,7 @@ async function shareBest() {
 /* Phones: keep the main action (count + button) reachable above the tab
    bar. The count used to stay behind a stuck button, out of sight. */
 @media (max-width: 767.98px) {
-  .open-actions {
+  .select-actions {
     position: sticky;
     bottom: calc(92px + env(safe-area-inset-bottom));
     z-index: 5;
@@ -1116,21 +1116,21 @@ async function shareBest() {
     box-shadow: var(--pb-shadow-lg);
   }
 
-  .open-actions .count-picker {
+  .select-actions .count-picker {
     flex-direction: row;
     justify-content: space-between;
     gap: 0.75rem;
     margin-bottom: 0.5rem;
   }
 
-  .open-actions .count-picker .form-label {
+  .select-actions .count-picker .form-label {
     margin: 0;
     font-size: 0.85rem;
     font-weight: 600;
     text-align: left;
   }
 
-  .open-actions .count-options button {
+  .select-actions .count-options button {
     min-width: 44px;
     height: 38px;
   }
@@ -1138,11 +1138,11 @@ async function shareBest() {
   /* Narrow phones: the numbers speak for themselves (the open button says
      "Open 3 boosters"), the label stays for screen readers */
   @media (max-width: 419.98px) {
-    .open-actions .count-picker {
+    .select-actions .count-picker {
       justify-content: center;
     }
 
-    .open-actions .count-picker .form-label {
+    .select-actions .count-picker .form-label {
       position: absolute;
       width: 1px;
       height: 1px;
@@ -1152,7 +1152,7 @@ async function shareBest() {
     }
   }
 
-  .open-actions .open-button {
+  .select-actions .open-button {
     max-width: none;
   }
 
@@ -1614,6 +1614,25 @@ async function shareBest() {
   }
 }
 
+/* Tablets and computers: the count + "Open" block sticks to the bottom
+   of the window too (on a 1280x720 laptop it sat below the fold) */
+@media (min-width: 768px) {
+  .select-actions {
+    position: sticky;
+    bottom: 1rem;
+    z-index: 5;
+    padding: 0.75rem;
+    border-radius: var(--pb-radius-lg);
+    border: 1px solid var(--pb-border-strong);
+    background: var(--pb-bg-elevated);
+    box-shadow: var(--pb-shadow-lg);
+  }
+
+  .select-actions .count-picker {
+    margin-bottom: 0.75rem;
+  }
+}
+
 @media (min-width: 992px) {
   .select-layout {
     grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
@@ -1633,6 +1652,17 @@ async function shareBest() {
   .done-best {
     position: sticky;
     top: 1rem;
+  }
+}
+
+/* Short computer screens (after the 992px rule it overrides): a smaller pack */
+@media (min-width: 992px) and (max-height: 820px) {
+  .preview-stage {
+    --booster-w: 150px;
+  }
+
+  .select-main .boosters-title {
+    margin-bottom: 0.75rem;
   }
 }
 </style>

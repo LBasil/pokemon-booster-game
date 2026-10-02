@@ -150,7 +150,7 @@ ne recharge pas si c'est déjà chargé (sauf `force`), et expose `loading`,
 
 | Store | Contient | Chargé par | Remarques |
 | --- | --- | --- | --- |
-| `auth` | `session`, `user`, `isLoggedIn`, `displayName` de secours | `App.vue`, garde du routeur | `signUp`, `signIn`, `signOut`, `requestPasswordReset`, `updatePassword`. **Vide tous les stores du joueur** à la déconnexion ou au changement de compte (`resetPlayerStores`) |
+| `auth` | `session`, `user`, `isLoggedIn`, `displayName` de secours | `App.vue`, garde du routeur | `signUp`, `signIn`, `signOut`, `requestPasswordReset`, `updatePassword` ; `hasAccountOnDevice()` (onglet par défaut de l'accueil). **Vide tous les stores du joueur** à la déconnexion ou au changement de compte (`resetPlayerStores`) |
 | `profile` | La ligne `profiles` du joueur | vues qui affichent le pseudo | `update(fields)` ; lève `{ code: 'taken' }` si le pseudo est pris |
 | `collection` / `challenge-collection` | `entries` (cartes possédées + détails), `stats` | `useModeCollectionStore(mode)` | Deux stores créés par la même fabrique, un par mode. `invalidate()` après une ouverture |
 | `sets` | Les 176 sets, `byId` | presque toutes les vues | Chargé une fois ; les appels simultanés partagent la même requête |

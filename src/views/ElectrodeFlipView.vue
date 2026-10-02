@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { resetTimeLabel } from '@/utils/challenge'
 import * as sfx from '@/lib/sfx'
 import { useChallengeStore } from '@/stores/challenge'
 import { useElectrodeFlipStore } from '@/stores/electrodeFlip'
@@ -17,7 +18,9 @@ import CoinAmount from '@/components/CoinAmount.vue'
 const LINES = [0, 1, 2, 3, 4]
 const MARKS = ['e', '1', '2', '3']
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+// The daily reset (00:00 UTC) in the player's own time
+const resetTime = computed(() => resetTimeLabel(locale.value))
 const game = useElectrodeFlipStore()
 const challenge = useChallengeStore()
 const settings = useSettingsStore()
@@ -335,7 +338,7 @@ const nextLevelLine = computed(() => {
             <li>{{ t('electrodeFlip.rules.points', { levels: rules.levels }) }}</li>
             <li>{{ t('electrodeFlip.rules.electrode') }}</li>
             <li>{{ t('electrodeFlip.rules.level') }}</li>
-            <li>{{ t('electrodeFlip.rules.coins', { max: rules.max }) }}</li>
+            <li>{{ t('electrodeFlip.rules.coins', { max: rules.max, time: resetTime }) }}</li>
             <li>{{ t('electrodeFlip.rules.memo') }}</li>
           </ul>
         </section>

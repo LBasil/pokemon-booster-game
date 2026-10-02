@@ -2,13 +2,16 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { hasAccountOnDevice, useAuthStore } from '@/stores/auth'
+import { USERNAME_MAX, USERNAME_MIN, validateUsername } from '@/utils/profile'
 
 const { t } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 
-const mode = ref('login')
+// Newcomers (most visitors) land on "Sign up"; a device that already had an
+// account on "Log in"
+const mode = ref(hasAccountOnDevice() ? 'login' : 'signup')
 const email = ref('')
 const password = ref('')
 const username = ref('')
@@ -36,10 +39,17 @@ async function submit() {
       await auth.signIn({ email: email.value, password: password.value })
       router.push({ name: 'game' })
     } else {
+      // A username is required: without one the account used to be named
+      // after the email (shown to everyone on a public profile)
+      const invalid = validateUsername(username.value)
+      if (invalid) {
+        error.value = t(`profile.username.${invalid}`)
+        return
+      }
       const data = await auth.signUp({
         email: email.value,
         password: password.value,
-        username: username.value || null,
+        username: username.value.trim(),
       })
       if (data.session) {
         router.push({ name: 'game' })
@@ -91,8 +101,13 @@ async function submit() {
           type="text"
           class="form-control"
           autocomplete="nickname"
+          required
+          :minlength="USERNAME_MIN"
+          :maxlength="USERNAME_MAX"
+          aria-describedby="username-hint"
           :placeholder="t('home.usernamePlaceholder')"
         />
+        <p id="username-hint" class="field-hint">{{ t('home.usernameHint') }}</p>
       </div>
 
       <div>

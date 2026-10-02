@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { resetTimeLabel } from '@/utils/challenge'
 import * as sfx from '@/lib/sfx'
 import { useChallengeStore } from '@/stores/challenge'
 import { useSettingsStore } from '@/stores/settings'
@@ -17,7 +18,9 @@ import CoinAmount from '@/components/CoinAmount.vue'
 // holds the next one.
 const REVEAL_MS = 1400
 
-const { t, te } = useI18n()
+const { t, te, locale } = useI18n()
+// The daily reset (00:00 UTC) in the player's own time
+const resetTime = computed(() => resetTimeLabel(locale.value))
 const game = useSuperEffectiveStore()
 const challenge = useChallengeStore()
 const settings = useSettingsStore()
@@ -309,7 +312,7 @@ function optionClass(type) {
             <li>{{ t('superEffective.rules.weakness') }}</li>
             <li>{{ t('minigame.rules.run') }}</li>
             <li>{{ t('minigame.rules.paid', { runs: rules.runs, coins: rules.coins, answers: rules.answers, max: rules.coins * rules.answers }) }}</li>
-            <li>{{ t('minigame.rules.free') }}</li>
+            <li>{{ t('minigame.rules.free', { time: resetTime }) }}</li>
             <li>{{ t('superEffective.rules.harder') }}</li>
           </ul>
         </section>

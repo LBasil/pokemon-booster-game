@@ -7,6 +7,11 @@ address** for the sign-up part.
 
 ## Accounts
 
+- [ ] A fresh browser lands on "Sign up"; leaving the username empty
+      blocks the form. After 0023, an account made without one (e.g. from
+      the Supabase dashboard) is named "Trainer-1234", not after its email.
+- [ ] An old account whose username is the start of its email sees "Your
+      username comes from your email address" on its profile.
 - [ ] Sign up with a new email and a username → "check your email" message.
 - [ ] The confirmation email arrives; its link opens the app on the hub
       (`/game`), already signed in.
@@ -29,7 +34,7 @@ address** for the sign-up part.
 - [ ] 3 boosters → "Open all at once" → summary with 30 cards.
 - [ ] "Share" on the best pull opens the phone's share sheet with an image.
 - [ ] Leaving mid-reveal and coming back: the cards are in the collection.
-- [ ] Summary: "Open again" / "Change set" stay stuck above the tab bar
+- [ ] Summary: "Open again" / "Other set" stay stuck above the tab bar
       while scrolling the 10 cards; achievement pop-ups show above them,
       never over the title. Card flips sound soft (no harsh hiss).
 - [ ] New account: the booster page offers "Base · 1999", "151 · 2023"
@@ -37,7 +42,8 @@ address** for the sign-up part.
 - [ ] On a small phone (iPhone SE size), in both modes: the set name, the
       1/3/5/10 choice and "Open" are all visible without scrolling.
 - [ ] First pack's summary: the best card shows first, then (after a
-      moment) one achievement pop-up with "+N more achievements".
+      moment) two achievement pop-ups at most, the second with "+N more
+      achievements".
 
 ## Collection
 
@@ -77,8 +83,14 @@ address** for the sign-up part.
 ## Challenge mode (after migration 0005)
 
 - [ ] Hub → "Take on the challenge": 1,000 coins, empty challenge
-      collection; the unlimited collection is unchanged. "How the
-      challenge works" is open at the top the first time, folded the next.
+      collection; the unlimited collection is unchanged. The first time,
+      "The challenge in short" sits under the wallet until "Got it", and
+      "Open boosters" is on the first screen.
+- [ ] On a 1280x720 laptop, the booster page shows the count and "Open"
+      without scrolling. During an opening, no empty bar under the pack.
+- [ ] French: the Pokédex says "Salamèche"; a card's rarity reads
+      "Secrète" with "Sur la carte (en anglais) : …" under it; the rules
+      give the reset time in your time ("02:00"), never "UTC".
 - [ ] Trades with an empty challenge collection: "open a few challenge
       boosters" + trainers to pick from (never yourself).
 - [ ] Claim the daily reward (+200) → the button turns into a countdown;

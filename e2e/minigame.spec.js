@@ -18,7 +18,10 @@ test('the mini-games are one tap away in the challenge, near the top of its hub'
   const tile = page.locator('.ch-games')
   await expect(tile).toContainText('Higher or lower')
   await expect(tile).toContainText('3 paid runs left today')
-  // Right under the wallet
+  // Right under the wallet (the first visit's "in short" box aside, until "Got it")
+  const games = () => page.locator('.ch-grid > .ch-tile:not(.ch-brief)').evaluateAll((els) => els.findIndex((el) => el.classList.contains('ch-games')))
+  expect(await games()).toBe(1)
+  await page.getByRole('button', { name: 'Got it' }).click()
   expect(await page.locator('.ch-grid > .ch-tile').evaluateAll((els) => els.findIndex((el) => el.classList.contains('ch-games')))).toBe(1)
 
   await gamesTab(page).click()

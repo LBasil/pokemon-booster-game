@@ -36,7 +36,7 @@
     "emailLabel": "Email",
     "passwordLabel": "Mot de passe",
     "usernameLabel": "Pseudo",
-    "usernamePlaceholder": "Optionnel, affiché sur ton profil",
+    "usernamePlaceholder": "Par exemple DresseurRouge",
     "login": "Connexion",
     "signup": "Inscription",
     "submitLogin": "Se connecter",
@@ -46,7 +46,7 @@
     "title": "Ouvre des boosters Pokémon et remplis ton classeur",
     "poolSize": "{sets} séries et {cards} cartes pour l'instant.",
     "loginIntro": "Connecte-toi pour retrouver ta collection.",
-    "signupIntro": "Un email et un mot de passe suffisent. C'est gratuit.",
+    "signupIntro": "Un pseudo, un email et un mot de passe. C'est gratuit.",
     "emailPlaceholder": "toi{'@'}exemple.com",
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
@@ -56,7 +56,8 @@
     "forgotIntro": "Indique ton email : on t'envoie un lien pour choisir un nouveau mot de passe.",
     "sendResetLink": "Envoyer le lien",
     "backToLogin": "Retour à la connexion",
-    "resetSent": "Si un compte existe pour cet email, un lien de réinitialisation arrive. Vérifie ta boîte (et les spams)."
+    "resetSent": "Si un compte existe pour cet email, un lien de réinitialisation arrive. Vérifie ta boîte (et les spams).",
+    "usernameHint": "Visible par les autres joueurs : évite ton vrai nom."
   },
   "game": {
     "greeting": "Salut {name}",
@@ -131,7 +132,8 @@
     "completion": "{owned} / {total} cartes collectionnées ({percent} %)",
     "completionLabel": "Complétion de la série",
     "complete": "Complète",
-    "starterTitle": "Pas d’idée ? Commence par"
+    "starterTitle": "Pas d’idée ? Commence par",
+    "otherSet": "Autre série"
   },
   "collection": {
     "title": "Ma collection",
@@ -147,7 +149,7 @@
     "valueNote": "Prix moyen Cardmarket au moment de l'import",
     "tabCards": "Cartes",
     "tabSets": "Séries",
-    "searchPlaceholder": "Rechercher une carte (Dracaufeu, Pikachu…)",
+    "searchPlaceholder": "Chercher : Dracaufeu, Pikachu…",
     "searchLabel": "Rechercher dans tes cartes",
     "setFilter": "Filtrer par série",
     "allSets": "Toutes les séries",
@@ -215,7 +217,8 @@
     "frenchName": "En français : {name}",
     "goalLabel": "Série la plus avancée :",
     "goalCount": "{owned} / {total} ({percent} %)",
-    "goalAria": "Progression de {name}"
+    "goalAria": "Progression de {name}",
+    "printedRarity": "Sur la carte (en anglais) :"
   },
   "profile": {
     "title": "Profil",
@@ -268,7 +271,7 @@
     "unlocked": "Débloqué",
     "locked": "Verrouillé",
     "accountTitle": "Compte",
-    "accountDesc": "Connecté avec Supabase. La langue et le thème sont dans la barre du haut.",
+    "accountDesc": "Connecté avec ton email. La langue et le thème sont dans la barre du haut.",
     "join": "Créer mon compte",
     "notFoundTitle": "Dresseur introuvable",
     "notFound": "{name} n'existe pas ou garde son profil privé.",
@@ -309,7 +312,10 @@
     "unlimitedDesc": "Les cartes des boosters illimités. Les échanges se font uniquement en mode défi.",
     "showMore": "Voir plus ({count})",
     "largeTextLabel": "Texte plus grand",
-    "largeTextDesc": "Lettres plus grandes et textes secondaires plus foncés, plus faciles à lire."
+    "largeTextDesc": "Lettres plus grandes et textes secondaires plus foncés, plus faciles à lire.",
+    "settingsJump": "Réglages : son, texte plus grand…",
+    "nameFromEmail": "Ton pseudo vient de ton adresse email, et tout le monde peut le voir. En choisir un autre ?",
+    "nameFromEmailCta": "Changer mon pseudo"
   },
   "notFound": {
     "title": "Ce booster est vide",
@@ -367,7 +373,7 @@
     "days": "{count} jour | {count} jours",
     "topSet": "Série la plus ouverte",
     "unloggedNote": "Le détail porte sur les {logged} boosters enregistrés depuis le {date} ; {count} booster plus ancien a été ouvert avant le début de l'enregistrement. | Le détail porte sur les {logged} boosters enregistrés depuis le {date} ; {count} boosters plus anciens ont été ouverts avant le début de l'enregistrement.",
-    "since": "Depuis le {date}. Les jours sont comptés en UTC, comme pour le défi.",
+    "since": "Depuis le {date}. Une journée commence à {time} (heure de ton appareil), comme pour le défi.",
     "filterLabel": "Filtrer les boosters",
     "filterAll": "Tous",
     "filterHits": "Avec un hit",
@@ -495,7 +501,7 @@
     "rules": {
       "start": "Tu commences avec {coins} pièces et un classeur vide. Ta collection illimitée n'est pas touchée.",
       "pack": "Un booster coûte {coins} pièces, quelle que soit la série.",
-      "daily": "La récompense du jour et les missions se renouvellent chaque jour à minuit UTC.",
+      "daily": "La récompense du jour et les missions se renouvellent chaque jour à {time} (heure de ton appareil).",
       "rates": "Mêmes taux que les vrais boosters : pas de compteur de pitié, c'est la chance qui décide. Une longue série sans ultra rare peut arriver.",
       "godPack": "God pack : 1 booster sur {odds} ne contient que des holos et mieux.",
       "recycle": "Recycler garde un exemplaire de chaque carte et transforme les autres en pièces. Fabriquer crée n'importe quelle carte, pour bien plus cher.",
@@ -561,7 +567,15 @@
       "less": "Une copie de moins de {name}",
       "more": "Une copie de plus de {name}"
     },
-    "dailyReady": "Prête : récupère-la avec le bouton en haut de la page"
+    "dailyReady": "Prête : récupère-la avec le bouton en haut de la page",
+    "brief": {
+      "title": "Le défi en bref",
+      "coins": "Tu commences avec {coins} pièces ; un booster en coûte {price}.",
+      "earn": "Gagnes-en chaque jour : récompense du jour, missions et mini-jeux.",
+      "separate": "C'est une collection à part : tes cartes Illimité ne bougent pas.",
+      "ok": "Compris",
+      "more": "Toutes les règles"
+    }
   },
   "trades": {
     "title": "Échanges",
@@ -748,7 +762,7 @@
       "pick": "Deux cartes s'affichent : touche celle qui vaut le plus cher (prix Cardmarket). Tu as {seconds} secondes.",
       "run": "Une partie continue jusqu'à ta première erreur (ou jusqu'à la fin du temps).",
       "paid": "{runs} parties récompensées par jour : {coins} pièces par bonne réponse, pour les {answers} premières de la partie ({max} pièces max par partie).",
-      "free": "Ensuite, joue autant que tu veux pour le record, sans pièces. Les parties récompensées reviennent à minuit UTC.",
+      "free": "Ensuite, joue autant que tu veux pour le record, sans pièces. Les parties récompensées reviennent à {time} (heure de ton appareil).",
       "harder": "Plus la série est longue, plus les prix sont proches."
     }
   },
@@ -814,7 +828,7 @@
     "memo": "Mémo",
     "memoPick": "Marque à poser",
     "memoOn": "Mémo : touche les cases cachées pour noter ce que tu penses qu'elles cachent.",
-    "howTo": "Retourne tous les 2 et les 3. Clic droit (ou Mémo) pour marquer une case.",
+    "howTo": "Retourne tous les 2 et les 3. Mémo (ou un clic droit) marque une case.",
     "markElectrode": "Électrode",
     "mark": "Marque {value}",
     "tileHidden": "Ligne {row}, colonne {col} : cachée",
@@ -844,8 +858,8 @@
       "points": "Tes points se multiplient à chaque case retournée. Retourne tous les 2 et les 3 pour vider le plateau et monter de niveau ({levels} niveaux, de plus en plus d'Électrode).",
       "electrode": "Un Électrode fait perdre le plateau et ses points. Tu peux encaisser à tout moment pour les garder.",
       "level": "Après une défaite ou un encaissement, le niveau descend au nombre de cases retournées, s'il est plus bas.",
-      "coins": "Les points sont payés en pièces, jusqu'à {max} par jour. Ensuite, joue pour le record ; la limite revient à minuit UTC.",
-      "memo": "Mémo : note ce que tu as deviné sur les cases cachées (clic droit pour marquer un Électrode)."
+      "coins": "Les points sont payés en pièces, jusqu'à {max} par jour. Ensuite, joue pour le record ; la limite revient à {time} (heure de ton appareil).",
+      "memo": "Mémo : active Mémo pour noter ce que tu as deviné sur les cases cachées (un clic droit marche aussi sur ordinateur)."
     }
   },
   "achievements": {

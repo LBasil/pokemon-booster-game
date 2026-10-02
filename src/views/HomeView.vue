@@ -153,6 +153,18 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
   text-align: center;
 }
 
+/* Phones: smaller cards, so the form starts higher (most visitors came to
+   sign up, and its button sat two screens down) */
+@media (max-width: 575.98px) {
+  .home-stage {
+    --fan-card-w: 24vw;
+  }
+
+  .home-title {
+    margin-bottom: 0.75rem;
+  }
+}
+
 @media (min-width: 992px) {
   .home-main {
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);

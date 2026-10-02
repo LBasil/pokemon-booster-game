@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { resetTimeLabel } from '@/utils/challenge'
 import * as sfx from '@/lib/sfx'
 import { useChallengeStore } from '@/stores/challenge'
 import { useEvolutionChainStore } from '@/stores/evolutionChain'
@@ -21,7 +22,9 @@ import CoinAmount from '@/components/CoinAmount.vue'
 const REVEAL_MS = 1600
 const STAGES = ['basic', 'stage1', 'stage2']
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+// The daily reset (00:00 UTC) in the player's own time
+const resetTime = computed(() => resetTimeLabel(locale.value))
 const game = useEvolutionChainStore()
 const challenge = useChallengeStore()
 const settings = useSettingsStore()
@@ -389,7 +392,7 @@ function cardLabel(card) {
             <li>{{ t('evolutionChain.rules.stop') }}</li>
             <li>{{ t('minigame.rules.paid', { runs: rules.runs, coins: rules.coins, answers: rules.answers, max: rules.coins * rules.answers }) }}</li>
             <li>{{ t('evolutionChain.rules.coins') }}</li>
-            <li>{{ t('minigame.rules.free') }}</li>
+            <li>{{ t('minigame.rules.free', { time: resetTime }) }}</li>
             <li>{{ t('evolutionChain.rules.harder') }}</li>
           </ul>
         </section>

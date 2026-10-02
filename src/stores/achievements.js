@@ -21,8 +21,6 @@ import { achievements, MAX_TOASTS, newlyUnlocked, sortForToasts, toastBatch } fr
 const MODES = ['unlimited', 'challenge']
 const RATES_TTL = 10 * 60 * 1000
 const TOAST_MS = 6000
-// Phones and tablets (the tab bar layout): one toast per batch
-const compactToasts = () => window.matchMedia?.('(max-width: 991.98px)').matches ?? false
 
 // Unlimited keeps its original (pre-modes) keys
 const storageKey = (kind, mode, userId) =>
@@ -111,7 +109,7 @@ export const useAchievementsStore = defineStore('achievements', {
         sfx.achievement(settings.sound)
         sfx.buzz(settings.vibration, [20, 60, 20])
       }, delay)
-      const batch = toastBatch(sortForToasts(items, this.rates[mode]), compactToasts() ? 1 : MAX_TOASTS)
+      const batch = toastBatch(sortForToasts(items, this.rates[mode]), MAX_TOASTS)
       batch.forEach((toast, index) => {
         const key = ++toastId
         // They arrive one after the other

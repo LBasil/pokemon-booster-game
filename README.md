@@ -11,7 +11,9 @@ How it works inside (every table, RPC and flow, in French):
 
 - **Real authentication** via Supabase Auth (email/password), with email
   confirmation and a "forgot password" flow — no plaintext passwords, no
-  homemade session logic.
+  homemade session logic. The landing opens on "Sign up" for a newcomer
+  ("Log in" on a device that had an account), and a username is required
+  (public profiles used to show the start of the email).
 - **Unlimited boosters, any type**: pick a specific Pokémon set (searchable,
   grouped by year, each pack shows the set's logo and chase card, and how
   much of it you've collected in that mode, with a "Complete" badge) or "any
@@ -66,9 +68,10 @@ How it works inside (every table, RPC and flow, in French):
   or keep chosen cards **out of trades** from their detail), follow your challenge booster history, and climb the two
   challenge leaderboards. Badges in the navigation show rewards to claim,
   offers to answer and answers to read; on phones the challenge strip has a
-  Trades shortcut. "How the challenge works" sits at the top of its hub,
-  open on the first visit; the daily reward has one claim button (the
-  callout at the top). A new player's trades page says to open challenge
+  Trades shortcut. A first visit gets "The challenge in short" (three
+  lines) under the wallet, the full rules stay folded at the bottom, and
+  resets are given in your own time ("02:00"), not "midnight UTC"; the
+  daily reward has one claim button (the callout at the top). A new player's trades page says to open challenge
   boosters first and suggests trainers with big collections. Every coin
   and card moves server-side, and the unlimited collection is never
   touched.
@@ -84,7 +87,9 @@ How it works inside (every table, RPC and flow, in French):
   sets that have no Cardmarket price); search, filter by set, rarity or duplicates,
   and sort — all kept in the URL. The search knows the **French Pokémon
   names** too ("Dracaufeu" finds Charizard; card names are English only),
-  and the card detail says the French name. Next to the overall progress,
+  the card detail says the French name, and the Pokédex names species in
+  French. The detail's rarity is the site's own (translated), with the
+  one printed on the card as a note. Next to the overall progress,
   the **most advanced set** ("Base: 1 / 102") is a goal within reach (also
   on both hubs). Tabs for:
   - **Sets**: per-set completion, each opening a **binder** with every card
@@ -112,7 +117,8 @@ How it works inside (every table, RPC and flow, in French):
   created before the beta ends — `BETA_END` in `src/utils/beta.js`), a showcase card, stats, rarity breakdown
   (level, stats, rarity and achievements per game mode: Challenge | Unlimited),
   public/private switch, sound / vibration / visual effects / **larger
-  text** (bigger letters, darker secondary text) settings, a
+  text** (bigger letters, darker secondary text) settings (one tap away
+  from the top of the profile), a
   **booster animations** setting (Auto / Full / Light — Light, the default on
   touch screens, drops the 3D flip and the glow layers that stuttered on
   phones), and an
@@ -175,8 +181,8 @@ How it works inside (every table, RPC and flow, in French):
   search uses).
   A Steam-style **"Achievement unlocked" pop-up** (with a chime) shows at the
   end of an opening — never mid-reveal, so nothing is spoiled, and only
-  after a moment so the best pull is seen first; on phones a batch is one
-  pop-up ("+3 more achievements") — and each
+  after a moment so the best pull is seen first; two pop-ups at most, the
+  second saying "+14 more achievements" — and each
   achievement shows the **share of players** who have it.
 - **Community**: public profiles at `/u/<username>` (readable signed out,
   so the link can be shared), a **live feed** of the latest ultra/secret
@@ -324,6 +330,9 @@ its **SQL editor** and run, in order:
    under each leaderboard, and "Who has it in double?" on a missing
    challenge card. Run it after 0021; until then the leaderboards show the
    top 20 only and the search says it isn't available yet.
+23. `supabase/migrations/0023_username_not_from_email.sql` — an account
+   created without a username is named `Trainer-1234`, never after its
+   email (the sign-up form requires one anyway). Run it after 0022.
 
 Then in **Authentication**:
 

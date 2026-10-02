@@ -231,19 +231,20 @@ test('on phones the weekly missions fold under their title until opened', async 
   await expect(page.locator('.ch-mission').filter({ hasText: 'Open 25 boosters' })).toBeVisible()
 })
 
-test('"How the challenge works" is open at the top on the first visit, folded after', async ({ page }) => {
+test('a first visit explains the challenge in three lines, and the main action stays on screen', async ({ page }) => {
   await mockSupabase(page)
   await page.goto('/challenge')
-  const rules = page.locator('details.ch-rules')
-  await expect(rules).toHaveAttribute('open', '')
-  // Above the tiles, below what's waiting
-  const [rulesTop, walletTop] = await Promise.all([
-    rules.evaluate((el) => el.getBoundingClientRect().top),
-    page.locator('.ch-wallet').evaluate((el) => el.getBoundingClientRect().top),
-  ])
-  expect(rulesTop).toBeLessThan(walletTop)
+  const brief = page.getByRole('region', { name: 'The challenge in short' })
+  await expect(brief.getByRole('listitem')).toHaveCount(3)
+  await expect(page.locator('details.ch-rules')).not.toHaveAttribute('open', '')
+  // The wallet's "Open boosters" is still on the first screen, phones included
+  await expect(page.locator('.ch-wallet .ch-cta')).toBeInViewport()
+
+  await brief.getByRole('link', { name: 'All the rules' }).click()
+  await expect(page.locator('details.ch-rules')).toHaveAttribute('open', '')
   await page.reload()
-  await expect(rules).not.toHaveAttribute('open', '')
+  await expect(brief).toHaveCount(0)
+  await expect(page.locator('.ch-subtitle')).toBeVisible()
 })
 
 test('the daily reward is claimed from one button only, the tile points to it', async ({ page }) => {

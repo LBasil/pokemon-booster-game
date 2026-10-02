@@ -200,6 +200,13 @@ const frName = computed(() => {
 })
 const tier = computed(() => (card.value ? rarityTier(card.value) : 'common'))
 const bucket = computed(() => (card.value ? rarityLabelKey(card.value) : 'common'))
+// The site's own rarity (translated), then the one printed on the card
+// (pokemontcg.io, English only: "Special Illustration Rare") when it says more
+const rarityName = computed(() => t(`challenge.buckets.${bucket.value}`))
+const printedRarity = computed(() => {
+  const printed = card.value?.rarity
+  return printed && printed.toLowerCase() !== rarityName.value.toLowerCase() ? printed : null
+})
 
 const acquired = computed(() =>
   props.entry?.acquired_at
@@ -278,7 +285,7 @@ function onPointerUp(event) {
           <span v-if="bucket !== 'common' && bucket !== 'uncommon'" class="tier-chip" :data-tier="tier">
             {{ t(`boosters.bucket.${bucket}`) }}
           </span>
-          <span v-else-if="card.rarity" class="tier-chip">{{ card.rarity }}</span>
+          <span v-else-if="card.rarity" class="tier-chip">{{ rarityName }}</span>
           <span v-if="owned" class="qty-chip">{{ t('collection.ownedCopies', { count: entry.quantity }, entry.quantity) }}</span>
           <span v-else class="qty-chip missing">{{ t('collection.notOwned') }}</span>
         </div>
@@ -395,7 +402,10 @@ function onPointerUp(event) {
           </div>
           <div v-if="card.rarity">
             <dt>{{ t('collection.rarity') }}</dt>
-            <dd>{{ card.rarity }}</dd>
+            <dd>
+              {{ rarityName }}
+              <span v-if="printedRarity" class="detail-printed">{{ t('collection.printedRarity') }} <span lang="en">{{ printedRarity }}</span></span>
+            </dd>
           </div>
           <div v-if="card.hp || card.types?.length">
             <dt>{{ t('collection.stats') }}</dt>
@@ -558,6 +568,13 @@ function onPointerUp(event) {
   font-size: clamp(1.6rem, 4vw, 2.2rem);
   font-weight: 800;
   overflow-wrap: anywhere;
+}
+
+.detail-printed {
+  display: block;
+  color: var(--pb-text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .detail-fr-name {

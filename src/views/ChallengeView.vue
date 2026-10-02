@@ -16,6 +16,7 @@ import {
   dailyReward,
   msUntilReset,
   msUntilWeeklyReset,
+  resetTimeLabel,
 } from '@/utils/challenge'
 import { completionPercent } from '@/utils/progress'
 import { nextUp } from '@/utils/achievements'
@@ -32,6 +33,8 @@ import RecycleDuplicates from '@/components/RecycleDuplicates.vue'
 // Challenge mode hub: coins, daily reward, missions, the separate
 // challenge collection (with duplicate recycling), trades and achievements.
 const { t, locale } = useI18n()
+// The daily reset (00:00 UTC) in the player's own time
+const resetTime = computed(() => resetTimeLabel(locale.value))
 const challenge = useChallengeStore()
 const collection = useChallengeCollectionStore()
 const setsStore = useSetsStore()
@@ -175,24 +178,32 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 
 // ---------- Rules ----------
 
-// "How the challenge works" sits at the top, open on the first visit on this
-// device (it used to be the last thing on a 10-screen page), folded after
-const RULES_SEEN_KEY = 'pb-challenge-rules-seen'
-function rulesSeen() {
+// A newcomer gets the challenge in three lines under the wallet until they
+// tap "Got it" (the full rules, with their table, opened at the top pushed
+// the wallet two screens down); "How the challenge works" stays folded at
+// the bottom, opened by the brief's "All the rules"
+const BRIEF_SEEN_KEY = 'pb-challenge-rules-seen'
+function briefSeen() {
   try {
-    return localStorage.getItem(RULES_SEEN_KEY) === '1'
+    return localStorage.getItem(BRIEF_SEEN_KEY) === '1'
   } catch {
     return false
   }
 }
-const rulesOpen = ref(!rulesSeen())
-onMounted(() => {
+const showBrief = ref(!briefSeen())
+function dismissBrief() {
+  showBrief.value = false
   try {
-    localStorage.setItem(RULES_SEEN_KEY, '1')
+    localStorage.setItem(BRIEF_SEEN_KEY, '1')
   } catch {
-    // private mode: open again next time
+    // private mode: shown again next time
   }
-})
+}
+const rulesOpen = ref(false)
+function openRules() {
+  rulesOpen.value = true
+  dismissBrief()
+}
 </script>
 
 <template>
@@ -203,7 +214,8 @@ onMounted(() => {
       <section class="ch-intro">
         <ModeSwitch class="ch-mode" />
         <h1 class="ch-title">{{ t('challenge.title') }}</h1>
-        <p class="ch-subtitle">{{ t('challenge.subtitle') }}</p>
+        <!-- The first-visit brief says it in short -->
+        <p v-if="!showBrief" class="ch-subtitle">{{ t('challenge.subtitle') }}</p>
       </section>
 
       <div v-if="challenge.error" class="alert alert-danger" role="alert">{{ t('challenge.loadError') }}</div>
@@ -240,39 +252,6 @@ onMounted(() => {
           </li>
         </ul>
 
-        <!-- ============ Rules (open on the first visit, then folded) ============ -->
-        <details class="ch-rules" :open="rulesOpen" @toggle="rulesOpen = $event.target.open">
-          <summary>{{ t('challenge.rulesTitle') }}</summary>
-          <ul class="ch-rules-list">
-            <li>{{ t('challenge.rules.start', { coins: formatNumber(START_COINS) }) }}</li>
-            <li>{{ t('challenge.rules.pack', { coins: formatNumber(PACK_PRICE) }) }}</li>
-            <li>{{ t('challenge.rules.daily') }}</li>
-            <li>{{ t('challenge.rules.rates') }}</li>
-            <li>{{ t('challenge.rules.godPack', { odds: formatNumber(GOD_PACK_ODDS) }) }}</li>
-            <li>{{ t('challenge.rules.recycle') }}</li>
-            <li>{{ t('challenge.rules.minigame') }}</li>
-            <li>{{ t('challenge.rules.separate') }}</li>
-          </ul>
-          <div class="ch-table-wrap">
-            <table class="ch-table">
-              <caption class="visually-hidden">{{ t('challenge.rules.tableCaption') }}</caption>
-              <thead>
-                <tr>
-                  <th scope="col">{{ t('challenge.rules.rarity') }}</th>
-                  <th scope="col">{{ t('challenge.rules.recycleCol') }}</th>
-                  <th scope="col">{{ t('challenge.rules.craftCol') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="bucket in BUCKETS" :key="bucket">
-                  <th scope="row"><span class="ch-swatch" :style="{ background: `var(--pb-bucket-${bucket})` }"></span>{{ t(`challenge.buckets.${bucket}`) }}</th>
-                  <td><CoinAmount :amount="RECYCLE_VALUE[bucket]" /></td>
-                  <td><CoinAmount :amount="CRAFT_PRICE[bucket]" /></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </details>
 
         <div class="ch-grid">
           <!-- ============ Wallet ============ -->
@@ -290,6 +269,20 @@ onMounted(() => {
             <div class="ch-wallet-art" aria-hidden="true">
               <BoosterArt class="ch-pack ch-pack-back" />
               <BoosterArt class="ch-pack ch-pack-front" />
+            </div>
+          </section>
+
+          <!-- ============ In short (first visit) ============ -->
+          <section v-if="showBrief" class="ch-tile ch-brief" aria-labelledby="ch-brief-title">
+            <h2 id="ch-brief-title" class="ch-brief-title">{{ t('challenge.brief.title') }}</h2>
+            <ul class="ch-brief-list">
+              <li>{{ t('challenge.brief.coins', { coins: formatNumber(START_COINS), price: formatNumber(PACK_PRICE) }) }}</li>
+              <li>{{ t('challenge.brief.earn') }}</li>
+              <li>{{ t('challenge.brief.separate') }}</li>
+            </ul>
+            <div class="ch-brief-actions">
+              <button type="button" class="btn btn-primary btn-sm" @click="dismissBrief">{{ t('challenge.brief.ok') }}</button>
+              <a href="#ch-rules" class="ch-link" @click="openRules">{{ t('challenge.brief.more') }}</a>
             </div>
           </section>
 
@@ -477,6 +470,40 @@ onMounted(() => {
             </template>
           </section>
         </div>
+
+        <!-- ============ Rules (folded) ============ -->
+        <details id="ch-rules" class="ch-rules" :open="rulesOpen" @toggle="rulesOpen = $event.target.open">
+          <summary>{{ t('challenge.rulesTitle') }}</summary>
+          <ul class="ch-rules-list">
+            <li>{{ t('challenge.rules.start', { coins: formatNumber(START_COINS) }) }}</li>
+            <li>{{ t('challenge.rules.pack', { coins: formatNumber(PACK_PRICE) }) }}</li>
+            <li>{{ t('challenge.rules.daily', { time: resetTime }) }}</li>
+            <li>{{ t('challenge.rules.rates') }}</li>
+            <li>{{ t('challenge.rules.godPack', { odds: formatNumber(GOD_PACK_ODDS) }) }}</li>
+            <li>{{ t('challenge.rules.recycle') }}</li>
+            <li>{{ t('challenge.rules.minigame') }}</li>
+            <li>{{ t('challenge.rules.separate') }}</li>
+          </ul>
+          <div class="ch-table-wrap">
+            <table class="ch-table">
+              <caption class="visually-hidden">{{ t('challenge.rules.tableCaption') }}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{{ t('challenge.rules.rarity') }}</th>
+                  <th scope="col">{{ t('challenge.rules.recycleCol') }}</th>
+                  <th scope="col">{{ t('challenge.rules.craftCol') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="bucket in BUCKETS" :key="bucket">
+                  <th scope="row"><span class="ch-swatch" :style="{ background: `var(--pb-bucket-${bucket})` }"></span>{{ t(`challenge.buckets.${bucket}`) }}</th>
+                  <td><CoinAmount :amount="RECYCLE_VALUE[bucket]" /></td>
+                  <td><CoinAmount :amount="CRAFT_PRICE[bucket]" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
 
         <RouterLink :to="{ name: 'game' }" class="ch-back"><span aria-hidden="true">←</span> {{ t('challenge.backToUnlimited') }}</RouterLink>
       </template>
@@ -1051,6 +1078,35 @@ onMounted(() => {
   gap: 0.75rem 1.25rem;
   margin-top: auto;
   padding-top: 1.25rem;
+}
+
+/* In short (first visit), right under the wallet */
+.ch-brief {
+  grid-column: 1 / -1;
+  padding: 1rem 1.25rem;
+  border-color: var(--pb-ring);
+}
+
+.ch-brief-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.ch-brief-list {
+  margin: 0 0 0.75rem;
+  padding-left: 1.2rem;
+  line-height: 1.55;
+}
+
+.ch-brief-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+#ch-rules {
+  scroll-margin-top: 1.5rem;
 }
 
 /* Rules */

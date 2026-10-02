@@ -44,26 +44,22 @@ const eyebrow = (toast) => {
       </div>
       <div v-for="toast in store.toasts" :key="toast.key" class="ach-toast" role="status">
         <RouterLink
-          :to="{ name: modeRoutes(toast.mode).achievements, query: toast.item && !toast.extra ? { cat: toast.item.category } : { status: 'unlocked' } }"
+          :to="{ name: modeRoutes(toast.mode).achievements, query: toast.extra ? { status: 'unlocked' } : { cat: toast.item.category } }"
           class="ach-toast-link"
           @click="store.dismiss(toast.key)"
         >
           <span class="ach-toast-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4" /></svg>
           </span>
-          <span v-if="toast.item" class="ach-toast-body">
+          <span class="ach-toast-body">
             <span class="ach-toast-eyebrow">{{ eyebrow(toast) }}</span>
             <span class="ach-toast-title">{{ text.title(toast.item) }}</span>
-            <span v-if="toast.extra" class="ach-toast-desc">{{ t('achievements.ui.moreUnlocked', { count: toast.extra }, toast.extra) }}</span>
-            <span v-else class="ach-toast-desc">{{ text.desc(toast.item) }}</span>
+            <span class="ach-toast-desc">{{ text.desc(toast.item) }}</span>
             <span v-if="!toast.extra && rateOf(toast.item, store.rates[toast.mode], true) !== null" class="ach-toast-rate">
               {{ text.rate(rateOf(toast.item, store.rates[toast.mode], true)) }}
             </span>
-          </span>
-          <span v-else class="ach-toast-body">
-            <span class="ach-toast-eyebrow">{{ eyebrow(toast) }}</span>
-            <span class="ach-toast-title">{{ t('achievements.ui.moreUnlocked', { count: toast.more }, toast.more) }}</span>
-            <span class="ach-toast-desc">{{ t('achievements.ui.seeAll') }}</span>
+            <!-- The last toast of a big batch: how many more (never more than 2 toasts) -->
+            <span v-if="toast.extra" class="ach-toast-extra">{{ t('achievements.ui.moreUnlocked', { count: toast.extra }, toast.extra) }}</span>
           </span>
         </RouterLink>
         <button type="button" class="ach-toast-close" :aria-label="t('achievements.ui.dismiss')" @click="store.dismiss(toast.key)">
@@ -115,6 +111,15 @@ const eyebrow = (toast) => {
 
   .ach-toast-desc {
     display: none;
+  }
+
+  /* Pack summary: a slimmer toast, so less of the best card hides behind */
+  html.pb-action-bar .ach-toast-icon {
+    display: none;
+  }
+
+  html.pb-action-bar .ach-toast-link {
+    padding: 0.45rem 2.5rem 0.45rem 0.85rem;
   }
 }
 
@@ -211,6 +216,12 @@ const eyebrow = (toast) => {
 
 .ach-toast-rate {
   font-weight: 700;
+}
+
+.ach-toast-extra {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  font-weight: 800;
 }
 
 .ach-toast-close {

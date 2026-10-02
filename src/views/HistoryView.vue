@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { resetTimeLabel } from '@/utils/challenge'
 import { fetchCardsByIds } from '@/api/cards'
 import { fetchPlayerAchievements } from '@/api/achievements'
 import { fetchOpenings } from '@/api/history'
@@ -23,6 +24,8 @@ const props = defineProps({
 const routes = modeRoutes(props.mode)
 
 const { t, locale } = useI18n()
+// The daily reset (00:00 UTC) in the player's own time
+const resetTime = computed(() => resetTimeLabel(locale.value))
 const setsStore = useSetsStore()
 
 const PAGE = 20
@@ -196,7 +199,7 @@ function chip(card) {
           <p v-if="summary.stats && summary.unlogged > 0" class="totals-note">
             {{ t('history.unloggedNote', { count: summary.unlogged, logged: summary.logged, date: since }, summary.unlogged) }}
           </p>
-          <p v-else-if="summary.stats && since" class="totals-note">{{ t('history.since', { date: since }) }}</p>
+          <p v-else-if="summary.stats && since" class="totals-note">{{ t('history.since', { date: since, time: resetTime }) }}</p>
         </template>
       </section>
 

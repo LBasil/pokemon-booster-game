@@ -43,6 +43,14 @@ sequenceDiagram
   end
 ```
 
+- **Onglet par défaut** : « Inscription » pour un nouveau visiteur,
+  « Connexion » si un compte s'est déjà connecté sur l'appareil
+  (`localStorage pb-has-account`, posé par le store auth à chaque session ;
+  `hasAccountOnDevice()`).
+- **Pseudo obligatoire** à l'inscription (2 à 24 caractères,
+  `validateUsername`) : sans lui, le compte prenait le début de l'e-mail,
+  public par défaut. Le profil propose de le changer à ceux dont le pseudo
+  est encore le début de leur e-mail (`nameFromEmail`).
 - **Connexion** : `auth.signIn` → `signInWithPassword` ; la garde du
   routeur envoie ensuite `/` vers `/game`.
 - **Mot de passe oublié** : `requestPasswordReset(email)` → e-mail avec un
@@ -120,10 +128,15 @@ sequenceDiagram
    mode est vide, « Pas d'idée ? Commence par » propose le Set de base,
    151 et le set le plus récent (`starterSets()` de `src/utils/sets.js`).
    **Téléphone** : le choix 1/3/5/10 et le bouton « Ouvrir » forment un
-   bloc collé au-dessus de la barre d'onglets (`.open-actions`) ; avant,
+   bloc collé au-dessus de la barre d'onglets (`.select-actions`) ; avant,
    le bouton seul restait collé et cachait le nombre. Sur un écran court
    (hauteur ≤ 760 px, iPhone SE), le booster est réduit et placé à côté
-   de son nom (`.preview-row`), pour que le nom reste visible.
+   de son nom (`.preview-row`), pour que le nom reste visible. Le bloc
+   s'appelle `.select-actions` (`.open-actions` est celui de la phase
+   d'ouverture : partager le nom les avait mélangés). **Ordinateur** : le
+   même bloc colle au bas de la fenêtre et le booster rétrécit sous 820 px
+   de haut ; sur un portable 1280×720, le bouton était sous la ligne de
+   flottaison.
 3. **`startOpening()`** : retient le set et le nombre, passe en
    `phase = 'open'`, puis `prepareBooster()`.
 4. **`drawPack()`** : **un appel serveur par booster**. Le pack est tiré
@@ -157,10 +170,12 @@ sequenceDiagram
     toute vérification (même déclenchée ailleurs, par exemple un échange
     accepté en direct) pour ne rien dévoiler. En `done`, `check(mode, {
     delay: 1500 })` affiche les succès débloqués après 1,5 s, pour que la
-    meilleure carte soit vue avant. Sur téléphone et tablette, un lot de
-    succès tient en un seul toast (le plus rare, puis « +N autres succès »,
-    lien vers les succès débloqués) : deux ou trois toasts cachaient la
-    moitié du récapitulatif.
+    meilleure carte soit vue avant. Partout, **2 toasts au plus** (les plus
+    rares) ; le second ajoute « +N autres succès » et mène aux succès
+    débloqués : un premier booster en débloquait 16 d'un coup. Pendant le
+    récapitulatif sur téléphone (`html.pb-action-bar`) ils perdent leur
+    icône pour cacher moins la meilleure carte ; le bouton
+    « Autre série » remplace « Changer de série » (sur deux lignes).
 
 Si un appel échoue (réseau, pièces insuffisantes), le message s'affiche
 et on revient à la sélection, ou au récapitulatif si des cartes ont déjà
@@ -299,7 +314,7 @@ l'Illimité (bug corrigé le 2026-09-27).
 | Changer de pseudo | `validateUsername` (2–24 caractères) puis `profileStore.update({ username })`. Pris → « déjà utilisé » (unicité sans tenir compte de la casse) |
 | Choisir la vitrine | `ShowcasePicker` → `update({ showcase_card_id })` ; le serveur refuse une carte non possédée |
 | Profil public/privé | `update({ is_public })`. Un profil privé disparaît du fil, des classements et de `/u/…` |
-| Réglages (son, vibration, effets, texte agrandi, animations) | `settingsStore.set()`, par appareil, rien côté serveur. « Texte plus grand » (`largeText`) : `html.pb-text-large` agrandit tous les `rem` (112,5 %) et fonce `--pb-text-muted` |
+| Réglages (son, vibration, effets, texte agrandi, animations) | Lien « Réglages : son, texte plus grand… » en haut de la carte du dresseur (`#profile-settings` : ils sont au 10e écran sur téléphone). `settingsStore.set()`, par appareil, rien côté serveur. « Texte plus grand » (`largeText`) : `html.pb-text-large` agrandit tous les `rem` (112,5 %) et fonce `--pb-text-muted` |
 | Installer l'app | `promptInstall()` |
 | Déconnexion | `auth.signOut()` puis retour à l'accueil (bouton sur cette page uniquement) |
 
@@ -328,6 +343,11 @@ l'Illimité (bug corrigé le 2026-09-27).
   « Dracaufeu » trouve « Charizard ex ». Même chose dans les sélecteurs
   d'échange (`searchEntries`). En français, la fiche d'une carte affiche
   « En français : Dracaufeu » sous le nom (sauf si c'est le même mot).
+  Le Pokédex nomme aussi les espèces en français (`PokedexGrid`). La
+  rareté de la fiche est celle du site, traduite (« Secrète »), avec la
+  rareté imprimée en note (« Sur la carte (en anglais) : Special
+  Illustration Rare ») : pokemontcg.io n'a que les noms anglais, et on
+  n'invente pas les noms officiels français.
 - **Objectif à portée** : sous « Cartes uniques 10 / 20 670 », `SetGoal`
   affiche la série la plus avancée (`setProgress()[0]`) avec un lien vers
   son classeur ; aussi sur les tuiles collection des deux hubs.
@@ -355,12 +375,18 @@ avec 1000 pièces au premier passage**), la collection Défi, le statut des
 mini-jeux ; un minuteur recharge l'état juste après 00:00 UTC.
 
 Ordre de la page : ce qui attend le joueur (`.ch-waiting` : récompense du
-jour, missions finies, offres), puis « Comment marche le défi »
-(`<details>`, **ouvert à la première visite** sur l'appareil, replié
-ensuite : `localStorage pb-challenge-rules-seen`), puis les tuiles. La
-récompense du jour ne se réclame que depuis l'encadré du haut ; la tuile
-garde la série de 7 jours et renvoie vers ce bouton. Sur téléphone, la
-tuile Succès n'affiche pas « Presque ! » (la page des succès les a).
+jour, missions finies, offres), puis les tuiles, portefeuille en premier.
+**Première visite** : « Le défi en bref » (3 lignes, `.ch-brief`) se place
+sous le portefeuille jusqu'à « Compris » (`localStorage
+pb-challenge-rules-seen`) et remplace le sous-titre ; son lien « Toutes
+les règles » ouvre « Comment marche le défi » (`<details>`, replié, en bas
+de page). Ouvertes en haut, les règles complètes repoussaient le bouton
+« Ouvrir des boosters » au 3e écran du téléphone. La récompense du jour ne
+se réclame que depuis l'encadré du haut ; la tuile garde la série de 7
+jours et renvoie vers ce bouton. Sur téléphone, la tuile Succès n'affiche
+pas « Presque ! » (la page des succès les a). Les règles (Défi,
+mini-jeux) et l'historique donnent l'heure de remise à zéro dans l'heure
+de l'appareil (`resetTimeLabel()`, « 02:00 »), plus « minuit UTC ».
 
 | Action | Store → RPC | Ce que fait le serveur |
 | --- | --- | --- |
@@ -571,7 +597,7 @@ flowchart TD
   C --> D["liste débloquée maintenant"]
   D --> E{"déjà vus sur cet appareil ?<br/>localStorage par compte et mode<br/>+ ids déjà enregistrés côté serveur"}
   E -- "première fois" --> F["référence silencieuse"]
-  E -- "nouveaux ids" --> G["toasts (3 max, les plus rares d'abord, puis « +N » ;<br/>téléphone : 1 seul, « +N autres succès »)"]
+  E -- "nouveaux ids" --> G["toasts (2 max, les plus rares d'abord ;<br/>le 2e ajoute « +N autres succès »)"]
   F --> H["record_achievements(ids manquants, mode)"]
   G --> H
   H --> I["taux rafraîchis"]
