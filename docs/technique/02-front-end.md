@@ -224,7 +224,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `pokemonGroups.js` | Listes de numéros du Pokédex des succès « possède-les tous » : lignées, starters, légendaires, fabuleux, Ultra-Chimères, badges d'arène, Conseil 4, Maîtres, rivaux (Kanto ; les lignées sont toutes dans les fichiers de région) |
 | `kanto.js` | Données Gen 1 : lignées de Rouge/Bleu, solitaires, bébés, évolutions tardives, formes régionales (noms de cartes), routes et lieux (Pokémon sauvages, PokéAPI), villes et dresseurs (motifs sur les noms de cartes), premières séries |
 | `johto.js`, `hoenn.js`, `sinnoh.js`, `unova.js`, `kalos.js`, `alola.js`, `galar.js`, `paldea.js` | Un fichier par région après Kanto, un objet de même forme (champs décrits en tête de hoenn.js) : lignées, solitaires, bébés, évolutions tardives, formes régionales, arènes, Conseil 4, rivaux, dresseurs en cartes, routes et lieux (PokéAPI), lieux en cartes, séries |
-| `challenge.js` | Économie du Défi (**miroir** du SQL) : prix, recyclage (`recyclePreview` avec sélection, `duplicateGroups`), fabrication, récompense quotidienne, comptes à rebours UTC |
+| `challenge.js` | Économie du Défi (**miroir** du SQL) : prix, recyclage (`recyclePreview` avec sélection et nombre d'exemplaires par carte, `duplicateGroups`), fabrication, récompense quotidienne, comptes à rebours UTC |
 | `minigame.js` | Règles de « Plus ou moins » (**miroir** de `minigame_rules()`) |
 | `electrodeFlip.js` | Règles d'« Électrode Shiny Flip » (**miroir** de `electrode_flip_rules()` / `electrode_flip_end()`) : points, niveau suivant, pièces, lignes sûres |
 | `superEffective.js` | Règles de « Super efficace ! » (**miroir** de `super_effective_rules()` / `super_effective_types()` / `super_effective_option_count()`) : nombre de choix selon la série, pièces, touches 1 à 6 |
@@ -250,7 +250,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `CardDetail` | Fiche plein écran (flèches, balayage), historique de prix, liste de souhaits, fabrication/recyclage en Défi |
 | `SetPicker` | Grille de sets cherchable, groupée par année (sous-sets masqués), avec la complétion de chaque set commencé (prop `owned`) |
 | `PriceChart` | Courbe du prix d'une carte (un relevé par jour d'import) |
-| `PokedexGrid`, `WishlistGrid`, `ShowcasePicker`, `RecycleDuplicates` | Onglets Pokédex et souhaits, choix de la vitrine, recyclage (tout, ou « Choisir… » par carte ou par rareté) |
+| `PokedexGrid`, `WishlistGrid`, `ShowcasePicker`, `RecycleDuplicates` | Onglets Pokédex et souhaits, choix de la vitrine, recyclage (tout, ou « Choisir… » par carte ou par rareté, − / + pour le nombre d'exemplaires) |
 | `BetaBadge` | Pastille « Bêta-testeur » (bordure holo + reflet qui passe, coupé sans effets / mouvement réduit), `compact` = juste « β ». Profil et tuile profil du hub |
 | `UsernameCombobox` | Champ pseudo avec suggestions des dresseurs publics (`searchUsernames`, 200 ms après la frappe, 8 au maximum, flèches + Entrée, Échap). Événement `pick` au choix d'une suggestion. Partenaire d'échange |
 | `AchievementTile`, `AchievementToasts` | Tuile d'un succès, notifications « succès débloqué » (et, dans la même pile, les toasts d'échange du store `trades`) |

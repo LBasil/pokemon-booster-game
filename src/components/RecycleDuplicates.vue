@@ -10,8 +10,9 @@ import CoinAmount from '@/components/CoinAmount.vue'
 // Challenge mode: "N duplicates → +X coins", then either a two-step button
 // that recycles every copy beyond the first (recycle_duplicates, migration
 // 0005), or "Choose": a list of the cards with duplicates, by rarity, to
-// tick the ones to recycle (recycle_cards, migration 0017). One copy of
-// each card is always kept.
+// tick the ones to recycle, all their extra copies or, with − / +, only
+// some (recycle_card_copies, migration 0020). One copy of each card is
+// always kept.
 const emit = defineEmits(['recycled', 'error'])
 
 const { t, locale } = useI18n()
@@ -26,32 +27,40 @@ const busy = ref(false)
 // ---------- Choose ----------
 
 const choosing = ref(false)
-const picked = ref(new Set())
+// card id -> copies to recycle (1 to its duplicates)
+const picked = ref(new Map())
 const groups = computed(() => duplicateGroups(collection.entries))
 const pickedPreview = computed(() => recyclePreview(collection.entries, picked.value))
 
+const extraOf = (entry) => entry.quantity - 1
+const copiesOf = (entry) => picked.value.get(entry.card_id) ?? 0
+
 function startChoosing() {
   confirming.value = false
-  picked.value = new Set()
+  picked.value = new Map()
   trades.loadLocks()
   choosing.value = true
 }
 
-function toggle(cardId) {
-  const next = new Set(picked.value)
-  if (next.has(cardId)) next.delete(cardId)
-  else next.add(cardId)
+function setCopies(entry, copies) {
+  const next = new Map(picked.value)
+  const count = Math.min(Math.max(copies, 0), extraOf(entry))
+  if (count) next.set(entry.card_id, count)
+  else next.delete(entry.card_id)
   picked.value = next
 }
 
-// A rarity chip ticks all of that rarity, or unticks them when they all are
-const bucketPicked = (group) => group.entries.every((entry) => picked.value.has(entry.card_id))
+// The checkbox takes every extra copy, or none
+const toggle = (entry) => setCopies(entry, copiesOf(entry) ? 0 : extraOf(entry))
+
+// A rarity chip ticks all of that rarity (every extra copy), or unticks them when they all are
+const bucketPicked = (group) => group.entries.every((entry) => copiesOf(entry) === extraOf(entry))
 function toggleBucket(group) {
-  const next = new Set(picked.value)
+  const next = new Map(picked.value)
   const all = bucketPicked(group)
   for (const entry of group.entries) {
     if (all) next.delete(entry.card_id)
-    else next.add(entry.card_id)
+    else next.set(entry.card_id, extraOf(entry))
   }
   picked.value = next
 }
@@ -62,7 +71,7 @@ async function run(cards) {
     const result = await challenge.recycle(cards)
     confirming.value = false
     choosing.value = false
-    picked.value = new Set()
+    picked.value = new Map()
     emit('recycled', result)
   } catch (err) {
     emit('error', err)
@@ -72,7 +81,11 @@ async function run(cards) {
 }
 
 const recycleAll = () => run(null)
-const recyclePicked = () => run([...picked.value])
+function recyclePicked() {
+  const extras = Object.fromEntries(collection.entries.map((entry) => [entry.card_id, extraOf(entry)]))
+  const picks = Object.fromEntries([...picked.value].map(([id, copies]) => [id, Math.min(copies, extras[id] ?? 0)]))
+  run({ picks, extras })
+}
 </script>
 
 <template>
@@ -129,19 +142,43 @@ const recyclePicked = () => run([...picked.value])
         <section v-for="group in groups" :key="group.bucket" class="pick-group">
           <h3 class="pick-group-title">{{ t(`challenge.pick.buckets.${group.bucket}`) }}</h3>
           <ul class="pick-rows" role="list">
-            <li v-for="entry in group.entries" :key="entry.card_id">
-              <label class="pick-row" :class="{ picked: picked.has(entry.card_id) }">
-                <input type="checkbox" class="form-check-input" :checked="picked.has(entry.card_id)" @change="toggle(entry.card_id)" />
+            <li v-for="entry in group.entries" :key="entry.card_id" class="pick-row" :class="{ picked: copiesOf(entry) }">
+              <label class="pick-label">
+                <input type="checkbox" class="form-check-input" :checked="copiesOf(entry) > 0" @change="toggle(entry)" />
                 <img :src="entry.cards.image_small" alt="" loading="lazy" class="pick-img" />
                 <span class="pick-name">
                   {{ entry.cards.name }}
                   <span class="pick-meta">
-                    {{ t('challenge.pick.extra', { count: entry.quantity - 1 }, entry.quantity - 1) }}
+                    {{ t('challenge.pick.extra', { count: extraOf(entry) }, extraOf(entry)) }}
                     <span v-if="trades.isLocked(entry.card_id)" class="pick-lock">· {{ t('trades.notForTrade') }}</span>
                   </span>
                 </span>
-                <CoinAmount class="pick-coins" :amount="(entry.quantity - 1) * recycleValue(entry.cards)" signed />
               </label>
+              <div class="pick-side">
+                <!-- How many copies, when there's more than one to choose from -->
+                <div v-if="extraOf(entry) > 1" class="pick-stepper">
+                  <button
+                    type="button"
+                    class="pick-step"
+                    :disabled="!copiesOf(entry)"
+                    :aria-label="t('challenge.pick.less', { name: entry.cards.name })"
+                    @click="setCopies(entry, copiesOf(entry) - 1)"
+                  >
+                    −
+                  </button>
+                  <span class="pick-copies">{{ t('challenge.pick.copies', { count: copiesOf(entry), total: extraOf(entry) }) }}</span>
+                  <button
+                    type="button"
+                    class="pick-step"
+                    :disabled="copiesOf(entry) >= extraOf(entry)"
+                    :aria-label="t('challenge.pick.more', { name: entry.cards.name })"
+                    @click="setCopies(entry, copiesOf(entry) + 1)"
+                  >
+                    +
+                  </button>
+                </div>
+                <CoinAmount class="pick-coins" :amount="(copiesOf(entry) || extraOf(entry)) * recycleValue(entry.cards)" signed />
+              </div>
             </li>
           </ul>
         </section>
@@ -307,12 +344,67 @@ const recyclePicked = () => run([...picked.value])
 
 .pick-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.4rem 0.65rem;
   padding: 0.4rem 0.6rem;
   border-radius: var(--pb-radius-sm);
   border: 1px solid var(--pb-border);
+}
+
+.pick-label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex: 1 1 12rem;
+  min-width: 0;
   cursor: pointer;
+}
+
+.pick-side {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-left: auto;
+}
+
+.pick-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--pb-border-strong);
+  border-radius: 999px;
+  background: var(--pb-surface);
+}
+
+.pick-step {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--pb-text);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pick-step:disabled {
+  color: var(--pb-text-muted);
+  opacity: 0.5;
+}
+
+@media (hover: hover) {
+  .pick-step:not(:disabled):hover {
+    background: var(--pb-selected);
+  }
+}
+
+.pick-copies {
+  min-width: 2.6rem;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .pick-row.picked {
@@ -320,7 +412,7 @@ const recyclePicked = () => run([...picked.value])
   background: var(--pb-selected);
 }
 
-.pick-row .form-check-input {
+.pick-label .form-check-input {
   flex-shrink: 0;
   margin: 0;
 }

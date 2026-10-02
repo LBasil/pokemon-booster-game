@@ -511,6 +511,21 @@ export async function mockSupabase(page, options = {}) {
       c.progress.recycle += recycled
       return json({ recycled, gained, coins: c.coins })
     }
+    if (path === '/rest/v1/rpc/recycle_card_copies') {
+      let recycled = 0
+      let gained = 0
+      for (const entry of state.challengeCollection) {
+        const copies = Math.min(entry.quantity - 1, Math.floor(args.p_picks[entry.card_id] ?? 0))
+        if (copies > 0) {
+          recycled += copies
+          gained += copies * RECYCLE[entry.cards.rarity_bucket]
+          entry.quantity -= copies
+        }
+      }
+      c.coins += gained
+      c.progress.recycle += recycled
+      return json({ recycled, gained, coins: c.coins })
+    }
     if (path === '/rest/v1/rpc/craft_card') {
       const card = byId[args.p_card_id]
       const price = CRAFT[card.rarity_bucket]

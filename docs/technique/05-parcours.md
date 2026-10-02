@@ -336,7 +336,7 @@ mini-jeux ; un minuteur recharge l'état juste après 00:00 UTC.
 | Récompense quotidienne | `challenge.claimDaily()` → `claim_daily_reward` | Série +1 si réclamée hier, sinon 1 ; 200 + 50 × (série − 1), plafond 500 ; journal `daily` |
 | Réclamer une mission | `challenge.claimMission(id)` → `claim_mission` | Vérifie progression ≥ objectif et pas déjà réclamée (index unique du journal) ; crédite ; journal `mission` |
 | Recycler les doublons | `challenge.recycle(cardId?)` → `recycle_duplicates` | Ramène chaque carte à 1 exemplaire ; crédite selon la rareté ; journal `recycle` avec la quantité (compte pour la mission) |
-| Recycler une sélection | « Choisir… » dans `RecycleDuplicates` (cases par carte, puces par rareté, `duplicateGroups`) → `challenge.recycle([ids])` → `recycle_cards` (0017) | Pareil, pour les cartes cochées seulement |
+| Recycler une sélection | « Choisir… » dans `RecycleDuplicates` (case par carte = tous ses doublons, − / + pour n'en prendre que certains, puces par rareté, `duplicateGroups`) → `challenge.recycle({ picks, extras })` → `recycle_card_copies` (0020) | Retire le nombre d'exemplaires choisi de chaque carte (au plus ses doublons) |
 | Fabriquer une carte | `challenge.craft(card)` → `craft_card` | Débite le prix de la rareté ; +1 exemplaire ; journal `craft` |
 
 Après chaque action, le store remplace l'état par celui renvoyé par le

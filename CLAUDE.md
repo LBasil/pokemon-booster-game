@@ -294,7 +294,12 @@ docs/technique/             technical doc (French, user choice): overview, front
   `?give=<id>` preselects my card; CardDetail has "Offer in a trade".
   **Recycling a pick** (0017 `recycle_cards(ids)`, fallback: one
   `recycle_duplicates` per card): RecycleDuplicates "Choose…" (checkbox
-  per card, rarity chips, `duplicateGroups`).
+  per card = every extra copy, rarity chips, `duplicateGroups`).
+  **How many copies** (user, 2026-10-02: "pas tout ou rien"): − / + per
+  card with 2+ extras, `picked` = Map id -> copies, sent to 0020
+  `recycle_card_copies({id: n})` (capped server side); without 0020 a
+  full pick falls back to `recycle_cards`, a partial one errors
+  `recycle_copies_unavailable`.
   Public profiles list the collection of the mode picked in their
   Challenge | Unlimited switch (user, 2026-09-28: "faudrait pouvoir voir
   les deux"); the challenge one has "Ask for it" ->
@@ -569,12 +574,13 @@ docs/technique/             technical doc (French, user choice): overview, front
   `recycle_cards` (**written 2026-09-30, not applied yet**) · 0018
   `cards.evolves_from` + "Evolution chain" mini-game (applied + synced
   2026-09-30, user: "ÇA MARCHE") · 0019 two-stage lines + Stop for
-  "Evolution chain" (**written 2026-09-30, not applied yet**). Every one was
-  verified locally with PGlite before being handed over; 0010-0019 have
+  "Evolution chain" (**written 2026-09-30, not applied yet**) · 0020 `recycle_card_copies`,
+  some copies of a card (**written 2026-10-02, not applied yet**). Every one was
+  verified locally with PGlite before being handed over; 0010-0020 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 200 unit tests, `npm run test:db` 291 database
-  checks, `npm run test:e2e` 234 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 200 unit tests, `npm run test:db` 305 database
+  checks, `npm run test:e2e` 236 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

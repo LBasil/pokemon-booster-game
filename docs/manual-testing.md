@@ -67,6 +67,8 @@ address** for the sign-up part.
       leads back to the challenge.
 - [ ] Recycle duplicates (challenge hub or collection) → one copy of each
       card is kept and the coins match the preview.
+- [ ] After 0020: "Choose…", − / + on a card with 2+ extra copies → only
+      that many are recycled (the rest stay), coins match the total.
 - [ ] In a challenge binder, a missing card shows its price and can be
       crafted when you have enough coins.
 - [ ] A challenge hit shows up in the Community feed with the "Challenge"

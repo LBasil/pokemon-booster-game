@@ -351,6 +351,7 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0017 | `trade_answers_recycle_picks` | Réponses aux offres signalées à l'expéditeur (`answer_seen`, badge), recyclage d'une sélection (`recycle_cards`) (écrite le 2026-09-30, **à appliquer**) |
 | 0018 | `minigame_evolution_chain` | Colonne `cards.evolves_from` + mini-jeu « Chaîne d'évolution » (écrite le 2026-09-30, appliquée le jour même) |
 | 0019 | `evolution_chain_two_stages_stop` | « Chaîne d'évolution » : lignées à 2 stades, bouton Arrêter (`evolution_chain_stop`) (écrite le 2026-09-30, **à appliquer**) |
+| 0020 | `recycle_copies` | Recyclage d'une partie des exemplaires d'une carte (`recycle_card_copies`) (écrite le 2026-10-02, **à appliquer**) |
 
 Les migrations 0001 à 0013 sont appliquées sur le projet réel (vérifié le
 2026-09-27).

@@ -438,7 +438,8 @@
       "already_flipped": "That tile is already flipped.",
       "nothing_to_cash": "Flip at least one tile before cashing out.",
       "super_effective_unavailable": "No cards to ask about right now. Try again later.",
-      "evolution_chain_unavailable": "No evolution lines to ask about right now. Try again later."
+      "evolution_chain_unavailable": "No evolution lines to ask about right now. Try again later.",
+      "recycle_copies_unavailable": "Picking how many copies to recycle isn't available yet. Recycle all the extra copies of a card, or try again later."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -522,7 +523,7 @@
     "pick": {
       "choose": "Choose…",
       "title": "Choose the duplicates to recycle",
-      "hint": "Tick the cards to recycle: every extra copy goes, one of each always stays in your collection.",
+      "hint": "Tick the cards to recycle (every extra copy), or pick how many with − and +. One of each always stays in your collection.",
       "buckets": {
         "common": "Commons",
         "uncommon": "Uncommons",
@@ -533,7 +534,10 @@
       },
       "extra": "{count} extra copy | {count} extra copies",
       "total": "Nothing picked | {count} duplicate picked | {count} duplicates picked",
-      "recycle": "Recycle | Recycle {count} duplicate | Recycle {count} duplicates"
+      "recycle": "Recycle | Recycle {count} duplicate | Recycle {count} duplicates",
+      "copies": "{count}/{total}",
+      "less": "One copy less of {name}",
+      "more": "One copy more of {name}"
     }
   },
   "trades": {

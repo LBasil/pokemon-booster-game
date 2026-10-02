@@ -300,6 +300,19 @@ doublon ignorés ; `null` ou `{}` = rien). Une ligne `recycle` au journal
 (`PGRST202`), le client appelle `recycle_duplicates` carte par carte et
 additionne.
 
+### `recycle_card_copies(p_picks jsonb)` (0020)
+
+JS : `recycleCopies(picks, extras)` (via `challenge.recycle({ picks,
+extras })`). `p_picks` = objet `{ "id de carte": exemplaires }`, par ex.
+`{ "sv3pt5-4": 2 }` : recycle ce nombre d'exemplaires de chaque carte,
+plafonné à ses doublons (un exemplaire est toujours gardé) ; nombres ≤ 0,
+non numériques, ids inconnus, non possédés ou sans doublon ignorés ; `null`
+ou autre chose qu'un objet = rien. Même barème, même verrou du
+portefeuille, une ligne `recycle` au journal (avec l'id si une seule
+carte). Même réponse. Avant 0020 (`PGRST202`) : si chaque carte prend tous
+ses doublons, le client passe par `recycle_cards`, sinon erreur
+`recycle_copies_unavailable`.
+
 ### `craft_card(p_card_id text)`
 
 JS : `craftCard(cardId)`. Achète un exemplaire d'une carte. Prix par

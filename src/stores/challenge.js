@@ -7,6 +7,7 @@ import {
   fetchChallengeState,
   openChallengeBooster,
   recycleCards,
+  recycleCopies,
   recycleDuplicates,
 } from '@/api/challenge'
 import { useAchievementsStore } from '@/stores/achievements'
@@ -107,12 +108,17 @@ export const useChallengeStore = defineStore('challenge', {
     },
 
     /**
-     * Every duplicate (no argument), those of one card (an id) or of a pick
-     * of cards (an array of ids).
+     * Every duplicate (no argument), those of one card (an id), of a pick
+     * of cards (an array of ids) or some copies of each ({ picks, extras }:
+     * card id -> copies to recycle / duplicates owned, migration 0020).
      * @returns {Promise<{ recycled: number, gained: number }>}
      */
     async recycle(cards = null) {
-      const result = Array.isArray(cards) ? await recycleCards(cards) : await recycleDuplicates(cards)
+      const result = Array.isArray(cards)
+        ? await recycleCards(cards)
+        : cards?.picks
+          ? await recycleCopies(cards.picks, cards.extras)
+          : await recycleDuplicates(cards)
       if (this.state && result.coins != null) this.state = { ...this.state, coins: result.coins }
       if (result.recycled) {
         // The "recycle" mission moved: refresh in the background

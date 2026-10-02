@@ -32,6 +32,8 @@ export const CHALLENGE_ERRORS = [
   'super_effective_unavailable',
   // "Evolution chain" (migration 0018)
   'evolution_chain_unavailable',
+  // recycling some copies (migration 0020)
+  'recycle_copies_unavailable',
 ]
 
 // PostgREST's answer for an RPC that doesn't exist yet
@@ -81,6 +83,28 @@ export async function recycleCards(cardIds) {
     total.coins = result.coins
   }
   return total
+}
+
+/**
+ * Recycles some copies of the picked cards (migration 0020): `picks` maps a
+ * card id to the copies to recycle, `extras` to its duplicates. Before 0020
+ * only "every duplicate" exists: fine when every pick takes them all,
+ * otherwise recycle_copies_unavailable.
+ * @param {Record<string, number>} picks
+ * @param {Record<string, number>} extras
+ * @returns {Promise<{ recycled: number, gained: number, coins: number }>}
+ */
+export async function recycleCopies(picks, extras) {
+  try {
+    return await call('recycle_card_copies', { p_picks: picks })
+  } catch (err) {
+    if (err?.code !== MISSING_FUNCTION) throw err
+  }
+  const ids = Object.keys(picks)
+  if (ids.some((id) => picks[id] < extras[id])) {
+    throw Object.assign(new Error('recycle_copies_unavailable'), { code: 'recycle_copies_unavailable' })
+  }
+  return recycleCards(ids)
 }
 
 export const craftCard = (cardId) => call('craft_card', { p_card_id: cardId })

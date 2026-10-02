@@ -24,15 +24,16 @@ export const affordablePacks = (coins) => Math.max(0, Math.floor((coins ?? 0) / 
 /**
  * What recycling would give: every copy beyond the first.
  * @param {{ card_id: string, quantity: number, cards: object }[]} entries - collection rows
- * @param {Set<string> | null} [picked] - only these card ids (recycle_cards, migration 0017)
+ * @param {Map<string, number> | null} [picked] - only these card ids, and that
+ *   many copies of each, capped at the duplicates (recycle_card_copies, migration 0020)
  * @returns {{ cards: number, coins: number }}
  */
 export function recyclePreview(entries, picked = null) {
   let cards = 0
   let coins = 0
   for (const entry of entries) {
-    if (picked && !picked.has(entry.card_id)) continue
-    const extra = entry.quantity - 1
+    if (picked && !picked.get(entry.card_id)) continue
+    const extra = picked ? Math.min(entry.quantity - 1, picked.get(entry.card_id)) : entry.quantity - 1
     if (extra > 0) {
       cards += extra
       coins += extra * recycleValue(entry.cards)

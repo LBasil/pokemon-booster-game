@@ -27,7 +27,7 @@ How it works inside (every table, RPC and flow, in French):
   daily reward that grows over a 7-day streak, three daily missions and
   four **weekly missions** (reset Monday 00:00 UTC, bigger rewards),
   recycle duplicates into coins (all of them, or **pick which ones**, card by
-  card or a whole rarity at once) and craft the cards you're missing. Earn
+  card or a whole rarity at once, and how many copies of each with − / +) and craft the cards you're missing. Earn
   coins with the **mini-games** (`/challenge/games`, their own tab in the
   challenge and a tile near the top of its hub), starting with
   **"Higher or lower"**:
@@ -294,6 +294,9 @@ its **SQL editor** and run, in order:
    "Evolution chain" also asks two-stage lines (Pikachu, Raichu) and gets
    a Stop button. Run it after 0018; until then every line has 3 stages
    and Stop just ends the run on screen.
+20. `supabase/migrations/0020_recycle_copies.sql` — recycling only some
+   copies of a card (the − / + in "Choose…"). Run it after 0017; until
+   then only "every extra copy" works and a partial pick shows an error.
 
 Then in **Authentication**:
 

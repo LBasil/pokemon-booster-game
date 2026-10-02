@@ -438,7 +438,8 @@
       "already_flipped": "Cette case est déjà retournée.",
       "nothing_to_cash": "Retourne au moins une case avant d'encaisser.",
       "super_effective_unavailable": "Aucune carte à proposer pour l'instant. Réessaie plus tard.",
-      "evolution_chain_unavailable": "Aucune lignée à proposer pour l'instant. Réessaie plus tard."
+      "evolution_chain_unavailable": "Aucune lignée à proposer pour l'instant. Réessaie plus tard.",
+      "recycle_copies_unavailable": "Choisir combien de copies recycler n'est pas encore disponible. Recycle toutes les copies en trop d'une carte, ou réessaie plus tard."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -522,7 +523,7 @@
     "pick": {
       "choose": "Choisir…",
       "title": "Choisis les doublons à recycler",
-      "hint": "Coche les cartes à recycler : leurs copies en trop partent, un exemplaire de chaque reste toujours dans ta collection.",
+      "hint": "Coche les cartes à recycler (toutes leurs copies en trop), ou choisis combien avec − et +. Un exemplaire de chaque reste toujours dans ta collection.",
       "buckets": {
         "common": "Communes",
         "uncommon": "Peu communes",
@@ -533,7 +534,10 @@
       },
       "extra": "{count} copie en trop | {count} copies en trop",
       "total": "Rien de coché | {count} doublon coché | {count} doublons cochés",
-      "recycle": "Recycler | Recycler {count} doublon | Recycler {count} doublons"
+      "recycle": "Recycler | Recycler {count} doublon | Recycler {count} doublons",
+      "copies": "{count}/{total}",
+      "less": "Une copie de moins de {name}",
+      "more": "Une copie de plus de {name}"
     }
   },
   "trades": {

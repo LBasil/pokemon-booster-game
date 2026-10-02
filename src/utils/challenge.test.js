@@ -48,14 +48,17 @@ describe('challenge economy', () => {
     expect(recyclePreview([])).toEqual({ cards: 0, coins: 0 })
   })
 
-  it('previews a pick of cards only', () => {
+  it('previews a pick of cards and copies only', () => {
     const entries = [
-      { card_id: 'a', quantity: 3, cards: card('common') },
+      { card_id: 'a', quantity: 4, cards: card('common') },
       { card_id: 'b', quantity: 2, cards: card('ultra') },
       { card_id: 'c', quantity: 1, cards: card('rare') },
     ]
-    expect(recyclePreview(entries, new Set(['b', 'c']))).toEqual({ cards: 1, coins: 60 })
-    expect(recyclePreview(entries, new Set())).toEqual({ cards: 0, coins: 0 })
+    expect(recyclePreview(entries, new Map([['b', 1], ['c', 1]]))).toEqual({ cards: 1, coins: 60 })
+    expect(recyclePreview(entries, new Map([['a', 2]]))).toEqual({ cards: 2, coins: 2 })
+    // capped at the duplicates, one copy always stays
+    expect(recyclePreview(entries, new Map([['a', 9], ['b', 0]]))).toEqual({ cards: 3, coins: 3 })
+    expect(recyclePreview(entries, new Map())).toEqual({ cards: 0, coins: 0 })
   })
 
   it('groups the cards with duplicates by rarity, then name', () => {

@@ -117,10 +117,41 @@ test('the duplicates to recycle can be picked one by one or by rarity', async ({
   await expect(pick.getByText('3 duplicates picked')).toBeVisible()
   await pick.getByRole('button', { name: 'Recycle 3 duplicates' }).click()
   await expect(page.getByText('3 duplicates recycled: +3 coins')).toBeVisible()
-  expect(JSON.parse(rpcCalls(backend, 'recycle_cards')[0].body)).toEqual({ p_card_ids: ['sv3pt5-4'] })
+  expect(JSON.parse(rpcCalls(backend, 'recycle_card_copies')[0].body)).toEqual({ p_picks: { 'sv3pt5-4': 3 } })
   // The secret rare's duplicate is still there
   await expect(page.getByText('1 duplicate to recycle')).toBeVisible()
   await expect(page.locator('.coll-balance')).toContainText('1,003')
+})
+
+test('only some copies of a card can be recycled', async ({ page }) => {
+  const backend = await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4', 5), collectionEntry('sv3pt5-199', 2)] })
+  await page.goto('/challenge/collection')
+  await page.getByRole('button', { name: 'Choose…' }).click()
+  const pick = page.getByRole('group', { name: 'Choose the duplicates to recycle' })
+  // A single extra copy needs no stepper
+  await expect(pick.getByRole('button', { name: /One copy more of Charizard/ })).toHaveCount(0)
+
+  const more = pick.getByRole('button', { name: 'One copy more of Charmander' })
+  const less = pick.getByRole('button', { name: 'One copy less of Charmander' })
+  await expect(less).toBeDisabled()
+  await more.click()
+  await more.click()
+  await expect(pick.getByRole('checkbox', { name: /Charmander/ })).toBeChecked()
+  await expect(pick.getByText('2/4')).toBeVisible()
+  await expect(pick.getByText('2 duplicates picked')).toBeVisible()
+  // Ticking the box takes them all, unticking none
+  await pick.getByRole('checkbox', { name: /Charmander/ }).uncheck()
+  await expect(pick.getByText('0/4')).toBeVisible()
+  await pick.getByRole('checkbox', { name: /Charmander/ }).check()
+  await expect(more).toBeDisabled()
+  await less.click()
+  await less.click()
+  await less.click()
+  await pick.getByRole('button', { name: 'Recycle 1 duplicate' }).click()
+  await expect(page.getByText('1 duplicate recycled: +1 coins')).toBeVisible()
+  expect(JSON.parse(rpcCalls(backend, 'recycle_card_copies')[0].body)).toEqual({ p_picks: { 'sv3pt5-4': 1 } })
+  // 3 extra Charmanders + 1 Charizard left
+  await expect(page.getByText('4 duplicates to recycle')).toBeVisible()
 })
 
 test('a missing card can be crafted from the binder', async ({ page }) => {
