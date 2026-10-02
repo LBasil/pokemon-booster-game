@@ -41,20 +41,28 @@ function tone(ac, { freq, start, duration = 0.25, type = 'sine', peak = 0.2, sli
   osc.stop(start + duration + 0.05)
 }
 
-/** Foil tearing: a band-passed noise burst sweeping upward. */
+/**
+ * Foil tearing: a band-passed noise burst sweeping upward. Kept soft (user,
+ * 2026-10-02: "c'est violent"): it used to peak at 0.5 (5x a card flip),
+ * sweep up to 4200 Hz unfiltered and start in 50ms; now a quieter, lower
+ * sweep under a lowpass that fades in.
+ */
 export function tear(enabled) {
   const ac = enabled && audio()
   if (!ac) return
   const now = ac.currentTime + 0.15 // lines up with the strip starting to peel
-  const src = noise(ac, 0.6)
+  const src = noise(ac, 0.65)
   const filter = ac.createBiquadFilter()
   filter.type = 'bandpass'
-  filter.Q.value = 1.2
-  filter.frequency.setValueAtTime(900, now)
-  filter.frequency.exponentialRampToValueAtTime(4200, now + 0.55)
-  src.connect(filter).connect(envelope(ac, 1, now, 0.05, 0.5, 0.5)).connect(ac.destination)
+  filter.Q.value = 0.9
+  filter.frequency.setValueAtTime(600, now)
+  filter.frequency.exponentialRampToValueAtTime(2200, now + 0.55)
+  const soft = ac.createBiquadFilter()
+  soft.type = 'lowpass'
+  soft.frequency.value = 2800
+  src.connect(filter).connect(soft).connect(envelope(ac, 1, now, 0.12, 0.45, 0.14)).connect(ac.destination)
   src.start(now)
-  src.stop(now + 0.6)
+  src.stop(now + 0.65)
 }
 
 /**
