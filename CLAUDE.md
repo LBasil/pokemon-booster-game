@@ -160,7 +160,10 @@ docs/technique/             technical doc (French, user choice): overview, front
   delay })`). Every screen gets 2 toasts at most (user, 2026-10-02: a
   first pack unlocked 16, "on en annonce 2 et on dit +X autres"):
   `toastBatch` -> `{ item, extra? }`, the last one adds "+N more" and
-  links to `?status=unlocked`.
+  links to `?status=unlocked`. During the summary on phones
+  (`html.pb-action-bar`) they're one line each (small trophy + title +
+  "+N"), and the best pull sits beside its name and "Share" (stacked,
+  "Share" hid behind the stuck action bar).
 - **Rarity**: 6 buckets (common, uncommon, rare, holo, ultra, secret)
   computed in SQL by `rarity_bucket()` (generated column
   `cards.rarity_bucket`) and mirrored in JS by `rarityBucket()` in
@@ -277,7 +280,10 @@ docs/technique/             technical doc (French, user choice): overview, front
   boards; 0023 falls back to `Trainer-1234`, existing names untouched, the
   profile offers a rename when the username equals the email's start).
   The landing opens on "Sign up" unless `pb-has-account` (set by the auth
-  store on any session) says the device had an account. Auth
+  store on any session) says the device had an account. `auth.displayName`
+  (the fallback until the profile loads) is the sign-up username or '' ,
+  never the email: the live hub greeted a new account with "Salut
+  jean.dupont" for a moment; views show `.name-skeleton` meanwhile. Auth
   metadata is no longer read for the username — use `useProfileStore()`
   (`displayName` falls back to auth until loaded). `ProfileView.vue` serves
   both `/profile` (own, editable) and `/u/:username` (public, read-only,
@@ -379,7 +385,12 @@ docs/technique/             technical doc (French, user choice): overview, front
   Challenge | Unlimited switch (user, 2026-10-01; opens on `routeMode`,
   `fetchFeed(30, mode)` per mode, Realtime pulls go to their mode's list).
   Its tablist is named "Show pulls from", not "Game mode" (e2e picks the
-  leaderboards' one by that name).
+  leaderboards' one by that name). **Grouped** (user, 2026-10-02, live:
+  one player's ~30 Base Set 2 holos filled it, ~9,000px on a phone):
+  `groupFeed()` (`src/utils/feed.js`) folds consecutive pulls of one
+  player in one mode into one entry (rarest shown, "and N more", "See all
+  N" unfolds them); 8 entries, then "Show more". The hub's "Live" row
+  groups the same way (`fetchFeed(30)`, 6 entries).
   **Mini-games** (user: "I'll add plenty"): `/challenge/games`
   (`GamesView`) lists every game of `src/utils/games.js` (id, route
   `challenge-game-<id>`, icon; EN/FR `games.items.<id>` — `games.test.js`
@@ -614,7 +625,8 @@ docs/technique/             technical doc (French, user choice): overview, front
 - **Live**: deployed on Vercel (`VITE_*` env vars set there; `vercel.json`
   has the SPA rewrite and serves `sw.js` uncached), used by the user on a
   real account ("tout fonctionne", 2026-09-26). **Migrations 0001-0021 are
-  all applied** (0022 and 0023 written 2026-10-02, not yet) (checked 2026-10-02 through the REST API with the service
+  all applied** (0022 and 0023 included: checked 2026-10-02, a new
+  account got `Trainer-3977`) (checked 2026-10-02 through the REST API with the service
   role key). `cards` has 20,670 rows, `sets` 176 (9 subsets linked to
   their parent).
 - Features: landing (auth, forgot password), hub, boosters (per-set packs,
@@ -648,14 +660,14 @@ docs/technique/             technical doc (French, user choice): overview, front
   "Evolution chain" (written 2026-09-30, applied) · 0020 `recycle_card_copies`,
   some copies of a card (written 2026-10-02, applied) · 0021
   counter-offers (written 2026-10-02, applied) · 0022 my rank
-  under the leaderboards + `card_traders` (**written 2026-10-02, not
-  applied yet**) · 0023 no username from the email at sign-up (**written
-  2026-10-02, not applied yet**). Every one was
+  under the leaderboards + `card_traders` (written 2026-10-02, applied) ·
+  0023 no username from the email at sign-up (written 2026-10-02,
+  applied). Every one was
   verified locally with PGlite before being handed over; 0010-0023 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 207 unit tests, `npm run test:db` 350 database
-  checks, `npm run test:e2e` 286 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 210 unit tests, `npm run test:db` 350 database
+  checks, `npm run test:e2e` 288 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

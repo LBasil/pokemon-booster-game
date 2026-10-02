@@ -6,6 +6,7 @@ import { routeMode } from '@/router/modes'
 import { LEADERBOARDS, fetchFeed, fetchLeaderboard, fetchMyRank, subscribeToFeed } from '@/api/social'
 import { useProfileStore } from '@/stores/profile'
 import { useSetsStore } from '@/stores/sets'
+import { groupFeed } from '@/utils/feed'
 import { timeAgo } from '@/utils/time'
 import AppHeader from '@/components/AppHeader.vue'
 
@@ -26,6 +27,21 @@ const feedStates = ref({ challenge: 'idle', unlimited: 'idle' }) // idle | loadi
 const feed = computed(() => feeds.value[feedMode.value])
 const feedState = computed(() => (feedStates.value[feedMode.value] === 'idle' ? 'loading' : feedStates.value[feedMode.value]))
 const freshIds = ref(new Set()) // just arrived: highlighted briefly
+
+// One busy player's pulls in a row fold into one entry (the rarest shown),
+// and the feed shows a few entries at a time: it ran ~9,000px on a phone
+const FEED_STEP = 8
+const feedShown = ref(FEED_STEP)
+const feedGroups = computed(() => groupFeed(feed.value))
+const visibleGroups = computed(() => feedGroups.value.slice(0, feedShown.value))
+const openGroups = ref(new Set())
+function toggleGroup(key) {
+  const next = new Set(openGroups.value)
+  if (next.has(key)) next.delete(key)
+  else next.add(key)
+  openGroups.value = next
+}
+watch(feedMode, () => (feedShown.value = FEED_STEP))
 const now = ref(new Date())
 let unsubscribe = null
 let clock = null
@@ -168,27 +184,56 @@ function scoreLabel(row) {
           </div>
           <p v-else-if="!feed.length" class="community-empty">{{ t('community.feedEmpty') }}</p>
 
-          <ul v-else class="feed-list" role="list" aria-live="polite">
-            <li v-for="pull in feed" :key="pull.id" class="feed-item" :class="{ fresh: freshIds.has(pull.id) }">
-              <img class="feed-card" :src="pull.image_small" alt="" loading="lazy" />
-              <div class="feed-text">
-                <p class="feed-line">
-                  <RouterLink :to="{ name: 'public-profile', params: { username: pull.username } }" class="feed-user">
-                    {{ pull.username }}
-                  </RouterLink>
-                  {{ t('community.pulled') }}
-                  <strong>{{ pull.card_name }}</strong>
-                </p>
-                <p class="feed-meta">
-                  <span class="feed-chip" :data-bucket="pull.bucket">{{ t(`boosters.bucket.${pull.bucket}`) }}</span>
-                  <span class="feed-mode" :class="{ challenge: pull.mode === 'challenge' }">{{ pull.mode === 'challenge' ? t('nav.modeChallenge') : t('nav.modeUnlimited') }}</span>
-                  <span>{{ setsStore.byId[pull.set_id]?.name ?? pull.set_id }}</span>
-                  <span aria-hidden="true">·</span>
-                  <time :datetime="pull.pulled_at">{{ timeAgo(pull.pulled_at, locale, now) }}</time>
-                </p>
+          <template v-else>
+          <ul class="feed-list" role="list" aria-live="polite">
+            <li
+              v-for="group in visibleGroups"
+              :key="group.key"
+              class="feed-item"
+              :class="{ fresh: group.pulls.some((pull) => freshIds.has(pull.id)) }"
+            >
+              <div class="feed-row">
+                <img class="feed-card" :src="group.best.image_small" alt="" loading="lazy" />
+                <div class="feed-text">
+                  <p class="feed-line">
+                    <RouterLink :to="{ name: 'public-profile', params: { username: group.best.username } }" class="feed-user">
+                      {{ group.best.username }}
+                    </RouterLink>
+                    {{ t('community.pulled') }}
+                    <strong>{{ group.best.card_name }}</strong>
+                    <span v-if="group.pulls.length > 1">{{ ' ' + t('community.andMore', { count: group.pulls.length - 1 }, group.pulls.length - 1) }}</span>
+                  </p>
+                  <p class="feed-meta">
+                    <span class="feed-chip" :data-bucket="group.best.bucket">{{ t(`boosters.bucket.${group.best.bucket}`) }}</span>
+                    <span class="feed-mode" :class="{ challenge: group.best.mode === 'challenge' }">{{ group.best.mode === 'challenge' ? t('nav.modeChallenge') : t('nav.modeUnlimited') }}</span>
+                    <span>{{ setsStore.byId[group.best.set_id]?.name ?? group.best.set_id }}</span>
+                    <span aria-hidden="true">·</span>
+                    <time :datetime="group.pulls[0].pulled_at">{{ timeAgo(group.pulls[0].pulled_at, locale, now) }}</time>
+                  </p>
+                  <button
+                    v-if="group.pulls.length > 1"
+                    type="button"
+                    class="feed-expand"
+                    :aria-expanded="openGroups.has(group.key)"
+                    @click="toggleGroup(group.key)"
+                  >
+                    {{ openGroups.has(group.key) ? t('community.hidePulls') : t('community.showPulls', { count: group.pulls.length }) }}
+                  </button>
+                </div>
               </div>
+              <ul v-if="openGroups.has(group.key)" class="feed-sub" role="list">
+                <li v-for="pull in group.pulls" :key="pull.id">
+                  <img class="feed-sub-card" :src="pull.image_small" alt="" loading="lazy" />
+                  <span class="feed-sub-name">{{ pull.card_name }}</span>
+                  <span class="feed-chip" :data-bucket="pull.bucket">{{ t(`boosters.bucket.${pull.bucket}`) }}</span>
+                </li>
+              </ul>
             </li>
           </ul>
+          <button v-if="feedGroups.length > feedShown" type="button" class="btn btn-outline-secondary btn-sm feed-more" @click="feedShown += FEED_STEP">
+            {{ t('community.feedMore') }}
+          </button>
+          </template>
         </section>
 
         <!-- ============ Leaderboards ============ -->
@@ -315,9 +360,6 @@ function scoreLabel(row) {
 }
 
 .feed-item {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
   padding: 0.55rem;
   border-radius: var(--pb-radius-md);
   background: var(--pb-input-bg);
@@ -338,6 +380,58 @@ function scoreLabel(row) {
     opacity: 0;
     transform: translateY(-8px);
   }
+}
+
+.feed-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.feed-expand {
+  margin-top: 0.25rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--bs-link-color);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.feed-sub {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.6rem 0 0;
+  padding: 0.5rem 0 0;
+  border-top: 1px solid var(--pb-border);
+  list-style: none;
+}
+
+.feed-sub li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+
+.feed-sub-card {
+  width: 24px;
+  flex-shrink: 0;
+  aspect-ratio: 63 / 88;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.feed-sub-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feed-more {
+  margin-top: 0.75rem;
 }
 
 .feed-card {

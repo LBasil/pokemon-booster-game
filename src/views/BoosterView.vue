@@ -1589,6 +1589,47 @@ async function shareBest() {
 /* Phones and tablets: 10 cards make a long page, so "Open again" stays in
    reach, stuck above the tab bar */
 @media (max-width: 991.98px) {
+  /* The best pull beside its name and "Share": stacked, "Share" sat behind
+     the stuck action bar (only its top edge showed) */
+  .done-best {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'label label'
+      'card name'
+      'card share'
+      'card notice';
+    align-items: start;
+    align-content: start;
+    column-gap: 1rem;
+    row-gap: 0.5rem;
+  }
+
+  .done-best-label {
+    grid-area: label;
+    justify-self: start;
+  }
+
+  .done-best :deep(.holo-card) {
+    grid-area: card;
+    width: min(46vw, 210px);
+  }
+
+  .done-best-name {
+    grid-area: name;
+    align-self: end;
+  }
+
+  .done-best > .btn {
+    grid-area: share;
+    justify-self: start;
+  }
+
+  .done-share-notice {
+    grid-area: notice;
+    text-align: left;
+  }
+
   .done-actions {
     position: sticky;
     bottom: calc(96px + env(safe-area-inset-bottom));

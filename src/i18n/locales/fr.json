@@ -417,7 +417,11 @@
       "complete_sets": "Tu n'es pas encore classé : complète une série entière.",
       "challenge_unique": "Tu n'es pas encore classé : ouvre des boosters du Défi.",
       "challenge_value": "Tu n'es pas encore classé : ouvre des boosters du Défi."
-    }
+    },
+    "andMore": "et {count} autre | et {count} autres",
+    "showPulls": "Voir les {count}",
+    "hidePulls": "Masquer",
+    "feedMore": "Voir plus"
   },
   "reset": {
     "title": "Nouveau mot de passe",

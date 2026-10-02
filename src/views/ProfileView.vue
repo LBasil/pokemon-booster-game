@@ -357,7 +357,10 @@ async function logout() {
                 </form>
 
                 <div v-else class="trainer-name-row">
-                  <h1 class="trainer-name">{{ displayName }}</h1>
+                  <h1 class="trainer-name">
+                    <template v-if="displayName">{{ displayName }}</template>
+                    <span v-else class="pb-skeleton name-skeleton" aria-hidden="true"></span>
+                  </h1>
                   <button v-if="isOwn" type="button" class="name-edit" :aria-label="t('profile.username.edit')" :title="t('profile.username.edit')" @click="startEditName">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4" /></svg>
                   </button>
@@ -1457,5 +1460,12 @@ async function logout() {
   .stat-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
+}
+
+.name-skeleton {
+  display: inline-block;
+  width: 6em;
+  height: 0.8em;
+  border-radius: 6px;
 }
 </style>

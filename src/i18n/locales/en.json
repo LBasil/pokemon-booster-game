@@ -417,7 +417,11 @@
       "complete_sets": "You're not ranked yet: complete a whole set.",
       "challenge_unique": "You're not ranked yet: open challenge boosters.",
       "challenge_value": "You're not ranked yet: open challenge boosters."
-    }
+    },
+    "andMore": "and {count} more | and {count} more",
+    "showPulls": "See all {count}",
+    "hidePulls": "Hide",
+    "feedMore": "Show more"
   },
   "reset": {
     "title": "New password",

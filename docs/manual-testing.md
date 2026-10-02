@@ -86,6 +86,10 @@ address** for the sign-up part.
       collection; the unlimited collection is unchanged. The first time,
       "The challenge in short" sits under the wallet until "Got it", and
       "Open boosters" is on the first screen.
+- [ ] Right after logging in, the hub never shows the start of the email
+      (a placeholder, then the username).
+- [ ] Community: a player's pulls in a row are one entry ("and N more",
+      "See all N"); 8 entries, then "Show more".
 - [ ] On a 1280x720 laptop, the booster page shows the count and "Open"
       without scrolling. During an opening, no empty bar under the pack.
 - [ ] French: the Pokédex says "Salamèche"; a card's rarity reads

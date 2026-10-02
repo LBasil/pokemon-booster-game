@@ -232,6 +232,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `cardPrice.js` | `cardPriceEur(card)` : prix en € d'une carte pokemontcg.io (Cardmarket, sinon TCGplayer converti). Utilisé par `scripts/populate.mjs` |
 | `trades.js` | Limites des échanges (**miroir** de `propose_trade`), `groupTrades`, `searchEntries`, `tradeNews` (ce qu'une ligne temps réel signifie pour le joueur) |
 | `sets.js` | URL des logos, sous-sets (`isSubset`, `packSetId`, `subsetsOf`), `groupSetsByYear`, `starterSets` (Set de base, 151 et le set le plus récent, proposés au premier booster) |
+| `feed.js` | `groupFeed(pulls)` : tirages consécutifs d'un même joueur dans le même mode en une entrée (le plus rare en avant), pour le fil de Communauté et « En direct » de l'accueil |
 | `pokemonNamesFr.js` | Généré par `node scripts/region-tools.mjs fr-names` (ne pas éditer) : `frenchName(dex)`, nom français officiel de chaque Pokémon (PokéAPI). Les noms de cartes sont en anglais ; la recherche et la fiche d'une carte s'en servent |
 | `games.js` | Registre des mini-jeux |
 | `beta.js` | `BETA_END` (null tant que la bêta dure) + `isBetaTester(createdAt)` : inscrit avant la fin de la bêta |

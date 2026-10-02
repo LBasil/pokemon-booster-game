@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { byId } from './support/data.js'
 import { mockSupabase, signIn } from './support/supabase.js'
 
 test('community shows the live feed and the leaderboards', async ({ page }) => {
@@ -110,4 +111,28 @@ test('a private profile is told it stays off the leaderboards', async ({ page })
   await mockSupabase(page, { leaderboard: [{ rank: 1, username: 'Misty', score: 24.5, packs: 40 }], myRank: { public: false } })
   await page.goto('/community')
   await expect(page.locator('.board-me-note')).toContainText("Your profile is private, so you're not on the leaderboards.")
+})
+
+test("one player's run of pulls is one feed entry (the rarest), and the feed shows a few at a time", async ({ page }) => {
+  const at = (minutes) => new Date(Date.now() - minutes * 60_000).toISOString()
+  const pull = (id, username, card, bucket) => ({ id, username, card_id: card, card_name: byId[card].name, image_small: byId[card].image_small, bucket, set_id: card.split('-')[0], mode: 'unlimited', pulled_at: at(id) })
+  const feed = [
+    pull(1, 'Bazouk', 'base1-4', 'holo'),
+    pull(2, 'Bazouk', 'sv3pt5-199', 'secret'),
+    pull(3, 'Bazouk', 'sv3pt5-6', 'holo'),
+    pull(4, 'Misty', 'sv3pt5-6', 'holo'),
+    ...Array.from({ length: 10 }, (_, i) => pull(10 + i, i % 2 ? 'Brock' : 'Gary', 'base1-4', 'holo')),
+  ]
+  await signIn(page)
+  await mockSupabase(page, { feed })
+  await page.goto('/community')
+  const items = page.locator('.feed-list > .feed-item')
+  await expect(items.first()).toContainText('Bazouk pulled Charizard ex and 2 more')
+  await expect(items.first().locator('.feed-chip').first()).toHaveText('Secret rare')
+  await expect(items).toHaveCount(8)
+  await items.first().getByRole('button', { name: 'See all 3' }).click()
+  await expect(items.first().locator('.feed-sub li')).toHaveCount(3)
+  await page.getByRole('button', { name: 'Show more' }).click()
+  await expect(items).toHaveCount(12)
+  await expect(page.getByRole('button', { name: 'Show more' })).toHaveCount(0)
 })

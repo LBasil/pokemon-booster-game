@@ -16,6 +16,7 @@ import { fetchFeed } from '@/api/social'
 import { useChallengeStore } from '@/stores/challenge'
 import { useProfileStore } from '@/stores/profile'
 import { useSetsStore } from '@/stores/sets'
+import { groupFeed } from '@/utils/feed'
 import { timeAgo } from '@/utils/time'
 
 const { t, locale } = useI18n()
@@ -32,8 +33,9 @@ const livePulls = ref([])
 
 onMounted(async () => {
   profileStore.load()
-  fetchFeed(6)
-    .then((pulls) => (livePulls.value = pulls))
+  // A busy player's run of pulls counts once (the rarest), like on Community
+  fetchFeed(30)
+    .then((pulls) => (livePulls.value = groupFeed(pulls).slice(0, 6).map((group) => ({ ...group.best, more: group.pulls.length - 1, pulled_at: group.pulls[0].pulled_at }))))
     .catch(() => {})
   collectionStore.load()
   setsStore.load()
@@ -68,7 +70,8 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
         <ModeSwitch class="hub-mode" />
         <i18n-t keypath="game.greeting" tag="h1" class="hub-title" scope="global">
           <template #name>
-            {{ profileStore.displayName }}
+            <template v-if="profileStore.displayName">{{ profileStore.displayName }}</template>
+            <span v-else class="pb-skeleton name-skeleton" aria-hidden="true"></span>
           </template>
         </i18n-t>
       </section>
@@ -129,7 +132,8 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
           <div class="hub-avatar" aria-hidden="true">{{ initial }}</div>
           <div class="hub-profile-text">
             <h2 class="hub-tile-title">
-              {{ profileStore.displayName }}
+              <template v-if="profileStore.displayName">{{ profileStore.displayName }}</template>
+              <span v-else class="pb-skeleton name-skeleton" aria-hidden="true"></span>
               <BetaBadge v-if="betaTester" compact />
             </h2>
             <p v-if="memberSince" class="hub-tile-desc mb-0">
@@ -176,7 +180,9 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
             <img :src="pull.image_small" alt="" loading="lazy" />
             <span class="hub-live-text">
               <RouterLink :to="{ name: 'public-profile', params: { username: pull.username } }" class="hub-live-user">{{ pull.username }}</RouterLink>
-              <span class="hub-live-card">{{ pull.card_name }}</span>
+              <span class="hub-live-card">
+                {{ pull.card_name }}<template v-if="pull.more">{{ ' ' + t('community.andMore', { count: pull.more }, pull.more) }}</template>
+              </span>
               <span class="hub-live-time">
                 <span class="hub-live-mode" :class="{ challenge: pull.mode === 'challenge' }">{{
                   pull.mode === 'challenge' ? t('nav.modeChallenge') : t('nav.modeUnlimited')
@@ -728,5 +734,14 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
     --booster-w: clamp(110px, 12vw, 150px);
     flex: 0 0 45%;
   }
+}
+
+/* The username while the profile loads (never the email meanwhile) */
+.name-skeleton {
+  display: inline-block;
+  width: 6em;
+  height: 0.8em;
+  vertical-align: middle;
+  border-radius: var(--pb-radius-sm, 6px);
 }
 </style>

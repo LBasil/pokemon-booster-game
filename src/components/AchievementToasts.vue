@@ -115,11 +115,37 @@ const eyebrow = (toast) => {
 
   /* Pack summary: a slimmer toast, so less of the best card hides behind */
   html.pb-action-bar .ach-toast-icon {
-    display: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
   }
 
   html.pb-action-bar .ach-toast-link {
-    padding: 0.45rem 2.5rem 0.45rem 0.85rem;
+    align-items: center;
+    padding: 0.4rem 2.5rem 0.4rem 0.6rem;
+  }
+
+  /* ...one line each: the title (+ "+N more"), the two of them used to
+     cover half the best card on a real first pack */
+  html.pb-action-bar .ach-toast-eyebrow,
+  html.pb-action-bar .ach-toast-desc,
+  html.pb-action-bar .ach-toast-rate {
+    display: none;
+  }
+
+  html.pb-action-bar .ach-toast-body {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.5rem;
+  }
+
+  html.pb-action-bar .ach-toast-title {
+    font-size: 0.95rem;
+  }
+
+  html.pb-action-bar .ach-toast-extra {
+    margin-top: 0;
   }
 }
 

@@ -47,6 +47,10 @@ sequenceDiagram
   « Connexion » si un compte s'est déjà connecté sur l'appareil
   (`localStorage pb-has-account`, posé par le store auth à chaque session ;
   `hasAccountOnDevice()`).
+- **Nom affiché en attendant le profil** : le pseudo d'inscription
+  (métadonnées Auth) ou rien (`.name-skeleton`), jamais le début de
+  l'e-mail : sur le vrai site, le hub a salué un nouveau compte
+  « Salut jean.dupont » pendant un instant.
 - **Pseudo obligatoire** à l'inscription (2 à 24 caractères,
   `validateUsername`) : sans lui, le compte prenait le début de l'e-mail,
   public par défaut. Le profil propose de le changer à ceux dont le pseudo
@@ -173,8 +177,10 @@ sequenceDiagram
     meilleure carte soit vue avant. Partout, **2 toasts au plus** (les plus
     rares) ; le second ajoute « +N autres succès » et mène aux succès
     débloqués : un premier booster en débloquait 16 d'un coup. Pendant le
-    récapitulatif sur téléphone (`html.pb-action-bar`) ils perdent leur
-    icône pour cacher moins la meilleure carte ; le bouton
+    récapitulatif sur téléphone (`html.pb-action-bar`) ils tiennent sur
+    une ligne (petit trophée, titre, « +N »), et la meilleure carte se
+    place à côté de son nom et de « Partager » (empilés, « Partager »
+    passait sous la barre collée) ; le bouton
     « Autre série » remplace « Changer de série » (sur deux lignes).
 
 Si un appel échoue (réseau, pièces insuffisantes), le message s'affiche
@@ -861,6 +867,13 @@ Page : [CommunityView.vue](../../src/views/CommunityView.vue)
   « Plus chanceux » restent ultra/secret, sinon il suffirait d'ouvrir du
   Base Set pour y grimper), dans les deux modes (badge « Illimité » ou « Défi » sur chaque
 tirage, ici et dans le bloc « En direct » de l'accueil).
+  **Regroupé** (`groupFeed()`, `src/utils/feed.js`) : les tirages
+  consécutifs d'un même joueur dans le même mode forment une seule entrée
+  (le plus rare affiché, « et 27 autres », « Voir les 28 » les déplie) ;
+  8 entrées, puis « Voir plus ». Sur le vrai site, ~30 holos de Base Set 2
+  d'un seul joueur remplissaient le fil (~9 000 px sur téléphone). Le bloc
+  « En direct » de l'accueil regroupe de la même façon (`fetchFeed(30)`,
+  6 entrées).
 - **Classements** : un sélecteur Défi | Illimité, puis les onglets de ce
   mode (`LEADERBOARDS` dans `src/api/social.js`) : Défi = « Le plus de
   cartes », « Valeur de collection » ; Illimité = « Plus chanceux »,

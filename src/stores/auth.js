@@ -45,9 +45,10 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isLoggedIn: (state) => Boolean(state.session),
     user: (state) => state.session?.user ?? null,
-    // Fallback name until the profile (with the real username) is loaded
-    displayName: (state) =>
-      state.session?.user?.user_metadata?.username || state.session?.user?.email?.split('@')[0] || '',
+    // Fallback name until the profile (with the real username) is loaded:
+    // the sign-up username, never the email (the hub greeted a new player
+    // with "Hi jean.dupont" for a moment); '' = the views show a placeholder
+    displayName: (state) => state.session?.user?.user_metadata?.username || '',
   },
   actions: {
     async init() {
