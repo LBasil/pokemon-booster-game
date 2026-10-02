@@ -57,18 +57,28 @@ export function tear(enabled) {
   src.stop(now + 0.6)
 }
 
-/** A card flipping: short airy swish. */
+/**
+ * A card flipping: a soft papery "fwip". Band-passed noise sweeping down,
+ * highs cut and kept quiet (it plays 10 times a pack: the old bright hiss,
+ * high-passed at 1800 Hz, got tiring); a slightly different pitch each card.
+ */
 export function flip(enabled) {
   const ac = enabled && audio()
   if (!ac) return
   const now = ac.currentTime
-  const src = noise(ac, 0.18)
-  const filter = ac.createBiquadFilter()
-  filter.type = 'highpass'
-  filter.frequency.value = 1800
-  src.connect(filter).connect(envelope(ac, 1, now, 0.02, 0.14, 0.25)).connect(ac.destination)
+  const pitch = 0.9 + Math.random() * 0.2
+  const src = noise(ac, 0.16)
+  const band = ac.createBiquadFilter()
+  band.type = 'bandpass'
+  band.Q.value = 0.8
+  band.frequency.setValueAtTime(2000 * pitch, now)
+  band.frequency.exponentialRampToValueAtTime(800 * pitch, now + 0.12)
+  const soft = ac.createBiquadFilter()
+  soft.type = 'lowpass'
+  soft.frequency.value = 3500
+  src.connect(band).connect(soft).connect(envelope(ac, 1, now, 0.015, 0.11, 0.09)).connect(ac.destination)
   src.start(now)
-  src.stop(now + 0.2)
+  src.stop(now + 0.16)
 }
 
 /** Rare card: a bright two-note chime. */

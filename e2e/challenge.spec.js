@@ -219,3 +219,14 @@ test('a card detail recycles only the copies asked for', async ({ page }) => {
   expect(JSON.parse(rpcCalls(backend, 'recycle_card_copies')[0].body)).toEqual({ p_picks: { 'sv3pt5-4': 1 } })
   expect(backend.state.challengeCollection[0].quantity).toBe(3)
 })
+
+test('on phones the weekly missions fold under their title until opened', async ({ page }, info) => {
+  test.skip(info.project.name !== 'mobile', 'phone layout')
+  await mockSupabase(page)
+  await page.goto('/challenge')
+  const toggle = page.getByRole('button', { name: /This week/ })
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  await expect(page.locator('.ch-mission').filter({ hasText: 'Open 25 boosters' })).toBeHidden()
+  await toggle.click()
+  await expect(page.locator('.ch-mission').filter({ hasText: 'Open 25 boosters' })).toBeVisible()
+})

@@ -83,3 +83,31 @@ test('on a computer every leaderboard tab is reachable (no hidden overflow)', as
   const [box, lastBox] = await Promise.all([tabs.boundingBox(), last.boundingBox()])
   expect(lastBox.x + lastBox.width).toBeLessThanOrEqual(box.x + box.width + 1)
 })
+
+test('a player outside the top rows sees their own rank, or why they are not ranked', async ({ page }) => {
+  await signIn(page)
+  await mockSupabase(page, {
+    leaderboard: [{ rank: 1, username: 'Misty', score: 24.5, packs: 40 }],
+    myRank: { public: true, rank: 34, score: 4.5, packs: 60 },
+  })
+  await page.goto('/community')
+  const me = page.locator('.board-me')
+  await expect(me).toContainText('34')
+  await expect(me).toContainText('You')
+  await expect(me).toContainText('4.5 / 100 · 60 boosters')
+})
+
+test('a new player is told how to get on the board', async ({ page }) => {
+  await signIn(page)
+  await mockSupabase(page, { leaderboard: [{ rank: 1, username: 'Misty', score: 24.5, packs: 40 }] })
+  await page.goto('/community')
+  await expect(page.locator('.board-me')).toHaveCount(0)
+  await expect(page.getByText("You're not ranked yet: 0/20 boosters opened.")).toBeVisible()
+})
+
+test('a private profile is told it stays off the leaderboards', async ({ page }) => {
+  await signIn(page)
+  await mockSupabase(page, { leaderboard: [{ rank: 1, username: 'Misty', score: 24.5, packs: 40 }], myRank: { public: false } })
+  await page.goto('/community')
+  await expect(page.locator('.board-me-note')).toContainText("Your profile is private, so you're not on the leaderboards.")
+})

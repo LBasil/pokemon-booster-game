@@ -15,6 +15,18 @@ export async function fetchLeaderboard(kind, limit = 20) {
 }
 
 /**
+ * The signed-in player's place on a board, even past the rows shown
+ * (migration 0022): { public, rank, score, packs, card_id, card_name,
+ * image_small }; rank null = not ranked yet (packs = unlimited packs opened),
+ * public false = private profile. null when the migration is missing or the
+ * call fails: the board just shows no "you" row.
+ */
+export async function fetchMyRank(kind) {
+  const { data, error } = await supabase.rpc('my_leaderboard_rank', { p_kind: kind })
+  return error ? null : data
+}
+
+/**
  * Most recent big pulls by public profiles: both game modes (see `mode`), or
  * only `mode`'s ('challenge' | 'unlimited') when given.
  */

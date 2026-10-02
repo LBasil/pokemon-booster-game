@@ -185,7 +185,7 @@ async function texts(regionName) {
       add(
         id,
         lang === 'en' ? `${last} line` : startsWithVowel(last) ? `Lignée d’${last}` : `Lignée de ${last}`,
-        lang === 'en' ? `Own the whole line: ${nameList(list, lang)}` : `Possède toute la lignée : ${nameList(list, lang)}`,
+        lang === 'en' ? `Own the whole line: ${nameList(list, lang)}` : `Possède toute la lignée\u00a0: ${nameList(list, lang)}`,
       )
     }
     for (const [id, list] of Object.entries(groups.places)) {
@@ -193,7 +193,7 @@ async function texts(regionName) {
       const link = { and: { en: 'and', fr: 'et' }, to: { en: 'to', fr: 'à' } }[route?.[2]]?.[lang]
       const title = route ? (link ? `Routes ${route[1]} ${link} ${route[3]}` : `Route ${route[1]}`) : placeNames[id]?.[lang]
       const games = region.games[lang]
-      add(id, title, lang === 'en' ? `Own the Pokémon found there in ${games}: ${nameList(list, lang)}` : `Possède les Pokémon qu’on y trouve dans ${games} : ${nameList(list, lang)}`)
+      add(id, title, lang === 'en' ? `Own the Pokémon found there in ${games}: ${nameList(list, lang)}` : `Possède les Pokémon qu’on y trouve dans ${games}\u00a0: ${nameList(list, lang)}`)
     }
     fs.writeFileSync(file, JSON.stringify(locale, null, 2) + '\n')
     console.log(`${lang}: ${added} texts added`)

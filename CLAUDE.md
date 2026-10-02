@@ -224,6 +224,10 @@ docs/technique/             technical doc (French, user choice): overview, front
   `transform`/animation on a wrapper around AppHeader — it would break the
   tab bar's `position: fixed`. Legibility beats effects: anything
   sitting over imagery must be near-opaque. Check both themes at phone width.
+- **French typography** (user, 2026-10-02): fr.json glues `: ; ! ? »` and
+  `«` with a no-break space (U+00A0), or the sign wraps alone to the next
+  line; `src/i18n/locales.test.js` fails on a plain space there (and on
+  em dashes). Write new FR strings with `\u00a0` (region-tools does).
 - vue-i18n treats `@` as special: write `{'@'}` in locale strings (e.g. email
   placeholders) or the message fails to compile at runtime.
 - New pure logic (sampling, grouping, formatting) goes in `src/utils/` with a
@@ -310,6 +314,14 @@ docs/technique/             technical doc (French, user choice): overview, front
   them, is the news, `tradeNews` -> 'counter') and links the new one
   (`counter_of`). It skips the partner's accepts_trades (they made the
   first offer). Missing RPC -> `counter_unavailable`.
+  **Who has it in double?** (0022 `card_traders(id)`): CardDetail, missing
+  challenge card -> public trainers accepting trades with 2+ unlocked
+  copies, "Ask for it" -> `?to=&want=`. **My rank** (0022
+  `my_leaderboard_rank(kind)`, ranking moved to internal
+  `leaderboard_rows`): Community shows "You" under the top 20 or why
+  you're not ranked. AppHeader loads the wallet whenever the mode strip
+  shows (coins were missing on trades/history/achievements). ChallengeView
+  folds the weekly missions on phones until opened or one is ready.
   Public profiles list the collection of the mode picked in their
   Challenge | Unlimited switch (user, 2026-09-28: "faudrait pouvoir voir
   les deux"); the challenge one has "Ask for it" ->
@@ -513,7 +525,10 @@ docs/technique/             technical doc (French, user choice): overview, front
   (`player_achievements().unlocked`) count as seen: another device toasted
   them. `achievements.paused` (set by BoosterView while `phase === 'open'`)
   drops checks mid-reveal; the summary's check catches up. Max 3 toasts, rarest
-  first, the last one "+N more". **Rates** ("12% of players", migrations
+  first, the last one "+N more". Phones: toasts sit at the bottom, above the
+  tab bar (at the top they hid the pack summary's title); the summary
+  sticks "Open again" / "Change set" above the tab bar and sets
+  `html.pb-action-bar` so toasts go above it. **Rates** ("12% of players", migrations
   0008 + 0009, per mode): the client reports unlocked ids
   (`record_achievements(ids, mode)`, retried until the server confirms)
   and reads `achievement_rates(mode)`; `src/api/achievements.js` falls
@@ -550,8 +565,8 @@ docs/technique/             technical doc (French, user choice): overview, front
 
 - **Live**: deployed on Vercel (`VITE_*` env vars set there; `vercel.json`
   has the SPA rewrite and serves `sw.js` uncached), used by the user on a
-  real account ("tout fonctionne", 2026-09-26). **Migrations 0001-0020 are
-  all applied** (0021 written 2026-10-02, not yet) (checked 2026-10-02 through the REST API with the service
+  real account ("tout fonctionne", 2026-09-26). **Migrations 0001-0021 are
+  all applied** (0022 written 2026-10-02, not yet) (checked 2026-10-02 through the REST API with the service
   role key). `cards` has 20,670 rows, `sets` 176 (9 subsets linked to
   their parent).
 - Features: landing (auth, forgot password), hub, boosters (per-set packs,
@@ -584,12 +599,14 @@ docs/technique/             technical doc (French, user choice): overview, front
   2026-09-30, user: "ÇA MARCHE") · 0019 two-stage lines + Stop for
   "Evolution chain" (written 2026-09-30, applied) · 0020 `recycle_card_copies`,
   some copies of a card (written 2026-10-02, applied) · 0021
-  counter-offers (**written 2026-10-02, not applied yet**). Every one was
-  verified locally with PGlite before being handed over; 0010-0021 have
+  counter-offers (written 2026-10-02, applied) · 0022 my rank
+  under the leaderboards + `card_traders` (**written 2026-10-02, not
+  applied yet**). Every one was
+  verified locally with PGlite before being handed over; 0010-0022 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 201 unit tests, `npm run test:db` 328 database
-  checks, `npm run test:e2e` 246 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 203 unit tests, `npm run test:db` 345 database
+  checks, `npm run test:e2e` 257 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

@@ -288,7 +288,13 @@ téléphone (`lite` sur `BoosterPack` et `CardStack`).
 **Sons et vibrations** ([src/lib/sfx.js](../../src/lib/sfx.js)) : tout est
 synthétisé avec la Web Audio API, sans fichier audio (`tear`, `flip`,
 `rare`, `hit`, `achievement`, `buzz`). Chaque appel reçoit le réglage
-`settings.sound` ou `settings.vibration`.
+`settings.sound` ou `settings.vibration`. `flip` (10 fois par paquet) est
+volontairement discret : bruit filtré en bande qui descend, aigus coupés,
+hauteur légèrement différente à chaque carte.
+
+**Textes français** : espaces insécables avant `: ; ! ? »` et après `«`
+dans `fr.json` (sinon le signe peut passer seul à la ligne) ;
+`src/i18n/locales.test.js` le vérifie, et interdit les tirets cadratins.
 
 **Image de partage** ([src/lib/shareCard.js](../../src/lib/shareCard.js)) :
 dessine une image 1080×1350 de la carte dans un canvas, puis ouvre le

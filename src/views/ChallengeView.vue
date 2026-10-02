@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useChallengeStore } from '@/stores/challenge'
@@ -130,6 +130,20 @@ const missionGroups = computed(() =>
     { key: 'weekly', missions: challenge.weekly },
   ].filter((group) => group.missions.length),
 )
+
+// Phones: this week's missions fold under their title (the hub ran several
+// screens long), unless one is ready to claim
+const narrowQuery = window.matchMedia?.('(max-width: 575.98px)')
+const narrow = ref(Boolean(narrowQuery?.matches))
+const onNarrow = (event) => (narrow.value = event.matches)
+narrowQuery?.addEventListener?.('change', onNarrow)
+onBeforeUnmount(() => narrowQuery?.removeEventListener?.('change', onNarrow))
+const weeklyOpen = ref(false)
+const weeklyReady = computed(() => challenge.weekly.some((m) => !m.claimed && m.progress >= m.target))
+// Opened for a mission to claim, it stays open after the claim
+watch(weeklyReady, (ready) => ready && (weeklyOpen.value = true), { immediate: true })
+const weeklyFolded = computed(() => narrow.value && !weeklyOpen.value)
+const weeklyDone = computed(() => challenge.weekly.filter((m) => m.claimed).length)
 
 const claimMission = (mission) =>
   run(mission, async () => {
@@ -284,10 +298,29 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
             </div>
             <template v-for="group in missionGroups" :key="group.key">
             <div v-if="group.key === 'weekly'" class="ch-week-head">
-              <h3 class="ch-week-title">{{ t('challenge.weeklyTitle') }}</h3>
+              <h3 class="ch-week-title">
+                <button
+                  v-if="narrow"
+                  type="button"
+                  class="ch-week-toggle"
+                  :aria-expanded="!weeklyFolded"
+                  aria-controls="ch-weekly-list"
+                  @click="weeklyOpen = !weeklyOpen"
+                >
+                  {{ t('challenge.weeklyTitle') }}
+                  <span class="ch-week-count">{{ weeklyDone }}/{{ group.missions.length }}</span>
+                  <svg class="ch-week-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+                <template v-else>{{ t('challenge.weeklyTitle') }}</template>
+              </h3>
               <span class="ch-reset">{{ t('challenge.resetIn', { time: weeklyResetIn }) }}</span>
             </div>
-            <ul class="ch-mission-list" role="list">
+            <ul
+              v-show="group.key !== 'weekly' || !weeklyFolded"
+              :id="group.key === 'weekly' ? 'ch-weekly-list' : undefined"
+              class="ch-mission-list"
+              role="list"
+            >
               <li v-for="mission in group.missions" :key="mission.mission" class="ch-mission" :class="{ claimed: mission.claimed }">
                 <div class="ch-mission-text">
                   <p class="ch-mission-name">{{ t(`challenge.missions.${mission.mission}`, { count: mission.target }, mission.target) }}</p>
@@ -757,6 +790,45 @@ const formatNumber = (value) => value.toLocaleString(locale.value)
 .ch-week-title {
   margin: 0;
   font-size: 0.95rem;
+}
+
+.ch-week-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+.ch-week-count {
+  color: var(--pb-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.ch-week-chevron {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s;
+}
+
+.ch-week-toggle[aria-expanded='true'] .ch-week-chevron {
+  transform: rotate(180deg);
+}
+
+/* Phones: the games list speaks for itself */
+@media (max-width: 575.98px) {
+  .ch-games > .ch-muted {
+    display: none;
+  }
 }
 
 .ch-mission-list {

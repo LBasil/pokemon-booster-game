@@ -170,6 +170,24 @@ Chaque ligne : `{ rank, username, score, packs, card_id, card_name, image_small 
 
 Erreur : `unknown leaderboard …`.
 
+Depuis 0022, le calcul vit dans `leaderboard_rows(p_kind)` (interne, non
+appelable par les clients : toutes les lignes, avec `user_id`) ;
+`leaderboard()` en prend les `p_limit` premières, résultats inchangés.
+
+### `my_leaderboard_rank(p_kind text)` (0022)
+
+JS : `fetchMyRank(kind)` (`null` si la migration manque ou en cas
+d'erreur : pas de ligne « Toi »). Accès : connecté. La ligne du joueur
+sur ce classement, même au-delà des 20 affichées :
+
+```json
+{ "public": true, "rank": 34, "score": 4.5, "packs": 60, "card_id": null, "card_name": null, "image_small": null }
+```
+
+`rank: null` = pas encore classé (`packs` = boosters Illimité ouverts, pour
+les 20 qu'il faut à `hit_rate`) ; `{ "public": false }` = profil privé,
+jamais classé. Erreurs : `not_authenticated`, `unknown leaderboard …`.
+
 ### Fil des gros tirages
 
 - `fetchFeed(limit = 30, mode = null)` : `pull_feed` : `select id, username, card_id, card_name, image_small, bucket, set_id, mode, pulled_at order by pulled_at desc limit <limit>`, plus `mode = eq.<mode>` si `mode` est donné (`'challenge'` | `'unlimited'` : le switch de Communauté ; l'accueil prend les deux modes). Public (profils publics seulement).
@@ -342,6 +360,7 @@ offres pas encore vues, depuis 0017, 0 avant côté client).
 | `respond_trade(p_trade_id, p_accept bool)` | `respondTrade(id, accept)` | `{ "status": "accepted" \| "declined" \| "failed" }`. `failed` = une carte n'est plus possédée, ou l'expéditeur a verrouillé une carte offerte entre-temps | `trade_not_found` (pas le destinataire), `trade_closed`, `trade_expired` (7 jours) |
 | `counter_trade(p_trade_id, p_offer text[], p_request text[] = '{}')` (0021) | `counterTrade(id, offerIds, requestIds)` | id de la contre-offre (envoyée à l'expéditeur de l'offre, `counter_of` = son id) ; l'offre d'origine passe en `countered` (vue d'office) | `trade_not_found` (pas le destinataire), `trade_closed`, `trade_expired`, puis les mêmes que `propose_trade` sauf `trades_closed` (il a fait la première offre). Sans la migration : `counter_unavailable` côté client |
 | `cancel_trade(p_trade_id)` | `cancelTrade(id)` | — | réservé à l'expéditeur, offre en attente |
+| `card_traders(p_card_id)` (0022) | `fetchCardTraders(cardId)` | `[{ "username": "Misty", "quantity": 3 }]` : joueurs publics qui acceptent les échanges, ont au moins 2 exemplaires de la carte en Défi et ne l'ont pas verrouillée ; jamais soi-même, 20 au maximum, les plus fournis d'abord. `null` côté client si la migration manque | `not_authenticated` |
 | `my_trades()` | `fetchTrades()` | Les 50 dernières offres, dans les deux sens (voir ci-dessous) | — |
 | `mark_trade_answers_seen()` (0017) | `markTradeAnswersSeen()` | Nombre de réponses marquées vues (celles des offres du joueur). 0 si la migration manque | `not_authenticated` |
 

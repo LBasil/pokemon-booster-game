@@ -298,3 +298,26 @@ test('big collections show 60 cards in the pickers, then more on demand', async 
   await ask.getByRole('searchbox').fill('Card 1')
   await expect(ask.locator('.picker-card')).toHaveCount(41) // 1, 10-19, 100-129
 })
+
+test('a missing challenge card says who has it in double, and leads to an offer', async ({ page }) => {
+  await mockSupabase(page, {
+    challengeCollection: [collectionEntry('sv3pt5-4', 2)],
+    traders: { 'base1-4': [{ username: 'Misty', quantity: 3 }] },
+  })
+  await page.goto('/challenge/collection/set/base1')
+  await page.getByRole('button', { name: /Charizard/ }).click()
+  await page.getByRole('button', { name: 'Who has it in double?' }).click()
+  await expect(page.getByText('Trainers who have it in double')).toBeVisible()
+  await expect(page.locator('.detail-trader')).toContainText('x3')
+  await page.getByRole('link', { name: 'Ask for it' }).click()
+  await expect(page).toHaveURL(/\/challenge\/trades\?to=Misty&want=base1-4/)
+  await expect(page.getByRole('group', { name: /You ask Misty for/ }).getByRole('button', { name: /Charizard/ })).toHaveAttribute('aria-pressed', 'true')
+})
+
+test('nobody with the card in double says so', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4')] })
+  await page.goto('/challenge/collection/set/base1')
+  await page.getByRole('button', { name: /Charizard/ }).click()
+  await page.getByRole('button', { name: 'Who has it in double?' }).click()
+  await expect(page.getByText('Nobody has it in double right now.')).toBeVisible()
+})

@@ -142,7 +142,10 @@ sequenceDiagram
 9. **Récapitulatif** : cartes regroupées par quantité et triées par
    rareté, nombre de nouvelles cartes, meilleure carte (`bestPull`),
    bouton de partage (`shareCard`). Les packs divins du Défi sont
-   signalés.
+   signalés. Sous 992 px, « Rouvrir » et « Changer de série » restent
+   collés au-dessus de la barre d'onglets (`position: sticky`) ; la vue
+   pose `html.pb-action-bar`, et les toasts de succès (en bas sur
+   téléphone, au-dessus de la barre d'onglets) montent au-dessus.
 10. **Succès** : tant que `phase === 'open'`, `achievements.paused` bloque
     toute vérification (même déclenchée ailleurs, par exemple un échange
     accepté en direct) pour ne rien dévoiler. En `done`, `check(mode)`
@@ -357,6 +360,10 @@ serveur, rafraîchit le badge (`loadBadge`) et appelle
 | `week_recycle` | 50 doublons recyclés cette semaine | 250 | |
 | `week_daily` | récompense quotidienne réclamée 5 jours | 300 | |
 
+Sur téléphone (< 576 px), les missions de la semaine sont repliées sous
+leur titre (« Cette semaine 0/4 »), sauf si l'une est prête à être
+réclamée ; une fois ouvertes, elles le restent pendant la visite.
+
 **Badge** : `challenge_badge()` compte ce qui attend le joueur
 (récompense du jour, missions finies non réclamées, offres reçues,
 réponses à ses offres pas encore vues). Récompenses sur les liens du Défi,
@@ -410,6 +417,10 @@ sequenceDiagram
   ou si l'expéditeur a verrouillé une carte offerte entre-temps, l'offre
   finit en `failed`, sans rien déplacer. `move_challenge_cards` supprime
   le dernier exemplaire ou décrémente, puis ajoute chez l'autre.
+- **Qui l'a en double ?** (0022) : sur la fiche d'une carte Défi
+  manquante, le bouton appelle `card_traders` et liste les dresseurs
+  (pseudo, nombre d'exemplaires) avec « Demander » →
+  `/challenge/trades?to=<pseudo>&want=<id>`.
 - **Contre-offre** (0021) : « Contre-proposer » sur une offre reçue la
   charge dans le formulaire, côtés inversés (`countering`) ; on change les
   cartes et on envoie → `trades.counter(id, …)` → `counter_trade`. L'offre
@@ -797,7 +808,10 @@ tirage, ici et dans le bloc « En direct » de l'accueil).
   `fetchLeaderboard(kind, 20)` à chaque changement d'onglet (une réponse
   arrivée après un nouveau changement est ignorée). Le sélecteur s'ouvre
   sur le mode d'où vient le joueur, et chaque mode retient son dernier
-  onglet. Sa propre ligne est mise en évidence.
+  onglet. Sa propre ligne est mise en évidence ; hors des 20 affichés
+  (0022, `fetchMyRank` en parallèle), une ligne « Toi » avec son rang
+  s'ajoute sous la liste, ou une note dit ce qui manque (« 7/20 boosters
+  ouverts », « complète une série entière »…, ou profil privé).
 - **Mise en page** : une colonne sur téléphone ; à partir de 992 px, deux
   colonnes, le fil prend la hauteur du classement et défile à l'intérieur
   (`contain: size`). Avec une souris, les onglets passent à la ligne au

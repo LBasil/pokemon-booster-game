@@ -29,6 +29,9 @@ address** for the sign-up part.
 - [ ] 3 boosters → "Open all at once" → summary with 30 cards.
 - [ ] "Share" on the best pull opens the phone's share sheet with an image.
 - [ ] Leaving mid-reveal and coming back: the cards are in the collection.
+- [ ] Summary: "Open again" / "Change set" stay stuck above the tab bar
+      while scrolling the 10 cards; achievement pop-ups show above them,
+      never over the title. Card flips sound soft (no harsh hiss).
 
 ## Collection
 
@@ -54,6 +57,10 @@ address** for the sign-up part.
       appear live in the other's Community feed (Realtime).
 - [ ] Leaderboards: "Luckiest" needs 20 boosters opened after migration
       0004 before an account shows up.
+- [ ] After 0022: under a board you're not in, "You're not ranked yet"
+      says what's missing (e.g. 7/20 boosters); ranked past 20, your row
+      ("You", rank, score) shows under the list; a private profile is told
+      it stays off the boards.
 
 ## Challenge mode (after migration 0005)
 
@@ -160,6 +167,10 @@ address** for the sign-up part.
 - [ ] A offers a card, then recycles/trades it away before B answers →
       B's Accept ends as "Failed" and nothing moves.
 - [ ] Offering to a private profile or an unknown name → friendly error.
+- [ ] After 0022: in a challenge binder, a missing card → "Who has it in
+      double?" lists public trainers with 2+ copies (never yourself, not
+      those who refuse trades or locked it); "Ask for it" opens the offer
+      with the card picked.
 - [ ] After 0021: B taps "Counter" on A's offer → the composer has it with
       sides swapped; B changes a card and sends → A gets it under "Offers
       for you" tagged "Counter-offer" (live toast), A's first offer shows

@@ -396,7 +396,10 @@ function backToSelect() {
 watch(phase, (value) => {
   achievements.paused = value === 'open'
   if (value === 'done') achievements.check(props.mode)
+  // Phones: the summary's buttons stick above the tab bar, toasts go above them
+  document.documentElement.classList.toggle('pb-action-bar', value === 'done')
 })
+onBeforeUnmount(() => document.documentElement.classList.remove('pb-action-bar'))
 
 const currentCard = computed(() =>
   step.value === 'reveal' && revealedCount.value > 0 ? currentCards.value[revealedCount.value - 1] : null,
@@ -750,6 +753,8 @@ async function shareBest() {
           <button type="button" class="btn btn-outline-secondary btn-lg" @click="backToSelect">
             {{ t('boosters.changeSet') }}
           </button>
+        </div>
+        <div class="done-links">
           <RouterLink :to="{ name: routes.collection }" class="btn btn-link">
             {{ t('game.viewCollection') }}
           </RouterLink>
@@ -1398,20 +1403,43 @@ async function shareBest() {
   padding: 0.15rem 0.5rem;
 }
 
-.done-actions {
+.done-actions,
+.done-links {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
 }
 
-@media (max-width: 575.98px) {
-  .done-actions .btn-lg {
-    width: 100%;
+.done-links {
+  margin-top: -1.25rem;
+}
+
+/* Phones and tablets: 10 cards make a long page, so "Open again" stays in
+   reach, stuck above the tab bar */
+@media (max-width: 991.98px) {
+  .done-actions {
+    position: sticky;
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    z-index: 40;
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: var(--pb-radius-lg);
+    border: 1px solid var(--pb-border-strong);
+    background: var(--pb-bg-elevated);
+    box-shadow: var(--pb-shadow-lg);
   }
 
-  .done-actions .btn-link {
-    width: 100%;
+  .done-actions .btn-lg {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .done-links {
+    justify-content: center;
+    margin-top: -1rem;
   }
 }
 

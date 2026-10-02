@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { routeMode } from '@/router/modes'
-import { LEADERBOARDS, fetchFeed, fetchLeaderboard, subscribeToFeed } from '@/api/social'
+import { LEADERBOARDS, fetchFeed, fetchLeaderboard, fetchMyRank, subscribeToFeed } from '@/api/social'
 import { useProfileStore } from '@/stores/profile'
 import { useSetsStore } from '@/stores/sets'
 import { timeAgo } from '@/utils/time'
@@ -83,13 +83,16 @@ function pickBoardMode(next) {
 }
 const rows = ref([])
 const boardState = ref('loading')
+// My place on it (migration 0022), shown under the top 20 when I'm not in it
+const myRank = ref(null)
 
 async function loadBoard(kind) {
   boardState.value = 'loading'
   try {
-    const data = await fetchLeaderboard(kind, 20)
+    const [data, mine] = await Promise.all([fetchLeaderboard(kind, 20), fetchMyRank(kind)])
     if (kind !== board.value) return // switched again meanwhile: a late answer
     rows.value = data
+    myRank.value = mine
     boardState.value = 'ready'
   } catch {
     if (kind === board.value) boardState.value = 'error'
@@ -98,6 +101,20 @@ async function loadBoard(kind) {
 watch(board, loadBoard, { immediate: true })
 
 const myName = computed(() => profileStore.profile?.username?.toLowerCase() ?? null)
+const meShown = computed(() => rows.value.some((row) => row.username.toLowerCase() === myName.value))
+// Ranked further down: my own row under the list
+const meRow = computed(() =>
+  myRank.value?.rank && !meShown.value ? { ...myRank.value, username: profileStore.profile?.username ?? '' } : null,
+)
+// Not on the board: why, and what gets me on it
+const meNote = computed(() => {
+  const mine = myRank.value
+  if (!mine || meShown.value) return ''
+  if (mine.public === false) return t('community.me.private')
+  if (mine.rank) return ''
+  if (board.value === 'hit_rate') return t('community.me.hit_rate', { packs: Math.min(mine.packs ?? 0, 20) })
+  return t(`community.me.${board.value}`)
+})
 const formatNumber = (value, digits = 0) =>
   Number(value).toLocaleString(locale.value, { maximumFractionDigits: digits, minimumFractionDigits: digits })
 const formatEuros = (value) =>
@@ -214,7 +231,7 @@ function scoreLabel(row) {
           </div>
           <p v-else-if="!rows.length" class="community-empty">{{ t('community.boardEmpty') }}</p>
 
-          <ol v-else class="board-list">
+          <ol v-if="boardState === 'ready' && (rows.length || meRow)" class="board-list">
             <li
               v-for="row in rows"
               :key="`${board}-${row.username}`"
@@ -228,7 +245,17 @@ function scoreLabel(row) {
               <img v-if="row.image_small" class="board-card" :src="row.image_small" :alt="row.card_name" loading="lazy" />
               <span class="board-score">{{ scoreLabel(row) }}</span>
             </li>
+            <li v-if="meRow" class="board-row mine board-me">
+              <span class="board-rank" :data-rank="meRow.rank">{{ meRow.rank }}</span>
+              <span class="board-user">{{ t('community.me.you') }}</span>
+              <img v-if="meRow.image_small" class="board-card" :src="meRow.image_small" :alt="meRow.card_name" loading="lazy" />
+              <span class="board-score">{{ scoreLabel(meRow) }}</span>
+            </li>
           </ol>
+          <p v-if="boardState === 'ready' && meNote" class="board-me-note">
+            {{ meNote }}
+            <RouterLink v-if="myRank.public === false" :to="{ name: 'profile' }">{{ t('community.manage') }}</RouterLink>
+          </p>
         </section>
       </div>
     </main>
@@ -469,6 +496,20 @@ function scoreLabel(row) {
 .board-row.mine {
   border-color: var(--pb-ring);
   background: color-mix(in srgb, var(--pb-ring) 12%, var(--pb-input-bg));
+}
+
+/* Me, further down the board: set apart from the top 20 */
+.board-me {
+  margin-top: 0.6rem;
+}
+
+.board-me-note {
+  margin: 0.75rem 0 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--pb-radius-md);
+  border: 1px dashed var(--pb-border-strong);
+  color: var(--pb-text-muted);
+  font-size: 0.9rem;
 }
 
 .board-rank {

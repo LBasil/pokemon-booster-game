@@ -54,7 +54,7 @@ export const MINIGAME_PAIRS = [
  * @param {{ collection?: object[], challengeCollection?: object[], challenge?: object, godPack?: boolean,
  *   trades?: object[], partners?: Record<string, object[]>, badge?: { rewards: number, trades: number },
  *   profile?: object, feed?: object[], leaderboard?: object[], takenUsernames?: string[],
- *   achievementRates?: object[] | 'missing', sets?: object[], stats?: Record<string, object>, counterTrade?: 'missing' }} [options] - rates rows may carry a `mode` (default unlimited);
+ *   achievementRates?: object[] | 'missing', sets?: object[], stats?: Record<string, object>, counterTrade?: 'missing', myRank?: object, traders?: Record<string, object[]> }} [options] - rates rows may carry a `mode` (default unlimited);
  *   sets replaces SETS; stats = player_achievements().stats per mode (migration 0010)
  */
 // "Shiny Electrode Flip" (migration 0014): every board the mock deals, row
@@ -119,6 +119,9 @@ export async function mockSupabase(page, options = {}) {
     nextTradeId: 100,
     // counter_trade() (migration 0021), or 'missing'
     counterTrade: options.counterTrade ?? 'ok',
+    // my_leaderboard_rank() answer (default: from the leaderboard rows), card_traders() rows by card id
+    myRank: options.myRank ?? null,
+    traders: options.traders ?? {},
     // Achievements (migrations 0008 + 0009): achievement_rates() rows (with an
     // optional mode), or 'missing' = not applied; recorded ids and packs per mode
     achievementRates: options.achievementRates ?? [],
@@ -617,6 +620,14 @@ export async function mockSupabase(page, options = {}) {
     }
 
     if (path === '/rest/v1/rpc/leaderboard') return json(state.leaderboard)
+    // Migration 0022: my place on a board, who has a card in double
+    if (path === '/rest/v1/rpc/my_leaderboard_rank') {
+      if (state.myRank) return json(state.myRank)
+      if (!state.profile.is_public) return json({ public: false })
+      const mine = state.leaderboard.find((row) => row.username.toLowerCase() === state.profile.username.toLowerCase())
+      return json(mine ? { public: true, ...mine } : { public: true, rank: null, packs: state.packs.unlimited })
+    }
+    if (path === '/rest/v1/rpc/card_traders') return json(state.traders[args.p_card_id] ?? [])
     // ---- Achievements (migration 0008) ----
     const missingFunction = () => json({ code: 'PGRST202', message: 'Could not find the function', details: null, hint: null }, 404)
     if (path === '/rest/v1/rpc/achievement_rates') {

@@ -134,6 +134,20 @@ export const fetchTrades = () => call('my_trades')
 /** A public player's challenge collection, same shape as fetchCollection() rows. */
 export const fetchChallengeCollectionOf = (username) => call('challenge_collection_of', { p_username: username })
 
+/**
+ * Who could trade me this card (migration 0022): public players who accept
+ * trades and own 2+ copies of it in their challenge collection, not kept
+ * out of trades; [{ username, quantity }], 20 at most. null before 0022.
+ */
+export async function fetchCardTraders(cardId) {
+  try {
+    return await call('card_traders', { p_card_id: cardId })
+  } catch (err) {
+    if (err?.code === MISSING_FUNCTION) return null
+    throw err
+  }
+}
+
 /** @returns {Promise<number>} the new offer's id */
 export const proposeTrade = (username, offerIds, requestIds) =>
   call('propose_trade', { p_username: username, p_offer: offerIds, p_request: requestIds })

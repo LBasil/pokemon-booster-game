@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { routeMode } from '@/router/modes'
@@ -29,6 +29,15 @@ const challenge = useChallengeStore()
 onMounted(() => {
   if (auth.isLoggedIn) challenge.loadBadge()
 })
+// The mode strip shows the coins: pages that don't load the wallet
+// themselves (trades, history, achievements, community...) still get them
+watch(
+  inChallenge,
+  (on) => {
+    if (on) challenge.load()
+  },
+  { immediate: true },
+)
 const badges = computed(() => ({
   challenge: inChallenge.value ? challenge.badge.rewards : challenge.waiting,
   'challenge-trades': challenge.tradeNews,

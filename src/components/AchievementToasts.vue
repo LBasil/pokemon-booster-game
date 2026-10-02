@@ -86,14 +86,19 @@ const eyebrow = (toast) => {
   pointer-events: none;
 }
 
-/* Phones and tablets: the tab bar is at the bottom; compact toasts */
+/* Phones and tablets: compact toasts right above the tab bar (at the top
+   they hid the page title, e.g. a pack's "10 cards"), or above the booster
+   summary's sticky buttons (html.pb-action-bar) */
 @media (max-width: 991.98px) {
   .ach-toasts {
-    top: calc(12px + env(safe-area-inset-top));
     right: 16px;
-    bottom: auto;
-    flex-direction: column;
+    bottom: calc(96px + env(safe-area-inset-bottom));
     gap: 0.4rem;
+  }
+
+  /* not :global(): it would drop the .ach-toasts part of the selector */
+  html.pb-action-bar .ach-toasts {
+    bottom: calc(190px + env(safe-area-inset-bottom));
   }
 
   .ach-toast-link {
@@ -258,7 +263,7 @@ const eyebrow = (toast) => {
 @media (max-width: 991.98px) {
   .ach-toast-enter-from,
   .ach-toast-leave-to {
-    transform: translateY(-120%);
+    transform: translateY(40%);
   }
 }
 

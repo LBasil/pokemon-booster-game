@@ -2,6 +2,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { fetchPriceHistory } from '@/api/cards'
+import { fetchCardTraders } from '@/api/challenge'
 import { shareCard } from '@/lib/shareCard'
 import { useChallengeStore } from '@/stores/challenge'
 import { useProfileStore } from '@/stores/profile'
@@ -84,6 +85,29 @@ async function coinAction(task) {
     coinBusy.value = false
   }
 }
+
+// "Who has it in double?" (migration 0022): trainers to ask for a missing card
+const traders = ref(null) // null = not asked yet, [] = nobody
+const tradersState = ref('idle') // idle | loading | ready | unavailable | error
+async function findTraders() {
+  const id = card.value.id
+  tradersState.value = 'loading'
+  try {
+    const list = await fetchCardTraders(id)
+    if (card.value?.id !== id) return
+    traders.value = list ?? []
+    tradersState.value = list ? 'ready' : 'unavailable'
+  } catch {
+    if (card.value?.id === id) tradersState.value = 'error'
+  }
+}
+watch(
+  () => card.value?.id,
+  () => {
+    traders.value = null
+    tradersState.value = 'idle'
+  },
+)
 
 const craft = () =>
   coinAction(async () => {
@@ -295,6 +319,36 @@ function onPointerUp(event) {
               {{ trades.isLocked(card.id) ? t('trades.lockedCard') : t('trades.lockCard') }}
             </button>
           </template>
+          <button
+            v-if="!owned && tradersState !== 'ready'"
+            type="button"
+            class="btn btn-outline-secondary"
+            :disabled="tradersState === 'loading'"
+            @click="findTraders"
+          >
+            <span v-if="tradersState === 'loading'" class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+            {{ t('trades.traders.find') }}
+          </button>
+          <div v-if="!owned && tradersState === 'ready'" class="detail-traders">
+            <p class="detail-traders-title">{{ t('trades.traders.title') }}</p>
+            <ul v-if="traders.length" class="detail-traders-list" role="list">
+              <li v-for="trader in traders" :key="trader.username" class="detail-trader">
+                <RouterLink :to="{ name: 'public-profile', params: { username: trader.username } }" class="detail-trader-name">
+                  {{ trader.username }}
+                </RouterLink>
+                <span class="detail-trader-qty">{{ t('trades.traders.copies', { count: trader.quantity }) }}</span>
+                <RouterLink
+                  :to="{ name: 'challenge-trades', query: { to: trader.username, want: card.id } }"
+                  class="btn btn-sm btn-outline-secondary"
+                >
+                  {{ t('trades.traders.ask') }}
+                </RouterLink>
+              </li>
+            </ul>
+            <p v-else class="detail-notice">{{ t('trades.traders.none') }}</p>
+          </div>
+          <p v-if="!owned && tradersState === 'unavailable'" class="detail-notice">{{ t('trades.traders.unavailable') }}</p>
+          <p v-if="!owned && tradersState === 'error'" class="detail-notice" role="alert">{{ t('challenge.errors.generic') }}</p>
           <p v-if="owned && trades.isLocked(card.id)" class="detail-notice">{{ t('trades.lockedHint') }}</p>
           <p v-if="!owned && challenge.coins < price && !coinNotice" class="detail-notice">
             {{ t('challenge.craftTooExpensive') }}
@@ -563,6 +617,50 @@ function onPointerUp(event) {
   border-radius: 999px;
   background: color-mix(in srgb, currentColor 12%, transparent);
   font-size: 0.85em;
+}
+
+.detail-traders {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.detail-traders-title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.detail-traders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.detail-trader {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.35rem 0.35rem 0.75rem;
+  border-radius: var(--pb-radius-sm);
+  border: 1px solid var(--pb-border);
+}
+
+.detail-trader-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 700;
+}
+
+.detail-trader-qty {
+  color: var(--pb-text-muted);
+  font-size: 0.8rem;
 }
 
 .detail-notice {

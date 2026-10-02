@@ -395,7 +395,16 @@
     "completeScore": "{count} set | {count} sets",
     "boardEmpty": "Nobody on this leaderboard yet.",
     "boardError": "Couldn't load the leaderboard.",
-    "uniqueScore": "{count} card | {count} cards"
+    "uniqueScore": "{count} card | {count} cards",
+    "me": {
+      "you": "You",
+      "private": "Your profile is private, so you're not on the leaderboards.",
+      "hit_rate": "You're not ranked yet: {packs}/20 boosters opened.",
+      "best_pull": "You're not ranked yet: pull a card that has a market price.",
+      "complete_sets": "You're not ranked yet: complete a whole set.",
+      "challenge_unique": "You're not ranked yet: open challenge boosters.",
+      "challenge_value": "You're not ranked yet: open challenge boosters."
+    }
   },
   "reset": {
     "title": "New password",
@@ -553,7 +562,7 @@
     "received": "Offers for you",
     "sent": "Waiting for an answer",
     "history": "Past trades",
-    "empty": "No trade yet. Find a trainer below to make your first offer.",
+    "empty": "No trade yet. Find a trainer above to make your first offer.",
     "youGet": "You get",
     "youGive": "You give",
     "youAsk": "You ask {name} for",
@@ -652,6 +661,14 @@
         "title": "{name} answered your offer with another one",
         "desc": "Tap to see it and answer."
       }
+    },
+    "traders": {
+      "find": "Who has it in double?",
+      "title": "Trainers who have it in double",
+      "copies": "x{count}",
+      "ask": "Ask for it",
+      "none": "Nobody has it in double right now. Try again later, or craft it.",
+      "unavailable": "This search isn't available yet."
     }
   },
   "games": {

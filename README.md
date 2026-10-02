@@ -53,7 +53,8 @@ How it works inside (every table, RPC and flow, in French):
   trainers (up to 5 for 5, or as a gift; the trainer field suggests
   usernames as you type, and every card in the pickers says how many
   copies you own, 60 at a time with "Show more"; answer an offer with a
-  **counter-offer**; public profiles show their
+  **counter-offer**; a missing card's detail lists **who has it in
+  double**, one tap from an offer; public profiles show their
   **challenge collection** with an "Ask for it" button per card; offers
   and answers show up **live**, no reload, with a pop-up for a new offer and
   for an answer to yours (accepted, declined or failed); answers you haven't
@@ -165,7 +166,8 @@ How it works inside (every table, RPC and flow, in French):
   so the link can be shared), a **live feed** of the latest ultra/secret
   pulls (holos for old sets that have nothing rarer, like Base Set;
   Supabase Realtime; Challenge | Unlimited switch), and luck-based **leaderboards** (hit rate, best
-  pull, complete sets).
+  pull, complete sets), which also show **your own rank** past the top 20,
+  or what gets you on the board.
 - **Installable PWA**: manifest, icons, and a service worker that keeps the
   app and already-seen card art available offline.
 - **Always the latest version**: a tab left open picks up a new deploy by
@@ -302,6 +304,10 @@ its **SQL editor** and run, in order:
 21. `supabase/migrations/0021_trade_counter_offers.sql` — counter-offers
    (answer a trade offer with another one). Run it after 0020; until then
    "Counter" shows an error.
+22. `supabase/migrations/0022_my_rank_card_traders.sql` — your own rank
+   under each leaderboard, and "Who has it in double?" on a missing
+   challenge card. Run it after 0021; until then the leaderboards show the
+   top 20 only and the search says it isn't available yet.
 
 Then in **Authentication**:
 
