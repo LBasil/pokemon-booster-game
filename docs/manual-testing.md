@@ -163,18 +163,26 @@ address** for the sign-up part.
 - [ ] On a 320px phone: card, question, types and feedback fit above the
       tab bar, both themes.
 
-## PvP battles (after migration 0024 + a card import)
+## PvP battles (after migrations 0024 + 0025 + a card import)
 
-- [ ] Right after 0024, before the sync: the games page says "Coming soon"
+- [ ] Right after 0025, before the sync: the games page says "Coming soon"
       for "PvP battles" (no card has its attacks yet).
 - [ ] After `npm run populate:sync`: "10 battles left today". "Every card",
       "One era" and "One set" list how many of my challenge cards can fight
       there; a Trainer or an effect-only Pokémon never shows in the builder.
-- [ ] Build a deck (5 cards), save: the 5 cards show with HP, attack and
-      weakness. With a second account, save a deck in the same format.
-- [ ] Attack: "Against <name>", 5 hidden cards; each tap plays a round,
-      the opponent's card shows up, HP bars drop, KOs count. Damage matches
+- [ ] Build a deck (5 cards), save: the 5 cards show with HP, their
+      attacks (energy cost, damage as printed), weakness, and "2 prizes" /
+      "3 prizes" on ex, V, VMAX... With a second account, save a deck in
+      the same format.
+- [ ] Attack: "Against <name>", 5 hidden cards, 1 energy each. Tap a
+      card: its attacks show, the ones costing more than my energy are
+      greyed. An attack plays the round: the opponent's card shows up, HP
+      bars drop, energy goes down by the cost then up by 1. Damage matches
       the printed attack (x2 on a weakness).
+- [ ] "No attack": no damage dealt, energy +1 (5 at most); the card keeps
+      being picked. A 3-energy attack becomes playable on round 3.
+- [ ] Knocking out an ex gives 2 prizes, a VMAX 3; 3 prizes end the
+      battle.
 - [ ] Reload mid-battle: it comes back. "Give up" asks first, then counts
       a loss.
 - [ ] At the end: their whole deck shows, Elo +/-, history and ranking

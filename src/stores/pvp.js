@@ -9,10 +9,10 @@ import {
   startPvpBattle,
 } from '@/api/challenge'
 
-// PvP battles (challenge mode, migration 0024): my decks and Elo per format,
+// PvP battles (challenge mode, migrations 0024 + 0025): my decks and Elo per format,
 // battles left today, the battle in progress and my history. The server
 // picks the opponent, plays their deck and moves both ratings.
-// `unavailable` = migration 0024 not applied yet, or no card has its attacks
+// `unavailable` = migration 0024/0025 not applied yet, or no card has its attacks + costs
 // yet (populate hasn't run since): "Coming soon".
 const isMissingRpc = (err) => err?.code === 'PGRST202' || /could not find the function/i.test(err?.message ?? '')
 
@@ -73,9 +73,13 @@ export const usePvpStore = defineStore('pvp', {
       this.state = await startPvpBattle(format)
     },
 
-    /** @returns {Promise<{ round: object, battle: object, state: object }>} */
-    async play(slot) {
-      const result = await playPvpCard(slot)
+    /**
+     * @param {number} slot - my card (0-4)
+     * @param {number | null} attack - index in the card's `attacks`, null = no attack
+     * @returns {Promise<{ round: object, battle: object, state: object }>}
+     */
+    async play(slot, attack) {
+      const result = await playPvpCard(slot, attack)
       this.state = result.state
       if (result.battle.status !== 'playing') delete this.boards[result.battle.format]
       return result

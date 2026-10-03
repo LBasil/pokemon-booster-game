@@ -54,8 +54,11 @@ How it works inside (every table, RPC and flow, in French):
   right line (60 per run, 180 a day at most) — and **PvP battles**:
   build a deck of 5 challenge cards per format (every card, one era of
   the TCG, or one set) and attack other players' decks, which the
-  server plays (their cards stay hidden until played; best printed
-  attack, weakness x2, 3 KOs win); Elo per format and a win rate, no
+  server plays (their cards stay hidden until played). Each round you
+  pick a card and one of its printed attacks you can pay for: energy
+  starts at 1 and grows by 1 a round (5 at most), so big attacks come
+  late; knocked out Pokémon give prizes like in the real game (2 for ex,
+  V, GX..., 3 for VMAX), 3 prizes win. Elo per format and a win rate, no
   coins, 10 attacks a day. One more is teased as
   "Coming soon" (**Boss raid**). Packs
   keep the real pull rates (no pity timer), except that 1 booster in 500 is
@@ -345,6 +348,11 @@ its **SQL editor** and run, in order:
    the next card sync (twice a day, or the "Sync cards" Action /
    `npm run populate:sync`) fills the new columns; until both are done
    PvP says "Coming soon".
+25. `supabase/migrations/0025_pvp_energy_prizes.sql` — PvP energy and
+   prize cards (pick an attack you can pay for each round; ex, V, VMAX...
+   give 2 or 3 prizes). Run it after 0024, then a card sync again (it
+   imports each attack's energy cost); until then PvP says "Coming soon".
+   Battles still in progress from 0024 end as draws.
 
 Then in **Authentication**:
 

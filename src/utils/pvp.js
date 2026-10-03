@@ -1,30 +1,48 @@
-// PvP battle rules. Mirrors pvp_rules(), pvp_damage() and pvp_elo_change()
-// in supabase/migrations/0024_pvp_battles.sql — change both together. The
-// server stays the authority (it sends the rules with its state and plays
-// every round): these only drive labels and previews.
+// PvP battle rules. Mirrors pvp_rules(), pvp_prizes(), pvp_damage() and
+// pvp_elo_change() in supabase/migrations/0025_pvp_energy_prizes.sql — change both
+// together. The server stays the authority (it sends the rules with its
+// state and plays every round): these only drive labels and previews.
 
 export const DECK_SIZE = 5
-export const KOS_TO_WIN = 3
-export const MAX_ROUNDS = 15
+export const PRIZES_TO_WIN = 3
+export const MAX_ROUNDS = 20
 export const BATTLES_PER_DAY = 10
+export const START_ENERGY = 1
+export const ENERGY_PER_ROUND = 1
+export const MAX_ENERGY = 5
 export const START_ELO = 1000
 export const K_FACTOR = 32
 export const WEAKNESS_MULTIPLIER = 2
 export const RESISTANCE = 30
 export const MIN_DAMAGE = 10
 
+/** Prizes a card gives when knocked out, from its subtypes (the real TCG's rule boxes). */
+export function prizesFor(subtypes = []) {
+  const has = (type) => subtypes.includes(type)
+  if (['VMAX', 'TAG TEAM', 'V-UNION'].some(has) || (has('MEGA') && has('ex'))) return 3
+  if (['ex', 'EX', 'GX', 'V', 'VSTAR', 'LEGEND'].some(has)) return 2
+  return 1
+}
+
 /**
  * Damage of one card's attack on another (card snapshots from the server:
- * damage, times, types, weaknesses, resistances).
+ * types, weaknesses, resistances; attack: damage, times). No attack = 0.
  * @param {number} [roll] - 1 to 3, multiplies a "20×" attack
  */
-export function damageAgainst(from, to, roll = 1) {
+export function damageAgainst(from, attack, to, roll = 1) {
+  if (!attack) return 0
   const types = from.types ?? []
-  const weak = types.some((type) => (to.weaknesses ?? []).includes(type))
-  const resisted = types.some((type) => (to.resistances ?? []).includes(type))
-  const base = from.damage * (from.times ? roll : 1) * (weak ? WEAKNESS_MULTIPLIER : 1) - (resisted ? RESISTANCE : 0)
+  const weak = types.some((type) => (to?.weaknesses ?? []).includes(type))
+  const resisted = types.some((type) => (to?.resistances ?? []).includes(type))
+  const base = attack.damage * (attack.times ? roll : 1) * (weak ? WEAKNESS_MULTIPLIER : 1) - (resisted ? RESISTANCE : 0)
   return Math.max(MIN_DAMAGE, base)
 }
+
+/** Energy after a round: the attack's cost paid, then +1 for the next round, 5 at most. */
+export const energyAfter = (energy, attack) => Math.min(energy - (attack?.cost ?? 0) + ENERGY_PER_ROUND, MAX_ENERGY)
+
+/** Whether an attack can be paid for with this much energy. */
+export const canPay = (attack, energy) => (attack?.cost ?? 0) <= energy
 
 /** Elo points `a` gains (or loses, negative) for a result against `b`: 1 win, 0.5 draw, 0 loss. */
 export function eloChange(a, b, score) {
@@ -32,7 +50,10 @@ export function eloChange(a, b, score) {
 }
 
 /** Attack damage as printed: "30", or "30×" for a multiplied one. */
-export const damageLabel = (card) => `${card.damage}${card.times ? '×' : ''}`
+export const damageLabel = (attack) => `${attack.damage}${attack.times ? '×' : ''}`
+
+/** The strongest damage among a card's attacks (deck builder sort and preview). */
+export const bestDamage = (card) => Math.max(0, ...(card?.attacks ?? []).map((attack) => attack.damage))
 
 /**
  * Wins, losses, draws and win rate (%, rounded, null before any battle) of a

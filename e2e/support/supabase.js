@@ -86,17 +86,23 @@ export const EVOLUTION_QUESTIONS = [
   { cards: [evoCard('sv3pt5-26', 'Raichu'), evoCard('sv3pt5-25', 'Pikachu')], chain: ['sv3pt5-25', 'sv3pt5-26'] },
 ]
 
-// PvP battles (migration 0024): every card of the mock fights with 30
-// damage (Fire), 60 HP, weak to Water. The opponent's deck: 5 Grass cards
-// weak to Fire (one hit each) that deal 20, in this order.
+// PvP battles (migrations 0024 + 0025): every card of the mock is a Fire Pokémon
+// with 60 HP, weak to Water: Ember (30, 1 energy) and Flamethrower (90, 3
+// energies). The opponent's deck: 5 Grass cards weak to Fire (Ember knocks
+// one out) that always use Vine Whip (20, 1 energy), played in this order.
+// Venusaur ex gives 2 prizes: Oddish + Venusaur ex = 3, a win.
 const SERIES = { sv3pt5: 'Scarlet & Violet', base1: 'Base' }
+const FIRE_ATTACKS = [
+  { name: 'Ember', damage: 30, times: false, cost: 1 },
+  { name: 'Flamethrower', damage: 90, times: false, cost: 3 },
+]
 const pvpCard = (id) => {
   const card = byId[id]
   return card?.national_pokedex_number
-    ? { id, name: card.name, image_small: card.image_small, hp: 60, types: ['Fire'], weaknesses: ['Water'], resistances: [], attack: 'Ember', damage: 30, times: false }
+    ? { id, name: card.name, image_small: card.image_small, hp: 60, types: ['Fire'], weaknesses: ['Water'], resistances: [], prizes: 1, attacks: FIRE_ATTACKS }
     : null
 }
-export const PVP_OPPONENT_DECK = ['Oddish', 'Bellsprout', 'Tangela', 'Exeggcute', 'Paras'].map((name, i) => ({
+export const PVP_OPPONENT_DECK = ['Oddish', 'Venusaur ex', 'Tangela', 'Exeggcute', 'Paras'].map((name, i) => ({
   id: `foe-${i}`,
   name,
   image_small: `https://images.e2e.test/foe-${i}.png`,
@@ -104,9 +110,8 @@ export const PVP_OPPONENT_DECK = ['Oddish', 'Bellsprout', 'Tangela', 'Exeggcute'
   types: ['Grass'],
   weaknesses: ['Fire'],
   resistances: [],
-  attack: 'Vine Whip',
-  damage: 20,
-  times: false,
+  prizes: name.endsWith(' ex') ? 2 : 1,
+  attacks: [{ name: 'Vine Whip', damage: 20, times: false, cost: 1 }],
 }))
 
 export async function mockSupabase(page, options = {}) {
@@ -442,8 +447,10 @@ export async function mockSupabase(page, options = {}) {
         format: b.format,
         status: b.status,
         round: b.round,
-        my_kos: b.my_kos,
-        their_kos: b.their_kos,
+        my_prizes: b.my_prizes,
+        their_prizes: b.their_prizes,
+        my_energy: b.my_energy,
+        their_energy: b.their_energy,
         elo_change: b.elo_change,
         opponent: b.opponent,
         log: b.log,
@@ -458,7 +465,8 @@ export async function mockSupabase(page, options = {}) {
         const owned = fighters()
         const sets = [...new Set(owned.map((card) => card.id.split('-')[0]))]
         return {
-          deck_size: 5, kos_to_win: 3, max_rounds: 15, battles_per_day: 10, start_elo: 1000, k_factor: 32, weakness_multiplier: 2, resistance: 30, min_damage: 10,
+          deck_size: 5, prizes_to_win: 3, max_rounds: 20, battles_per_day: 10, start_energy: 1, energy_per_round: 1, max_energy: 5,
+          start_elo: 1000, k_factor: 32, weakness_multiplier: 2, resistance: 30, min_damage: 10,
           ready: pv.ready,
           battles_left: pv.battlesLeft,
           formats: {
@@ -489,7 +497,7 @@ export async function mockSupabase(page, options = {}) {
         if (!pv.opponent) return raise('pvp_no_opponent')
         pv.battlesLeft--
         pv.battle = {
-          id: Date.now(), format: args.p_format, status: 'playing', round: 0, my_kos: 0, their_kos: 0, elo_change: null,
+          id: Date.now(), format: args.p_format, status: 'playing', round: 0, my_prizes: 0, their_prizes: 0, my_energy: 1, their_energy: 1, elo_change: null,
           opponent: { username: 'Misty', elo: 1000 }, log: [], mine: deck.cards, myHp: deck.cards.map((card) => card.hp),
           theirHp: PVP_OPPONENT_DECK.map((card) => card.hp), seen: [], next: 0,
         }
@@ -510,22 +518,32 @@ export async function mockSupabase(page, options = {}) {
         if (!b || b.status !== 'playing') return raise('no_game')
         const slot = args.p_slot
         if (!(b.myHp[slot] > 0)) return raise('pvp_invalid_card')
-        const d = b.next
         const mine = b.mine[slot]
+        const myAttack = args.p_attack === null ? null : mine.attacks[args.p_attack]
+        if (args.p_attack !== null && !myAttack) return raise('pvp_invalid_attack')
+        if (myAttack && myAttack.cost > b.my_energy) return raise('pvp_not_enough_energy')
+        const d = b.next
         const theirs = PVP_OPPONENT_DECK[d]
-        const hit = (from, to) => Math.max(10, from.damage * (from.types.some((type) => to.weaknesses.includes(type)) ? 2 : 1))
-        const dealt = hit(mine, theirs)
-        const taken = hit(theirs, mine)
+        const theirAttack = theirs.attacks[0]
+        const hit = (from, attack, to) =>
+          attack ? Math.max(10, attack.damage * (from.types.some((type) => to.weaknesses.includes(type)) ? 2 : 1)) : 0
+        const dealt = hit(mine, myAttack, theirs)
+        const taken = hit(theirs, theirAttack, mine)
         b.theirHp[d] = Math.max(0, b.theirHp[d] - dealt)
         b.myHp[slot] = Math.max(0, b.myHp[slot] - taken)
         if (!b.seen.includes(d)) b.seen.push(d)
-        const round = { a: slot, d, dealt, taken, roll_a: null, roll_d: null, ko_theirs: b.theirHp[d] === 0, ko_mine: b.myHp[slot] === 0 }
-        b.my_kos += round.ko_theirs ? 1 : 0
-        b.their_kos += round.ko_mine ? 1 : 0
+        const round = {
+          a: slot, d, a_attack: args.p_attack, d_attack: 0, dealt, taken, roll_a: null, roll_d: null,
+          ko_theirs: b.theirHp[d] === 0, ko_mine: b.myHp[slot] === 0,
+        }
+        b.my_prizes += round.ko_theirs ? theirs.prizes : 0
+        b.their_prizes += round.ko_mine ? mine.prizes : 0
+        b.my_energy = Math.min(5, b.my_energy - (myAttack?.cost ?? 0) + 1)
+        b.their_energy = Math.min(5, b.their_energy - theirAttack.cost + 1)
         b.round++
         b.log.push(round)
         b.next = b.theirHp.findIndex((hp) => hp > 0)
-        if (b.my_kos >= 3 || b.their_kos >= 3 || b.round >= 15) finish(b, b.my_kos > b.their_kos ? 'won' : b.my_kos < b.their_kos ? 'lost' : 'draw')
+        if (b.my_prizes >= 3 || b.their_prizes >= 3 || b.round >= 20) finish(b, b.my_prizes > b.their_prizes ? 'won' : b.my_prizes < b.their_prizes ? 'lost' : 'draw')
         return json({ round, battle: view(b), state: pvState() })
       }
       if (path === '/rest/v1/rpc/pvp_forfeit') {

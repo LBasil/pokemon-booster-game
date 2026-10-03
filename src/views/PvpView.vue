@@ -6,16 +6,19 @@ import { useChallengeStore } from '@/stores/challenge'
 import { usePvpStore } from '@/stores/pvp'
 import { useSettingsStore } from '@/stores/settings'
 import { resetTimeLabel } from '@/utils/challenge'
-import { BATTLES_PER_DAY, DECK_SIZE, KOS_TO_WIN, MAX_ROUNDS, RESISTANCE, parseFormat, record, toggleDeckCard } from '@/utils/pvp'
+import { BATTLES_PER_DAY, DECK_SIZE, MAX_ENERGY, MAX_ROUNDS, PRIZES_TO_WIN, RESISTANCE, canPay, damageLabel, parseFormat, record, toggleDeckCard } from '@/utils/pvp'
 import AppHeader from '@/components/AppHeader.vue'
 import PvpCard from '@/components/PvpCard.vue'
 
-// PvP battles (challenge mode, migration 0024), asynchronous: I save a deck
+// PvP battles (challenge mode, migrations 0024 + 0025), asynchronous: I save a deck
 // of 5 challenge cards per format (every card, one TCG era, one set), then
 // attack: the server finds a player of close Elo with a deck in that format
 // and plays it against mine, its cards hidden until they're played. Each
-// round I play one card, both cards hit each other, 3 KOs win. Elo only, no
-// coins. The format is remembered on this device (`pb-pvp-format`).
+// round I pick a card, then one of its attacks I can pay for (energy: 1 at
+// the start, +1 a round, 5 at most) or no attack to save energy; both cards
+// hit each other. Knocked out cards give prizes (2 or 3 for ex, V, VMAX...),
+// 3 win. Elo only, no coins. The format is remembered on this device
+// (`pb-pvp-format`).
 const FORMAT_KEY = 'pb-pvp-format'
 const KINDS = ['all', 'era', 'set']
 
@@ -53,7 +56,8 @@ watch(format, (value) => {
 
 const rules = computed(() => ({
   deck: pvp.state?.deck_size ?? DECK_SIZE,
-  kos: pvp.state?.kos_to_win ?? KOS_TO_WIN,
+  prizes: pvp.state?.prizes_to_win ?? PRIZES_TO_WIN,
+  energy: pvp.state?.max_energy ?? MAX_ENERGY,
   rounds: pvp.state?.max_rounds ?? MAX_ROUNDS,
   battles: pvp.state?.battles_per_day ?? BATTLES_PER_DAY,
   resistance: pvp.state?.resistance ?? RESISTANCE,
@@ -145,6 +149,12 @@ async function saveDeck() {
 // ---------- Battle ----------
 
 const battle = computed(() => finished.value ?? pvp.battle)
+// The card picked in my hand, before choosing its attack
+const selectedSlot = ref(null)
+const selected = computed(() => {
+  const card = battle.value?.mine[selectedSlot.value]
+  return card && card.hp_left > 0 && !finished.value ? card : null
+})
 const unseen = computed(() => (battle.value ? Math.max(0, rules.value.deck - battle.value.theirs.seen.length) : 0))
 
 function scrollToBattle() {
@@ -166,13 +176,21 @@ async function fight() {
   }
 }
 
-async function play(slot) {
-  if (busy.value || finished.value) return
+function selectCard(slot) {
+  selectedSlot.value = selectedSlot.value === slot ? null : slot
+}
+
+/** @param {number | null} attack - index in the selected card's attacks, null = no attack */
+async function play(attack) {
+  const slot = selected.value?.slot
+  if (busy.value || finished.value || slot === undefined) return
   busy.value = true
   errorMessage.value = ''
   confirmForfeit.value = false
   try {
-    const result = await pvp.play(slot)
+    const result = await pvp.play(slot, attack)
+    // Keep the card picked for the next round while it stands
+    if (result.round.ko_mine) selectedSlot.value = null
     if (result.battle.status === 'playing') {
       sfx.flip(settings.sound)
       if (result.round.ko_theirs) sfx.rare(settings.sound)
@@ -214,15 +232,22 @@ async function forfeit() {
 function backToLobby() {
   if (finished.value) format.value = finished.value.format
   finished.value = null
+  selectedSlot.value = null
 }
 
-/** The last round, told from my side. */
+/** The last round, told from my side: cards and attacks by name. */
 const lastRound = computed(() => {
   const round = battle.value?.log.at(-1)
   if (!round) return null
   const mine = battle.value.mine[round.a]
   const theirs = (battle.value.theirs.deck ?? battle.value.theirs.seen).find((card) => card.slot === round.d)
-  return { ...round, mine: mine?.name ?? '', theirs: theirs?.name ?? '' }
+  return {
+    ...round,
+    mine: mine?.name ?? '',
+    theirs: theirs?.name ?? '',
+    myAttack: round.a_attack === null ? null : (mine?.attacks[round.a_attack]?.name ?? ''),
+    theirAttack: round.d_attack === null ? null : (theirs?.attacks[round.d_attack]?.name ?? ''),
+  }
 })
 
 const opponentName = computed(() => battle.value?.opponent.username ?? t('pvp.privateTrainer'))
@@ -289,18 +314,31 @@ onMounted(async () => {
 
           <dl class="pvp-score">
             <div>
-              <dt>{{ t('pvp.myKos') }}</dt>
-              <dd>{{ battle.my_kos }} / {{ rules.kos }}</dd>
+              <dt>{{ t('pvp.myPrizes') }}</dt>
+              <dd>{{ battle.my_prizes }} / {{ rules.prizes }}</dd>
             </div>
             <div>
               <dt>{{ t('pvp.round') }}</dt>
               <dd>{{ battle.round }} / {{ rules.rounds }}</dd>
             </div>
             <div>
-              <dt>{{ t('pvp.theirKos') }}</dt>
-              <dd>{{ battle.their_kos }} / {{ rules.kos }}</dd>
+              <dt>{{ t('pvp.theirPrizes') }}</dt>
+              <dd>{{ battle.their_prizes }} / {{ rules.prizes }}</dd>
             </div>
           </dl>
+
+          <div class="pvp-energies">
+            <span class="pvp-energy" role="meter" :aria-label="t('pvp.myEnergy')" aria-valuemin="0" :aria-valuemax="rules.energy" :aria-valuenow="battle.my_energy">
+              <span class="pvp-energy-label">{{ t('pvp.myEnergy') }}</span>
+              <span class="pvp-pips" aria-hidden="true"><span v-for="n in rules.energy" :key="n" :class="{ on: n <= battle.my_energy }"></span></span>
+              <strong>{{ battle.my_energy }}</strong>
+            </span>
+            <span class="pvp-energy" role="meter" :aria-label="t('pvp.theirEnergy')" aria-valuemin="0" :aria-valuemax="rules.energy" :aria-valuenow="battle.their_energy">
+              <span class="pvp-energy-label">{{ t('pvp.theirEnergy') }}</span>
+              <span class="pvp-pips" aria-hidden="true"><span v-for="n in rules.energy" :key="n" :class="{ on: n <= battle.their_energy }"></span></span>
+              <strong>{{ battle.their_energy }}</strong>
+            </span>
+          </div>
 
           <h3 class="pvp-side-title">{{ t('pvp.theirCards', { name: opponentName }) }}</h3>
           <ul class="pvp-row pvp-theirs" :aria-label="t('pvp.theirCards', { name: opponentName })">
@@ -318,12 +356,14 @@ onMounted(async () => {
               <span>{{ t('pvp.eloChange', { change: signed(finished.elo_change) }) }}</span>
             </template>
             <template v-else-if="lastRound">
-              <span>
-                {{ t('pvp.roundDealt', { mine: lastRound.mine, theirs: lastRound.theirs, damage: lastRound.dealt }) }}
+              <span v-if="lastRound.myAttack === null">{{ t('pvp.roundSaved', { mine: lastRound.mine }) }}</span>
+              <span v-else>
+                {{ t('pvp.roundDealt', { mine: lastRound.mine, attack: lastRound.myAttack, theirs: lastRound.theirs, damage: lastRound.dealt }) }}
                 <template v-if="lastRound.roll_a">{{ t('pvp.roll', { roll: lastRound.roll_a }) }}</template>
               </span>
-              <span>
-                {{ t('pvp.roundTaken', { theirs: lastRound.theirs, damage: lastRound.taken }) }}
+              <span v-if="lastRound.theirAttack === null">{{ t('pvp.roundTheySaved', { theirs: lastRound.theirs }) }}</span>
+              <span v-else>
+                {{ t('pvp.roundTaken', { theirs: lastRound.theirs, attack: lastRound.theirAttack, damage: lastRound.taken }) }}
                 <template v-if="lastRound.roll_d">{{ t('pvp.roll', { roll: lastRound.roll_d }) }}</template>
               </span>
               <strong v-if="lastRound.ko_theirs" class="pvp-good">{{ t('pvp.koTheirs', { name: lastRound.theirs }) }}</strong>
@@ -338,15 +378,39 @@ onMounted(async () => {
               <button
                 type="button"
                 class="pvp-play"
-                :class="{ 'is-last': lastRound?.a === card.slot }"
+                :class="{ 'is-last': lastRound?.a === card.slot, 'is-selected': selected?.slot === card.slot }"
+                :aria-pressed="selected?.slot === card.slot"
                 :disabled="busy || !!finished || card.hp_left === 0"
                 :aria-label="t('pvp.playCard', { name: card.name, left: card.hp_left, hp: card.hp })"
-                @click="play(card.slot)"
+                @click="selectCard(card.slot)"
               >
                 <PvpCard :card="card" show-hp />
               </button>
             </li>
           </ul>
+
+          <!-- The picked card's attacks: the ones I can't pay for yet stay greyed -->
+          <div v-if="selected" class="pvp-attack-panel" role="group" :aria-label="t('pvp.attackWith', { name: selected.name })">
+            <p class="pvp-side-title">{{ t('pvp.attackWith', { name: selected.name }) }}</p>
+            <div class="pvp-attack-buttons">
+              <button
+                v-for="(attack, i) in selected.attacks"
+                :key="i"
+                type="button"
+                class="pvp-attack-button"
+                :disabled="busy || !canPay(attack, battle.my_energy)"
+                @click="play(i)"
+              >
+                <span class="pvp-attack-cost">{{ t('pvp.cost', { count: attack.cost }, attack.cost) }}</span>
+                <span class="pvp-attack-title">{{ attack.name }}</span>
+                <strong>{{ damageLabel(attack) }}</strong>
+              </button>
+              <button type="button" class="pvp-attack-button is-skip" :disabled="busy" @click="play(null)">
+                <span class="pvp-attack-title">{{ t('pvp.noAttack') }}</span>
+              </button>
+            </div>
+          </div>
+          <p v-else-if="!finished" class="pvp-note pvp-hint">{{ t('pvp.pickCard') }}</p>
 
           <div class="pvp-actions">
             <button v-if="finished" type="button" class="btn btn-primary glow-button" @click="backToLobby">{{ t('pvp.back') }}</button>
@@ -505,7 +569,9 @@ onMounted(async () => {
           <ul>
             <li>{{ t('pvp.rules.deck', { deck: rules.deck }) }}</li>
             <li>{{ t('pvp.rules.hidden') }}</li>
-            <li>{{ t('pvp.rules.round', { kos: rules.kos, rounds: rules.rounds }) }}</li>
+            <li>{{ t('pvp.rules.round', { rounds: rules.rounds }) }}</li>
+            <li>{{ t('pvp.rules.energy', { max: rules.energy }) }}</li>
+            <li>{{ t('pvp.rules.prizes', { prizes: rules.prizes }) }}</li>
             <li>{{ t('pvp.rules.damage', { resistance: rules.resistance }) }}</li>
             <li>{{ t('pvp.rules.elo') }}</li>
             <li>{{ t('pvp.rules.limit', { count: rules.battles, time: resetTime }) }}</li>
@@ -719,6 +785,122 @@ onMounted(async () => {
 
 .pvp-play.is-last {
   border-color: var(--pb-ring);
+}
+
+.pvp-play.is-selected {
+  border-color: var(--pb-accent);
+  box-shadow: 0 0 0 2px var(--pb-accent);
+}
+
+.pvp-energies {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.pvp-energy {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.pvp-energy-label {
+  color: var(--pb-text-muted);
+}
+
+.pvp-pips {
+  display: flex;
+  gap: 3px;
+}
+
+.pvp-pips span {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-input-bg);
+}
+
+.pvp-pips span.on {
+  border-color: var(--pb-coin);
+  background: var(--pb-coin);
+}
+
+.pvp-attack-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: var(--pb-radius-md);
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-bg-elevated);
+}
+
+.pvp-attack-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+  gap: 0.5rem;
+}
+
+.pvp-attack-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--pb-radius-md);
+  border: 2px solid var(--pb-border-strong);
+  background: var(--pb-surface);
+  color: var(--pb-text);
+  font-weight: 700;
+  text-align: left;
+}
+
+.pvp-attack-button:not(:disabled) {
+  border-color: var(--pb-accent);
+}
+
+.pvp-attack-button:disabled {
+  opacity: 0.5;
+}
+
+.pvp-attack-button.is-skip {
+  border-style: dashed;
+  border-color: var(--pb-border-strong);
+  color: var(--pb-text-muted);
+}
+
+.pvp-attack-button:focus-visible {
+  outline: 2px solid var(--pb-focus);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .pvp-attack-button:not(:disabled):hover {
+    background: var(--pb-bg-elevated);
+  }
+}
+
+.pvp-attack-cost {
+  flex: none;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: var(--pb-input-bg);
+  font-size: 0.7rem;
+  color: var(--pb-text-muted);
+}
+
+.pvp-attack-title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pvp-hint {
+  text-align: center;
 }
 
 .pvp-pick.is-picked {

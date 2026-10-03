@@ -472,7 +472,9 @@
       "pvp_no_deck": "Monte d'abord un deck dans ce format.",
       "pvp_no_opponent": "Pas encore d'adversaire dans ce format : personne d'autre n'y a de deck. Essaie un autre format, ou reviens plus tard.",
       "pvp_no_battles_left": "Plus de combats aujourd'hui : reviens demain.",
-      "pvp_invalid_card": "Cette carte ne peut pas jouer (K.O. ?)."
+      "pvp_invalid_card": "Cette carte ne peut pas jouer (K.O. ?).",
+      "pvp_invalid_attack": "Cette carte n'a pas cette attaque.",
+      "pvp_not_enough_energy": "Pas encore assez d'énergie pour cette attaque."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -733,7 +735,7 @@
       },
       "pvp": {
         "title": "Combats PvP",
-        "desc": "Ton deck contre ceux des autres joueurs. De l'Elo, pas de pièces."
+        "desc": "Ton deck contre ceux des autres joueurs : énergie, récompenses, Elo."
       },
       "boss-raid": {
         "title": "Raid de boss",
@@ -826,7 +828,7 @@
   },
   "pvp": {
     "title": "Combats PvP",
-    "subtitle": "Monte un deck de 5 cartes du défi et affronte les decks des autres joueurs. Le serveur joue leur deck : pas besoin qu'ils soient connectés. Gagne des points Elo.",
+    "subtitle": "Monte un deck de 5 cartes du défi et affronte les decks des autres joueurs. Le serveur joue leur deck : pas besoin qu'ils soient connectés. Gère ton énergie, prends 3 récompenses, gagne des points Elo.",
     "unavailable": "Les combats PvP arrivent bientôt.",
     "loadError": "Impossible de charger les combats PvP. Réessaie dans un instant.",
     "hiddenCard": "Une carte pas encore jouée",
@@ -875,16 +877,14 @@
     "fight": "Trouver un adversaire",
     "vs": "Contre {name}",
     "privateTrainer": "Un dresseur privé",
-    "myKos": "Mes K.O.",
-    "theirKos": "Ses K.O.",
     "round": "Manche",
     "theirCards": "Les cartes de {name}",
     "myCards": "Mes cartes",
-    "playOne": "Joue une carte",
-    "playCard": "Jouer {name} ({left} / {hp} PV)",
-    "firstRound": "Sa première carte est déjà choisie. Joue l'une des tiennes.",
-    "roundDealt": "Ton {mine} inflige {damage} à {theirs}.",
-    "roundTaken": "{theirs} riposte avec {damage}.",
+    "playOne": "Mes cartes",
+    "playCard": "Choisir {name} ({left} / {hp} PV)",
+    "firstRound": "Sa première carte est déjà choisie. Choisis l'une des tiennes, puis son attaque.",
+    "roundDealt": "Ton {mine} utilise {attack} : {damage} dégâts à {theirs}.",
+    "roundTaken": "{theirs} utilise {attack} : {damage} dégâts.",
     "roll": "(x{roll})",
     "koTheirs": "{name} est K.O. !",
     "koMine": "Ton {name} est K.O.",
@@ -914,13 +914,27 @@
     "boardError": "Impossible de charger le classement.",
     "myRank": "Toi : n°{rank}, Elo {elo}",
     "rules": {
-      "deck": "Ton deck : {deck} Pokémon différents de ta collection du défi, chacun avec une attaque qui inflige des dégâts. Un deck par format ; il attaque et il défend.",
-      "hidden": "Le deck de l'autre joueur est caché : ses cartes apparaissent quand elles sont jouées. Le serveur les joue et choisit sa carte avant que la tienne n'arrive.",
-      "round": "À chaque manche, tu joues une carte, les deux cartes se frappent, et les dégâts restent d'une manche à l'autre. {kos} K.O. donnent la victoire ; après {rounds} manches, le plus de K.O. l'emporte.",
-      "damage": "Une carte utilise sa meilleure attaque imprimée. La faiblesse double les dégâts, la résistance en retire {resistance}. « 30+ » compte 30 ; « 20× » vaut 20 fois 1 à 3.",
+      "deck": "Ton deck : {deck} Pokémon différents de ta collection du défi, chacun avec au moins une attaque qui inflige des dégâts. Un deck par format ; il attaque et il défend.",
+      "hidden": "Le deck de l'autre joueur est caché : ses cartes apparaissent quand elles sont jouées. Le serveur les joue et choisit sa carte et son attaque avant que les tiennes n'arrivent.",
+      "round": "À chaque manche, tu choisis une carte et une de ses attaques ; les deux cartes se frappent, et les dégâts restent d'une manche à l'autre. Après {rounds} manches, le plus de récompenses l'emporte.",
+      "energy": "Énergie : 1 au départ, +1 à chaque manche, jusqu'à {max}. Une attaque coûte les énergies imprimées sur la carte : les grosses attaques arrivent tard. Ne pas attaquer garde ton énergie pour la manche suivante.",
+      "prizes": "Mettre un Pokémon K.O. rapporte ses récompenses : 1 pour la plupart, 2 pour les ex, EX, GX, V et VSTAR, 3 pour les VMAX, TAG TEAM et Méga ex. {prizes} récompenses donnent la victoire.",
+      "damage": "La faiblesse double les dégâts, la résistance en retire {resistance}. « 30+ » compte 30 ; « 20× » vaut 20 fois 1 à 3.",
       "elo": "Pas de pièces : tu gagnes ou perds des points Elo, plus contre un joueur plus fort. Ton adversaire est tiré parmi les joueurs les plus proches de ton Elo.",
       "limit": "{count} attaques par jour, remises à zéro à {time}. Les défenses sont illimitées."
-    }
+    },
+    "roundSaved": "Ton {mine} n'attaque pas (énergie gardée).",
+    "roundTheySaved": "{theirs} n'attaque pas (il garde son énergie).",
+    "myPrizes": "Mes récompenses",
+    "theirPrizes": "Ses récompenses",
+    "myEnergy": "Mon énergie",
+    "theirEnergy": "Son énergie",
+    "attacksLabel": "Attaques",
+    "cost": "gratuite | 1 énergie | {count} énergies",
+    "prizesBadge": "{count} récompenses",
+    "pickCard": "Choisis une de tes cartes, puis son attaque.",
+    "attackWith": "{name} : choisis une attaque",
+    "noAttack": "Pas d'attaque (garder l'énergie)"
   },
   "electrodeFlip": {
     "title": "Électrode Shiny Flip",

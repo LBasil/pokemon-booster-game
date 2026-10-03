@@ -472,7 +472,9 @@
       "pvp_no_deck": "Build a deck in this format first.",
       "pvp_no_opponent": "No opponent in this format yet: nobody else has a deck here. Try another format, or come back later.",
       "pvp_no_battles_left": "No battles left today: come back tomorrow.",
-      "pvp_invalid_card": "This card can't play (knocked out?)."
+      "pvp_invalid_card": "This card can't play (knocked out?).",
+      "pvp_invalid_attack": "This card has no such attack.",
+      "pvp_not_enough_energy": "Not enough energy for this attack yet."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -733,7 +735,7 @@
       },
       "pvp": {
         "title": "PvP battles",
-        "desc": "Your deck against other players' decks. Elo, no coins."
+        "desc": "Your deck against other players' decks: energy, prizes, Elo."
       },
       "boss-raid": {
         "title": "Boss raid",
@@ -826,7 +828,7 @@
   },
   "pvp": {
     "title": "PvP battles",
-    "subtitle": "Build a deck of 5 challenge cards and take on other players' decks. The server plays their deck: they don't need to be online. Win Elo points.",
+    "subtitle": "Build a deck of 5 challenge cards and take on other players' decks. The server plays their deck: they don't need to be online. Manage your energy, take 3 prizes, win Elo points.",
     "unavailable": "PvP battles are coming soon.",
     "loadError": "Couldn’t load PvP battles. Try again in a moment.",
     "hiddenCard": "A card not played yet",
@@ -875,16 +877,14 @@
     "fight": "Find an opponent",
     "vs": "Against {name}",
     "privateTrainer": "A private trainer",
-    "myKos": "My KOs",
-    "theirKos": "Their KOs",
     "round": "Round",
     "theirCards": "{name}'s cards",
     "myCards": "My cards",
-    "playOne": "Play a card",
-    "playCard": "Play {name} ({left} / {hp} HP)",
-    "firstRound": "Their first card is already picked. Play one of yours.",
-    "roundDealt": "Your {mine} hit {theirs} for {damage}.",
-    "roundTaken": "{theirs} hit back for {damage}.",
+    "playOne": "My cards",
+    "playCard": "Pick {name} ({left} / {hp} HP)",
+    "firstRound": "Their first card is already picked. Pick one of yours, then its attack.",
+    "roundDealt": "Your {mine} used {attack}: {damage} damage to {theirs}.",
+    "roundTaken": "{theirs} used {attack}: {damage} damage.",
     "roll": "(x{roll})",
     "koTheirs": "{name} is knocked out!",
     "koMine": "Your {name} is knocked out.",
@@ -914,13 +914,27 @@
     "boardError": "Couldn’t load the ranking.",
     "myRank": "You: #{rank}, Elo {elo}",
     "rules": {
-      "deck": "Your deck: {deck} different Pokémon from your challenge collection, each with an attack that deals damage. One deck per format; it attacks and it defends.",
-      "hidden": "The other player's deck is hidden: their cards show up as they're played. The server plays them, picking its card before yours arrives.",
-      "round": "Each round you play one card, both cards hit each other, and damage stays from one round to the next. {kos} KOs win; after {rounds} rounds, the most KOs win.",
-      "damage": "A card uses its best printed attack. Weakness doubles the damage, resistance takes {resistance} off. “30+” counts 30; “20×” is 20 times 1 to 3.",
+      "deck": "Your deck: {deck} different Pokémon from your challenge collection, each with at least one attack that deals damage. One deck per format; it attacks and it defends.",
+      "hidden": "The other player's deck is hidden: their cards show up as they're played. The server plays them, picking its card and attack before yours arrive.",
+      "round": "Each round you pick a card and one of its attacks; both cards hit each other, and damage stays from one round to the next. After {rounds} rounds, the most prizes win.",
+      "energy": "Energy: 1 at the start, +1 each round, up to {max}. An attack costs the energies printed on the card: big attacks come late. No attack saves your energy for the next round.",
+      "prizes": "Knocking out a Pokémon takes its prizes: 1 for most, 2 for ex, EX, GX, V and VSTAR, 3 for VMAX, TAG TEAM and Mega ex. {prizes} prizes win.",
+      "damage": "Weakness doubles the damage, resistance takes {resistance} off. “30+” counts 30; “20×” is 20 times 1 to 3.",
       "elo": "No coins: you win or lose Elo points, more against a stronger player. Your opponent is drawn among the players closest to your Elo.",
       "limit": "{count} attacks a day, reset at {time}. Defenses are unlimited."
-    }
+    },
+    "roundSaved": "Your {mine} didn't attack (energy saved).",
+    "roundTheySaved": "{theirs} didn't attack (saving energy).",
+    "myPrizes": "My prizes",
+    "theirPrizes": "Their prizes",
+    "myEnergy": "My energy",
+    "theirEnergy": "Their energy",
+    "attacksLabel": "Attacks",
+    "cost": "free | 1 energy | {count} energies",
+    "prizesBadge": "{count} prizes",
+    "pickCard": "Pick one of your cards, then its attack.",
+    "attackWith": "{name}: pick an attack",
+    "noAttack": "No attack (save energy)"
   },
   "electrodeFlip": {
     "title": "Shiny Electrode Flip",

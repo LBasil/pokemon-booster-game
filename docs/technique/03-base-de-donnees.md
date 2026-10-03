@@ -80,7 +80,7 @@ Lecture : tout le monde. Écriture client : aucune.
 | `national_pokedex_number` | int | Numéro du Pokédex national (onglet Pokédex, succès) |
 | `weaknesses` | text[] | Types de faiblesse imprimés sur la carte (`{Fire}`), remplis par l'import depuis 0015 ; sert à « Super efficace ! ». `null` tant que l'import n'est pas repassé |
 | `evolves_from` | text | Nom du stade précédent imprimé sur la carte (`Charmeleon` pour Dracaufeu), rempli par l'import depuis 0018 ; sert à « Chaîne d'évolution » (lignée = Niveau 2 → le Niveau 1 qu'il nomme → la carte de base que celui-ci nomme). Index sur `cards.name` et `cards.evolves_from` (0019) pour suivre les lignées |
-| `attacks` | jsonb | Attaques imprimées `[{ name, damage }]`, `damage` tel quel (`"30"`, `"30+"`, `"20×"`, `""` = effet seul), remplies par l'import depuis 0024 ; servent aux combats PvP (`pvp_card()` garde la meilleure). Mesuré le 2026-10-03 : 99,8 % des Pokémon ont une attaque, 94 % une attaque qui fait des dégâts |
+| `attacks` | jsonb | Attaques imprimées `[{ name, damage, cost }]` (`cost` = nombre d'énergies, importé depuis 0025), `damage` tel quel (`"30"`, `"30+"`, `"20×"`, `""` = effet seul), remplies par l'import depuis 0024 ; servent aux combats PvP (`pvp_card()` garde la meilleure). Mesuré le 2026-10-03 : 99,8 % des Pokémon ont une attaque, 94 % une attaque qui fait des dégâts |
 | `resistances` | text[] | Types de résistance imprimés (`{Fighting}`), depuis 0024 ; −30 en combat PvP |
 | `set_id` | text → `sets.id` | Set de la carte |
 
@@ -286,7 +286,7 @@ premier), `cards` (les cartes montrées, lignée + intrus, mélangées),
 `game_day`. Une seule partie `playing` par joueur (index unique).
 **Aucun accès client** : l'ordre ne doit pas fuiter.
 
-### `pvp_decks`, `pvp_ratings`, `pvp_battles` (0024)
+### `pvp_decks`, `pvp_ratings`, `pvp_battles` (0024, 0025)
 
 - `pvp_decks` : `(user_id, format)` → `card_ids` (5 ids). Un deck par
   format (`all`, `era:<série>`, `set:<id>`) ; il attaque et il défend.
@@ -295,8 +295,11 @@ premier), `cards` (les cartes montrées, lignée + intrus, mélangées),
   (en défense).
 - `pvp_battles` : un combat : `attacker`, `defender`, `format`,
   `a_deck` / `d_deck` (instantanés des cartes, figés au départ), `a_hp`
-  / `d_hp`, `d_next` (la prochaine carte du défenseur, choisie **avant**
-  que l'attaquant joue), `round`, `a_kos`, `d_kos`, `log` (une entrée par
+  / `d_hp`, `a_energy` / `d_energy` (réserves d'énergie, 0025), `d_next` et
+  `d_next_attack` (la prochaine carte du défenseur et son attaque, `null`
+  = pas d'attaque, choisies **avant** que l'attaquant joue), `round`,
+  `a_prizes` / `d_prizes` (récompenses prises, 0025 ; remplacent `a_kos` /
+  `d_kos` de 0024), `log` (une entrée par
   manche), `status` (`playing`, `won`, `lost`, `draw`, `forfeit`, du point
   de vue de l'attaquant), `elo_change` (celui de l'attaquant, le défenseur
   bouge de l'opposé), `game_day`. Un seul combat `playing` par attaquant.
@@ -343,7 +346,7 @@ elles servent de briques aux RPC décrites dans la
 | `minigame_rules`, `minigame_min_ratio`, `minigame_pair`, `minigame_card` | Règles et tirage des paires du mini-jeu |
 | `super_effective_rules`, `super_effective_types`, `super_effective_option_count`, `super_effective_ready`, `super_effective_question`, `super_effective_card` | Règles, cartes jouables et tirage des questions de « Super efficace ! » (`card` = la carte sans sa faiblesse) |
 | `evolution_chain_rules`, `evolution_chain_intruders`, `evolution_chain_ready`, `evolution_chain_line`, `evolution_chain_question`, `evolution_chain_cards` | Règles, lignées complètes et tirage des questions de « Chaîne d'évolution » (`line(2 ou 3)` = une lignée ou `null`, `cards` = nom + image, sans stade) |
-| `pvp_rules`, `pvp_card`, `pvp_fits`, `pvp_valid_format`, `pvp_damage`, `pvp_deck_cards`, `pvp_defender_pick`, `pvp_rating`, `pvp_elo_change`, `pvp_finish`, `pvp_battle_view` | Combats PvP : règles, carte jouable (`null` sinon), appartenance à un format, dégâts, deck encore valide, IA du défenseur, Elo (lignes verrouillées par id : deux joueurs qui s'attaquent en même temps ne s'interbloquent pas), vue de l'attaquant |
+| `pvp_rules`, `pvp_prizes`, `pvp_card`, `pvp_fits`, `pvp_valid_format`, `pvp_damage`, `pvp_deck_cards`, `pvp_defender_pick`, `pvp_rating`, `pvp_elo_change`, `pvp_finish`, `pvp_battle_view` | Combats PvP : règles, récompenses selon les sous-types, carte jouable (`null` sinon), appartenance à un format, dégâts d'une attaque, deck encore valide, IA du défenseur, Elo (lignes verrouillées par id : deux joueurs qui s'attaquent en même temps ne s'interbloquent pas), vue de l'attaquant |
 | `electrode_flip_rules`, `electrode_flip_layout`, `electrode_flip_deal`, `electrode_flip_view`, `electrode_flip_today`, `electrode_flip_end` | Règles, distribution et fin des plateaux d'« Électrode Shiny Flip » (`view` = ce que voit le client) |
 | `handle_new_user`, `unique_username`, `profiles_before_update` | Création du profil, pseudo libre, contrôle de la vitrine |
 | `link_subsets`, `guess_subset_parent`, `subset_default_rate` | Relie les nouveaux sous-sets à leur parent (service role, appelé par l'import) |
@@ -380,7 +383,8 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0021 | `trade_counter_offers` | Contre-offres (`counter_trade`, statut `countered`, `trade_offers.counter_of`) (écrite le 2026-10-02, appliquée) |
 | 0022 | `my_rank_card_traders` | Son rang sous chaque classement (`my_leaderboard_rank`, le calcul passe dans `leaderboard_rows`), « Qui l'a en double ? » (`card_traders`) (écrite le 2026-10-02, appliquée) |
 | 0023 | `username_not_from_email` | `handle_new_user` : sans pseudo, `Trainer-1234` au lieu du début de l'e-mail ; les comptes existants ne sont pas renommés (écrite le 2026-10-02, appliquée) |
-| 0024 | `pvp_battles` | `sets.series`, `cards.attacks`, `cards.resistances` + combats PvP asynchrones : decks, Elo par format, combats joués par le serveur (écrite le 2026-10-03, **à appliquer**, puis un import des cartes) |
+| 0024 | `pvp_battles` | `sets.series`, `cards.attacks`, `cards.resistances` + combats PvP asynchrones : decks, Elo par format, combats joués par le serveur (écrite le 2026-10-03, appliquée) |
+| 0025 | `pvp_energy_prizes` | Combats PvP : énergie et choix de l'attaque, cartes Récompense, 20 manches ; les combats en cours de 0024 finissent en nul (écrite le 2026-10-03, **à appliquer**, puis un import des cartes pour les coûts) |
 
 Les migrations 0001 à 0023 sont appliquées sur le projet réel (vérifié le
 2026-10-02).

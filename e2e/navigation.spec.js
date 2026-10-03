@@ -132,6 +132,8 @@ test('after a challenge opening, another one can be started', async ({ page }) =
 // Regression: the community leaderboard tabs once made the page 628px wide on phones
 test('no page scrolls sideways', async ({ page }, info) => {
   test.skip(info.project.name !== 'mobile', 'phone layout')
+  test.setTimeout(60_000) // every page in a row, like 'no page logs an error'
+  test.setTimeout(60_000) // every page in a row, like 'no page logs an error'
   await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4')] })
   const pages = ['/game', '/boosters', '/collection', '/collection?view=sets', '/collection?view=pokedex', '/collection/set/sv3pt5', '/history', '/profile', '/achievements', '/community', '/u/misty', ...CHALLENGE_PAGES]
   for (const path of pages) {
@@ -144,6 +146,8 @@ test('no page scrolls sideways', async ({ page }, info) => {
 
 test('no page scrolls sideways with larger text on the narrowest phone', async ({ page }, info) => {
   test.skip(info.project.name !== 'mobile', 'phone layout')
+  test.setTimeout(60_000) // every page in a row, like 'no page logs an error'
+  test.setTimeout(60_000) // every page in a row, like 'no page logs an error'
   await page.addInitScript(() => localStorage.setItem('settings', JSON.stringify({ largeText: true })))
   await page.setViewportSize({ width: 320, height: 640 })
   await mockSupabase(page, { challengeCollection: [collectionEntry('sv3pt5-4')] })
@@ -160,6 +164,8 @@ test('no page scrolls sideways with larger text on the narrowest phone', async (
 // Silent breakage (a thrown error in a computed, a failed request nobody
 // shows...) never makes a page fail visibly: catch it here
 test('no page logs an error', async ({ page }) => {
+  // ~30 pages one after the other: the default 30 s ran out under a full parallel run
+  test.setTimeout(60_000)
   const problems = []
   page.on('pageerror', (err) => problems.push(`${page.url()} threw: ${err.message}`))
   page.on('console', (msg) => {

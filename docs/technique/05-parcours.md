@@ -852,11 +852,14 @@ sequenceDiagram
 ### Combats PvP
 
 Page : [PvpView.vue](../../src/views/PvpView.vue)
-(`/challenge/games/pvp`), store `pvp`, migration 0024. Demande de
+(`/challenge/games/pvp`), store `pvp`, migrations 0024 et 0025. Demande de
 l'utilisateur (2026-10-03) : du PvP en différé, « on attaque le deck de
 qq qui est joué par le serveur », trois formats (toutes les cartes, une
 ère du JCC, un set), deck adverse caché, de l'Elo et un taux de victoire,
-pas de pièces, adversaire tiré au hasard parmi les Elo proches.
+pas de pièces, adversaire tiré au hasard parmi les Elo proches. Puis, le
+même jour (« sinon je mets une carte avec une attaque à 130 et je gagne
+auto ») : deux règles du vrai jeu, l'énergie et les cartes Récompense
+(migration 0025, 0024 étant déjà appliquée).
 
 ```mermaid
 sequenceDiagram
@@ -869,11 +872,11 @@ sequenceDiagram
   PV->>DB: pvp_eligible(format) puis pvp_save_deck(format, ids)
   J->>PV: « Trouver un adversaire »
   PV->>DB: pvp_start(format)
-  DB-->>PV: adversaire (Elo proche), deck caché, sa 1re carte déjà choisie
-  loop jusqu'à 3 K.O. (ou 15 manches)
-    J->>PV: touche une de ses cartes
-    PV->>DB: pvp_play(slot)
-    DB-->>PV: dégâts des deux côtés, K.O., carte adverse révélée
+  DB-->>PV: adversaire (Elo proche), deck caché, sa 1re carte et attaque déjà choisies
+  loop jusqu'à 3 récompenses (ou 20 manches)
+    J->>PV: touche une de ses cartes, puis une attaque payable (ou « pas d'attaque »)
+    PV->>DB: pvp_play(slot, attaque)
+    DB-->>PV: dégâts des deux côtés, énergie, K.O. et récompenses, carte adverse révélée
   end
   DB->>DB: pvp_finish : Elo des deux joueurs
 ```
@@ -888,17 +891,35 @@ sequenceDiagram
   choix de l'utilisateur plutôt que la génération du Pokémon, pour que PV
   et dégâts se valent) ou un **set** (le plus équitable). Le format choisi
   est retenu sur l'appareil (`pb-pvp-format`).
-- **Manche** : le serveur choisit la carte du défenseur **avant** de
-  recevoir celle de l'attaquant (stockée dans `d_next`). Les deux cartes
-  se frappent ; les PV restent d'une manche à l'autre. 3 K.O. gagnent ;
-  après 15 manches, le plus de K.O. gagne, sinon nul.
-- **Dégâts** (**miroir** : `pvp_damage()` et `src/utils/pvp.js`) : la
-  meilleure attaque imprimée ; « 30+ » vaut 30, « 20× » vaut 20 × un tirage
-  de 1 à 3 (compté 2 pour choisir la meilleure) ; faiblesse ×2, résistance
-  −30, 10 au minimum.
-- **IA du défenseur** : 1re carte au hasard, puis la carte vivante qui
-  frappe le plus fort la dernière carte de l'attaquant (si elle est encore
-  debout) en encaissant le moins, avec un peu de hasard.
+- **Manche** : le serveur choisit la carte et l'attaque du défenseur
+  **avant** de recevoir celles de l'attaquant (`d_next`, `d_next_attack`).
+  Les deux cartes se frappent ; les PV restent d'une manche à l'autre.
+- **Énergie** : chaque camp a une réserve, 1 au départ, +1 par manche,
+  5 au maximum, gardée d'une manche à l'autre. On choisit une carte puis
+  une de ses attaques payables (coût imprimé = nombre d'énergies), ou
+  « pas d'attaque » pour économiser. Les grosses attaques (130 coûte
+  souvent 3 ou 4) arrivent donc tard et pas à chaque manche. Mesuré le
+  2026-10-03 sur 28 250 attaques : 20 de dégâts en médiane pour 1 énergie,
+  30 pour 2, 70 pour 3, 110 pour 4, 160 pour 5.
+- **Récompenses** (**miroir** : `pvp_prizes()` et `prizesFor`) : un K.O.
+  rapporte 1 récompense, 2 pour un ex/EX/GX/V/VSTAR/LEGEND, 3 pour un
+  VMAX/TAG TEAM/V-UNION/Méga ex (les vraies règles ; V-UNION en vaut 4 en
+  vrai). 3 récompenses gagnent ; après 20 manches, le plus de récompenses
+  gagne, sinon nul. Un deck de grosses cartes tombe en 1 ou 2 K.O.
+- **Dégâts** (**miroir** : `pvp_damage()` et `src/utils/pvp.js`) :
+  l'attaque choisie ; « 30+ » vaut 30, « 20× » vaut 20 × un tirage de 1 à
+  3 ; faiblesse ×2, résistance −30, 10 au minimum (0 sans attaque).
+- **IA du défenseur** : chaque carte vivante × chaque attaque payable (ou
+  aucune) reçoit un score : les dégâts sur la dernière carte de
+  l'attaquant (si elle est encore debout), moins la moitié de ce que
+  celle-ci renverrait ; « pas d'attaque » vaut 40 % de la plus grosse
+  attaque pas encore payable (économiser). Plus un peu de hasard.
+- **Équilibre** (simulé le 2026-10-03 sur les vraies cartes, IA contre IA)
+  : les « 5 plus grosses attaques » battent un deck au hasard mais plus
+  un deck construit (32 % contre 5 bonnes cartes à 1 récompense en format
+  libre). En format libre, les attaquants rapides à 1 récompense sont les
+  plus forts, sauf contre un deck mixte (2 grosses + 3 rapides : 50 %) ;
+  par ère, les écarts sont plus serrés.
 - **Elo** : K = 32 par format, les deux joueurs bougent (le défenseur
   gagne s'il résiste). Abandon = défaite. 10 attaques par jour de jeu,
   défenses illimitées. Un combat en cours revient au rechargement (pas

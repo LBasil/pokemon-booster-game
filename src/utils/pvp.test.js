@@ -1,29 +1,75 @@
 import { describe, expect, it } from 'vitest'
-import { damageAgainst, damageLabel, eloChange, hpPercent, parseFormat, record, toggleDeckCard } from './pvp'
+import {
+  bestDamage,
+  canPay,
+  damageAgainst,
+  damageLabel,
+  eloChange,
+  energyAfter,
+  hpPercent,
+  parseFormat,
+  prizesFor,
+  record,
+  toggleDeckCard,
+} from './pvp'
 
-const fire = { damage: 30, times: false, types: ['Fire'], weaknesses: ['Water'], resistances: [] }
-const water = { damage: 20, times: false, types: ['Water'], weaknesses: ['Lightning'], resistances: ['Fire'] }
-const grass = { damage: 100, times: false, types: ['Grass'], weaknesses: ['Fire'], resistances: [] }
-const flips = { damage: 30, times: true, types: ['Lightning'], weaknesses: [], resistances: [] }
+const fire = { types: ['Fire'], weaknesses: ['Water'], resistances: [] }
+const water = { types: ['Water'], weaknesses: ['Lightning'], resistances: ['Fire'] }
+const grass = { types: ['Grass'], weaknesses: ['Fire'], resistances: [] }
+const lightning = { types: ['Lightning'], weaknesses: [], resistances: [] }
+const ember = { damage: 30, times: false, cost: 1 }
+const bubble = { damage: 20, times: false, cost: 1 }
+const solar = { damage: 100, times: false, cost: 4 }
+const flips = { damage: 30, times: true, cost: 2 }
+
+describe('prizesFor', () => {
+  it('follows the rule boxes', () => {
+    expect(prizesFor(['Basic'])).toBe(1)
+    expect(prizesFor(['Basic', 'ex'])).toBe(2)
+    expect(prizesFor(['MEGA', 'EX'])).toBe(2)
+    expect(prizesFor(['VMAX'])).toBe(3)
+    expect(prizesFor(['Basic', 'TAG TEAM', 'GX'])).toBe(3)
+    expect(prizesFor(['Stage 1', 'MEGA', 'ex'])).toBe(3)
+    expect(prizesFor()).toBe(1)
+  })
+})
 
 describe('damageAgainst', () => {
   it('deals the printed damage', () => {
-    expect(damageAgainst(grass, water)).toBe(100)
+    expect(damageAgainst(grass, solar, water)).toBe(100)
   })
 
   it('doubles on a weakness', () => {
-    expect(damageAgainst(water, fire)).toBe(40)
-    expect(damageAgainst(fire, grass)).toBe(60)
+    expect(damageAgainst(water, bubble, fire)).toBe(40)
+    expect(damageAgainst(fire, ember, grass)).toBe(60)
   })
 
   it('takes 30 off on a resistance, never under 10', () => {
-    expect(damageAgainst(fire, water)).toBe(10)
+    expect(damageAgainst(fire, ember, water)).toBe(10)
   })
 
   it('multiplies a "×" attack by the roll', () => {
-    expect(damageAgainst(flips, grass, 3)).toBe(90)
-    expect(damageAgainst(flips, water, 2)).toBe(120)
-    expect(damageAgainst(grass, water, 3)).toBe(100)
+    expect(damageAgainst(lightning, flips, grass, 3)).toBe(90)
+    expect(damageAgainst(lightning, flips, water, 2)).toBe(120)
+  })
+
+  it('deals nothing without an attack', () => {
+    expect(damageAgainst(fire, null, grass)).toBe(0)
+  })
+})
+
+describe('energy', () => {
+  it('pays the cost, then adds 1, up to 5', () => {
+    expect(energyAfter(1, ember)).toBe(1)
+    expect(energyAfter(1, null)).toBe(2)
+    expect(energyAfter(4, solar)).toBe(1)
+    expect(energyAfter(5, null)).toBe(5)
+  })
+
+  it('says what can be paid for', () => {
+    expect(canPay(solar, 3)).toBe(false)
+    expect(canPay(solar, 4)).toBe(true)
+    expect(canPay(null, 0)).toBe(true)
   })
 })
 
@@ -68,9 +114,11 @@ describe('toggleDeckCard', () => {
 })
 
 describe('labels', () => {
-  it('prints damage and HP bars', () => {
+  it('prints damage, best damage and HP bars', () => {
     expect(damageLabel(flips)).toBe('30×')
-    expect(damageLabel(grass)).toBe('100')
+    expect(damageLabel(solar)).toBe('100')
+    expect(bestDamage({ attacks: [ember, solar] })).toBe(100)
+    expect(bestDamage({})).toBe(0)
     expect(hpPercent({ hp: 200, hp_left: 50 })).toBe(25)
     expect(hpPercent({ hp: 60 })).toBe(100)
   })

@@ -4,8 +4,9 @@ import { useI18n } from 'vue-i18n'
 import { damageLabel, hpPercent } from '@/utils/pvp'
 
 // One card in a PvP battle or deck (a pvp_card() snapshot): picture, HP
-// left (bar), best attack and weakness. `hidden` = a defender card not
-// played yet (a card back).
+// left (bar), its attacks with their energy cost, weakness, and the prizes
+// it gives when knocked out (2 or 3 for ex, V, VMAX...). `hidden` = a
+// defender card not played yet (a card back).
 const props = defineProps({
   card: { type: Object, default: null },
   hidden: { type: Boolean, default: false },
@@ -31,14 +32,18 @@ const percent = computed(() => (props.card ? hpPercent(props.card) : 0))
       <span class="pvp-hp-text">{{ knockedOut ? t('pvp.ko') : t('pvp.hp', { left: card.hp_left, hp: card.hp }) }}</span>
     </span>
     <span v-else class="pvp-hp-text">{{ t('pvp.hpPrinted', { hp: card.hp }) }}</span>
-    <span class="pvp-attack">
-      <span class="pvp-attack-name">{{ card.attack }}</span>
-      <strong>{{ damageLabel(card) }}</strong>
-    </span>
+    <ul class="pvp-attacks" :aria-label="t('pvp.attacksLabel')">
+      <li v-for="(attack, i) in card.attacks" :key="i">
+        <span class="pvp-cost" :aria-label="t('pvp.cost', { count: attack.cost }, attack.cost)">{{ attack.cost }}</span>
+        <span class="pvp-attack-name">{{ attack.name }}</span>
+        <strong>{{ damageLabel(attack) }}</strong>
+      </li>
+    </ul>
     <span class="pvp-types">
       <span v-for="type in card.types" :key="type" class="pvp-dot" :style="{ '--dot': `var(--pb-type-${type.toLowerCase()}, var(--pb-type-colorless))` }" :title="typeLabel(type)"></span>
       <span v-if="card.weaknesses?.length" class="pvp-weak">{{ t('pvp.weakTo', { types: card.weaknesses.map(typeLabel).join(', ') }) }}</span>
     </span>
+    <span v-if="card.prizes > 1" class="pvp-prizes">{{ t('pvp.prizesBadge', { count: card.prizes }) }}</span>
   </div>
 </template>
 
@@ -97,11 +102,49 @@ const percent = computed(() => (props.card ? hpPercent(props.card) : 0))
   font-weight: 700;
 }
 
-.pvp-attack {
+
+.pvp-attacks {
   display: flex;
-  justify-content: space-between;
-  gap: 0.35rem;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvp-attacks li {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
   min-width: 0;
+}
+
+.pvp-attacks strong {
+  margin-left: auto;
+}
+
+/* Energy cost: a small coin with the number of energies */
+.pvp-cost {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-input-bg);
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.pvp-prizes {
+  align-self: flex-start;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--pb-danger-bg);
+  color: var(--pb-danger-text);
+  font-size: 0.7rem;
+  font-weight: 800;
 }
 
 .pvp-attack-name {

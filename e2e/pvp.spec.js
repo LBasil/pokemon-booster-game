@@ -2,9 +2,10 @@ import { expect, test } from '@playwright/test'
 import { collectionEntry } from './support/data.js'
 import { mockSupabase, signIn } from './support/supabase.js'
 
-// PvP battles (migration 0024). In the mock every challenge Pokémon deals 30
-// (Fire, 60 HP) and Misty's deck is PVP_OPPONENT_DECK: 5 Grass cards weak to
-// Fire (one hit each, Oddish first) that deal 20.
+// PvP battles (migrations 0024 + 0025). In the mock every challenge Pokémon is Fire
+// with 60 HP: Ember (30, 1 energy) and Flamethrower (90, 3 energies).
+// Misty's deck is PVP_OPPONENT_DECK: Grass cards weak to Fire (Ember knocks
+// one out) using Vine Whip (20); Oddish first (1 prize), then Venusaur ex (2).
 test.beforeEach(async ({ page }) => {
   await signIn(page)
 })
@@ -52,14 +53,34 @@ test('build a deck, attack and win Elo', async ({ page }) => {
   await expect(page.locator('.pvp-theirs .is-hidden')).toHaveCount(5)
 
   const mine = page.locator('.pvp-play')
+  const panel = page.locator('.pvp-attack-panel')
+  const myEnergy = page.getByRole('meter', { name: 'My energy' })
+  await expect(page.locator('.pvp-hint')).toHaveText('Pick one of your cards, then its attack.')
+  await expect(myEnergy).toHaveAttribute('aria-valuenow', '1')
+
+  // A card, then an attack I can pay for (Flamethrower needs 3 energies)
   await mine.nth(0).click()
-  await expect(page.locator('.pvp-feedback')).toContainText('Your Charmander hit Oddish for 60.')
+  await expect(panel).toContainText('Charmander: pick an attack')
+  await expect(panel.getByRole('button', { name: /Flamethrower/ })).toBeDisabled()
+  await panel.getByRole('button', { name: /Ember/ }).click()
+  await expect(page.locator('.pvp-feedback')).toContainText('Your Charmander used Ember: 60 damage to Oddish.')
+  await expect(page.locator('.pvp-feedback')).toContainText('Oddish used Vine Whip: 20 damage.')
   await expect(page.locator('.pvp-feedback')).toContainText('Oddish is knocked out!')
   await expect(page.locator('.pvp-theirs .is-hidden')).toHaveCount(4)
   await expect(page.locator('.pvp-theirs')).toContainText('Oddish')
   await expect(page.locator('.pvp-score')).toContainText('1 / 3')
-  await mine.nth(0).click()
+  const sent = backend.calls.filter((call) => call.path === '/rest/v1/rpc/pvp_play').at(-1)
+  expect(JSON.parse(sent.body)).toEqual({ p_slot: 0, p_attack: 0 })
+
+  // No attack: the energy is saved (the card stays picked)
+  await panel.getByRole('button', { name: 'No attack (save energy)' }).click()
+  await expect(page.locator('.pvp-feedback')).toContainText('Your Charmander didn’t attack (energy saved).'.replace('’', "'"))
+  await expect(myEnergy).toHaveAttribute('aria-valuenow', '2')
+
+  // Venusaur ex gives 2 prizes: 1 + 2 = 3, a win
   await mine.nth(1).click()
+  await expect(panel).toContainText('Squirtle: pick an attack')
+  await panel.getByRole('button', { name: /Ember/ }).click()
 
   await expect(page.locator('.pvp-feedback')).toContainText('You win!')
   await expect(page.locator('.pvp-feedback')).toContainText('Elo +16')
@@ -84,6 +105,7 @@ test('a battle in progress comes back, and giving up asks first', async ({ page 
   await page.getByRole('button', { name: 'Save the deck' }).click()
   await page.getByRole('button', { name: 'Find an opponent' }).click()
   await page.locator('.pvp-play').first().click()
+  await page.locator('.pvp-attack-panel').getByRole('button', { name: /Ember/ }).click()
   await expect(page.locator('.pvp-feedback')).toContainText('Oddish is knocked out!')
 
   await page.reload()

@@ -163,8 +163,14 @@ async function populateCards(startPage = 1) {
       types: card.types ?? null,
       weaknesses: card.weaknesses?.map((weakness) => weakness.type) ?? null,
       evolves_from: card.evolvesFrom ?? null,
-      // PvP (0024): name + damage as printed ("30", "30+", "20×", "" = effect only)
-      attacks: card.attacks?.map((attack) => ({ name: attack.name, damage: attack.damage ?? '' })) ?? null,
+      // PvP (0024): name, damage as printed ("30", "30+", "20×", "" = effect
+      // only); cost (number of energies) since 0025
+      attacks:
+        card.attacks?.map((attack) => ({
+          name: attack.name,
+          damage: attack.damage ?? '',
+          cost: attack.convertedEnergyCost ?? attack.cost?.length ?? 0,
+        })) ?? null,
       resistances: card.resistances?.map((resistance) => resistance.type) ?? null,
       set_id: card.set.id,
     }))

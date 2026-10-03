@@ -36,13 +36,15 @@ export const CHALLENGE_ERRORS = [
   'recycle_copies_unavailable',
   // counter-offers (migration 0021)
   'counter_unavailable',
-  // PvP battles (migration 0024)
+  // PvP battles (migrations 0024 + 0025)
   'pvp_invalid_format',
   'pvp_invalid_deck',
   'pvp_no_deck',
   'pvp_no_opponent',
   'pvp_no_battles_left',
   'pvp_invalid_card',
+  'pvp_invalid_attack',
+  'pvp_not_enough_energy',
 ]
 
 // PostgREST's answer for an RPC that doesn't exist yet
@@ -306,7 +308,7 @@ export const answerEvolutionChain = (order) => call('evolution_chain_answer', { 
  */
 export const stopEvolutionChain = () => call('evolution_chain_stop')
 
-// ---------- PvP battles (migration 0024) ----------
+// ---------- PvP battles (migrations 0024 + 0025: energy, prizes) ----------
 
 /**
  * Rules, whether attacks are loaded (`ready`), formats with my eligible card
@@ -325,10 +327,12 @@ export const savePvpDeck = (format, cardIds) => call('pvp_save_deck', { p_format
 export const startPvpBattle = (format) => call('pvp_start', { p_format: format })
 
 /**
- * Plays my card at `slot` (0-4) against the defender's next card.
+ * Plays my card at `slot` (0-4) with one of its attacks (index in its
+ * `attacks`, null = no attack, saving the energy) against the defender's
+ * next card.
  * @returns {Promise<{ round: object, battle: object, state: object }>}
  */
-export const playPvpCard = (slot) => call('pvp_play', { p_slot: slot })
+export const playPvpCard = (slot, attack) => call('pvp_play', { p_slot: slot, p_attack: attack })
 
 /** Gives up the battle in progress (a loss). */
 export const forfeitPvpBattle = () => call('pvp_forfeit')
