@@ -75,6 +75,8 @@ function crackles(ac, duration, { from, to }) {
  * was "étouffé et sourd". Foil reads as crisp transients in the 2-8 kHz
  * range with gaps between them, so it stays bright without being harsh:
  * highpass the body away, a small presence bump, the fizz above 10 kHz cut.
+ * Then (2026-10-03) "baisse le son ou un peu moins aigu": a bit of both,
+ * highpass 1400 -> 1200 Hz, bump 4500 -> 3500 Hz, lowpass 10 -> 7.5 kHz, level 0.22 -> 0.17.
  */
 export function tear(enabled, { lite = false } = {}) {
   const ac = enabled && audio()
@@ -84,19 +86,19 @@ export function tear(enabled, { lite = false } = {}) {
   const src = crackles(ac, duration, lite ? { from: 150, to: 450 } : { from: 70, to: 380 })
   const low = ac.createBiquadFilter()
   low.type = 'highpass'
-  low.frequency.value = 1400
+  low.frequency.value = 1200
   const presence = ac.createBiquadFilter()
   presence.type = 'peaking'
-  presence.frequency.value = 4500
+  presence.frequency.value = 3500
   presence.Q.value = 0.9
   presence.gain.value = 4
   const fizz = ac.createBiquadFilter()
   fizz.type = 'lowpass'
-  fizz.frequency.value = 10000
+  fizz.frequency.value = 7500
   const level = ac.createGain()
   level.gain.setValueAtTime(0.0001, now)
-  level.gain.exponentialRampToValueAtTime(0.22, now + 0.03)
-  level.gain.setValueAtTime(0.22, now + duration - 0.05)
+  level.gain.exponentialRampToValueAtTime(0.17, now + 0.03)
+  level.gain.setValueAtTime(0.17, now + duration - 0.05)
   level.gain.exponentialRampToValueAtTime(0.0001, now + duration)
   src.connect(low).connect(presence).connect(fizz).connect(level).connect(ac.destination)
   src.start(now)
