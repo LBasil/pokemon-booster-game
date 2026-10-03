@@ -163,6 +163,26 @@ address** for the sign-up part.
 - [ ] On a 320px phone: card, question, types and feedback fit above the
       tab bar, both themes.
 
+## PvP battles (after migration 0024 + a card import)
+
+- [ ] Right after 0024, before the sync: the games page says "Coming soon"
+      for "PvP battles" (no card has its attacks yet).
+- [ ] After `npm run populate:sync`: "10 battles left today". "Every card",
+      "One era" and "One set" list how many of my challenge cards can fight
+      there; a Trainer or an effect-only Pokémon never shows in the builder.
+- [ ] Build a deck (5 cards), save: the 5 cards show with HP, attack and
+      weakness. With a second account, save a deck in the same format.
+- [ ] Attack: "Against <name>", 5 hidden cards; each tap plays a round,
+      the opponent's card shows up, HP bars drop, KOs count. Damage matches
+      the printed attack (x2 on a weakness).
+- [ ] Reload mid-battle: it comes back. "Give up" asks first, then counts
+      a loss.
+- [ ] At the end: their whole deck shows, Elo +/-, history and ranking
+      updated; on the second account the defense shows up in its history.
+- [ ] Recycle a deck card: the deck says to change it.
+- [ ] On a 320px phone and at 1280x720: cards, buttons and history fit,
+      both themes.
+
 ## Evolution chain (after migration 0018 + a card import)
 
 - [ ] Right after 0018, before the import: the games page says "Coming

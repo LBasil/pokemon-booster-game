@@ -82,9 +82,11 @@ async function populateSets() {
       // New sets' images live on images.scrydex.com, so store what the API gives
       logo_url: set.images?.logo ?? null,
       symbol_url: set.images?.symbol ?? null,
+      // The TCG era (Base, Neo, ... Scarlet & Violet): PvP's era format (0024)
+      series: set.series ?? null,
     }))
 
-    const { error } = await supabase.from('sets').upsert(sets)
+    const { error } = await upsertRows('sets', sets)
     if (error) {
       console.error('Error inserting sets:', error.message)
       return
@@ -115,21 +117,26 @@ async function recordPrices(cards) {
 }
 
 // Columns that came with later migrations: cards.weaknesses ("Super
-// effective!", 0015) and cards.evolves_from ("Evolution chain", 0018). Until
-// one is applied, cards are saved without it rather than not at all
-const OPTIONAL_COLUMNS = { weaknesses: '0015', evolves_from: '0018' }
-const missingColumns = new Set()
+// effective!", 0015), cards.evolves_from ("Evolution chain", 0018),
+// cards.attacks / resistances and sets.series (PvP, 0024). Until one is
+// applied, rows are saved without it rather than not at all
+const OPTIONAL_COLUMNS = {
+  cards: { weaknesses: '0015', evolves_from: '0018', attacks: '0024', resistances: '0024' },
+  sets: { series: '0024' },
+}
+const missingColumns = { cards: new Set(), sets: new Set() }
 
-async function upsertCards(cards) {
-  const rows = missingColumns.size
-    ? cards.map((card) => Object.fromEntries(Object.entries(card).filter(([key]) => !missingColumns.has(key))))
-    : cards
-  const { error } = await supabase.from('cards').upsert(rows)
-  const column = error && Object.keys(OPTIONAL_COLUMNS).find((key) => !missingColumns.has(key) && error.message.includes(key))
+async function upsertRows(table, rows) {
+  const missing = missingColumns[table]
+  const kept = missing.size
+    ? rows.map((row) => Object.fromEntries(Object.entries(row).filter(([key]) => !missing.has(key))))
+    : rows
+  const { error } = await supabase.from(table).upsert(kept)
+  const column = error && Object.keys(OPTIONAL_COLUMNS[table]).find((key) => !missing.has(key) && error.message.includes(key))
   if (column) {
-    missingColumns.add(column)
-    console.warn(`Skipping ${column} (run migration ${OPTIONAL_COLUMNS[column]} first?):`, error.message)
-    return upsertCards(cards)
+    missing.add(column)
+    console.warn(`Skipping ${table}.${column} (run migration ${OPTIONAL_COLUMNS[table][column]} first?):`, error.message)
+    return upsertRows(table, rows)
   }
   return { error }
 }
@@ -156,10 +163,13 @@ async function populateCards(startPage = 1) {
       types: card.types ?? null,
       weaknesses: card.weaknesses?.map((weakness) => weakness.type) ?? null,
       evolves_from: card.evolvesFrom ?? null,
+      // PvP (0024): name + damage as printed ("30", "30+", "20×", "" = effect only)
+      attacks: card.attacks?.map((attack) => ({ name: attack.name, damage: attack.damage ?? '' })) ?? null,
+      resistances: card.resistances?.map((resistance) => resistance.type) ?? null,
       set_id: card.set.id,
     }))
 
-    const { error } = await upsertCards(cards)
+    const { error } = await upsertRows('cards', cards)
     if (error) {
       console.error('Error inserting cards:', error.message)
       return

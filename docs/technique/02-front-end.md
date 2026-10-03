@@ -78,6 +78,7 @@ Chaque page est un *chunk* chargé à la demande
 | `/challenge/games/electrode-flip` | `challenge-game-electrode-flip` | `ElectrodeFlipView` | connecté | défi |
 | `/challenge/games/super-effective` | `challenge-game-super-effective` | `SuperEffectiveView` | connecté | défi |
 | `/challenge/games/evolution-chain` | `challenge-game-evolution-chain` | `EvolutionChainView` | connecté | défi |
+| `/challenge/games/pvp` | `challenge-game-pvp` | `PvpView` | connecté | défi |
 | `/challenge/trades` | `challenge-trades` | `TradesView` | connecté | défi |
 | `/u/:username` | `public-profile` | `ProfileView` (`username` en prop) | **public** | partagé |
 | `/u/:username/achievements` | `public-achievements` | `AchievementsView` | **public** | partagé |
@@ -160,6 +161,7 @@ ne recharge pas si c'est déjà chargé (sauf `force`), et expose `loading`,
 | `minigame` | État de « Plus ou moins » | page du jeu, hub des jeux | `unavailable` si la migration 0013 manque ; répercute le solde de pièces dans `challenge` |
 | `electrodeFlip` | État d'« Électrode Shiny Flip » : niveau, pièces restantes, records, plateau en cours | page du jeu, hub des jeux | `flip(index)`, `cashOut()` ; `unavailable` si la migration 0014 manque ; répercute le solde de pièces |
 | `superEffective` | État de « Super efficace ! » : parties payées restantes, record, partie en cours | page du jeu, hub des jeux | `unavailable` si la migration 0015 manque **ou** si aucune carte n'a encore ses faiblesses (`ready: false`) ; répercute le solde de pièces |
+| `pvp` | Combats PvP : decks et Elo par format, combats restants du jour, combat en cours, historique (attaques et défenses), cartes jouables par format (`eligible`), classements (`boards`) | page des combats, hub des jeux | `loadEligible(format)`, `saveDeck`, `start(format)`, `play(slot)`, `forfeit()`, `loadBoard(format)` ; `bestElo` pour la tuile ; `unavailable` si la migration 0024 manque **ou** si aucune carte n'a encore ses attaques (`ready: false`) |
 | `evolutionChain` | État de « Chaîne d'évolution » : parties payées restantes, record, partie en cours | page du jeu, hub des jeux | `answer(order)`, `stop()` (sans la RPC de 0019 : la partie s'arrête à l'écran et expire côté serveur) ; `unavailable` si la migration 0018 manque **ou** si aucune lignée complète n'est encore connue (`ready: false`) ; répercute le solde de pièces |
 | `achievements` | Toasts, taux par mode, données serveur par mode | `check(mode)` un peu partout | Voir [Parcours > Succès](05-parcours.md#7-succès) |
 | `settings` | `sound`, `vibration`, `effects`, `animations`, `recycleKeep` (exemplaires gardés au recyclage, 1 à 4), `largeText` (texte agrandi : `html.pb-text-large`, posé par `App.vue`) | — | Par appareil (`localStorage`). `liteAnimations` = animations légères sur écran tactile en mode `auto` |
@@ -234,6 +236,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `sets.js` | URL des logos, sous-sets (`isSubset`, `packSetId`, `subsetsOf`), `groupSetsByYear`, `starterSets` (Set de base, 151 et le set le plus récent, proposés au premier booster) |
 | `feed.js` | `groupFeed(pulls)` : tirages consécutifs d'un même joueur dans le même mode en une entrée (le plus rare en avant), pour le fil de Communauté et « En direct » de l'accueil |
 | `pokemonNamesFr.js` | Généré par `node scripts/region-tools.mjs fr-names` (ne pas éditer) : `frenchName(dex)`, nom français officiel de chaque Pokémon (PokéAPI). Les noms de cartes sont en anglais ; la recherche et la fiche d'une carte s'en servent |
+| `pvp.js` | Règles des combats PvP (**miroir** de `pvp_rules()` / `pvp_damage()` / `pvp_elo_change()`) : `damageAgainst`, `eloChange`, `record` (victoires, défaites, nuls et taux, attaques + défenses), `parseFormat` (`all`, `era:<série>`, `set:<id>`), `toggleDeckCard`, `hpPercent` |
 | `games.js` | Registre des mini-jeux |
 | `beta.js` | `BETA_END` (null tant que la bêta dure) + `isBetaTester(createdAt)` : inscrit avant la fin de la bêta |
 | `cards.js`, `progress.js`, `time.js`, `tilt.js`, `appVersion.js`, `chunkError.js` | Petits utilitaires (regroupement, pourcentage, « il y a 3 min », inclinaison 3D, détection de build, erreur de chunk) |
@@ -255,6 +258,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `PokedexGrid`, `WishlistGrid`, `ShowcasePicker`, `RecycleDuplicates` | Onglets Pokédex et souhaits, choix de la vitrine, recyclage (tout, ou « Choisir… » par carte ou par rareté, − / + pour le nombre d'exemplaires) |
 | `SetGoal` | « Série la plus avancée : Base, 1 / 102 (1 %) » + barre : un objectif à portée du débutant, sous la progression globale (hubs Illimité et Défi, collection ; prop `to` = lien vers le classeur) |
 | `CopyStepper` | − n/max + : nombre d'exemplaires à recycler (liste « Choisir… » et fiche d'une carte) |
+| `PvpCard` | Une carte de combat PvP (instantané `pvp_card()`) : image, PV (barre si `show-hp`), meilleure attaque, types et faiblesse ; `hidden` = dos de carte (carte adverse pas encore jouée) |
 | `BetaBadge` | Pastille « Bêta-testeur » (bordure holo + reflet qui passe, coupé sans effets / mouvement réduit), `compact` = juste « β ». Profil et tuile profil du hub |
 | `UsernameCombobox` | Champ pseudo avec suggestions des dresseurs publics (`searchUsernames`, 200 ms après la frappe, 8 au maximum, flèches + Entrée, Échap). Événement `pick` au choix d'une suggestion. Partenaire d'échange |
 | `AchievementTile`, `AchievementToasts` | Tuile d'un succès, notifications « succès débloqué » (et, dans la même pile, les toasts d'échange du store `trades`) |

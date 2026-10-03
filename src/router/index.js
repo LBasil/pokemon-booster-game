@@ -139,6 +139,13 @@ const router = createRouter({
       meta: { requiresAuth: true, mode: 'challenge' },
     },
     {
+      // PvP battles against other players' decks (migration 0024)
+      path: '/challenge/games/pvp',
+      name: 'challenge-game-pvp',
+      component: () => import('@/views/PvpView.vue'),
+      meta: { requiresAuth: true, mode: 'challenge' },
+    },
+    {
       path: '/challenge/trades',
       name: 'challenge-trades',
       component: () => import('@/views/TradesView.vue'),

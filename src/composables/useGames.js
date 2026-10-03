@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { useElectrodeFlipStore } from '@/stores/electrodeFlip'
 import { useEvolutionChainStore } from '@/stores/evolutionChain'
 import { useMinigameStore } from '@/stores/minigame'
+import { usePvpStore } from '@/stores/pvp'
 import { useSuperEffectiveStore } from '@/stores/superEffective'
 import { GAMES } from '@/utils/games'
 
@@ -19,6 +20,7 @@ export function useGames() {
   const electrodeFlip = useElectrodeFlipStore()
   const superEffective = useSuperEffectiveStore()
   const evolutionChain = useEvolutionChainStore()
+  const pvp = usePvpStore()
 
   const statusOf = {
     'higher-lower': () => ({
@@ -53,6 +55,13 @@ export function useGames() {
         : t('minigame.nextFree'),
       record: evolutionChain.best ? t('minigame.bestShort', { count: evolutionChain.best }) : '',
     }),
+    // No coins: Elo only
+    pvp: () => ({
+      store: pvp,
+      inProgress: Boolean(pvp.battle),
+      line: pvp.battlesLeft ? t('pvp.battlesLeftLine', { count: pvp.battlesLeft }, pvp.battlesLeft) : t('pvp.noBattlesLeft'),
+      record: pvp.bestElo !== null ? t('pvp.eloShort', { elo: pvp.bestElo }) : '',
+    }),
   }
 
   const games = computed(() =>
@@ -83,6 +92,7 @@ export function useGames() {
       electrodeFlip.load()
       superEffective.load()
       evolutionChain.load()
+      pvp.load()
     },
   }
 }

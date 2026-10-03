@@ -86,6 +86,29 @@ export const EVOLUTION_QUESTIONS = [
   { cards: [evoCard('sv3pt5-26', 'Raichu'), evoCard('sv3pt5-25', 'Pikachu')], chain: ['sv3pt5-25', 'sv3pt5-26'] },
 ]
 
+// PvP battles (migration 0024): every card of the mock fights with 30
+// damage (Fire), 60 HP, weak to Water. The opponent's deck: 5 Grass cards
+// weak to Fire (one hit each) that deal 20, in this order.
+const SERIES = { sv3pt5: 'Scarlet & Violet', base1: 'Base' }
+const pvpCard = (id) => {
+  const card = byId[id]
+  return card?.national_pokedex_number
+    ? { id, name: card.name, image_small: card.image_small, hp: 60, types: ['Fire'], weaknesses: ['Water'], resistances: [], attack: 'Ember', damage: 30, times: false }
+    : null
+}
+export const PVP_OPPONENT_DECK = ['Oddish', 'Bellsprout', 'Tangela', 'Exeggcute', 'Paras'].map((name, i) => ({
+  id: `foe-${i}`,
+  name,
+  image_small: `https://images.e2e.test/foe-${i}.png`,
+  hp: 60,
+  types: ['Grass'],
+  weaknesses: ['Fire'],
+  resistances: [],
+  attack: 'Vine Whip',
+  damage: 20,
+  times: false,
+}))
+
 export async function mockSupabase(page, options = {}) {
   const state = {
     collection: options.collection ?? [collectionEntry('sv3pt5-4', 2), collectionEntry('base1-4')],
@@ -150,6 +173,12 @@ export async function mockSupabase(page, options = {}) {
     // (`next` = the first one); noStop: true = before 0019 (no stop RPC)
     evolutionChain:
       options.evolutionChain === 'missing' ? 'missing' : { ready: true, paidUsed: 0, best: 0, todayCoins: 0, run: null, next: 0, ...options.evolutionChain },
+    // PvP battles (migration 0024): 'missing' = not applied; opponent: false =
+    // nobody else has a deck; decks / ratings by format; board = leaderboard rows
+    pvp:
+      options.pvp === 'missing'
+        ? 'missing'
+        : { ready: true, battlesLeft: 10, opponent: true, decks: {}, ratings: {}, battle: null, history: [], board: [], ...options.pvp },
   }
   const challengeState = () => {
     const c = state.challenge
@@ -398,6 +427,116 @@ export async function mockSupabase(page, options = {}) {
         if (!run) return raise('no_game')
         ec.run = null
         return json({ streak: run.streak, run_coins: run.coins, state: ecState() })
+      }
+    }
+    // ---- PvP battles (migration 0024) ----
+    if (path.startsWith('/rest/v1/rpc/pvp_')) {
+      const pv = state.pvp
+      if (pv === 'missing') return json({ code: 'PGRST202', message: `Could not find the function public.${path.split('/').pop()} in the schema cache` }, 404)
+      const fighters = () => state.challengeCollection.map((e) => pvpCard(e.card_id)).filter(Boolean)
+      const fits = (card, format) =>
+        format === 'all' || format === `era:${SERIES[card.id.split('-')[0]]}` || format === `set:${card.id.split('-')[0]}`
+      const rating = (format) => (pv.ratings[format] ??= { elo: 1000, wins: 0, losses: 0, draws: 0, def_wins: 0, def_losses: 0, def_draws: 0 })
+      const view = (b) => ({
+        id: b.id,
+        format: b.format,
+        status: b.status,
+        round: b.round,
+        my_kos: b.my_kos,
+        their_kos: b.their_kos,
+        elo_change: b.elo_change,
+        opponent: b.opponent,
+        log: b.log,
+        mine: b.mine.map((card, slot) => ({ ...card, slot, hp_left: b.myHp[slot] })),
+        theirs: {
+          left: b.theirHp.filter((hp) => hp > 0).length,
+          seen: b.seen.map((slot) => ({ ...PVP_OPPONENT_DECK[slot], slot, hp_left: b.theirHp[slot] })),
+          deck: b.status === 'playing' ? null : PVP_OPPONENT_DECK.map((card, slot) => ({ ...card, slot, hp_left: b.theirHp[slot] })),
+        },
+      })
+      const pvState = () => {
+        const owned = fighters()
+        const sets = [...new Set(owned.map((card) => card.id.split('-')[0]))]
+        return {
+          deck_size: 5, kos_to_win: 3, max_rounds: 15, battles_per_day: 10, start_elo: 1000, k_factor: 32, weakness_multiplier: 2, resistance: 30, min_damage: 10,
+          ready: pv.ready,
+          battles_left: pv.battlesLeft,
+          formats: {
+            all: owned.length,
+            eras: ['Base', 'Scarlet & Violet'].map((series) => ({ format: `era:${series}`, series, owned: owned.filter((card) => fits(card, `era:${series}`)).length })),
+            sets: sets.map((id) => ({ format: `set:${id}`, set_id: id, name: SETS.find((set) => set.id === id)?.name ?? id, series: SERIES[id], owned: owned.filter((card) => fits(card, `set:${id}`)).length })),
+          },
+          decks: pv.decks,
+          ratings: pv.ratings,
+          battle: pv.battle && pv.battle.status === 'playing' ? view(pv.battle) : null,
+          history: pv.history,
+        }
+      }
+      if (path === '/rest/v1/rpc/pvp_state') return json(pvState())
+      if (path === '/rest/v1/rpc/pvp_eligible') return json(fighters().filter((card) => fits(card, args.p_format)))
+      if (path === '/rest/v1/rpc/pvp_save_deck') {
+        const cards = (args.p_cards ?? []).map(pvpCard)
+        if (cards.length !== 5 || new Set(args.p_cards).size !== 5 || cards.some((card) => !card || !fits(card, args.p_format))) return raise('pvp_invalid_deck')
+        pv.decks[args.p_format] = { cards, valid: true }
+        rating(args.p_format)
+        return json(pvState())
+      }
+      if (path === '/rest/v1/rpc/pvp_start') {
+        if (pv.battle?.status === 'playing') return json(pvState())
+        if (!pv.battlesLeft) return raise('pvp_no_battles_left')
+        const deck = pv.decks[args.p_format]
+        if (!deck) return raise('pvp_no_deck')
+        if (!pv.opponent) return raise('pvp_no_opponent')
+        pv.battlesLeft--
+        pv.battle = {
+          id: Date.now(), format: args.p_format, status: 'playing', round: 0, my_kos: 0, their_kos: 0, elo_change: null,
+          opponent: { username: 'Misty', elo: 1000 }, log: [], mine: deck.cards, myHp: deck.cards.map((card) => card.hp),
+          theirHp: PVP_OPPONENT_DECK.map((card) => card.hp), seen: [], next: 0,
+        }
+        return json(pvState())
+      }
+      const finish = (b, status) => {
+        b.status = status
+        b.elo_change = status === 'won' ? 16 : status === 'draw' ? 0 : -16
+        const r = rating(b.format)
+        r.elo += b.elo_change
+        if (status === 'won') r.wins++
+        else if (status === 'draw') r.draws++
+        else r.losses++
+        pv.history.unshift({ id: b.id, format: b.format, at: new Date().toISOString(), role: 'attack', result: status === 'forfeit' ? 'lost' : status, elo_change: b.elo_change, opponent: 'Misty' })
+      }
+      if (path === '/rest/v1/rpc/pvp_play') {
+        const b = pv.battle
+        if (!b || b.status !== 'playing') return raise('no_game')
+        const slot = args.p_slot
+        if (!(b.myHp[slot] > 0)) return raise('pvp_invalid_card')
+        const d = b.next
+        const mine = b.mine[slot]
+        const theirs = PVP_OPPONENT_DECK[d]
+        const hit = (from, to) => Math.max(10, from.damage * (from.types.some((type) => to.weaknesses.includes(type)) ? 2 : 1))
+        const dealt = hit(mine, theirs)
+        const taken = hit(theirs, mine)
+        b.theirHp[d] = Math.max(0, b.theirHp[d] - dealt)
+        b.myHp[slot] = Math.max(0, b.myHp[slot] - taken)
+        if (!b.seen.includes(d)) b.seen.push(d)
+        const round = { a: slot, d, dealt, taken, roll_a: null, roll_d: null, ko_theirs: b.theirHp[d] === 0, ko_mine: b.myHp[slot] === 0 }
+        b.my_kos += round.ko_theirs ? 1 : 0
+        b.their_kos += round.ko_mine ? 1 : 0
+        b.round++
+        b.log.push(round)
+        b.next = b.theirHp.findIndex((hp) => hp > 0)
+        if (b.my_kos >= 3 || b.their_kos >= 3 || b.round >= 15) finish(b, b.my_kos > b.their_kos ? 'won' : b.my_kos < b.their_kos ? 'lost' : 'draw')
+        return json({ round, battle: view(b), state: pvState() })
+      }
+      if (path === '/rest/v1/rpc/pvp_forfeit') {
+        const b = pv.battle
+        if (!b || b.status !== 'playing') return raise('no_game')
+        finish(b, 'forfeit')
+        return json({ battle: view(b), state: pvState() })
+      }
+      if (path === '/rest/v1/rpc/pvp_leaderboard') {
+        const me = pv.board.find((row) => row.username === 'Ash')
+        return json({ rows: pv.board, me: me ? { rank: me.rank, elo: me.elo, wins: me.wins, losses: me.losses, draws: me.draws } : null })
       }
     }
     // ---- Super effective! (migration 0015) ----

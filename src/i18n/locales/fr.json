@@ -466,7 +466,13 @@
       "super_effective_unavailable": "Aucune carte à proposer pour l'instant. Réessaie plus tard.",
       "evolution_chain_unavailable": "Aucune lignée à proposer pour l'instant. Réessaie plus tard.",
       "recycle_copies_unavailable": "Choisir combien de copies recycler n'est pas encore disponible. Recycle toutes les copies en trop d'une carte, ou réessaie plus tard.",
-      "counter_unavailable": "Les contre-offres ne sont pas encore disponibles. Accepte ou refuse cette offre, ou réessaie plus tard."
+      "counter_unavailable": "Les contre-offres ne sont pas encore disponibles. Accepte ou refuse cette offre, ou réessaie plus tard.",
+      "pvp_invalid_format": "Ce format n'existe pas.",
+      "pvp_invalid_deck": "Ce deck n'est pas valide : 5 cartes différentes que tu possèdes, capables de combattre dans ce format.",
+      "pvp_no_deck": "Monte d'abord un deck dans ce format.",
+      "pvp_no_opponent": "Pas encore d'adversaire dans ce format : personne d'autre n'y a de deck. Essaie un autre format, ou reviens plus tard.",
+      "pvp_no_battles_left": "Plus de combats aujourd'hui : reviens demain.",
+      "pvp_invalid_card": "Cette carte ne peut pas jouer (K.O. ?)."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -725,6 +731,10 @@
         "title": "Chaîne d'évolution",
         "desc": "Remets les stades d'une lignée d'évolution dans l'ordre."
       },
+      "pvp": {
+        "title": "Combats PvP",
+        "desc": "Ton deck contre ceux des autres joueurs. De l'Elo, pas de pièces."
+      },
       "boss-raid": {
         "title": "Raid de boss",
         "desc": "Tous les joueurs contre un Pokémon géant, chaque semaine."
@@ -813,6 +823,104 @@
     },
     "stop": "Arrêter",
     "stoppedTitle": "Partie arrêtée"
+  },
+  "pvp": {
+    "title": "Combats PvP",
+    "subtitle": "Monte un deck de 5 cartes du défi et affronte les decks des autres joueurs. Le serveur joue leur deck : pas besoin qu'ils soient connectés. Gagne des points Elo.",
+    "unavailable": "Les combats PvP arrivent bientôt.",
+    "loadError": "Impossible de charger les combats PvP. Réessaie dans un instant.",
+    "hiddenCard": "Une carte pas encore jouée",
+    "hpLabel": "PV restants",
+    "ko": "K.O.",
+    "hp": "{left} / {hp} PV",
+    "hpPrinted": "{hp} PV",
+    "weakTo": "Faible contre {types}",
+    "battlesLeftLine": "{count} combat restant aujourd'hui | {count} combats restants aujourd'hui",
+    "noBattlesLeft": "Plus de combats aujourd'hui : reviens demain.",
+    "eloShort": "Elo {elo}",
+    "formats": {
+      "all": "Toutes les cartes",
+      "era": "Ère {name}"
+    },
+    "formatTitle": "Format",
+    "kinds": {
+      "all": "Toutes les cartes",
+      "era": "Une ère",
+      "set": "Une extension"
+    },
+    "kindHelp": {
+      "all": "Toutes les cartes du défi peuvent combattre. Les cartes récentes frappent bien plus fort que les anciennes.",
+      "era": "Seulement les cartes d'une ère du JCC (Base, Neo, EX... Écarlate et Violet) : leurs PV et leurs dégâts se valent.",
+      "set": "Seulement les cartes d'une extension : le format le plus équitable."
+    },
+    "pickEra": "Ère",
+    "pickSet": "Extension",
+    "optionCount": "{name} (aucune carte) | {name} (1 carte) | {name} ({count} cartes)",
+    "noSets": "Tu n'as encore aucune carte capable de combattre : ouvre d'abord des boosters du défi.",
+    "elo": "Elo",
+    "record": "Gagnés / perdus / nuls",
+    "recordValue": "{wins} / {losses} / {draws}",
+    "winRate": "Taux de victoire",
+    "deckTitle": "Mon deck",
+    "buildDeck": "Monter mon deck",
+    "editDeck": "Changer mon deck",
+    "buildTitle": "Choisis 5 cartes ({format})",
+    "notEnough": "Il te faut {deck} cartes capables de combattre dans ce format, tu n'en as aucune. | Il te faut {deck} cartes capables de combattre dans ce format, tu en as 1. | Il te faut {deck} cartes capables de combattre dans ce format, tu en as {count}.",
+    "openBoosters": "Ouvrir des boosters du défi",
+    "saveDeck": "Enregistrer le deck",
+    "cancel": "Annuler",
+    "deckInvalid": "Certaines de ces cartes ont quitté ta collection (recyclées ou échangées) : change ton deck pour combattre à nouveau.",
+    "deckDefends": "Ce deck te défend aussi : les autres joueurs l'attaquent, et tu gagnes ou perds des points Elo à chaque fois.",
+    "noDeck": "Pas encore de deck dans ce format. Tu n'as aucune carte capable de combattre ici. | Pas encore de deck dans ce format. Tu as 1 carte capable de combattre ici (il en faut {deck}). | Pas encore de deck dans ce format. Tu as {count} cartes capables de combattre ici (il en faut {deck}).",
+    "fight": "Trouver un adversaire",
+    "vs": "Contre {name}",
+    "privateTrainer": "Un dresseur privé",
+    "myKos": "Mes K.O.",
+    "theirKos": "Ses K.O.",
+    "round": "Manche",
+    "theirCards": "Les cartes de {name}",
+    "myCards": "Mes cartes",
+    "playOne": "Joue une carte",
+    "playCard": "Jouer {name} ({left} / {hp} PV)",
+    "firstRound": "Sa première carte est déjà choisie. Joue l'une des tiennes.",
+    "roundDealt": "Ton {mine} inflige {damage} à {theirs}.",
+    "roundTaken": "{theirs} riposte avec {damage}.",
+    "roll": "(x{roll})",
+    "koTheirs": "{name} est K.O. !",
+    "koMine": "Ton {name} est K.O.",
+    "eloChange": "Elo {change}",
+    "result": {
+      "won": "Victoire !",
+      "lost": "Défaite.",
+      "draw": "Match nul.",
+      "forfeit": "Tu as abandonné."
+    },
+    "back": "Retour aux combats",
+    "forfeit": "Abandonner",
+    "forfeitConfirm": "Sûr ? Abandonner (une défaite)",
+    "historyTitle": "Mes derniers combats",
+    "history": {
+      "attack": "Tu as attaqué {name}",
+      "defense": "{name} a attaqué ton deck"
+    },
+    "short": {
+      "won": "Gagné",
+      "lost": "Perdu",
+      "draw": "Nul"
+    },
+    "noHistory": "Aucun combat pour l'instant. Tes défenses s'afficheront ici aussi.",
+    "boardTitle": "Classement : {format}",
+    "boardEmpty": "Personne n'est encore classé dans ce format.",
+    "boardError": "Impossible de charger le classement.",
+    "myRank": "Toi : n°{rank}, Elo {elo}",
+    "rules": {
+      "deck": "Ton deck : {deck} Pokémon différents de ta collection du défi, chacun avec une attaque qui inflige des dégâts. Un deck par format ; il attaque et il défend.",
+      "hidden": "Le deck de l'autre joueur est caché : ses cartes apparaissent quand elles sont jouées. Le serveur les joue et choisit sa carte avant que la tienne n'arrive.",
+      "round": "À chaque manche, tu joues une carte, les deux cartes se frappent, et les dégâts restent d'une manche à l'autre. {kos} K.O. donnent la victoire ; après {rounds} manches, le plus de K.O. l'emporte.",
+      "damage": "Une carte utilise sa meilleure attaque imprimée. La faiblesse double les dégâts, la résistance en retire {resistance}. « 30+ » compte 30 ; « 20× » vaut 20 fois 1 à 3.",
+      "elo": "Pas de pièces : tu gagnes ou perds des points Elo, plus contre un joueur plus fort. Ton adversaire est tiré parmi les joueurs les plus proches de ton Elo.",
+      "limit": "{count} attaques par jour, remises à zéro à {time}. Les défenses sont illimitées."
+    }
   },
   "electrodeFlip": {
     "title": "Électrode Shiny Flip",

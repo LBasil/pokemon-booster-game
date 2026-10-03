@@ -552,6 +552,54 @@ complète : l'import n'est pas repassé). RPC absente (`PGRST202`) ou
 
 ---
 
+## Combats PvP (Défi, migration 0024)
+
+| RPC | JS | Rôle |
+| --- | --- | --- |
+| `pvp_state()` | `fetchPvpState()` | Règles, `ready` (des cartes ont leurs attaques et les sets leur ère), combats restants du jour, formats avec mes cartes jouables, mes decks (`valid` : toutes les cartes encore possédées), mes Elo par format, combat en cours, mes 10 derniers combats (attaques et défenses, de mon point de vue) |
+| `pvp_eligible(p_format)` | `fetchPvpEligible(format)` | Mes cartes du Défi jouables dans ce format, meilleure attaque d'abord |
+| `pvp_save_deck(p_format, p_cards)` | `savePvpDeck(format, ids)` | 5 ids distincts, possédés, jouables, du format. Crée mon Elo du format. Renvoie l'état |
+| `pvp_start(p_format)` | `startPvpBattle(format)` | Renvoie le combat en cours s'il y en a un ; sinon tire un adversaire parmi les 5 decks valides d'Elo le plus proche (le dernier adversaire en dernier) et démarre. Renvoie l'état |
+| `pvp_play(p_slot)` | `playPvpCard(slot)` | Joue ma carte (0-4) contre la carte déjà choisie du défenseur. Renvoie `{ round, battle, state }` |
+| `pvp_forfeit()` | `forfeitPvpBattle()` | Abandon = défaite (Elo). Renvoie `{ battle, state }` |
+| `pvp_leaderboard(p_format)` | `fetchPvpLeaderboard(format)` | Top 20 des profils publics ayant combattu (attaques + défenses), et ma ligne (`me`, `null` si pas classé) |
+
+Format : `all`, `era:<sets.series>` ou `set:<id>` (un sous-set n'est pas
+un format : ses cartes comptent pour son parent).
+
+Carte (instantané `pvp_card()`) :
+
+```json
+{ "id": "sv3pt5-6", "name": "Charizard ex", "image_small": "…", "hp": 330,
+  "types": ["Darkness"], "weaknesses": ["Grass"], "resistances": [],
+  "attack": "Burning Darkness", "damage": 180, "times": false }
+```
+
+Combat (`battle`, vue de l'attaquant) :
+
+```json
+{
+  "id": 12, "format": "era:Scarlet & Violet", "status": "playing", "round": 2,
+  "my_kos": 1, "their_kos": 0, "elo_change": null,
+  "opponent": { "username": "Misty", "elo": 1016 },
+  "mine": [{ "…carte…": "", "slot": 0, "hp_left": 150 }],
+  "theirs": { "left": 4, "seen": [{ "…carte…": "", "slot": 3, "hp_left": 0 }], "deck": null },
+  "log": [{ "a": 0, "d": 3, "dealt": 180, "taken": 60, "roll_a": null, "roll_d": null, "ko_theirs": true, "ko_mine": false }]
+}
+```
+
+`opponent.username` est `null` pour un profil privé. `theirs.deck` (tout
+le deck adverse) n'arrive qu'à la fin du combat. `roll_*` = le tirage 1 à
+3 d'une attaque « 20× ».
+
+Erreurs : `pvp_invalid_format`, `pvp_invalid_deck`, `pvp_no_deck`,
+`pvp_no_opponent` (aucun autre deck valide dans ce format),
+`pvp_no_battles_left` (10 par jour de jeu), `pvp_invalid_card` (emplacement
+inconnu ou carte K.O.), `no_game` (jouer / abandonner sans combat). RPC
+absente (`PGRST202`) ou `ready: false` → store `unavailable`, « Bientôt ».
+
+---
+
 ## Import des cartes (admin)
 
 `scripts/populate.mjs` utilise la clé **service role** et fait des `upsert`

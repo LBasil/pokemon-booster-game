@@ -475,6 +475,24 @@ docs/technique/             technical doc (French, user choice): overview, front
   one): 3 paid runs, 3 coins x first 20 = 180 a day max vs 300 for the
   others. `ready` false -> "Coming soon". Mirror:
   `src/utils/evolutionChain.js`. Ledger kind `evolution_chain`.
+  **"PvP battles"** (0024, user 2026-10-03: asynchronous, "on attaque le
+  deck de qq qui est joué par le serveur"; `/challenge/games/pvp`,
+  `PvpView` + `usePvpStore` + `PvpCard`): one deck of 5 different
+  challenge Pokémon per format (`all`, `era:<sets.series>` = TCG era, the
+  user's pick over the Pokémon's generation, `set:<id>`, a subset's cards
+  count for its parent), used to attack and to defend. `pvp_start` picks
+  among the 5 valid decks of closest Elo (last opponent last, private
+  profiles drawn without their name); the defender's next card is stored
+  (`d_next`) before the attacker plays, both cards hit each other, HP
+  carries over, 3 KOs win, 15 rounds max. Damage = best printed attack
+  (`cards.attacks`, new in 0024 with `resistances` and `sets.series`,
+  filled by `populate.mjs`, `OPTIONAL_COLUMNS` per table now): "30+" = 30,
+  "20×" = 20 x a 1-3 roll, weakness x2, resistance -30, min 10; effect-only
+  cards can't be in a deck (~6%). Elo only (user: no coins, K 32, both
+  players move, forfeit = loss), win rate = attacks + defenses, 10
+  attacks per game day. Deck hidden until played (`theirs.seen`, whole
+  deck once over). Mirror: `src/utils/pvp.js`. `ready` false (no attacks
+  yet) -> "Coming soon".
 - **Never let a player lose track of the mode** (user priority): every
   challenge page shows AppHeader's `.mode-strip` ("Challenge mode", coins,
   "Leave" → `/game`, phones included); Community and profiles
@@ -648,7 +666,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   categories, rates, unlock toasts), challenge mode (coins, daily reward,
   daily + weekly missions, recycle, craft, god packs, mini-games "Higher
   or lower", "Shiny Electrode Flip", "Super effective!" and "Evolution chain" (needs 0018 + a
-  card import), trades with live
+  card import), PvP battles (needs 0024 + a card sync), trades with live
   updates, opt-out and cards kept out of trades), PWA, EN/FR, both themes.
 - What each migration does (details in each file's header comment):
   0001 schema · 0002 first RPCs (unused) · 0003 realistic packs + rarity
@@ -670,12 +688,13 @@ docs/technique/             technical doc (French, user choice): overview, front
   counter-offers (written 2026-10-02, applied) · 0022 my rank
   under the leaderboards + `card_traders` (written 2026-10-02, applied) ·
   0023 no username from the email at sign-up (written 2026-10-02,
-  applied). Every one was
-  verified locally with PGlite before being handed over; 0010-0023 have
+  applied) · 0024 PvP battles (written 2026-10-03, **to apply**, then a
+  card sync). Every one was
+  verified locally with PGlite before being handed over; 0010-0024 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 210 unit tests, `npm run test:db` 350 database
-  checks, `npm run test:e2e` 288 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 221 unit tests, `npm run test:db` 407 database
+  checks, `npm run test:e2e` 292 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

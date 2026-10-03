@@ -466,7 +466,13 @@
       "super_effective_unavailable": "No cards to ask about right now. Try again later.",
       "evolution_chain_unavailable": "No evolution lines to ask about right now. Try again later.",
       "recycle_copies_unavailable": "Picking how many copies to recycle isn't available yet. Recycle all the extra copies of a card, or try again later.",
-      "counter_unavailable": "Counter-offers aren't available yet. Accept or decline this offer, or try again later."
+      "counter_unavailable": "Counter-offers aren't available yet. Accept or decline this offer, or try again later.",
+      "pvp_invalid_format": "This format doesn't exist.",
+      "pvp_invalid_deck": "This deck isn't valid: 5 different cards you own, that can fight in this format.",
+      "pvp_no_deck": "Build a deck in this format first.",
+      "pvp_no_opponent": "No opponent in this format yet: nobody else has a deck here. Try another format, or come back later.",
+      "pvp_no_battles_left": "No battles left today: come back tomorrow.",
+      "pvp_invalid_card": "This card can't play (knocked out?)."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -725,6 +731,10 @@
         "title": "Evolution chain",
         "desc": "Put the stages of an evolution line back in order."
       },
+      "pvp": {
+        "title": "PvP battles",
+        "desc": "Your deck against other players' decks. Elo, no coins."
+      },
       "boss-raid": {
         "title": "Boss raid",
         "desc": "Every player against one giant Pokémon, each week."
@@ -813,6 +823,104 @@
     },
     "stop": "Stop",
     "stoppedTitle": "Run stopped"
+  },
+  "pvp": {
+    "title": "PvP battles",
+    "subtitle": "Build a deck of 5 challenge cards and take on other players' decks. The server plays their deck: they don't need to be online. Win Elo points.",
+    "unavailable": "PvP battles are coming soon.",
+    "loadError": "Couldn’t load PvP battles. Try again in a moment.",
+    "hiddenCard": "A card not played yet",
+    "hpLabel": "HP left",
+    "ko": "KO",
+    "hp": "{left} / {hp} HP",
+    "hpPrinted": "{hp} HP",
+    "weakTo": "Weak to {types}",
+    "battlesLeftLine": "{count} battle left today | {count} battles left today",
+    "noBattlesLeft": "No battles left today: come back tomorrow.",
+    "eloShort": "Elo {elo}",
+    "formats": {
+      "all": "Every card",
+      "era": "{name} era"
+    },
+    "formatTitle": "Format",
+    "kinds": {
+      "all": "Every card",
+      "era": "One era",
+      "set": "One set"
+    },
+    "kindHelp": {
+      "all": "Any challenge card can fight. Recent cards hit much harder than old ones.",
+      "era": "Only cards from one era of the TCG (Base, Neo, EX... Scarlet & Violet): their HP and damage are comparable.",
+      "set": "Only cards from one set: the fairest format."
+    },
+    "pickEra": "Era",
+    "pickSet": "Set",
+    "optionCount": "{name} (no card) | {name} (1 card) | {name} ({count} cards)",
+    "noSets": "You have no card that can fight yet: open challenge boosters first.",
+    "elo": "Elo",
+    "record": "Won / lost / drawn",
+    "recordValue": "{wins} / {losses} / {draws}",
+    "winRate": "Win rate",
+    "deckTitle": "My deck",
+    "buildDeck": "Build my deck",
+    "editDeck": "Change my deck",
+    "buildTitle": "Pick 5 cards ({format})",
+    "notEnough": "You need {deck} cards that can fight in this format, you have none. | You need {deck} cards that can fight in this format, you have 1. | You need {deck} cards that can fight in this format, you have {count}.",
+    "openBoosters": "Open challenge boosters",
+    "saveDeck": "Save the deck",
+    "cancel": "Cancel",
+    "deckInvalid": "Some of these cards left your collection (recycled or traded): change your deck to fight again.",
+    "deckDefends": "This deck also defends you: other players attack it, and you win or lose Elo when they do.",
+    "noDeck": "No deck in this format yet. You have no card that can fight here. | No deck in this format yet. You have 1 card that can fight here ({deck} needed). | No deck in this format yet. You have {count} cards that can fight here ({deck} needed).",
+    "fight": "Find an opponent",
+    "vs": "Against {name}",
+    "privateTrainer": "A private trainer",
+    "myKos": "My KOs",
+    "theirKos": "Their KOs",
+    "round": "Round",
+    "theirCards": "{name}'s cards",
+    "myCards": "My cards",
+    "playOne": "Play a card",
+    "playCard": "Play {name} ({left} / {hp} HP)",
+    "firstRound": "Their first card is already picked. Play one of yours.",
+    "roundDealt": "Your {mine} hit {theirs} for {damage}.",
+    "roundTaken": "{theirs} hit back for {damage}.",
+    "roll": "(x{roll})",
+    "koTheirs": "{name} is knocked out!",
+    "koMine": "Your {name} is knocked out.",
+    "eloChange": "Elo {change}",
+    "result": {
+      "won": "You win!",
+      "lost": "You lose.",
+      "draw": "A draw.",
+      "forfeit": "You gave up."
+    },
+    "back": "Back to battles",
+    "forfeit": "Give up",
+    "forfeitConfirm": "Sure? Give up (a loss)",
+    "historyTitle": "My last battles",
+    "history": {
+      "attack": "You attacked {name}",
+      "defense": "{name} attacked your deck"
+    },
+    "short": {
+      "won": "Won",
+      "lost": "Lost",
+      "draw": "Draw"
+    },
+    "noHistory": "No battle yet. Your defenses will show up here too.",
+    "boardTitle": "Ranking: {format}",
+    "boardEmpty": "Nobody is ranked in this format yet.",
+    "boardError": "Couldn’t load the ranking.",
+    "myRank": "You: #{rank}, Elo {elo}",
+    "rules": {
+      "deck": "Your deck: {deck} different Pokémon from your challenge collection, each with an attack that deals damage. One deck per format; it attacks and it defends.",
+      "hidden": "The other player's deck is hidden: their cards show up as they're played. The server plays them, picking its card before yours arrives.",
+      "round": "Each round you play one card, both cards hit each other, and damage stays from one round to the next. {kos} KOs win; after {rounds} rounds, the most KOs win.",
+      "damage": "A card uses its best printed attack. Weakness doubles the damage, resistance takes {resistance} off. “30+” counts 30; “20×” is 20 times 1 to 3.",
+      "elo": "No coins: you win or lose Elo points, more against a stronger player. Your opponent is drawn among the players closest to your Elo.",
+      "limit": "{count} attacks a day, reset at {time}. Defenses are unlimited."
+    }
   },
   "electrodeFlip": {
     "title": "Shiny Electrode Flip",

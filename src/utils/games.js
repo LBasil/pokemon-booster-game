@@ -29,6 +29,12 @@ export const GAMES = [
     icon: 'M3 18a2 2 0 1 0 4 0a2 2 0 1 0-4 0M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0M15.5 5.5a3 3 0 1 0 6 0a3 3 0 1 0-6 0M6.5 16.5l3.3-2.8M14.2 10.2l2.2-2.2',
   },
   {
+    id: 'pvp',
+    route: 'challenge-game-pvp',
+    // Two crossed swords
+    icon: 'M4 4l9 9M4 4h4M4 4v4M20 4l-9 9M20 4h-4M20 4v4M6 15l3 3M5 19l2-2M18 15l-3 3M19 19l-2-2',
+  },
+  {
     id: 'boss-raid',
     soon: true,
     // A sword

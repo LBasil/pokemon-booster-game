@@ -36,6 +36,13 @@ export const CHALLENGE_ERRORS = [
   'recycle_copies_unavailable',
   // counter-offers (migration 0021)
   'counter_unavailable',
+  // PvP battles (migration 0024)
+  'pvp_invalid_format',
+  'pvp_invalid_deck',
+  'pvp_no_deck',
+  'pvp_no_opponent',
+  'pvp_no_battles_left',
+  'pvp_invalid_card',
 ]
 
 // PostgREST's answer for an RPC that doesn't exist yet
@@ -298,3 +305,33 @@ export const answerEvolutionChain = (order) => call('evolution_chain_answer', { 
  * @returns {Promise<{ streak: number, run_coins: number, state: object }>}
  */
 export const stopEvolutionChain = () => call('evolution_chain_stop')
+
+// ---------- PvP battles (migration 0024) ----------
+
+/**
+ * Rules, whether attacks are loaded (`ready`), formats with my eligible card
+ * counts, my decks and ratings per format, battles left today, the battle in
+ * progress and my last 10 battles (attacks and defenses).
+ */
+export const fetchPvpState = () => call('pvp_state')
+
+/** My challenge cards that can fight in a format ('all', 'era:<series>', 'set:<id>'), best attack first. */
+export const fetchPvpEligible = (format) => call('pvp_eligible', { p_format: format })
+
+/** Saves my deck (5 card ids) for a format; returns the state. */
+export const savePvpDeck = (format, cardIds) => call('pvp_save_deck', { p_format: format, p_cards: cardIds })
+
+/** Finds an opponent and starts a battle (or returns the one in progress); returns the state. */
+export const startPvpBattle = (format) => call('pvp_start', { p_format: format })
+
+/**
+ * Plays my card at `slot` (0-4) against the defender's next card.
+ * @returns {Promise<{ round: object, battle: object, state: object }>}
+ */
+export const playPvpCard = (slot) => call('pvp_play', { p_slot: slot })
+
+/** Gives up the battle in progress (a loss). */
+export const forfeitPvpBattle = () => call('pvp_forfeit')
+
+/** @returns {Promise<{ rows: object[], me: object | null }>} top 20 public players of a format + my row */
+export const fetchPvpLeaderboard = (format) => call('pvp_leaderboard', { p_format: format })

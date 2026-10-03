@@ -51,7 +51,12 @@ How it works inside (every table, RPC and flow, in French):
   stage is hidden), tap them from the Basic to the last stage within 15
   seconds; intruders from other lines slip in as the streak grows, and
   "Stop" ends a run keeping its coins. The simplest game, so it pays the least: 3 coins per
-  right line (60 per run, 180 a day at most). One more is teased as
+  right line (60 per run, 180 a day at most) — and **PvP battles**:
+  build a deck of 5 challenge cards per format (every card, one era of
+  the TCG, or one set) and attack other players' decks, which the
+  server plays (their cards stay hidden until played; best printed
+  attack, weakness x2, 3 KOs win); Elo per format and a win rate, no
+  coins, 10 attacks a day. One more is teased as
   "Coming soon" (**Boss raid**). Packs
   keep the real pull rates (no pity timer), except that 1 booster in 500 is
   a "god pack" (holos and better only). **Trade cards** with other
@@ -334,6 +339,12 @@ its **SQL editor** and run, in order:
 23. `supabase/migrations/0023_username_not_from_email.sql` — an account
    created without a username is named `Trainer-1234`, never after its
    email (the sign-up form requires one anyway). Run it after 0022.
+24. `supabase/migrations/0024_pvp_battles.sql` — PvP battles: the cards'
+   attacks and resistances (`cards.attacks`, `cards.resistances`), each
+   set's era (`sets.series`), decks, Elo and battles. Run it after 0023;
+   the next card sync (twice a day, or the "Sync cards" Action /
+   `npm run populate:sync`) fills the new columns; until both are done
+   PvP says "Coming soon".
 
 Then in **Authentication**:
 

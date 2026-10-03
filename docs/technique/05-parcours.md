@@ -849,6 +849,67 @@ sequenceDiagram
   script pourrait retrouver les stades ; le plafond quotidien borne le
   gain.
 
+### Combats PvP
+
+Page : [PvpView.vue](../../src/views/PvpView.vue)
+(`/challenge/games/pvp`), store `pvp`, migration 0024. Demande de
+l'utilisateur (2026-10-03) : du PvP en différé, « on attaque le deck de
+qq qui est joué par le serveur », trois formats (toutes les cartes, une
+ère du JCC, un set), deck adverse caché, de l'Elo et un taux de victoire,
+pas de pièces, adversaire tiré au hasard parmi les Elo proches.
+
+```mermaid
+sequenceDiagram
+  actor J as Joueur
+  participant PV as PvpView
+  participant DB as Postgres
+
+  PV->>DB: pvp_state() : formats, decks, Elo, combat en cours
+  J->>PV: choisit le format, monte son deck (5 cartes)
+  PV->>DB: pvp_eligible(format) puis pvp_save_deck(format, ids)
+  J->>PV: « Trouver un adversaire »
+  PV->>DB: pvp_start(format)
+  DB-->>PV: adversaire (Elo proche), deck caché, sa 1re carte déjà choisie
+  loop jusqu'à 3 K.O. (ou 15 manches)
+    J->>PV: touche une de ses cartes
+    PV->>DB: pvp_play(slot)
+    DB-->>PV: dégâts des deux côtés, K.O., carte adverse révélée
+  end
+  DB->>DB: pvp_finish : Elo des deux joueurs
+```
+
+- **Deck** : 5 Pokémon différents de la collection du Défi, avec une
+  attaque qui fait des dégâts (environ 6 % des cartes n'ont que des
+  attaques à effet). Un deck par format ; il sert aussi en défense. Une
+  carte recyclée ou échangée rend le deck invalide (« change ton deck »),
+  et un deck invalide n'est plus tiré comme adversaire.
+- **Formats** : toutes les cartes (les cartes récentes écrasent les
+  anciennes, d'où les deux autres), une **ère** du JCC (`sets.series` :
+  choix de l'utilisateur plutôt que la génération du Pokémon, pour que PV
+  et dégâts se valent) ou un **set** (le plus équitable). Le format choisi
+  est retenu sur l'appareil (`pb-pvp-format`).
+- **Manche** : le serveur choisit la carte du défenseur **avant** de
+  recevoir celle de l'attaquant (stockée dans `d_next`). Les deux cartes
+  se frappent ; les PV restent d'une manche à l'autre. 3 K.O. gagnent ;
+  après 15 manches, le plus de K.O. gagne, sinon nul.
+- **Dégâts** (**miroir** : `pvp_damage()` et `src/utils/pvp.js`) : la
+  meilleure attaque imprimée ; « 30+ » vaut 30, « 20× » vaut 20 × un tirage
+  de 1 à 3 (compté 2 pour choisir la meilleure) ; faiblesse ×2, résistance
+  −30, 10 au minimum.
+- **IA du défenseur** : 1re carte au hasard, puis la carte vivante qui
+  frappe le plus fort la dernière carte de l'attaquant (si elle est encore
+  debout) en encaissant le moins, avec un peu de hasard.
+- **Elo** : K = 32 par format, les deux joueurs bougent (le défenseur
+  gagne s'il résiste). Abandon = défaite. 10 attaques par jour de jeu,
+  défenses illimitées. Un combat en cours revient au rechargement (pas
+  d'esquive).
+- **Adversaire** : parmi les 5 decks valides d'Elo le plus proche, au
+  hasard, le dernier adversaire en dernier. Les profils privés peuvent
+  être tirés, sans leur nom (« Un dresseur privé ») ; le classement ne
+  montre que les profils publics.
+- **Avant l'import** : tant qu'aucune carte n'a ses attaques,
+  `pvp_state()` renvoie `ready: false` et le jeu affiche « Bientôt ».
+
 ---
 
 ## 9. Communauté : fil et classements
