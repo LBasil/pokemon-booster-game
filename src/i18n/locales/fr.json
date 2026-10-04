@@ -474,7 +474,9 @@
       "pvp_no_battles_left": "Plus de combats aujourd'hui : reviens demain.",
       "pvp_invalid_card": "Cette carte ne peut pas jouer (K.O. ?).",
       "pvp_invalid_attack": "Cette carte n'a pas cette attaque.",
-      "pvp_not_enough_energy": "Pas encore assez d'énergie pour cette attaque."
+      "pvp_not_enough_energy": "Pas encore assez d'énergie pour cette attaque.",
+      "pvp_invalid_role": "Ce type de deck n'existe pas.",
+      "pvp_roles_unavailable": "Les decks de défense ne sont pas encore disponibles : ton deck d'attaque te défend pour l'instant."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -863,16 +865,21 @@
     "record": "Gagnés / perdus / nuls",
     "recordValue": "{wins} / {losses} / {draws}",
     "winRate": "Taux de victoire",
-    "deckTitle": "Mon deck",
+    "deckTitle": {
+      "attack": "Deck d'attaque",
+      "defense": "Deck de défense"
+    },
     "buildDeck": "Monter mon deck",
     "editDeck": "Changer mon deck",
-    "buildTitle": "Choisis 5 cartes ({format})",
+    "buildTitle": {
+      "attack": "Deck d'attaque : choisis 5 cartes ({format})",
+      "defense": "Deck de défense : choisis 5 cartes ({format})"
+    },
     "notEnough": "Il te faut {deck} cartes capables de combattre dans ce format, tu n'en as aucune. | Il te faut {deck} cartes capables de combattre dans ce format, tu en as 1. | Il te faut {deck} cartes capables de combattre dans ce format, tu en as {count}.",
     "openBoosters": "Ouvrir des boosters du défi",
     "saveDeck": "Enregistrer le deck",
     "cancel": "Annuler",
     "deckInvalid": "Certaines de ces cartes ont quitté ta collection (recyclées ou échangées) : change ton deck pour combattre à nouveau.",
-    "deckDefends": "Ce deck te défend aussi : les autres joueurs l'attaquent, et tu gagnes ou perds des points Elo à chaque fois.",
     "noDeck": "Pas encore de deck dans ce format. Tu n'as aucune carte capable de combattre ici. | Pas encore de deck dans ce format. Tu as 1 carte capable de combattre ici (il en faut {deck}). | Pas encore de deck dans ce format. Tu as {count} cartes capables de combattre ici (il en faut {deck}).",
     "fight": "Trouver un adversaire",
     "vs": "Contre {name}",
@@ -914,7 +921,7 @@
     "boardError": "Impossible de charger le classement.",
     "myRank": "Toi : n°{rank}, Elo {elo}",
     "rules": {
-      "deck": "Ton deck : {deck} Pokémon différents de ta collection du défi, chacun avec au moins une attaque qui inflige des dégâts. Un deck par format ; il attaque et il défend.",
+      "deck": "Tes decks : {deck} Pokémon différents de ta collection du défi, chacun avec au moins une attaque qui inflige des dégâts. Deux decks par format : un pour attaquer, un que le serveur joue quand on t'attaque (ton deck d'attaque défend tant que tu ne l'as pas monté).",
       "hidden": "Le deck de l'autre joueur est caché : ses cartes apparaissent quand elles sont jouées. Le serveur les joue et choisit sa carte et son attaque avant que les tiennes n'arrivent.",
       "round": "À chaque manche, tu choisis une carte et une de ses attaques ; les deux cartes se frappent, et les dégâts restent d'une manche à l'autre. Après {rounds} manches, le plus de récompenses l'emporte.",
       "energy": "Énergie : 1 au départ, +1 à chaque manche, jusqu'à {max}. Une attaque coûte les énergies imprimées sur la carte : les grosses attaques arrivent tard. Ne pas attaquer garde ton énergie pour la manche suivante.",
@@ -934,7 +941,18 @@
     "prizesBadge": "{count} récompenses",
     "pickCard": "Choisis une de tes cartes, puis son attaque.",
     "attackWith": "{name} : choisis une attaque",
-    "noAttack": "Pas d'attaque (garder l'énergie)"
+    "noAttack": "Pas d'attaque (garder l'énergie)",
+    "buildHelp": {
+      "attack": "Tu joues ces cartes toi-même quand tu attaques : des attaques pas chères pour démarrer, une ou deux grosses frappes pour finir.",
+      "defense": "Le serveur joue ces cartes quand quelqu'un t'attaque, alors choisis des cartes qui tiennent : beaucoup de PV, et peu d'ex ou de V (ils donnent 2 ou 3 récompenses)."
+    },
+    "autoDeck": "Deck auto",
+    "deckRole": {
+      "attack": "Tu joues ce deck quand tu attaques.",
+      "defense": "Les autres joueurs attaquent ce deck : tu gagnes ou perds des points Elo à chaque fois."
+    },
+    "defenseFallback": "Pas encore de deck de défense : ton deck d'attaque te défend en attendant. Les autres joueurs l'attaquent, et tu gagnes ou perds des points Elo à chaque fois.",
+    "defenseInvalid": "Certaines de ces cartes ont quitté ta collection (recyclées ou échangées) : ton deck d'attaque te défend tant que tu ne changes pas celui-ci."
   },
   "electrodeFlip": {
     "title": "Électrode Shiny Flip",

@@ -8,8 +8,10 @@ import {
   savePvpDeck,
   startPvpBattle,
 } from '@/api/challenge'
+import { deckRoles } from '@/utils/pvp'
 
-// PvP battles (challenge mode, migrations 0024 + 0025): my decks and Elo per format,
+// PvP battles (challenge mode, migrations 0024 + 0025 + 0026): my attack and
+// defense decks and Elo per format,
 // battles left today, the battle in progress and my history. The server
 // picks the opponent, plays their deck and moves both ratings.
 // `unavailable` = migration 0024/0025 not applied yet, or no card has its attacks + costs
@@ -30,7 +32,8 @@ export const usePvpStore = defineStore('pvp', {
     battle: (s) => s.state?.battle ?? null,
     battlesLeft: (s) => s.state?.battles_left ?? 0,
     formats: (s) => s.state?.formats ?? { all: 0, eras: [], sets: [] },
-    decks: (s) => s.state?.decks ?? {},
+    // format -> { attack, defense } (each { cards, valid } or null), whatever the server's version
+    decks: (s) => Object.fromEntries(Object.entries(s.state?.decks ?? {}).map(([format, entry]) => [format, deckRoles(entry)])),
     ratings: (s) => s.state?.ratings ?? {},
     history: (s) => s.state?.history ?? [],
     /** Best Elo among the formats played, null before a battle. */
@@ -65,8 +68,9 @@ export const usePvpStore = defineStore('pvp', {
       return cards
     },
 
-    async saveDeck(format, cardIds) {
-      this.state = await savePvpDeck(format, cardIds)
+    /** @param {'attack' | 'defense'} role */
+    async saveDeck(format, cardIds, role = 'attack') {
+      this.state = await savePvpDeck(format, cardIds, role)
     },
 
     async start(format) {

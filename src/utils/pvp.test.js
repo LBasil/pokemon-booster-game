@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  autoDeck,
   bestDamage,
   canPay,
   damageAgainst,
   damageLabel,
+  deckRoles,
+  defendingDeck,
   eloChange,
   energyAfter,
   hpPercent,
@@ -121,5 +124,74 @@ describe('labels', () => {
     expect(bestDamage({})).toBe(0)
     expect(hpPercent({ hp: 200, hp_left: 50 })).toBe(25)
     expect(hpPercent({ hp: 60 })).toBe(100)
+  })
+})
+
+describe('attack and defense decks', () => {
+  const deck = (valid) => ({ cards: [], valid })
+  it('reads both roles, and the one deck of the 0025 server as the attack deck', () => {
+    expect(deckRoles(undefined)).toEqual({ attack: null, defense: null })
+    expect(deckRoles(deck(true))).toEqual({ attack: deck(true), defense: null })
+    expect(deckRoles({ defense: deck(true) })).toEqual({ attack: null, defense: deck(true) })
+  })
+
+  it('defends with the defense deck while valid, else the attack deck', () => {
+    expect(defendingDeck({ attack: deck(true), defense: deck(true) }).role).toBe('defense')
+    expect(defendingDeck({ attack: deck(true), defense: deck(false) }).role).toBe('attack')
+    expect(defendingDeck({ attack: deck(true) }).role).toBe('attack')
+    expect(defendingDeck(null)).toBeNull()
+  })
+})
+
+describe('autoDeck', () => {
+  let n = 0
+  const card = (name, hp, cost, damage, { prizes = 1, type = 'Colorless', times = false } = {}) => ({
+    id: `c${++n}`, name, hp, prizes, types: [type], attacks: [{ name: 'Hit', damage, cost, times }],
+  })
+
+  it('takes 5 different cards, the efficient ones first', () => {
+    const pool = [
+      card('Weak', 40, 3, 20),
+      card('Rattata', 40, 1, 20),
+      card('Pikachu', 60, 1, 30, { type: 'Lightning' }),
+      card('Charmander', 70, 1, 30, { type: 'Fire' }),
+      card('Squirtle', 70, 1, 30, { type: 'Water' }),
+      card('Bulbasaur', 70, 1, 30, { type: 'Grass' }),
+      card('Onix', 90, 2, 40, { type: 'Fighting' }),
+    ]
+    const ids = autoDeck(pool)
+    expect(ids).toHaveLength(5)
+    expect(new Set(ids).size).toBe(5)
+    expect(ids).not.toContain(pool[0].id)
+    expect(ids).not.toContain(pool[1].id)
+  })
+
+  it('never takes two cards of the same name', () => {
+    const pool = [card('Mewtwo', 120, 1, 60), card('Mewtwo', 120, 1, 60), ...['A', 'B', 'C', 'D', 'E'].map((x) => card(x, 50, 1, 20))]
+    const names = autoDeck(pool).map((id) => pool.find((c) => c.id === id).name)
+    expect(names.filter((x) => x === 'Mewtwo')).toHaveLength(1)
+  })
+
+  it('keeps at most 2 cards worth 2+ prizes and 2 cheap attackers', () => {
+    const big = ['V1', 'V2', 'V3', 'V4', 'V5'].map((x, i) => card(x, 220, 3, 200, { prizes: 2, type: ['Fire', 'Water', 'Grass', 'Psychic', 'Metal'][i] }))
+    const cheap = ['a', 'b', 'c', 'd'].map((x) => card(x, 50, 1, 10))
+    const picked = autoDeck([...big, ...cheap]).map((id) => [...big, ...cheap].find((c) => c.id === id))
+    expect(picked.filter((c) => c.prizes > 1)).toHaveLength(2)
+    expect(picked.filter((c) => c.attacks[0].cost <= 1).length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('leans on HP per prize for defense', () => {
+    const glass = card('Glass', 40, 1, 50)
+    const wall = card('Wall', 160, 2, 40)
+    const filler = ['a', 'b', 'c', 'd', 'e', 'f'].map((x, i) => card(x, 70, 1, 30, { type: ['Fire', 'Water', 'Grass', 'Psychic', 'Metal', 'Dragon'][i] }))
+    const attack = autoDeck([glass, wall, ...filler], 'attack')
+    const defense = autoDeck([glass, wall, ...filler], 'defense')
+    expect(defense).toContain(wall.id)
+    expect(defense.indexOf(wall.id)).toBeLessThanOrEqual(attack.includes(wall.id) ? attack.indexOf(wall.id) : 5)
+  })
+
+  it('fills what it can from a short pool', () => {
+    expect(autoDeck([card('A', 50, 1, 10), card('A', 50, 1, 10)])).toHaveLength(2)
+    expect(autoDeck([])).toEqual([])
   })
 })

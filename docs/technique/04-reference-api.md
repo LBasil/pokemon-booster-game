@@ -552,14 +552,14 @@ complète : l'import n'est pas repassé). RPC absente (`PGRST202`) ou
 
 ---
 
-## Combats PvP (Défi, migrations 0024 + 0025)
+## Combats PvP (Défi, migrations 0024 + 0025 + 0026)
 
 | RPC | JS | Rôle |
 | --- | --- | --- |
-| `pvp_state()` | `fetchPvpState()` | Règles, `ready` (des cartes ont leurs attaques et les sets leur ère), combats restants du jour, formats avec mes cartes jouables, mes decks (`valid` : toutes les cartes encore possédées), mes Elo par format, combat en cours, mes 10 derniers combats (attaques et défenses, de mon point de vue) |
+| `pvp_state()` | `fetchPvpState()` | Règles, `ready` (des cartes ont leurs attaques et les sets leur ère), combats restants du jour, formats avec mes cartes jouables, mes decks (`{ format: { attack, defense } }` depuis 0026, chacun `{ cards, valid }` ou absent ; `valid` : toutes les cartes encore possédées ; avant 0026 un seul `{ cards, valid }` par format, que `deckRoles()` lit comme le deck d'attaque), mes Elo par format, combat en cours, mes 10 derniers combats (attaques et défenses, de mon point de vue) |
 | `pvp_eligible(p_format)` | `fetchPvpEligible(format)` | Mes cartes du Défi jouables dans ce format, meilleure attaque d'abord |
-| `pvp_save_deck(p_format, p_cards)` | `savePvpDeck(format, ids)` | 5 ids distincts, possédés, jouables, du format. Crée mon Elo du format. Renvoie l'état |
-| `pvp_start(p_format)` | `startPvpBattle(format)` | Renvoie le combat en cours s'il y en a un ; sinon tire un adversaire parmi les 5 decks valides d'Elo le plus proche (le dernier adversaire en dernier) et démarre. Renvoie l'état |
+| `pvp_save_deck(p_format, p_cards, p_role)` (0026 ; sans `p_role` avant) | `savePvpDeck(format, ids, role)` | `role` = `attack` (par défaut) ou `defense` (sinon `pvp_invalid_role`). 5 ids distincts, possédés, jouables, du format ; une carte peut être dans les deux decks. Crée mon Elo du format. Renvoie l'état. Sans 0026 : le deck d'attaque est enregistré à l'ancienne, un deck de défense donne `pvp_roles_unavailable` (côté client) |
+| `pvp_start(p_format)` | `startPvpBattle(format)` | Renvoie le combat en cours s'il y en a un ; sinon attaque avec **mon deck d'attaque** (`pvp_no_deck` sans lui) : tire un adversaire parmi les 5 joueurs d'Elo le plus proche ayant un deck valide (**son deck de défense**, sinon son deck d'attaque ; le dernier adversaire en dernier) et démarre. Renvoie l'état |
 | `pvp_play(p_slot, p_attack)` (0025 ; `pvp_play(p_slot)` avant) | `playPvpCard(slot, attack)` | Joue ma carte (0-4) avec une de ses attaques (index dans `attacks`, `null` = pas d'attaque, l'énergie est gardée) contre la carte et l'attaque déjà choisies du défenseur. Renvoie `{ round, battle, state }` |
 | `pvp_forfeit()` | `forfeitPvpBattle()` | Abandon = défaite (Elo). Renvoie `{ battle, state }` |
 | `pvp_leaderboard(p_format)` | `fetchPvpLeaderboard(format)` | Top 20 des profils publics ayant combattu (attaques + défenses), et ma ligne (`me`, `null` si pas classé) |

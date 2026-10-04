@@ -474,7 +474,9 @@
       "pvp_no_battles_left": "No battles left today: come back tomorrow.",
       "pvp_invalid_card": "This card can't play (knocked out?).",
       "pvp_invalid_attack": "This card has no such attack.",
-      "pvp_not_enough_energy": "Not enough energy for this attack yet."
+      "pvp_not_enough_energy": "Not enough energy for this attack yet.",
+      "pvp_invalid_role": "This kind of deck doesn't exist.",
+      "pvp_roles_unavailable": "Defense decks aren't available yet: your attack deck defends you for now."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -863,16 +865,21 @@
     "record": "Won / lost / drawn",
     "recordValue": "{wins} / {losses} / {draws}",
     "winRate": "Win rate",
-    "deckTitle": "My deck",
+    "deckTitle": {
+      "attack": "Attack deck",
+      "defense": "Defense deck"
+    },
     "buildDeck": "Build my deck",
     "editDeck": "Change my deck",
-    "buildTitle": "Pick 5 cards ({format})",
+    "buildTitle": {
+      "attack": "Attack deck: pick 5 cards ({format})",
+      "defense": "Defense deck: pick 5 cards ({format})"
+    },
     "notEnough": "You need {deck} cards that can fight in this format, you have none. | You need {deck} cards that can fight in this format, you have 1. | You need {deck} cards that can fight in this format, you have {count}.",
     "openBoosters": "Open challenge boosters",
     "saveDeck": "Save the deck",
     "cancel": "Cancel",
     "deckInvalid": "Some of these cards left your collection (recycled or traded): change your deck to fight again.",
-    "deckDefends": "This deck also defends you: other players attack it, and you win or lose Elo when they do.",
     "noDeck": "No deck in this format yet. You have no card that can fight here. | No deck in this format yet. You have 1 card that can fight here ({deck} needed). | No deck in this format yet. You have {count} cards that can fight here ({deck} needed).",
     "fight": "Find an opponent",
     "vs": "Against {name}",
@@ -914,7 +921,7 @@
     "boardError": "Couldn’t load the ranking.",
     "myRank": "You: #{rank}, Elo {elo}",
     "rules": {
-      "deck": "Your deck: {deck} different Pokémon from your challenge collection, each with at least one attack that deals damage. One deck per format; it attacks and it defends.",
+      "deck": "Your decks: {deck} different Pokémon from your challenge collection, each with at least one attack that deals damage. Two decks per format: one you attack with, one the server plays when you are attacked (your attack deck defends until you build it).",
       "hidden": "The other player's deck is hidden: their cards show up as they're played. The server plays them, picking its card and attack before yours arrive.",
       "round": "Each round you pick a card and one of its attacks; both cards hit each other, and damage stays from one round to the next. After {rounds} rounds, the most prizes win.",
       "energy": "Energy: 1 at the start, +1 each round, up to {max}. An attack costs the energies printed on the card: big attacks come late. No attack saves your energy for the next round.",
@@ -934,7 +941,18 @@
     "prizesBadge": "{count} prizes",
     "pickCard": "Pick one of your cards, then its attack.",
     "attackWith": "{name}: pick an attack",
-    "noAttack": "No attack (save energy)"
+    "noAttack": "No attack (save energy)",
+    "buildHelp": {
+      "attack": "You play these cards yourself when you attack: cheap attacks to get going, a big hitter or two to finish.",
+      "defense": "The server plays these cards when someone attacks you, so pick cards that last: lots of HP, and few ex or V (they give 2 or 3 prizes)."
+    },
+    "autoDeck": "Auto deck",
+    "deckRole": {
+      "attack": "You play this deck when you attack.",
+      "defense": "Other players attack this deck: you win or lose Elo when they do."
+    },
+    "defenseFallback": "No defense deck yet: your attack deck defends you meanwhile. Other players attack it, and you win or lose Elo when they do.",
+    "defenseInvalid": "Some of these cards left your collection (recycled or traded): your attack deck defends you until you change this one."
   },
   "electrodeFlip": {
     "title": "Shiny Electrode Flip",

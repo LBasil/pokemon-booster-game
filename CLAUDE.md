@@ -475,13 +475,25 @@ docs/technique/             technical doc (French, user choice): overview, front
   one): 3 paid runs, 3 coins x first 20 = 180 a day max vs 300 for the
   others. `ready` false -> "Coming soon". Mirror:
   `src/utils/evolutionChain.js`. Ledger kind `evolution_chain`.
-  **"PvP battles"** (0024 + 0025, user 2026-10-03: asynchronous, "on attaque le
+  **"PvP battles"** (0024 + 0025 + 0026, user 2026-10-03: asynchronous, "on attaque le
   deck de qq qui est joué par le serveur"; `/challenge/games/pvp`,
-  `PvpView` + `usePvpStore` + `PvpCard`): one deck of 5 different
+  `PvpView` + `usePvpStore` + `PvpCard`): decks of 5 different
   challenge Pokémon per format (`all`, `era:<sets.series>` = TCG era, the
   user's pick over the Pokémon's generation, `set:<id>`, a subset's cards
-  count for its parent), used to attack and to defend. `pvp_start` picks
-  among the 5 valid decks of closest Elo (last opponent last, private
+  count for its parent). **Two decks per format** (0026, user
+  2026-10-04: "séparer le deck d'attaque et de défense"):
+  `pvp_decks.role` 'attack' (I play it) | 'defense' (the server plays it
+  when I'm attacked); no valid defense deck -> the attack deck defends.
+  `pvp_save_deck(format, cards, role = 'attack')`; `pvp_state().decks` =
+  `{ format: { attack, defense } }`, read through `deckRoles()` (also
+  reads 0025's single `{ cards, valid }`). **"Auto deck"** (same day):
+  `autoDeck(cards, role)` in `src/utils/pvp.js` fills the builder, the
+  player saves; scores damage per energy / best hit / HP per prize,
+  weighted per role, then picks with no repeated name, <= 2 multi-prize
+  cards, >= 2 cheap attackers, a type malus (simulated: ~58% vs "5
+  biggest attacks", tuning stayed within noise). `pvp_start` attacks
+  with my attack deck and picks among the 5 players of closest Elo with
+  a valid (defense, else attack) deck (last opponent last, private
   profiles drawn without their name); the defender's next card + attack
   are stored (`d_next`, `d_next_attack`) before the attacker plays, both
   cards hit each other, HP carries over, 20 rounds max. **Game design**
@@ -494,7 +506,9 @@ docs/technique/             technical doc (French, user choice): overview, front
   longer win against built decks; cheap 1-prize attackers lead the `all`
   format, a 2 big + 3 cheap deck holds them at 50%. Attacks
   (`cards.attacks` [{name, damage, cost}] (cost since 0025: `ready` waits for a
-  sync that stored it), new in 0024 with `resistances`
+  sync that stored it; since 0026 an attack without a `cost` is dropped
+  by `pvp_card()`, never free: the 2026-10-04 midnight sync stopped
+  halfway and ~7,400 cards showed 3-energy attacks as "0"), new in 0024 with `resistances`
   and `sets.series`, filled by `populate.mjs`, `OPTIONAL_COLUMNS` per
   table now): "30+" = 30, "20×" = 20 x a 1-3 roll, weakness x2, resistance
   -30, min 10; effect-only attacks are dropped and cards with none can't
@@ -661,9 +675,9 @@ docs/technique/             technical doc (French, user choice): overview, front
 
 - **Live**: deployed on Vercel (`VITE_*` env vars set there; `vercel.json`
   has the SPA rewrite and serves `sw.js` uncached), used by the user on a
-  real account ("tout fonctionne", 2026-09-26). **Migrations 0001-0021 are
-  all applied** (0022 and 0023 included: checked 2026-10-02, a new
-  account got `Trainer-3977`) (checked 2026-10-02 through the REST API with the service
+  real account ("tout fonctionne", 2026-09-26). **Migrations 0001-0025 are
+  all applied** (0022 and 0023 checked 2026-10-02, a new account got
+  `Trainer-3977`; 0025 checked 2026-10-04, `pvp_rules()` has its rules) (checked 2026-10-02 through the REST API with the service
   role key). `cards` has 20,670 rows, `sets` 176 (9 subsets linked to
   their parent).
 - Features: landing (auth, forgot password), hub, boosters (per-set packs,
@@ -700,13 +714,15 @@ docs/technique/             technical doc (French, user choice): overview, front
   under the leaderboards + `card_traders` (written 2026-10-02, applied) ·
   0023 no username from the email at sign-up (written 2026-10-02,
   applied) · 0024 PvP battles (written 2026-10-03, applied) · 0025 PvP
-  energy + prize cards (written 2026-10-03, **to apply**, then a
-  card sync). Every one was
+  energy + prize cards (written 2026-10-03, applied, checked
+  2026-10-04) · 0026 PvP attack / defense decks + attacks without a
+  cost dropped (written 2026-10-04, **to apply**, then check a full
+  card sync went through). Every one was
   verified locally with PGlite before being handed over; 0010-0025 have
-  their suites in `supabase/tests/` (`npm run test:db`, also in CI) —
+  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 too) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 225 unit tests, `npm run test:db` 484 database
-  checks, `npm run test:e2e` 292 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 232 unit tests, `npm run test:db` 504 database
+  checks, `npm run test:e2e` 296 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.
@@ -730,7 +746,11 @@ docs/technique/             technical doc (French, user choice): overview, front
   noon): 4 UTC crons (summer + winter slot for each) and a "Paris time"
   step that lets through the one matching today's offset. The import
   takes ~4 min, but GitHub starts scheduled runs late (the Monday 04:00
-  UTC run started at 13:55). Check runs on the Actions tab (public repo:
+  UTC run started at 13:55). Since 2026-10-04 `populate.mjs`
+  (`forEachPage`) knows the page count from `totalCount`: a page that
+  keeps failing is skipped, retried at the end, and fails the run (exit
+  1) instead of silently ending the import as if it were the last page
+  (a "green" run that took under 2 minutes was a partial import). Check runs on the Actions tab (public repo:
   `api.github.com/repos/LBasil/pokemon-booster-game/actions/workflows/
   sync-cards.yml/runs`, no auth).
   Confirmed 2026-09-27: the GitHub secrets work (manual run succeeded) and

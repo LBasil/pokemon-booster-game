@@ -95,8 +95,14 @@ le workflow de synchro (minuit et midi). Il lit `scripts/.env.local` (non versio
 | `sync [page]` | `sets` puis `cards` puis `link_subsets()` |
 
 L'API pokemontcg.io est capricieuse : chaque page est retentée 6 fois avec
-un délai croissant, et une pause de 300 ms sépare les pages. Le numéro de
-page optionnel permet de reprendre un import interrompu.
+un délai croissant, et une pause de 300 ms sépare les pages. Le nombre de
+pages vient du `totalCount` de l'API (`forEachPage`) : une page qui échoue
+encore est sautée, retentée une fois à la fin, et si elle échoue toujours
+le script se termine en erreur (le workflow passe au rouge). Avant le
+2026-10-04, une page en échec était prise pour la dernière : l'import
+s'arrêtait là et le workflow restait vert (la synchro de minuit ce
+jour-là n'avait importé qu'une partie des cartes). Le numéro de page
+optionnel permet de reprendre un import interrompu.
 
 **Workflow** [sync-cards.yml](../../.github/workflows/sync-cards.yml) :
 tous les jours à minuit et à midi, heure de Paris (ou à la demande, avec

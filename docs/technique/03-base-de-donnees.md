@@ -80,7 +80,7 @@ Lecture : tout le monde. Écriture client : aucune.
 | `national_pokedex_number` | int | Numéro du Pokédex national (onglet Pokédex, succès) |
 | `weaknesses` | text[] | Types de faiblesse imprimés sur la carte (`{Fire}`), remplis par l'import depuis 0015 ; sert à « Super efficace ! ». `null` tant que l'import n'est pas repassé |
 | `evolves_from` | text | Nom du stade précédent imprimé sur la carte (`Charmeleon` pour Dracaufeu), rempli par l'import depuis 0018 ; sert à « Chaîne d'évolution » (lignée = Niveau 2 → le Niveau 1 qu'il nomme → la carte de base que celui-ci nomme). Index sur `cards.name` et `cards.evolves_from` (0019) pour suivre les lignées |
-| `attacks` | jsonb | Attaques imprimées `[{ name, damage, cost }]` (`cost` = nombre d'énergies, importé depuis 0025), `damage` tel quel (`"30"`, `"30+"`, `"20×"`, `""` = effet seul), remplies par l'import depuis 0024 ; servent aux combats PvP (`pvp_card()` garde la meilleure). Mesuré le 2026-10-03 : 99,8 % des Pokémon ont une attaque, 94 % une attaque qui fait des dégâts |
+| `attacks` | jsonb | Attaques imprimées `[{ name, damage, cost }]` (`cost` = nombre d'énergies, importé depuis 0025 ; une attaque sans `cost` est ignorée par `pvp_card()` depuis 0026, jamais gratuite), `damage` tel quel (`"30"`, `"30+"`, `"20×"`, `""` = effet seul), remplies par l'import depuis 0024 ; servent aux combats PvP (`pvp_card()` garde la meilleure). Mesuré le 2026-10-03 : 99,8 % des Pokémon ont une attaque, 94 % une attaque qui fait des dégâts |
 | `resistances` | text[] | Types de résistance imprimés (`{Fighting}`), depuis 0024 ; −30 en combat PvP |
 | `set_id` | text → `sets.id` | Set de la carte |
 
@@ -286,10 +286,14 @@ premier), `cards` (les cartes montrées, lignée + intrus, mélangées),
 `game_day`. Une seule partie `playing` par joueur (index unique).
 **Aucun accès client** : l'ordre ne doit pas fuiter.
 
-### `pvp_decks`, `pvp_ratings`, `pvp_battles` (0024, 0025)
+### `pvp_decks`, `pvp_ratings`, `pvp_battles` (0024, 0025, 0026)
 
-- `pvp_decks` : `(user_id, format)` → `card_ids` (5 ids). Un deck par
-  format (`all`, `era:<série>`, `set:<id>`) ; il attaque et il défend.
+- `pvp_decks` : `(user_id, format, role)` → `card_ids` (5 ids). Deux
+  decks par format (`all`, `era:<série>`, `set:<id>`) depuis 0026 :
+  `role` = `attack` (celui que je joue) ou `defense` (celui que le
+  serveur joue quand on m'attaque). Sans deck de défense valide, le deck
+  d'attaque défend. Les decks d'avant 0026 sont devenus des decks
+  d'attaque.
 - `pvp_ratings` : `(user_id, format)` → `elo` (1000 au départ), `wins`,
   `losses`, `draws` (en attaque), `def_wins`, `def_losses`, `def_draws`
   (en défense).
@@ -384,7 +388,8 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0022 | `my_rank_card_traders` | Son rang sous chaque classement (`my_leaderboard_rank`, le calcul passe dans `leaderboard_rows`), « Qui l'a en double ? » (`card_traders`) (écrite le 2026-10-02, appliquée) |
 | 0023 | `username_not_from_email` | `handle_new_user` : sans pseudo, `Trainer-1234` au lieu du début de l'e-mail ; les comptes existants ne sont pas renommés (écrite le 2026-10-02, appliquée) |
 | 0024 | `pvp_battles` | `sets.series`, `cards.attacks`, `cards.resistances` + combats PvP asynchrones : decks, Elo par format, combats joués par le serveur (écrite le 2026-10-03, appliquée) |
-| 0025 | `pvp_energy_prizes` | Combats PvP : énergie et choix de l'attaque, cartes Récompense, 20 manches ; les combats en cours de 0024 finissent en nul (écrite le 2026-10-03, **à appliquer**, puis un import des cartes pour les coûts) |
+| 0025 | `pvp_energy_prizes` | Combats PvP : énergie et choix de l'attaque, cartes Récompense, 20 manches ; les combats en cours de 0024 finissent en nul (écrite le 2026-10-03, appliquée) |
+| 0026 | `pvp_attack_defense_decks` | Combats PvP : deck d'attaque et deck de défense par format (`pvp_decks.role`), `pvp_save_deck(format, cards, role)` ; une attaque sans coût importé est ignorée au lieu d'être gratuite (écrite le 2026-10-04, **à appliquer**) |
 
-Les migrations 0001 à 0023 sont appliquées sur le projet réel (vérifié le
-2026-10-02).
+Les migrations 0001 à 0025 sont appliquées sur le projet réel (vérifié le
+2026-10-04 : `pvp_rules()` renvoie les règles de 0025).

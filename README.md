@@ -52,9 +52,11 @@ How it works inside (every table, RPC and flow, in French):
   seconds; intruders from other lines slip in as the streak grows, and
   "Stop" ends a run keeping its coins. The simplest game, so it pays the least: 3 coins per
   right line (60 per run, 180 a day at most) — and **PvP battles**:
-  build a deck of 5 challenge cards per format (every card, one era of
-  the TCG, or one set) and attack other players' decks, which the
-  server plays (their cards stay hidden until played). Each round you
+  build two decks of 5 challenge cards per format (every card, one era
+  of the TCG, or one set), one to attack with and one the server plays
+  when you're attacked ("Auto deck" picks either for you), and attack
+  other players' defense decks, which the server plays (their cards stay
+  hidden until played). Each round you
   pick a card and one of its printed attacks you can pay for: energy
   starts at 1 and grows by 1 a round (5 at most), so big attacks come
   late; knocked out Pokémon give prizes like in the real game (2 for ex,
@@ -353,6 +355,12 @@ its **SQL editor** and run, in order:
    give 2 or 3 prizes). Run it after 0024, then a card sync again (it
    imports each attack's energy cost); until then PvP says "Coming soon".
    Battles still in progress from 0024 end as draws.
+26. `supabase/migrations/0026_pvp_attack_defense_decks.sql` — separate
+   attack and defense decks per format (your attack deck defends until
+   you save a defense deck), and an attack whose energy cost wasn't
+   imported yet is left out instead of being free. Run it after 0025,
+   then make sure a full card sync went through (the "Sync cards"
+   Action now fails if a page couldn't be imported).
 
 Then in **Authentication**:
 

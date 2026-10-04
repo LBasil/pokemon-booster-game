@@ -852,14 +852,17 @@ sequenceDiagram
 ### Combats PvP
 
 Page : [PvpView.vue](../../src/views/PvpView.vue)
-(`/challenge/games/pvp`), store `pvp`, migrations 0024 et 0025. Demande de
+(`/challenge/games/pvp`), store `pvp`, migrations 0024, 0025 et 0026. Demande de
 l'utilisateur (2026-10-03) : du PvP en différé, « on attaque le deck de
 qq qui est joué par le serveur », trois formats (toutes les cartes, une
 ère du JCC, un set), deck adverse caché, de l'Elo et un taux de victoire,
 pas de pièces, adversaire tiré au hasard parmi les Elo proches. Puis, le
 même jour (« sinon je mets une carte avec une attaque à 130 et je gagne
 auto ») : deux règles du vrai jeu, l'énergie et les cartes Récompense
-(migration 0025, 0024 étant déjà appliquée).
+(migration 0025, 0024 étant déjà appliquée). Le 2026-10-04 (« il faudrait
+un système de création de deck auto et je pense qu'on doit séparer le
+deck d'attaque et de défense ») : deux decks par format et « Deck auto »
+(migration 0026).
 
 ```mermaid
 sequenceDiagram
@@ -868,11 +871,11 @@ sequenceDiagram
   participant DB as Postgres
 
   PV->>DB: pvp_state() : formats, decks, Elo, combat en cours
-  J->>PV: choisit le format, monte son deck (5 cartes)
-  PV->>DB: pvp_eligible(format) puis pvp_save_deck(format, ids)
+  J->>PV: choisit le format, monte son deck d'attaque et son deck de défense (5 cartes, ou « Deck auto »)
+  PV->>DB: pvp_eligible(format) puis pvp_save_deck(format, ids, role)
   J->>PV: « Trouver un adversaire »
   PV->>DB: pvp_start(format)
-  DB-->>PV: adversaire (Elo proche), deck caché, sa 1re carte et attaque déjà choisies
+  DB-->>PV: adversaire (Elo proche), son deck de défense caché, sa 1re carte et attaque déjà choisies
   loop jusqu'à 3 récompenses (ou 20 manches)
     J->>PV: touche une de ses cartes, puis une attaque payable (ou « pas d'attaque »)
     PV->>DB: pvp_play(slot, attaque)
@@ -883,9 +886,27 @@ sequenceDiagram
 
 - **Deck** : 5 Pokémon différents de la collection du Défi, avec une
   attaque qui fait des dégâts (environ 6 % des cartes n'ont que des
-  attaques à effet). Un deck par format ; il sert aussi en défense. Une
-  carte recyclée ou échangée rend le deck invalide (« change ton deck »),
-  et un deck invalide n'est plus tiré comme adversaire.
+  attaques à effet). **Deux decks par format** (0026) : le deck
+  d'attaque, que je joue, et le deck de défense, que le serveur joue
+  quand on m'attaque. Tant que je n'ai pas de deck de défense (ou qu'il
+  n'est plus valide), mon deck d'attaque défend. Une carte peut être dans
+  les deux. Une carte recyclée ou échangée rend le deck invalide (« change
+  ton deck »), et un joueur sans deck valide n'est plus tiré comme
+  adversaire.
+- **Deck auto** (`autoDeck(cards, role)` dans `src/utils/pvp.js`) : remplit
+  le constructeur (rien n'est enregistré avant « Enregistrer le deck »).
+  Chaque carte est notée sur ses dégâts par énergie, sa plus grosse
+  attaque et ses PV par récompense (chacun rapporté à la meilleure carte
+  disponible), pondérés selon le rôle : l'attaque mise sur les dégâts, la
+  défense sur la solidité (l'IA du serveur la joue moins bien qu'un
+  joueur). Puis les meilleures, une à une : jamais deux fois le même nom,
+  2 cartes à 2+ récompenses au plus, au moins 2 cartes avec une attaque à
+  1 énergie ou moins (la manche 1 n'en a qu'une), et un malus aux types
+  déjà pris (une faiblesse ne balaie pas tout le deck). Simulé le
+  2026-10-04 sur 2 553 vraies cartes, IA contre IA, collections de 25 à
+  80 cartes : environ 58 % contre « les 5 plus grosses attaques », 95 %
+  contre 5 cartes au hasard ; les variantes de poids testées restaient à
+  ±3 % (le bruit), les réglages n'ont donc pas été poussés plus loin.
 - **Formats** : toutes les cartes (les cartes récentes écrasent les
   anciennes, d'où les deux autres), une **ère** du JCC (`sets.series` :
   choix de l'utilisateur plutôt que la génération du Pokémon, pour que PV
@@ -930,6 +951,10 @@ sequenceDiagram
   montre que les profils publics.
 - **Avant l'import** : tant qu'aucune carte n'a ses attaques,
   `pvp_state()` renvoie `ready: false` et le jeu affiche « Bientôt ».
+  Une attaque importée avant 0025 (sans `cost`) est ignorée depuis 0026 :
+  le 2026-10-04, la synchro de minuit s'était arrêtée en route et ~7 400
+  cartes avaient encore des attaques sans coût, lues comme gratuites
+  (« une attaque à trois énergies marquée 0 »).
 
 ---
 

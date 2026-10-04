@@ -39,19 +39,20 @@ const MAX_ATTEMPTS = 6
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-// Fetches one page and returns its `data` array, or null once the API has
-// no more pages. pokemontcg.io's free tier is flaky under load (transient
-// 5xx, or an out-of-range page answered with a non-JSON/empty body instead
-// of `{ data: [] }`) — retried with backoff before being treated as "no
-// more data".
+// Fetches one page: `{ data, totalCount }`, or null if it still fails after
+// MAX_ATTEMPTS. pokemontcg.io's free tier is flaky under load (transient
+// 5xx, non-JSON bodies, dropped connections), hence the retries with backoff.
 async function fetchPage(endpoint, page) {
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const response = await fetch(`${endpoint}?page=${page}&pageSize=${PAGE_SIZE}`, { headers })
+    const response = await fetch(`${endpoint}?page=${page}&pageSize=${PAGE_SIZE}`, { headers }).catch((err) => err)
 
-    if (response.ok) {
+    if (response instanceof Error) {
+      console.warn(`Page ${page}: ${response.message} (attempt ${attempt}/${MAX_ATTEMPTS}).`)
+    } else if (response.ok) {
       try {
-        const { data } = await response.json()
-        return data && data.length > 0 ? data : null
+        const { data, totalCount } = await response.json()
+        if (Array.isArray(data)) return { data, totalCount }
+        console.warn(`Page ${page}: no data in the response (attempt ${attempt}/${MAX_ATTEMPTS}).`)
       } catch {
         console.warn(`Page ${page}: could not parse response as JSON (attempt ${attempt}/${MAX_ATTEMPTS}).`)
       }
@@ -59,20 +60,56 @@ async function fetchPage(endpoint, page) {
       console.warn(`Page ${page}: request failed with status ${response.status} (attempt ${attempt}/${MAX_ATTEMPTS}).`)
     }
 
-    if (attempt < MAX_ATTEMPTS) await sleep(attempt * 1000)
+    if (attempt < MAX_ATTEMPTS) await sleep(attempt * 2000)
   }
 
-  console.warn(`Page ${page}: giving up after ${MAX_ATTEMPTS} attempts, stopping.`)
+  console.warn(`Page ${page}: giving up after ${MAX_ATTEMPTS} attempts.`)
   return null
 }
 
+// Runs `save(data, page)` on every page of an endpoint, from `startPage` to
+// the last one (from the API's totalCount). A page that kept failing used to
+// end the import right there, as if it were the last, and the run still
+// "succeeded": on 2026-10-04 ~7,400 cards were left with their attacks
+// imported before 0025, without a cost (free attacks in PvP). Now that page
+// is skipped, retried once at the end, and if it still fails the script
+// exits with an error (the GitHub Action shows red).
+async function forEachPage(endpoint, startPage, save) {
+  const failed = []
+  let lastPage = Infinity
+
+  const run = async (page) => {
+    const result = await fetchPage(endpoint, page)
+    if (!result) return false
+    if (Number.isFinite(result.totalCount)) lastPage = Math.max(1, Math.ceil(result.totalCount / PAGE_SIZE))
+    if (result.data.length) await save(result.data, page)
+    // No totalCount in the answer: an empty page is the end
+    else if (lastPage === Infinity) lastPage = page
+    return true
+  }
+
+  for (let page = startPage; page <= lastPage; page++) {
+    if (!(await run(page))) {
+      // Without one good page, the number of pages is unknown
+      if (lastPage === Infinity) throw new Error(`${endpoint}: page ${page} failed, import stopped.`)
+      failed.push(page)
+    }
+    await sleep(300)
+  }
+
+  const stillFailed = []
+  for (const page of failed) {
+    await sleep(10000)
+    if (!(await run(page))) stillFailed.push(page)
+  }
+  if (stillFailed.length) {
+    console.error(`${endpoint}: page(s) ${stillFailed.join(', ')} could not be imported.`)
+    process.exitCode = 1
+  }
+}
+
 async function populateSets() {
-  let page = 1
-
-  while (true) {
-    const data = await fetchPage(`${BASE_URL}/sets`, page)
-    if (!data) break
-
+  await forEachPage(`${BASE_URL}/sets`, 1, async (data, page) => {
     const sets = data.map((set) => ({
       id: set.id,
       name: set.name,
@@ -87,15 +124,9 @@ async function populateSets() {
     }))
 
     const { error } = await upsertRows('sets', sets)
-    if (error) {
-      console.error('Error inserting sets:', error.message)
-      return
-    }
-
+    if (error) throw new Error(`Error inserting sets: ${error.message}`)
     console.log(`Sets page ${page} done (${sets.length} sets)`)
-    if (data.length < PAGE_SIZE) break
-    page++
-  }
+  })
 
   console.log('Sets populated.')
 }
@@ -142,12 +173,7 @@ async function upsertRows(table, rows) {
 }
 
 async function populateCards(startPage = 1) {
-  let page = startPage
-
-  while (true) {
-    const data = await fetchPage(`${BASE_URL}/cards`, page)
-    if (!data) break
-
+  await forEachPage(`${BASE_URL}/cards`, startPage, async (data, page) => {
     const cards = data.map((card) => ({
       id: card.id,
       name: card.name,
@@ -176,18 +202,11 @@ async function populateCards(startPage = 1) {
     }))
 
     const { error } = await upsertRows('cards', cards)
-    if (error) {
-      console.error('Error inserting cards:', error.message)
-      return
-    }
+    if (error) throw new Error(`Error inserting cards: ${error.message}`)
     await recordPrices(cards)
 
     console.log(`Cards page ${page} done (${cards.length} cards)`)
-
-    if (data.length < PAGE_SIZE) break
-    page++
-    await sleep(300)
-  }
+  })
 
   console.log('Cards populated.')
 }

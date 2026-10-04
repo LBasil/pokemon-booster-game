@@ -45,6 +45,9 @@ export const CHALLENGE_ERRORS = [
   'pvp_invalid_card',
   'pvp_invalid_attack',
   'pvp_not_enough_energy',
+  // attack and defense decks (migration 0026)
+  'pvp_invalid_role',
+  'pvp_roles_unavailable',
 ]
 
 // PostgREST's answer for an RPC that doesn't exist yet
@@ -308,7 +311,7 @@ export const answerEvolutionChain = (order) => call('evolution_chain_answer', { 
  */
 export const stopEvolutionChain = () => call('evolution_chain_stop')
 
-// ---------- PvP battles (migrations 0024 + 0025: energy, prizes) ----------
+// ---------- PvP battles (migrations 0024 + 0025: energy, prizes; 0026: attack and defense decks) ----------
 
 /**
  * Rules, whether attacks are loaded (`ready`), formats with my eligible card
@@ -320,8 +323,21 @@ export const fetchPvpState = () => call('pvp_state')
 /** My challenge cards that can fight in a format ('all', 'era:<series>', 'set:<id>'), best attack first. */
 export const fetchPvpEligible = (format) => call('pvp_eligible', { p_format: format })
 
-/** Saves my deck (5 card ids) for a format; returns the state. */
-export const savePvpDeck = (format, cardIds) => call('pvp_save_deck', { p_format: format, p_cards: cardIds })
+/**
+ * Saves one of my decks (5 card ids) for a format: 'attack' (the one I play)
+ * or 'defense' (the one the server plays when I'm attacked); returns the
+ * state. Before 0026 there is one deck for both: an attack deck is saved the
+ * old way, a defense deck errors `pvp_roles_unavailable`.
+ */
+export async function savePvpDeck(format, cardIds, role = 'attack') {
+  try {
+    return await call('pvp_save_deck', { p_format: format, p_cards: cardIds, p_role: role })
+  } catch (err) {
+    if (err?.code !== MISSING_FUNCTION) throw err
+  }
+  if (role !== 'attack') throw Object.assign(new Error('pvp_roles_unavailable'), { code: 'pvp_roles_unavailable' })
+  return call('pvp_save_deck', { p_format: format, p_cards: cardIds })
+}
 
 /** Finds an opponent and starts a battle (or returns the one in progress); returns the state. */
 export const startPvpBattle = (format) => call('pvp_start', { p_format: format })

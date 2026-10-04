@@ -434,7 +434,7 @@ export async function mockSupabase(page, options = {}) {
         return json({ streak: run.streak, run_coins: run.coins, state: ecState() })
       }
     }
-    // ---- PvP battles (migration 0024) ----
+    // ---- PvP battles (migrations 0024-0026; decks: { format: { attack, defense } }, or { cards, valid } before 0026) ----
     if (path.startsWith('/rest/v1/rpc/pvp_')) {
       const pv = state.pvp
       if (pv === 'missing') return json({ code: 'PGRST202', message: `Could not find the function public.${path.split('/').pop()} in the schema cache` }, 404)
@@ -485,14 +485,23 @@ export async function mockSupabase(page, options = {}) {
       if (path === '/rest/v1/rpc/pvp_save_deck') {
         const cards = (args.p_cards ?? []).map(pvpCard)
         if (cards.length !== 5 || new Set(args.p_cards).size !== 5 || cards.some((card) => !card || !fits(card, args.p_format))) return raise('pvp_invalid_deck')
-        pv.decks[args.p_format] = { cards, valid: true }
+        // Before 0026 (`noRoles`): one deck, saved without a role
+        if (pv.noRoles) {
+          if ('p_role' in args) return json({ code: 'PGRST202', message: 'Could not find the function public.pvp_save_deck(p_cards, p_format, p_role) in the schema cache' }, 404)
+          pv.decks[args.p_format] = { cards, valid: true }
+        } else {
+          const role = args.p_role ?? 'attack'
+          if (!['attack', 'defense'].includes(role)) return raise('pvp_invalid_role')
+          pv.decks[args.p_format] = { ...pv.decks[args.p_format], [role]: { cards, valid: true } }
+        }
         rating(args.p_format)
         return json(pvState())
       }
       if (path === '/rest/v1/rpc/pvp_start') {
         if (pv.battle?.status === 'playing') return json(pvState())
         if (!pv.battlesLeft) return raise('pvp_no_battles_left')
-        const deck = pv.decks[args.p_format]
+        const entry = pv.decks[args.p_format]
+        const deck = entry && ('cards' in entry ? entry : entry.attack)
         if (!deck) return raise('pvp_no_deck')
         if (!pv.opponent) return raise('pvp_no_opponent')
         pv.battlesLeft--

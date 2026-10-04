@@ -6,13 +6,29 @@ import { useChallengeStore } from '@/stores/challenge'
 import { usePvpStore } from '@/stores/pvp'
 import { useSettingsStore } from '@/stores/settings'
 import { resetTimeLabel } from '@/utils/challenge'
-import { BATTLES_PER_DAY, DECK_SIZE, MAX_ENERGY, MAX_ROUNDS, PRIZES_TO_WIN, RESISTANCE, canPay, damageLabel, parseFormat, record, toggleDeckCard } from '@/utils/pvp'
+import {
+  BATTLES_PER_DAY,
+  DECK_ROLES,
+  DECK_SIZE,
+  MAX_ENERGY,
+  MAX_ROUNDS,
+  PRIZES_TO_WIN,
+  RESISTANCE,
+  autoDeck,
+  canPay,
+  damageLabel,
+  parseFormat,
+  record,
+  toggleDeckCard,
+} from '@/utils/pvp'
 import AppHeader from '@/components/AppHeader.vue'
 import PvpCard from '@/components/PvpCard.vue'
 
-// PvP battles (challenge mode, migrations 0024 + 0025), asynchronous: I save a deck
-// of 5 challenge cards per format (every card, one TCG era, one set), then
-// attack: the server finds a player of close Elo with a deck in that format
+// PvP battles (challenge mode, migrations 0024 + 0025 + 0026), asynchronous: I
+// save two decks of 5 challenge cards per format (every card, one TCG era, one
+// set): an attack deck I play, a defense deck the server plays when I'm
+// attacked (until I save one, the attack deck defends). "Auto deck" fills the
+// builder with autoDeck(), to save as is or change. Then I attack: the server finds a player of close Elo with a deck in that format
 // and plays it against mine, its cards hidden until they're played. Each
 // round I pick a card, then one of its attacks I can pay for (energy: 1 at
 // the start, +1 a round, 5 at most) or no attack to save energy; both cards
@@ -29,7 +45,7 @@ const settings = useSettingsStore()
 const resetTime = computed(() => resetTimeLabel(locale.value))
 
 const format = ref(readFormat())
-const building = ref(false)
+const building = ref(null) // the deck role being built, null = not building
 const picks = ref([])
 const eligibleLoading = ref(false)
 const busy = ref(false)
@@ -87,7 +103,7 @@ const ownedHere = computed(() => {
 
 function pickKind(next) {
   if (next === kind.value) return
-  building.value = false
+  building.value = null
   if (next === 'all') format.value = 'all'
   // The era / set where I have the most cards that can fight
   else {
@@ -98,34 +114,47 @@ function pickKind(next) {
 }
 
 function pickFormat(event) {
-  building.value = false
+  building.value = null
   format.value = event.target.value
 }
 
 // ---------- Deck ----------
 
-const deck = computed(() => pvp.decks[format.value] ?? null)
+// { attack, defense }: each { cards, valid } or null
+const decks = computed(() => pvp.decks[format.value] ?? { attack: null, defense: null })
 const rating = computed(() => pvp.ratings[format.value] ?? null)
 const myRecord = computed(() => record(rating.value))
 const eligible = computed(() => pvp.eligible[format.value] ?? [])
-const canFight = computed(() => deck.value?.valid && pvp.battlesLeft > 0 && !building.value)
+const canFight = computed(() => decks.value.attack?.valid && pvp.battlesLeft > 0 && !building.value)
 
-async function editDeck() {
-  building.value = true
-  picks.value = deck.value?.valid ? deck.value.cards.map((card) => card.id) : []
+const autoPicks = (role) => autoDeck(eligible.value, role, rules.value.deck)
+
+/**
+ * Opens the builder for one deck: its saved cards, or with `auto` the
+ * picks of autoDeck() (nothing is saved until "Save the deck").
+ * @param {'attack' | 'defense'} role
+ */
+async function editDeck(role, { auto = false } = {}) {
+  building.value = role
+  const saved = decks.value[role]
+  picks.value = saved?.valid ? saved.cards.map((card) => card.id) : []
   eligibleLoading.value = true
   errorMessage.value = ''
   try {
     await pvp.loadEligible(format.value, { force: true })
     // Cards that left the collection since can't stay picked
     const ids = new Set(eligible.value.map((card) => card.id))
-    picks.value = picks.value.filter((id) => ids.has(id))
+    picks.value = auto ? autoPicks(role) : picks.value.filter((id) => ids.has(id))
   } catch (err) {
     errorMessage.value = errorFor(err)
-    building.value = false
+    building.value = null
   } finally {
     eligibleLoading.value = false
   }
+}
+
+function fillAuto() {
+  picks.value = autoPicks(building.value)
 }
 
 function togglePick(id) {
@@ -137,8 +166,8 @@ async function saveDeck() {
   busy.value = true
   errorMessage.value = ''
   try {
-    await pvp.saveDeck(format.value, picks.value)
-    building.value = false
+    await pvp.saveDeck(format.value, picks.value, building.value)
+    building.value = null
   } catch (err) {
     errorMessage.value = errorFor(err)
   } finally {
@@ -473,9 +502,10 @@ onMounted(async () => {
           <!-- Deck builder -->
           <div v-if="building" class="pvp-builder">
             <div class="pvp-builder-head">
-              <h3 class="pvp-side-title">{{ t('pvp.buildTitle', { format: formatLabel(format) }) }}</h3>
+              <h3 class="pvp-side-title">{{ t(`pvp.buildTitle.${building}`, { format: formatLabel(format) }) }}</h3>
               <span class="pvp-count" :class="{ full: picks.length === rules.deck }">{{ picks.length }} / {{ rules.deck }}</span>
             </div>
+            <p class="pvp-note">{{ t(`pvp.buildHelp.${building}`) }}</p>
             <div v-if="eligibleLoading" class="pb-skeleton pvp-builder-skeleton" aria-busy="true"></div>
             <p v-else-if="eligible.length < rules.deck" class="pvp-note">
               {{ t('pvp.notEnough', { count: eligible.length, deck: rules.deck }, eligible.length) }}
@@ -498,26 +528,39 @@ onMounted(async () => {
             </ul>
             <div class="pvp-actions">
               <button type="button" class="btn btn-primary" :disabled="busy || picks.length !== rules.deck" @click="saveDeck">{{ t('pvp.saveDeck') }}</button>
-              <button type="button" class="btn btn-outline-secondary" :disabled="busy" @click="building = false">{{ t('pvp.cancel') }}</button>
+              <button type="button" class="btn btn-outline-secondary" :disabled="busy || eligibleLoading || !eligible.length" @click="fillAuto">
+                {{ t('pvp.autoDeck') }}
+              </button>
+              <button type="button" class="btn btn-outline-secondary" :disabled="busy" @click="building = null">{{ t('pvp.cancel') }}</button>
             </div>
           </div>
 
-          <!-- Saved deck -->
-          <div v-else class="pvp-deck">
-            <div class="pvp-builder-head">
-              <h3 class="pvp-side-title">{{ t('pvp.deckTitle') }}</h3>
-              <button type="button" class="btn btn-outline-secondary btn-sm" @click="editDeck">
-                {{ deck ? t('pvp.editDeck') : t('pvp.buildDeck') }}
-              </button>
+          <!-- Saved decks: attack, defense -->
+          <div v-else class="pvp-decks">
+            <div v-for="role in DECK_ROLES" :key="role" class="pvp-deck" role="group" :aria-labelledby="`pvp-deck-${role}`">
+              <div class="pvp-builder-head">
+                <h3 :id="`pvp-deck-${role}`" class="pvp-side-title">{{ t(`pvp.deckTitle.${role}`) }}</h3>
+                <div class="pvp-deck-buttons">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" :disabled="ownedHere < rules.deck" @click="editDeck(role, { auto: true })">
+                    {{ t('pvp.autoDeck') }}
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" @click="editDeck(role)">
+                    {{ decks[role] ? t('pvp.editDeck') : t('pvp.buildDeck') }}
+                  </button>
+                </div>
+              </div>
+              <template v-if="decks[role]">
+                <p v-if="!decks[role].valid" class="pvp-warning" role="alert">
+                  {{ t(role === 'defense' && decks.attack?.valid ? 'pvp.defenseInvalid' : 'pvp.deckInvalid') }}
+                </p>
+                <ul class="pvp-row">
+                  <li v-for="(card, i) in decks[role].cards" :key="i"><PvpCard :card="card" /></li>
+                </ul>
+                <p class="pvp-note">{{ t(`pvp.deckRole.${role}`) }}</p>
+              </template>
+              <p v-else-if="role === 'defense' && decks.attack" class="pvp-note">{{ t('pvp.defenseFallback') }}</p>
+              <p v-else class="pvp-note">{{ t('pvp.noDeck', { count: ownedHere, deck: rules.deck }, ownedHere) }}</p>
             </div>
-            <template v-if="deck">
-              <p v-if="!deck.valid" class="pvp-warning" role="alert">{{ t('pvp.deckInvalid') }}</p>
-              <ul class="pvp-row">
-                <li v-for="(card, i) in deck.cards" :key="i"><PvpCard :card="card" /></li>
-              </ul>
-              <p class="pvp-note">{{ t('pvp.deckDefends') }}</p>
-            </template>
-            <p v-else class="pvp-note">{{ t('pvp.noDeck', { count: ownedHere, deck: rules.deck }, ownedHere) }}</p>
           </div>
 
           <div class="pvp-start">
@@ -987,11 +1030,27 @@ onMounted(async () => {
 }
 
 .pvp-builder,
-.pvp-deck {
+.pvp-deck,
+.pvp-decks {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   min-width: 0;
+}
+
+.pvp-decks {
+  gap: 1.25rem;
+}
+
+.pvp-deck + .pvp-deck {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--pb-border);
+}
+
+.pvp-deck-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .pvp-count {
