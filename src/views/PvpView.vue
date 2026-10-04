@@ -8,6 +8,10 @@ import { useSettingsStore } from '@/stores/settings'
 import { resetTimeLabel } from '@/utils/challenge'
 import {
   BATTLES_PER_DAY,
+  BOT_BATTLES_PER_DAY,
+  BOT_COINS,
+  BOT_LEVELS,
+  BOT_PAID_PER_DAY,
   DECK_ROLES,
   DECK_SIZE,
   MAX_ENERGY,
@@ -22,6 +26,7 @@ import {
   toggleDeckCard,
 } from '@/utils/pvp'
 import AppHeader from '@/components/AppHeader.vue'
+import CoinAmount from '@/components/CoinAmount.vue'
 import PvpCard from '@/components/PvpCard.vue'
 
 // PvP battles (challenge mode, migrations 0024 + 0025 + 0026), asynchronous: I
@@ -33,8 +38,10 @@ import PvpCard from '@/components/PvpCard.vue'
 // round I pick a card, then one of its attacks I can pay for (energy: 1 at
 // the start, +1 a round, 5 at most) or no attack to save energy; both cards
 // hit each other. Knocked out cards give prizes (2 or 3 for ex, V, VMAX...),
-// 3 win. Elo only, no coins. The format is remembered on this device
-// (`pb-pvp-format`).
+// 3 win. Elo only, no coins. Bots (0027, few players): the same battle against
+// a deck the server deals (easy / normal / hard), with my attack deck: no Elo,
+// coins for the first wins of the day, and they don't use the daily attacks.
+// The format is remembered on this device (`pb-pvp-format`).
 const FORMAT_KEY = 'pb-pvp-format'
 const KINDS = ['all', 'era', 'set']
 
@@ -77,6 +84,9 @@ const rules = computed(() => ({
   rounds: pvp.state?.max_rounds ?? MAX_ROUNDS,
   battles: pvp.state?.battles_per_day ?? BATTLES_PER_DAY,
   resistance: pvp.state?.resistance ?? RESISTANCE,
+  botCoins: pvp.state?.bot_coins ?? BOT_COINS,
+  botPaid: pvp.state?.bot_paid_per_day ?? BOT_PAID_PER_DAY,
+  botBattles: pvp.state?.bot_battles_per_day ?? BOT_BATTLES_PER_DAY,
 }))
 
 const errorFor = (err) => t(err?.code ? `challenge.errors.${err.code}` : 'challenge.errors.generic')
@@ -126,6 +136,7 @@ const rating = computed(() => pvp.ratings[format.value] ?? null)
 const myRecord = computed(() => record(rating.value))
 const eligible = computed(() => pvp.eligible[format.value] ?? [])
 const canFight = computed(() => decks.value.attack?.valid && pvp.battlesLeft > 0 && !building.value)
+const canFightBot = computed(() => decks.value.attack?.valid && pvp.botBattlesLeft > 0 && !building.value)
 
 const autoPicks = (role) => autoDeck(eligible.value, role, rules.value.deck)
 
@@ -190,13 +201,15 @@ function scrollToBattle() {
   nextTick(() => battleEl.value?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }))
 }
 
-async function fight() {
-  if (busy.value || !canFight.value) return
+/** @param {string | null} [level] - a bot level, null = a player */
+async function fight(level = null) {
+  if (busy.value || !(level ? canFightBot.value : canFight.value)) return
   busy.value = true
   errorMessage.value = ''
   finished.value = null
   try {
-    await pvp.start(format.value)
+    if (level) await pvp.startBot(format.value, level)
+    else await pvp.start(format.value)
     scrollToBattle()
   } catch (err) {
     errorMessage.value = errorFor(err)
@@ -279,7 +292,12 @@ const lastRound = computed(() => {
   }
 })
 
-const opponentName = computed(() => battle.value?.opponent.username ?? t('pvp.privateTrainer'))
+const botName = (level) => t('pvp.botName', { level: t(`pvp.levels.${level}`) })
+const opponentName = computed(() => {
+  const opponent = battle.value?.opponent
+  if (opponent?.bot) return botName(opponent.bot)
+  return opponent?.username ?? t('pvp.privateTrainer')
+})
 
 const resultTitle = computed(() => (finished.value ? t(`pvp.result.${finished.value.status}`) : ''))
 
@@ -382,7 +400,9 @@ onMounted(async () => {
           <p class="pvp-feedback" role="status" aria-live="polite">
             <template v-if="finished">
               <strong :class="finished.status === 'won' ? 'pvp-good' : finished.status === 'draw' ? '' : 'pvp-bad'">{{ resultTitle }}</strong>
-              <span>{{ t('pvp.eloChange', { change: signed(finished.elo_change) }) }}</span>
+              <span v-if="!finished.bot">{{ t('pvp.eloChange', { change: signed(finished.elo_change) }) }}</span>
+              <span v-else-if="finished.coins" class="pvp-coins-won">{{ t('pvp.coinsWon') }} <CoinAmount :amount="finished.coins" signed /></span>
+              <span v-else>{{ t(finished.paid ? 'pvp.noCoins' : 'pvp.unpaid') }}</span>
             </template>
             <template v-else-if="lastRound">
               <span v-if="lastRound.myAttack === null">{{ t('pvp.roundSaved', { mine: lastRound.mine }) }}</span>
@@ -564,9 +584,33 @@ onMounted(async () => {
           </div>
 
           <div class="pvp-start">
-            <button type="button" class="btn btn-primary btn-lg glow-button" :disabled="busy || !canFight" @click="fight">{{ t('pvp.fight') }}</button>
+            <button type="button" class="btn btn-primary btn-lg glow-button" :disabled="busy || !canFight" @click="fight()">{{ t('pvp.fight') }}</button>
             <p class="pvp-note">
               {{ pvp.battlesLeft ? t('pvp.battlesLeftLine', { count: pvp.battlesLeft }, pvp.battlesLeft) : t('pvp.noBattlesLeft') }}
+            </p>
+          </div>
+
+          <!-- Bots: the same battle, for coins (0027) -->
+          <div v-if="pvp.botsAvailable" class="pvp-bots" role="group" aria-labelledby="pvp-bots-title">
+            <h3 id="pvp-bots-title" class="pvp-side-title">{{ t('pvp.botsTitle') }}</h3>
+            <p class="pvp-note">{{ t('pvp.botsHelp') }}</p>
+            <div class="pvp-bot-buttons">
+              <button
+                v-for="level in BOT_LEVELS"
+                :key="level"
+                type="button"
+                class="pvp-bot-button"
+                :disabled="busy || !canFightBot"
+                @click="fight(level)"
+              >
+                <span class="pvp-attack-title">{{ t(`pvp.levels.${level}`) }}</span>
+                <span v-if="pvp.botPaidLeft" class="pvp-bot-reward">{{ t('pvp.botWin') }} <CoinAmount :amount="rules.botCoins[level] ?? 0" /></span>
+              </button>
+            </div>
+            <p class="pvp-note">
+              <template v-if="!pvp.botBattlesLeft">{{ t('pvp.noBotBattlesLeft') }}</template>
+              <template v-else-if="pvp.botPaidLeft">{{ t('pvp.botPaidLeft', { count: pvp.botPaidLeft }, pvp.botPaidLeft) }}</template>
+              <template v-else>{{ t('pvp.botUnpaidLeft', { count: pvp.botBattlesLeft }, pvp.botBattlesLeft) }}</template>
             </p>
           </div>
         </section>
@@ -578,10 +622,12 @@ onMounted(async () => {
             <li v-for="entry in pvp.history" :key="entry.id">
               <span class="pvp-result" :class="`is-${entry.result}`">{{ t(`pvp.short.${entry.result}`) }}</span>
               <span class="pvp-history-text">
-                {{ t(`pvp.history.${entry.role}`, { name: entry.opponent ?? t('pvp.privateTrainer') }) }}
+                <template v-if="entry.bot">{{ t('pvp.history.bot', { name: botName(entry.bot) }) }}</template>
+                <template v-else>{{ t(`pvp.history.${entry.role}`, { name: entry.opponent ?? t('pvp.privateTrainer') }) }}</template>
                 <span class="pvp-muted">{{ formatLabel(entry.format) }}</span>
               </span>
-              <strong class="pvp-change">{{ signed(entry.elo_change) }}</strong>
+              <strong v-if="entry.bot" class="pvp-change"><CoinAmount v-if="entry.coins" :amount="entry.coins" signed /></strong>
+              <strong v-else class="pvp-change">{{ signed(entry.elo_change) }}</strong>
             </li>
           </ul>
           <p v-else class="pvp-note">{{ t('pvp.noHistory') }}</p>
@@ -618,6 +664,9 @@ onMounted(async () => {
             <li>{{ t('pvp.rules.damage', { resistance: rules.resistance }) }}</li>
             <li>{{ t('pvp.rules.elo') }}</li>
             <li>{{ t('pvp.rules.limit', { count: rules.battles, time: resetTime }) }}</li>
+            <li v-if="pvp.botsAvailable">
+              {{ t('pvp.rules.bots', { easy: rules.botCoins.easy, normal: rules.botCoins.normal, hard: rules.botCoins.hard, paid: rules.botPaid, count: rules.botBattles }) }}
+            </li>
           </ul>
         </section>
       </template>
@@ -1083,6 +1132,66 @@ onMounted(async () => {
   align-items: center;
   gap: 0.5rem;
   text-align: center;
+}
+
+.pvp-bots {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--pb-border);
+  text-align: center;
+}
+
+.pvp-bot-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 32rem;
+}
+
+.pvp-bot-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0.6rem 0.5rem;
+  border-radius: var(--pb-radius-md);
+  border: 2px solid var(--pb-accent);
+  background: var(--pb-bg-elevated);
+  color: var(--pb-text);
+  font-weight: 700;
+}
+
+.pvp-bot-button:disabled {
+  border-color: var(--pb-border-strong);
+  opacity: 0.5;
+}
+
+.pvp-bot-button:focus-visible {
+  outline: 2px solid var(--pb-focus);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .pvp-bot-button:not(:disabled):hover {
+    border-color: var(--pb-ring);
+  }
+}
+
+.pvp-bot-reward {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--pb-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.pvp-coins-won {
+  color: var(--pb-success-text);
+  font-weight: 700;
 }
 
 .pvp-history,

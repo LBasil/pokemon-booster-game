@@ -214,7 +214,7 @@ onglets de dépenser les mêmes pièces.
 ### `challenge_ledger`
 
 Le journal de **chaque mouvement de pièces** : `kind` (`start`, `daily`,
-`booster`, `recycle`, `craft`, `mission`, `minigame`, `electrode_flip`, `super_effective`, `evolution_chain`), `amount` (+ gagné,
+`booster`, `recycle`, `craft`, `mission`, `minigame`, `electrode_flip`, `super_effective`, `evolution_chain`, `pvp_bot` (0027)), `amount` (+ gagné,
 − dépensé), `card_id`, `quantity`, `mission`, `game_day`, `created_at`.
 
 Un index unique `(user_id, mission, game_day) where kind = 'mission'`
@@ -286,7 +286,7 @@ premier), `cards` (les cartes montrées, lignée + intrus, mélangées),
 `game_day`. Une seule partie `playing` par joueur (index unique).
 **Aucun accès client** : l'ordre ne doit pas fuiter.
 
-### `pvp_decks`, `pvp_ratings`, `pvp_battles` (0024, 0025, 0026)
+### `pvp_decks`, `pvp_ratings`, `pvp_battles` (0024, 0025, 0026, 0027)
 
 - `pvp_decks` : `(user_id, format, role)` → `card_ids` (5 ids). Deux
   decks par format (`all`, `era:<série>`, `set:<id>`) depuis 0026 :
@@ -307,6 +307,10 @@ premier), `cards` (les cartes montrées, lignée + intrus, mélangées),
   manche), `status` (`playing`, `won`, `lost`, `draw`, `forfeit`, du point
   de vue de l'attaquant), `elo_change` (celui de l'attaquant, le défenseur
   bouge de l'opposé), `game_day`. Un seul combat `playing` par attaquant.
+  Combat contre un bot (0027) : `defender` vide, `bot` (`easy`, `normal`,
+  `hard`), `paid` (dans les 5 premiers combats contre les bots du jour),
+  `coins` (pièces versées à la fin) ; une contrainte impose exactement un
+  des deux (`defender` ou `bot`).
 
 **Aucun accès client** sur les trois : les decks sont cachés, l'Elo est
 écrit par le serveur.
@@ -390,6 +394,7 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0024 | `pvp_battles` | `sets.series`, `cards.attacks`, `cards.resistances` + combats PvP asynchrones : decks, Elo par format, combats joués par le serveur (écrite le 2026-10-03, appliquée) |
 | 0025 | `pvp_energy_prizes` | Combats PvP : énergie et choix de l'attaque, cartes Récompense, 20 manches ; les combats en cours de 0024 finissent en nul (écrite le 2026-10-03, appliquée) |
 | 0026 | `pvp_attack_defense_decks` | Combats PvP : deck d'attaque et deck de défense par format (`pvp_decks.role`), `pvp_save_deck(format, cards, role)` ; une attaque sans coût importé est ignorée au lieu d'être gratuite (écrite le 2026-10-04, **à appliquer**) |
+| 0027 | `pvp_bots` | Combats PvP contre des bots (facile, normal, difficile) : `pvp_bot_start`, `pvp_bot_deck`, colonnes `bot` / `paid` / `coins` de `pvp_battles`, pièces au lieu d'Elo, type `pvp_bot` du journal (écrite le 2026-10-04, **à appliquer** après 0026) |
 
 Les migrations 0001 à 0025 sont appliquées sur le projet réel (vérifié le
 2026-10-04 : `pvp_rules()` renvoie les règles de 0025).

@@ -852,7 +852,7 @@ sequenceDiagram
 ### Combats PvP
 
 Page : [PvpView.vue](../../src/views/PvpView.vue)
-(`/challenge/games/pvp`), store `pvp`, migrations 0024, 0025 et 0026. Demande de
+(`/challenge/games/pvp`), store `pvp`, migrations 0024, 0025, 0026 et 0027. Demande de
 l'utilisateur (2026-10-03) : du PvP en différé, « on attaque le deck de
 qq qui est joué par le serveur », trois formats (toutes les cartes, une
 ère du JCC, un set), deck adverse caché, de l'Elo et un taux de victoire,
@@ -955,6 +955,22 @@ sequenceDiagram
   le 2026-10-04, la synchro de minuit s'était arrêtée en route et ~7 400
   cartes avaient encore des attaques sans coût, lues comme gratuites
   (« une attaque à trois énergies marquée 0 »).
+- **Bots** (0027, demande du 2026-10-04 : « met un pvp contre des bots,
+  lui il donne des pièces au pire, j'ai pas assez de joueurs ») : sous
+  « Trouver un adversaire », trois boutons Facile / Normal / Difficile
+  lancent le même combat (mêmes règles, même IA, mon deck d'attaque)
+  contre un deck que le serveur tire du format (`pvp_bot_deck`) : 400
+  cartes jouables au hasard, notées comme `autoDeck` (dégâts par énergie,
+  plus grosse attaque, PV par récompense), coupées en 5 paliers ; facile
+  prend le palier 2, normal le 4, difficile le 5, 5 noms différents. Pas
+  d'Elo (le classement reste entre joueurs) et pas compté dans les 10
+  attaques du jour. Une victoire rapporte 10 / 25 / 50 pièces, un nul la
+  moitié (arrondie en dessous), une défaite ou un abandon rien, pour les 5
+  premiers combats contre les bots lancés dans la journée (décidé au
+  départ : abandonner ne rend pas la place) ; 20 par jour en tout, les
+  suivants pour le plaisir. 250 pièces par jour au plus, proche des
+  autres mini-jeux (180 à 300). Le message « pas d'adversaire » renvoie
+  vers les bots.
 
 ---
 

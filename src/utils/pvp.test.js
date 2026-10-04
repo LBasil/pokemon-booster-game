@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   autoDeck,
   bestDamage,
+  botCoins,
   canPay,
   damageAgainst,
   damageLabel,
@@ -193,5 +194,20 @@ describe('autoDeck', () => {
   it('fills what it can from a short pool', () => {
     expect(autoDeck([card('A', 50, 1, 10), card('A', 50, 1, 10)])).toHaveLength(2)
     expect(autoDeck([])).toEqual([])
+  })
+})
+
+describe('botCoins', () => {
+  it('pays the level for a win, half for a draw', () => {
+    expect(botCoins('easy', 'won')).toBe(10)
+    expect(botCoins('normal', 'won')).toBe(25)
+    expect(botCoins('hard', 'won')).toBe(50)
+    expect(botCoins('normal', 'draw')).toBe(12)
+  })
+
+  it('pays nothing for a loss, giving up or an unpaid battle', () => {
+    expect(botCoins('hard', 'lost')).toBe(0)
+    expect(botCoins('hard', 'forfeit')).toBe(0)
+    expect(botCoins('hard', 'won', false)).toBe(0)
   })
 })

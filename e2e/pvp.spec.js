@@ -22,7 +22,8 @@ test('PvP is listed with the mini-games', async ({ page }) => {
   await expect(page).toHaveURL(/\/challenge\/games\/pvp$/)
   await expect(page.getByRole('heading', { level: 1, name: 'PvP battles' })).toBeVisible()
   await expect(page.locator('a[href="/challenge/games"]:visible').first()).toHaveClass(/active|router-link-active/)
-  await expect(page.locator('.pvp-rules')).toContainText('No coins')
+  await expect(page.locator('.pvp-rules')).toContainText('Against players, no coins')
+  await expect(page.locator('.pvp-rules')).toContainText('Bots: the same battle')
 })
 
 test('build a deck, attack and win Elo', async ({ page }) => {
@@ -194,4 +195,60 @@ test('before the migration, PvP says it is coming', async ({ page }) => {
   await expect(page.getByText('PvP battles are coming soon.')).toBeVisible()
   await page.goto('/challenge/games')
   await expect(page.locator('.game-tile').filter({ hasText: 'PvP battles' })).toContainText('Coming soon')
+})
+
+test('bots: the same battle for coins, no Elo, and no player battle used', async ({ page }) => {
+  const backend = await mockSupabase(page, { challengeCollection, pvp: { opponent: false } })
+  await page.goto('/challenge/games/pvp')
+  const bots = page.getByRole('group', { name: 'Train against a bot' })
+  await expect(bots).toContainText('5 paying bot battles left today')
+  // No attack deck yet: bots wait for it too
+  await expect(bots.getByRole('button', { name: /Hard/ })).toBeDisabled()
+
+  await page.getByRole('group', { name: 'Attack deck' }).getByRole('button', { name: 'Build my deck' }).click()
+  for (const name of ['Charmander', 'Squirtle', 'Bulbasaur', 'Pikachu', 'Charmeleon']) await page.locator('.pvp-pick').filter({ hasText: name }).click()
+  await page.getByRole('button', { name: 'Save the deck' }).click()
+  // Nobody else has a deck: the error points to the bots
+  await page.getByRole('button', { name: 'Find an opponent' }).click()
+  await expect(page.getByRole('alert')).toContainText('Fight a bot meanwhile')
+
+  await bots.getByRole('button', { name: /Hard/ }).click()
+  const start = backend.calls.find((call) => call.path === '/rest/v1/rpc/pvp_bot_start')
+  expect(JSON.parse(start.body)).toEqual({ p_format: 'all', p_level: 'hard' })
+  await expect(page.getByRole('heading', { name: /Against a bot \(Hard\)/ })).toBeVisible()
+  await expect(page.locator('.pvp-elo')).toHaveCount(0)
+
+  const panel = page.locator('.pvp-attack-panel')
+  await page.locator('.pvp-play').nth(0).click()
+  await panel.getByRole('button', { name: /Ember/ }).click()
+  await expect(page.locator('.pvp-feedback')).toContainText('Oddish is knocked out!')
+  await page.locator('.pvp-play').nth(1).click()
+  await panel.getByRole('button', { name: /Ember/ }).click()
+  await expect(page.locator('.pvp-feedback')).toContainText('You win!')
+  await expect(page.locator('.pvp-coins-won')).toContainText('+50')
+  await expect(page.locator('.pvp-feedback')).not.toContainText('Elo')
+  await expect(page.locator('.mode-strip')).toContainText('1,050')
+
+  await page.getByRole('button', { name: 'Back to battles' }).click()
+  await expect(page.locator('.pvp-history')).toContainText('You fought a bot (Hard)')
+  await expect(page.locator('.pvp-history .pvp-change')).toContainText('+50')
+  await expect(page.locator('.pvp-stats')).toContainText('1000')
+  await expect(page.locator('.pvp-start')).toContainText('10 battles left today')
+  await expect(bots).toContainText('4 paying bot battles left today')
+})
+
+test('bots: past the paying battles, they play for fun', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection, pvp: { botsToday: 5 } })
+  await page.goto('/challenge/games/pvp')
+  const bots = page.getByRole('group', { name: 'Train against a bot' })
+  await expect(bots).toContainText('No more coins today: 15 bot battles left for fun.')
+  await expect(bots.locator('.pvp-bot-reward')).toHaveCount(0)
+})
+
+test('before 0027, no bots', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection, pvp: { noBots: true } })
+  await page.goto('/challenge/games/pvp')
+  await expect(page.getByRole('group', { name: 'Attack deck' })).toBeVisible()
+  await expect(page.getByRole('group', { name: 'Train against a bot' })).toHaveCount(0)
+  await expect(page.locator('.pvp-rules')).not.toContainText('Bots:')
 })

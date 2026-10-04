@@ -470,13 +470,17 @@
       "pvp_invalid_format": "Ce format n'existe pas.",
       "pvp_invalid_deck": "Ce deck n'est pas valide : 5 cartes différentes que tu possèdes, capables de combattre dans ce format.",
       "pvp_no_deck": "Monte d'abord un deck dans ce format.",
-      "pvp_no_opponent": "Pas encore d'adversaire dans ce format : personne d'autre n'y a de deck. Essaie un autre format, ou reviens plus tard.",
+      "pvp_no_opponent": "Pas encore d'adversaire dans ce format : personne d'autre n'y a de deck. Affronte un bot en attendant (sous le bouton), essaie un autre format, ou reviens plus tard.",
       "pvp_no_battles_left": "Plus de combats aujourd'hui : reviens demain.",
       "pvp_invalid_card": "Cette carte ne peut pas jouer (K.O. ?).",
       "pvp_invalid_attack": "Cette carte n'a pas cette attaque.",
       "pvp_not_enough_energy": "Pas encore assez d'énergie pour cette attaque.",
       "pvp_invalid_role": "Ce type de deck n'existe pas.",
-      "pvp_roles_unavailable": "Les decks de défense ne sont pas encore disponibles : ton deck d'attaque te défend pour l'instant."
+      "pvp_roles_unavailable": "Les decks de défense ne sont pas encore disponibles : ton deck d'attaque te défend pour l'instant.",
+      "pvp_invalid_level": "Ce niveau de bot n'existe pas.",
+      "pvp_no_bot_battles_left": "Plus de combats contre les bots aujourd'hui : reviens demain.",
+      "pvp_no_bot_deck": "Pas assez de Pokémon différents dans ce format pour donner un deck à un bot. Essaie un autre format.",
+      "pvp_bots_unavailable": "Les bots arrivent bientôt."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -737,7 +741,7 @@
       },
       "pvp": {
         "title": "Combats PvP",
-        "desc": "Ton deck contre ceux des autres joueurs : énergie, récompenses, Elo."
+        "desc": "Ton deck contre ceux des autres joueurs, ou contre des bots pour des pièces : énergie, récompenses, Elo."
       },
       "boss-raid": {
         "title": "Raid de boss",
@@ -830,7 +834,7 @@
   },
   "pvp": {
     "title": "Combats PvP",
-    "subtitle": "Monte un deck de 5 cartes du défi et affronte les decks des autres joueurs. Le serveur joue leur deck : pas besoin qu'ils soient connectés. Gère ton énergie, prends 3 récompenses, gagne des points Elo.",
+    "subtitle": "Monte un deck de 5 cartes du défi et affronte les decks des autres joueurs. Le serveur joue leur deck : pas besoin qu'ils soient connectés. Gère ton énergie, prends 3 récompenses, gagne des points Elo. Pas encore beaucoup de joueurs ? Les bots rapportent des pièces.",
     "unavailable": "Les combats PvP arrivent bientôt.",
     "loadError": "Impossible de charger les combats PvP. Réessaie dans un instant.",
     "hiddenCard": "Une carte pas encore jouée",
@@ -908,7 +912,8 @@
     "historyTitle": "Mes derniers combats",
     "history": {
       "attack": "Tu as attaqué {name}",
-      "defense": "{name} a attaqué ton deck"
+      "defense": "{name} a attaqué ton deck",
+      "bot": "Tu as affronté {name}"
     },
     "short": {
       "won": "Gagné",
@@ -927,8 +932,9 @@
       "energy": "Énergie : 1 au départ, +1 à chaque manche, jusqu'à {max}. Une attaque coûte les énergies imprimées sur la carte : les grosses attaques arrivent tard. Ne pas attaquer garde ton énergie pour la manche suivante.",
       "prizes": "Mettre un Pokémon K.O. rapporte ses récompenses : 1 pour la plupart, 2 pour les ex, EX, GX, V et VSTAR, 3 pour les VMAX, TAG TEAM et Méga ex. {prizes} récompenses donnent la victoire.",
       "damage": "La faiblesse double les dégâts, la résistance en retire {resistance}. « 30+ » compte 30 ; « 20× » vaut 20 fois 1 à 3.",
-      "elo": "Pas de pièces : tu gagnes ou perds des points Elo, plus contre un joueur plus fort. Ton adversaire est tiré parmi les joueurs les plus proches de ton Elo.",
-      "limit": "{count} attaques par jour, remises à zéro à {time}. Les défenses sont illimitées."
+      "elo": "Contre les joueurs, pas de pièces : tu gagnes ou perds des points Elo, plus contre un joueur plus fort. Ton adversaire est tiré parmi les joueurs les plus proches de ton Elo.",
+      "limit": "{count} attaques par jour, remises à zéro à {time}. Les défenses sont illimitées.",
+      "bots": "Bots : le même combat avec ton deck d'attaque, contre des cartes que le serveur tire du format. Pas d'Elo, et ils n'utilisent pas tes attaques. Une victoire rapporte {easy}, {normal} ou {hard} pièces (facile, normal, difficile), un match nul la moitié, pour tes {paid} premiers combats contre les bots de la journée ; {count} par jour en tout."
     },
     "roundSaved": "Ton {mine} n'attaque pas (énergie gardée).",
     "roundTheySaved": "{theirs} n'attaque pas (il garde son énergie).",
@@ -952,7 +958,22 @@
       "defense": "Les autres joueurs attaquent ce deck : tu gagnes ou perds des points Elo à chaque fois."
     },
     "defenseFallback": "Pas encore de deck de défense : ton deck d'attaque te défend en attendant. Les autres joueurs l'attaquent, et tu gagnes ou perds des points Elo à chaque fois.",
-    "defenseInvalid": "Certaines de ces cartes ont quitté ta collection (recyclées ou échangées) : ton deck d'attaque te défend tant que tu ne changes pas celui-ci."
+    "defenseInvalid": "Certaines de ces cartes ont quitté ta collection (recyclées ou échangées) : ton deck d'attaque te défend tant que tu ne changes pas celui-ci.",
+    "botsTitle": "S'entraîner contre un bot",
+    "botsHelp": "Mêmes règles, avec ton deck d'attaque. Pas d'Elo : des pièces à la place.",
+    "levels": {
+      "easy": "Facile",
+      "normal": "Normal",
+      "hard": "Difficile"
+    },
+    "botName": "un bot ({level})",
+    "botWin": "Victoire :",
+    "botPaidLeft": "{count} combat payant contre les bots aujourd'hui | {count} combats payants contre les bots aujourd'hui",
+    "botUnpaidLeft": "Plus de pièces aujourd'hui : encore {count} combat contre les bots pour le plaisir. | Plus de pièces aujourd'hui : encore {count} combats contre les bots pour le plaisir.",
+    "noBotBattlesLeft": "Plus de combats contre les bots aujourd'hui : reviens demain.",
+    "coinsWon": "Tu gagnes",
+    "noCoins": "Pas de pièces cette fois.",
+    "unpaid": "Pas de pièces : tes combats payants contre les bots sont utilisés pour aujourd'hui."
   },
   "electrodeFlip": {
     "title": "Électrode Shiny Flip",

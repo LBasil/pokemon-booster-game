@@ -61,7 +61,10 @@ How it works inside (every table, RPC and flow, in French):
   starts at 1 and grows by 1 a round (5 at most), so big attacks come
   late; knocked out Pokémon give prizes like in the real game (2 for ex,
   V, GX..., 3 for VMAX), 3 prizes win. Elo per format and a win rate, no
-  coins, 10 attacks a day. One more is teased as
+  coins, 10 attacks a day. Not many players yet? **Bots** (easy, normal,
+  hard) play the same battle against your attack deck with cards dealt
+  from the format: no Elo, but a win pays 10 / 25 / 50 coins (a draw half)
+  for the first 5 bot battles of the day, 20 a day in all. One more is teased as
   "Coming soon" (**Boss raid**). Packs
   keep the real pull rates (no pity timer), except that 1 booster in 500 is
   a "god pack" (holos and better only). **Trade cards** with other
@@ -361,6 +364,9 @@ its **SQL editor** and run, in order:
    imported yet is left out instead of being free. Run it after 0025,
    then make sure a full card sync went through (the "Sync cards"
    Action now fails if a page couldn't be imported).
+27. `supabase/migrations/0027_pvp_bots.sql` — PvP against bots (easy,
+   normal, hard) for coins, no Elo. Run it after 0026; until then the
+   PvP page simply has no bot section.
 
 Then in **Authentication**:
 

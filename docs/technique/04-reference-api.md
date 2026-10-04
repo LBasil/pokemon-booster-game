@@ -552,16 +552,17 @@ complète : l'import n'est pas repassé). RPC absente (`PGRST202`) ou
 
 ---
 
-## Combats PvP (Défi, migrations 0024 + 0025 + 0026)
+## Combats PvP (Défi, migrations 0024 + 0025 + 0026 + 0027)
 
 | RPC | JS | Rôle |
 | --- | --- | --- |
-| `pvp_state()` | `fetchPvpState()` | Règles, `ready` (des cartes ont leurs attaques et les sets leur ère), combats restants du jour, formats avec mes cartes jouables, mes decks (`{ format: { attack, defense } }` depuis 0026, chacun `{ cards, valid }` ou absent ; `valid` : toutes les cartes encore possédées ; avant 0026 un seul `{ cards, valid }` par format, que `deckRoles()` lit comme le deck d'attaque), mes Elo par format, combat en cours, mes 10 derniers combats (attaques et défenses, de mon point de vue) |
+| `pvp_state()` | `fetchPvpState()` | Règles, `ready` (des cartes ont leurs attaques et les sets leur ère), combats restants du jour, formats avec mes cartes jouables, mes decks (`{ format: { attack, defense } }` depuis 0026, chacun `{ cards, valid }` ou absent ; `valid` : toutes les cartes encore possédées ; avant 0026 un seul `{ cards, valid }` par format, que `deckRoles()` lit comme le deck d'attaque), mes Elo par format, combat en cours, mes 10 derniers combats (attaques, défenses et bots, de mon point de vue ; un combat contre un bot a `bot` et `coins`). Depuis 0027 : `battles_left` ne compte que les combats contre des joueurs, plus `bot_battles_left`, `bot_paid_left`, `coins` (portefeuille) et les règles `bot_levels`, `bot_coins`, `bot_paid_per_day`, `bot_battles_per_day` |
 | `pvp_eligible(p_format)` | `fetchPvpEligible(format)` | Mes cartes du Défi jouables dans ce format, meilleure attaque d'abord |
 | `pvp_save_deck(p_format, p_cards, p_role)` (0026 ; sans `p_role` avant) | `savePvpDeck(format, ids, role)` | `role` = `attack` (par défaut) ou `defense` (sinon `pvp_invalid_role`). 5 ids distincts, possédés, jouables, du format ; une carte peut être dans les deux decks. Crée mon Elo du format. Renvoie l'état. Sans 0026 : le deck d'attaque est enregistré à l'ancienne, un deck de défense donne `pvp_roles_unavailable` (côté client) |
 | `pvp_start(p_format)` | `startPvpBattle(format)` | Renvoie le combat en cours s'il y en a un ; sinon attaque avec **mon deck d'attaque** (`pvp_no_deck` sans lui) : tire un adversaire parmi les 5 joueurs d'Elo le plus proche ayant un deck valide (**son deck de défense**, sinon son deck d'attaque ; le dernier adversaire en dernier) et démarre. Renvoie l'état |
+| `pvp_bot_start(p_format, p_level)` (0027) | `startPvpBotBattle(format, level)` | Renvoie le combat en cours s'il y en a un ; sinon combat contre un bot (`easy`, `normal`, `hard`, sinon `pvp_invalid_level`) avec **mon deck d'attaque** (`pvp_no_deck`, `pvp_invalid_deck`) : le serveur tire le deck du bot dans tout le format (`pvp_no_bot_deck` s'il n'y a pas 5 noms différents). Pas d'Elo ; payant si c'est un des 5 premiers combats contre les bots du jour, 20 par jour (`pvp_no_bot_battles_left`). Renvoie l'état. Sans 0027 : `pvp_bots_unavailable` (côté client) |
 | `pvp_play(p_slot, p_attack)` (0025 ; `pvp_play(p_slot)` avant) | `playPvpCard(slot, attack)` | Joue ma carte (0-4) avec une de ses attaques (index dans `attacks`, `null` = pas d'attaque, l'énergie est gardée) contre la carte et l'attaque déjà choisies du défenseur. Renvoie `{ round, battle, state }` |
-| `pvp_forfeit()` | `forfeitPvpBattle()` | Abandon = défaite (Elo). Renvoie `{ battle, state }` |
+| `pvp_forfeit()` | `forfeitPvpBattle()` | Abandon = défaite (Elo ; contre un bot : 0 pièce). Renvoie `{ battle, state }` |
 | `pvp_leaderboard(p_format)` | `fetchPvpLeaderboard(format)` | Top 20 des profils publics ayant combattu (attaques + défenses), et ma ligne (`me`, `null` si pas classé) |
 
 Format : `all`, `era:<sets.series>` ou `set:<id>` (un sous-set n'est pas
@@ -593,7 +594,10 @@ Combat (`battle`, vue de l'attaquant) :
 }
 ```
 
-`opponent.username` est `null` pour un profil privé. `theirs.deck` (tout
+Depuis 0027, le combat a aussi `bot` (niveau, `null` contre un joueur),
+`paid` et `coins` (pièces gagnées, à la fin), et `opponent.bot`. Contre un
+bot : `opponent.username` et `opponent.elo` sont `null`, `elo_change`
+vaut 0 à la fin. `opponent.username` est `null` pour un profil privé. `theirs.deck` (tout
 le deck adverse) n'arrive qu'à la fin du combat, la prochaine carte du
 défenseur jamais. `a_attack` / `d_attack` = index de l'attaque (`null` =
 pas d'attaque). `roll_*` = le tirage 1 à 3 d'une attaque « 20× ».

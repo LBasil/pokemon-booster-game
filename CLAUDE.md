@@ -518,6 +518,19 @@ docs/technique/             technical doc (French, user choice): overview, front
   attacks per game day. Deck hidden until played (`theirs.seen`, whole
   deck once over). Mirror: `src/utils/pvp.js`. `ready` false (no attacks
   yet) -> "Coming soon".
+  **Bots** (0027, user 2026-10-04: "met un pvp contre des bots, lui il
+  donne des pièces au pire, j'ai pas assez de joueurs"): `pvp_bot_start(
+  format, level)` (easy | normal | hard) = the same battle (`pvp_play`,
+  `pvp_forfeit` unchanged) with my attack deck against `pvp_bot_deck()`:
+  5 different names from 400 random fighting cards of the format, scored
+  like `autoDeck` into 5 tiers (easy 2, normal 4, hard 5).
+  `pvp_battles.defender` null + `bot`, `paid`, `coins`. No Elo, not in
+  the 10 daily attacks; coins (`BOT_COINS` 10/25/50, draw half) for the
+  first 5 bot battles started that game day (a forfeit uses the slot),
+  20 a day in all; ledger kind `pvp_bot`. `pvp_state()` adds
+  `bot_battles_left`, `bot_paid_left`, `coins`; no `bot_battles_left` =
+  0027 missing -> no bot section (`botsAvailable`). Mirror:
+  `src/utils/pvp.js` (`botCoins`).
 - **Never let a player lose track of the mode** (user priority): every
   challenge page shows AppHeader's `.mode-strip` ("Challenge mode", coins,
   "Leave" → `/game`, phones included); Community and profiles
@@ -691,7 +704,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   categories, rates, unlock toasts), challenge mode (coins, daily reward,
   daily + weekly missions, recycle, craft, god packs, mini-games "Higher
   or lower", "Shiny Electrode Flip", "Super effective!" and "Evolution chain" (needs 0018 + a
-  card import), PvP battles (needs 0024 + 0025 + a card sync), trades with live
+  card import), PvP battles (needs 0024 + 0025 + a card sync; bots for coins since 0027), trades with live
   updates, opt-out and cards kept out of trades), PWA, EN/FR, both themes.
 - What each migration does (details in each file's header comment):
   0001 schema · 0002 first RPCs (unused) · 0003 realistic packs + rarity
@@ -717,12 +730,13 @@ docs/technique/             technical doc (French, user choice): overview, front
   energy + prize cards (written 2026-10-03, applied, checked
   2026-10-04) · 0026 PvP attack / defense decks + attacks without a
   cost dropped (written 2026-10-04, **to apply**, then check a full
-  card sync went through). Every one was
+  card sync went through) · 0027 PvP against bots for coins (written
+  2026-10-04, **to apply** after 0026). Every one was
   verified locally with PGlite before being handed over; 0010-0025 have
-  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 too) —
+  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 and 0027 too) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 232 unit tests, `npm run test:db` 504 database
-  checks, `npm run test:e2e` 296 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 234 unit tests, `npm run test:db` 542 database
+  checks, `npm run test:e2e` 302 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

@@ -1,6 +1,6 @@
 // PvP battle rules. Mirrors pvp_rules(), pvp_prizes(), pvp_damage() and
-// pvp_elo_change() in supabase/migrations/0025_pvp_energy_prizes.sql — change both
-// together. The server stays the authority (it sends the rules with its
+// pvp_elo_change() in supabase/migrations/0025_pvp_energy_prizes.sql, and the
+// bot rules of 0027_pvp_bots.sql — change both together. The server stays the authority (it sends the rules with its
 // state and plays every round): these only drive labels and previews.
 
 export const DECK_SIZE = 5
@@ -15,6 +15,22 @@ export const K_FACTOR = 32
 export const WEAKNESS_MULTIPLIER = 2
 export const RESISTANCE = 30
 export const MIN_DAMAGE = 10
+
+// Bots (0027): no Elo, coins for the first battles of the game day
+export const BOT_LEVELS = ['easy', 'normal', 'hard']
+export const BOT_COINS = { easy: 10, normal: 25, hard: 50 }
+export const BOT_PAID_PER_DAY = 5
+export const BOT_BATTLES_PER_DAY = 20
+
+/**
+ * Coins a finished bot battle pays: the level's coins for a win, half
+ * (rounded down) for a draw, nothing for a loss / giving up or an unpaid one.
+ */
+export function botCoins(level, status, paid = true, coins = BOT_COINS) {
+  if (!paid) return 0
+  const share = status === 'won' ? 1 : status === 'draw' ? 0.5 : 0
+  return Math.floor((coins[level] ?? 0) * share)
+}
 
 /** Prizes a card gives when knocked out, from its subtypes (the real TCG's rule boxes). */
 export function prizesFor(subtypes = []) {

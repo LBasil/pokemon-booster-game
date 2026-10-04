@@ -48,6 +48,11 @@ export const CHALLENGE_ERRORS = [
   // attack and defense decks (migration 0026)
   'pvp_invalid_role',
   'pvp_roles_unavailable',
+  // bots (migration 0027)
+  'pvp_invalid_level',
+  'pvp_no_bot_battles_left',
+  'pvp_no_bot_deck',
+  'pvp_bots_unavailable',
 ]
 
 // PostgREST's answer for an RPC that doesn't exist yet
@@ -341,6 +346,20 @@ export async function savePvpDeck(format, cardIds, role = 'attack') {
 
 /** Finds an opponent and starts a battle (or returns the one in progress); returns the state. */
 export const startPvpBattle = (format) => call('pvp_start', { p_format: format })
+
+/**
+ * Starts a battle against a bot ('easy' | 'normal' | 'hard') with my attack
+ * deck (or returns the one in progress); returns the state. No Elo, coins
+ * for the first wins of the day. Before 0027: `pvp_bots_unavailable`.
+ */
+export async function startPvpBotBattle(format, level) {
+  try {
+    return await call('pvp_bot_start', { p_format: format, p_level: level })
+  } catch (err) {
+    if (err?.code === MISSING_FUNCTION) throw Object.assign(new Error('pvp_bots_unavailable'), { code: 'pvp_bots_unavailable' })
+    throw err
+  }
+}
 
 /**
  * Plays my card at `slot` (0-4) with one of its attacks (index in its

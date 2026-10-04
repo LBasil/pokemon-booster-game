@@ -179,11 +179,12 @@ export async function mockSupabase(page, options = {}) {
     evolutionChain:
       options.evolutionChain === 'missing' ? 'missing' : { ready: true, paidUsed: 0, best: 0, todayCoins: 0, run: null, next: 0, ...options.evolutionChain },
     // PvP battles (migration 0024): 'missing' = not applied; opponent: false =
-    // nobody else has a deck; decks / ratings by format; board = leaderboard rows
+    // nobody else has a deck; decks / ratings by format; board = leaderboard rows;
+    // bots (0027): botsToday = bot battles started today, noBots = 0027 not applied
     pvp:
       options.pvp === 'missing'
         ? 'missing'
-        : { ready: true, battlesLeft: 10, opponent: true, decks: {}, ratings: {}, battle: null, history: [], board: [], ...options.pvp },
+        : { ready: true, battlesLeft: 10, opponent: true, decks: {}, ratings: {}, battle: null, history: [], board: [], botsToday: 0, noBots: false, ...options.pvp },
   }
   const challengeState = () => {
     const c = state.challenge
@@ -452,6 +453,9 @@ export async function mockSupabase(page, options = {}) {
         my_energy: b.my_energy,
         their_energy: b.their_energy,
         elo_change: b.elo_change,
+        bot: b.bot ?? null,
+        paid: b.paid ?? false,
+        coins: b.coins ?? null,
         opponent: b.opponent,
         log: b.log,
         mine: b.mine.map((card, slot) => ({ ...card, slot, hp_left: b.myHp[slot] })),
@@ -478,6 +482,14 @@ export async function mockSupabase(page, options = {}) {
           ratings: pv.ratings,
           battle: pv.battle && pv.battle.status === 'playing' ? view(pv.battle) : null,
           history: pv.history,
+          ...(pv.noBots
+            ? {}
+            : {
+                bot_levels: ['easy', 'normal', 'hard'], bot_coins: { easy: 10, normal: 25, hard: 50 }, bot_paid_per_day: 5, bot_battles_per_day: 20,
+                bot_battles_left: Math.max(20 - pv.botsToday, 0),
+                bot_paid_left: Math.max(5 - pv.botsToday, 0),
+                coins: state.challenge.coins,
+              }),
         }
       }
       if (path === '/rest/v1/rpc/pvp_state') return json(pvState())
@@ -512,7 +524,32 @@ export async function mockSupabase(page, options = {}) {
         }
         return json(pvState())
       }
+      if (path === '/rest/v1/rpc/pvp_bot_start') {
+        if (pv.noBots) return json({ code: 'PGRST202', message: 'Could not find the function public.pvp_bot_start(p_format, p_level) in the schema cache' }, 404)
+        if (pv.battle?.status === 'playing') return json(pvState())
+        if (!['easy', 'normal', 'hard'].includes(args.p_level)) return raise('pvp_invalid_level')
+        if (pv.botsToday >= 20) return raise('pvp_no_bot_battles_left')
+        const entry = pv.decks[args.p_format]
+        const deck = entry && ('cards' in entry ? entry : entry.attack)
+        if (!deck) return raise('pvp_no_deck')
+        pv.battle = {
+          id: Date.now(), format: args.p_format, status: 'playing', round: 0, my_prizes: 0, their_prizes: 0, my_energy: 1, their_energy: 1, elo_change: null,
+          bot: args.p_level, paid: pv.botsToday < 5, coins: null,
+          opponent: { bot: args.p_level, username: null, elo: null }, log: [], mine: deck.cards, myHp: deck.cards.map((card) => card.hp),
+          theirHp: PVP_OPPONENT_DECK.map((card) => card.hp), seen: [], next: 0,
+        }
+        pv.botsToday++
+        return json(pvState())
+      }
       const finish = (b, status) => {
+        if (b.bot) {
+          b.status = status
+          b.elo_change = 0
+          b.coins = b.paid ? Math.floor({ easy: 10, normal: 25, hard: 50 }[b.bot] * (status === 'won' ? 1 : status === 'draw' ? 0.5 : 0)) : 0
+          state.challenge.coins += b.coins
+          pv.history.unshift({ id: b.id, format: b.format, at: new Date().toISOString(), role: 'attack', result: status === 'forfeit' ? 'lost' : status, elo_change: 0, bot: b.bot, coins: b.coins, opponent: null })
+          return
+        }
         b.status = status
         b.elo_change = status === 'won' ? 16 : status === 'draw' ? 0 : -16
         const r = rating(b.format)

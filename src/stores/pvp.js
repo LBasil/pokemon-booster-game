@@ -7,13 +7,18 @@ import {
   playPvpCard,
   savePvpDeck,
   startPvpBattle,
+  startPvpBotBattle,
 } from '@/api/challenge'
+import { useAchievementsStore } from '@/stores/achievements'
+import { useChallengeStore } from '@/stores/challenge'
 import { deckRoles } from '@/utils/pvp'
 
-// PvP battles (challenge mode, migrations 0024 + 0025 + 0026): my attack and
+// PvP battles (challenge mode, migrations 0024 + 0025 + 0026 + 0027): my attack and
 // defense decks and Elo per format,
 // battles left today, the battle in progress and my history. The server
-// picks the opponent, plays their deck and moves both ratings.
+// picks the opponent, plays their deck and moves both ratings. Bots (0027):
+// the server deals the deck, no Elo, coins (the header's wallet follows
+// `state.coins`). `botsAvailable` false = 0027 not applied: no bot section.
 // `unavailable` = migration 0024/0025 not applied yet, or no card has its attacks + costs
 // yet (populate hasn't run since): "Coming soon".
 const isMissingRpc = (err) => err?.code === 'PGRST202' || /could not find the function/i.test(err?.message ?? '')
@@ -31,6 +36,9 @@ export const usePvpStore = defineStore('pvp', {
   getters: {
     battle: (s) => s.state?.battle ?? null,
     battlesLeft: (s) => s.state?.battles_left ?? 0,
+    botsAvailable: (s) => typeof s.state?.bot_battles_left === 'number',
+    botBattlesLeft: (s) => s.state?.bot_battles_left ?? 0,
+    botPaidLeft: (s) => s.state?.bot_paid_left ?? 0,
     formats: (s) => s.state?.formats ?? { all: 0, eras: [], sets: [] },
     // format -> { attack, defense } (each { cards, valid } or null), whatever the server's version
     decks: (s) => Object.fromEntries(Object.entries(s.state?.decks ?? {}).map(([format, entry]) => [format, deckRoles(entry)])),
@@ -77,6 +85,19 @@ export const usePvpStore = defineStore('pvp', {
       this.state = await startPvpBattle(format)
     },
 
+    /** @param {'easy' | 'normal' | 'hard'} level */
+    async startBot(format, level) {
+      this.state = await startPvpBotBattle(format, level)
+    },
+
+    // A bot battle that paid: the header's coins follow the server, and
+    // coins earned count for the economy achievements
+    syncCoins() {
+      const challenge = useChallengeStore()
+      if (challenge.state && typeof this.state?.coins === 'number') challenge.state = { ...challenge.state, coins: this.state.coins }
+      useAchievementsStore().check('challenge')
+    },
+
     /**
      * @param {number} slot - my card (0-4)
      * @param {number | null} attack - index in the card's `attacks`, null = no attack
@@ -85,7 +106,10 @@ export const usePvpStore = defineStore('pvp', {
     async play(slot, attack) {
       const result = await playPvpCard(slot, attack)
       this.state = result.state
-      if (result.battle.status !== 'playing') delete this.boards[result.battle.format]
+      if (result.battle.status !== 'playing') {
+        delete this.boards[result.battle.format]
+        if (result.battle.coins) this.syncCoins()
+      }
       return result
     },
 

@@ -470,13 +470,17 @@
       "pvp_invalid_format": "This format doesn't exist.",
       "pvp_invalid_deck": "This deck isn't valid: 5 different cards you own, that can fight in this format.",
       "pvp_no_deck": "Build a deck in this format first.",
-      "pvp_no_opponent": "No opponent in this format yet: nobody else has a deck here. Try another format, or come back later.",
+      "pvp_no_opponent": "No opponent in this format yet: nobody else has a deck here. Fight a bot meanwhile (below the button), try another format, or come back later.",
       "pvp_no_battles_left": "No battles left today: come back tomorrow.",
       "pvp_invalid_card": "This card can't play (knocked out?).",
       "pvp_invalid_attack": "This card has no such attack.",
       "pvp_not_enough_energy": "Not enough energy for this attack yet.",
       "pvp_invalid_role": "This kind of deck doesn't exist.",
-      "pvp_roles_unavailable": "Defense decks aren't available yet: your attack deck defends you for now."
+      "pvp_roles_unavailable": "Defense decks aren't available yet: your attack deck defends you for now.",
+      "pvp_invalid_level": "This bot level doesn't exist.",
+      "pvp_no_bot_battles_left": "No bot battles left today: come back tomorrow.",
+      "pvp_no_bot_deck": "Not enough different Pokémon in this format to deal a bot a deck. Try another format.",
+      "pvp_bots_unavailable": "Bots are coming soon."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -737,7 +741,7 @@
       },
       "pvp": {
         "title": "PvP battles",
-        "desc": "Your deck against other players' decks: energy, prizes, Elo."
+        "desc": "Your deck against other players' decks, or bots for coins: energy, prizes, Elo."
       },
       "boss-raid": {
         "title": "Boss raid",
@@ -830,7 +834,7 @@
   },
   "pvp": {
     "title": "PvP battles",
-    "subtitle": "Build a deck of 5 challenge cards and take on other players' decks. The server plays their deck: they don't need to be online. Manage your energy, take 3 prizes, win Elo points.",
+    "subtitle": "Build a deck of 5 challenge cards and take on other players' decks. The server plays their deck: they don't need to be online. Manage your energy, take 3 prizes, win Elo points. Not many players yet? Bots pay coins.",
     "unavailable": "PvP battles are coming soon.",
     "loadError": "Couldn’t load PvP battles. Try again in a moment.",
     "hiddenCard": "A card not played yet",
@@ -908,7 +912,8 @@
     "historyTitle": "My last battles",
     "history": {
       "attack": "You attacked {name}",
-      "defense": "{name} attacked your deck"
+      "defense": "{name} attacked your deck",
+      "bot": "You fought {name}"
     },
     "short": {
       "won": "Won",
@@ -927,8 +932,9 @@
       "energy": "Energy: 1 at the start, +1 each round, up to {max}. An attack costs the energies printed on the card: big attacks come late. No attack saves your energy for the next round.",
       "prizes": "Knocking out a Pokémon takes its prizes: 1 for most, 2 for ex, EX, GX, V and VSTAR, 3 for VMAX, TAG TEAM and Mega ex. {prizes} prizes win.",
       "damage": "Weakness doubles the damage, resistance takes {resistance} off. “30+” counts 30; “20×” is 20 times 1 to 3.",
-      "elo": "No coins: you win or lose Elo points, more against a stronger player. Your opponent is drawn among the players closest to your Elo.",
-      "limit": "{count} attacks a day, reset at {time}. Defenses are unlimited."
+      "elo": "Against players, no coins: you win or lose Elo points, more against a stronger player. Your opponent is drawn among the players closest to your Elo.",
+      "limit": "{count} attacks a day, reset at {time}. Defenses are unlimited.",
+      "bots": "Bots: the same battle with your attack deck, against cards the server deals from the format. No Elo, and they don't use your attacks. A win pays {easy}, {normal} or {hard} coins (easy, normal, hard), a draw half, for your first {paid} bot battles of the day; {count} a day in all."
     },
     "roundSaved": "Your {mine} didn't attack (energy saved).",
     "roundTheySaved": "{theirs} didn't attack (saving energy).",
@@ -952,7 +958,22 @@
       "defense": "Other players attack this deck: you win or lose Elo when they do."
     },
     "defenseFallback": "No defense deck yet: your attack deck defends you meanwhile. Other players attack it, and you win or lose Elo when they do.",
-    "defenseInvalid": "Some of these cards left your collection (recycled or traded): your attack deck defends you until you change this one."
+    "defenseInvalid": "Some of these cards left your collection (recycled or traded): your attack deck defends you until you change this one.",
+    "botsTitle": "Train against a bot",
+    "botsHelp": "Same rules, with your attack deck. No Elo: coins instead.",
+    "levels": {
+      "easy": "Easy",
+      "normal": "Normal",
+      "hard": "Hard"
+    },
+    "botName": "a bot ({level})",
+    "botWin": "Win:",
+    "botPaidLeft": "{count} paying bot battle left today | {count} paying bot battles left today",
+    "botUnpaidLeft": "No more coins today: {count} bot battle left for fun. | No more coins today: {count} bot battles left for fun.",
+    "noBotBattlesLeft": "No bot battles left today: come back tomorrow.",
+    "coinsWon": "You earn",
+    "noCoins": "No coins this time.",
+    "unpaid": "No coins: your paying bot battles are used for today."
   },
   "electrodeFlip": {
     "title": "Shiny Electrode Flip",
