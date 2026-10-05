@@ -531,6 +531,16 @@ docs/technique/             technical doc (French, user choice): overview, front
   `bot_battles_left`, `bot_paid_left`, `coins`; no `bot_battles_left` =
   0027 missing -> no bot section (`botsAvailable`). Mirror:
   `src/utils/pvp.js` (`botCoins`).
+  **Testers only** (0028, user 2026-10-05: "bloque le PvP uniquement pour
+  le joueur Bazouk"; a bot battle won in 2 rounds by always hitting the
+  biggest affordable attack, "aucun choix tactique"): `pvp_open_to(user)`
+  (usernames in SQL) mirrored by `PVP_TESTERS` / `pvpOpenTo()` in
+  `src/utils/pvp.js`; others get `pvp_state() = { ready: false }` ("Coming
+  soon") and `pvp_closed`. `pvp_state` / `pvp_save_deck` / `pvp_start` /
+  `pvp_bot_start` are wrappers over renamed `*_impl` functions: a later
+  migration redefines the `*_impl`, not the wrapper. The e2e PvP specs
+  play as Bazouk (mock `username` option). Next: rework the rules so a
+  battle has real decisions (to settle with the user).
 - **Never let a player lose track of the mode** (user priority): every
   challenge page shows AppHeader's `.mode-strip` ("Challenge mode", coins,
   "Leave" → `/game`, phones included); Community and profiles
@@ -731,9 +741,9 @@ docs/technique/             technical doc (French, user choice): overview, front
   2026-10-04) · 0026 PvP attack / defense decks + attacks without a
   cost dropped (written 2026-10-04, **to apply**, then check a full
   card sync went through) · 0027 PvP against bots for coins (written
-  2026-10-04, **to apply** after 0026). Every one was
+  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027). Every one was
   verified locally with PGlite before being handed over; 0010-0025 have
-  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 and 0027 too) —
+  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0028 too) —
   the earlier checks lived in scratch scripts and are gone.
 - Tests: `npm test` 234 unit tests, `npm run test:db` 542 database
   checks, `npm run test:e2e` 302 (desktop + Pixel 7, incl. "no page

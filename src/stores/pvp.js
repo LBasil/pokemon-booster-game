@@ -11,7 +11,8 @@ import {
 } from '@/api/challenge'
 import { useAchievementsStore } from '@/stores/achievements'
 import { useChallengeStore } from '@/stores/challenge'
-import { deckRoles } from '@/utils/pvp'
+import { useProfileStore } from '@/stores/profile'
+import { deckRoles, pvpOpenTo } from '@/utils/pvp'
 
 // PvP battles (challenge mode, migrations 0024 + 0025 + 0026 + 0027): my attack and
 // defense decks and Elo per format,
@@ -20,7 +21,8 @@ import { deckRoles } from '@/utils/pvp'
 // the server deals the deck, no Elo, coins (the header's wallet follows
 // `state.coins`). `botsAvailable` false = 0027 not applied: no bot section.
 // `unavailable` = migration 0024/0025 not applied yet, or no card has its attacks + costs
-// yet (populate hasn't run since): "Coming soon".
+// yet (populate hasn't run since), or I'm not a tester (`pvpOpenTo`, the
+// server checks it too since 0028): "Coming soon".
 const isMissingRpc = (err) => err?.code === 'PGRST202' || /could not find the function/i.test(err?.message ?? '')
 
 export const usePvpStore = defineStore('pvp', {
@@ -58,6 +60,15 @@ export const usePvpStore = defineStore('pvp', {
       this.loading = true
       this.error = null
       try {
+        const profile = useProfileStore()
+        await profile.load()
+        // Already loading elsewhere (the header): wait for that load
+        while (profile.loading) await new Promise((resolve) => setTimeout(resolve, 50))
+        if (!pvpOpenTo(profile.profile?.username)) {
+          this.unavailable = true
+          this.loaded = true
+          return
+        }
         this.state = await fetchPvpState()
         this.unavailable = this.state?.ready === false
         this.loaded = true

@@ -13,6 +13,7 @@ import {
   hpPercent,
   parseFormat,
   prizesFor,
+  pvpOpenTo,
   record,
   toggleDeckCard,
 } from './pvp'
@@ -209,5 +210,18 @@ describe('botCoins', () => {
     expect(botCoins('hard', 'lost')).toBe(0)
     expect(botCoins('hard', 'forfeit')).toBe(0)
     expect(botCoins('hard', 'won', false)).toBe(0)
+  })
+})
+
+describe('pvpOpenTo', () => {
+  it('lets the testers in, whatever the case', () => {
+    expect(pvpOpenTo('Bazouk')).toBe(true)
+    expect(pvpOpenTo('BAZOUK')).toBe(true)
+  })
+
+  it('keeps everyone else out, and opens to all with null', () => {
+    expect(pvpOpenTo('Ash')).toBe(false)
+    expect(pvpOpenTo(null)).toBe(false)
+    expect(pvpOpenTo('Ash', null)).toBe(true)
   })
 })

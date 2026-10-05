@@ -51,7 +51,7 @@ How it works inside (every table, RPC and flow, in French):
   stage is hidden), tap them from the Basic to the last stage within 15
   seconds; intruders from other lines slip in as the streak grows, and
   "Stop" ends a run keeping its coins. The simplest game, so it pays the least: 3 coins per
-  right line (60 per run, 180 a day at most) — and **PvP battles**:
+  right line (60 per run, 180 a day at most) — and **PvP battles** (testers only for now, migration 0028):
   build two decks of 5 challenge cards per format (every card, one era
   of the TCG, or one set), one to attack with and one the server plays
   when you're attacked ("Auto deck" picks either for you), and attack
@@ -367,6 +367,10 @@ its **SQL editor** and run, in order:
 27. `supabase/migrations/0027_pvp_bots.sql` — PvP against bots (easy,
    normal, hard) for coins, no Elo. Run it after 0026; until then the
    PvP page simply has no bot section.
+28. `supabase/migrations/0028_pvp_testers_only.sql` — closes PvP to
+   everyone but its testers (Bazouk) while its rules are reworked; others
+   see "Coming soon". Run it after 0027. To reopen: `pvp_open_to()` returns
+   true, and `PVP_TESTERS = null` in `src/utils/pvp.js`.
 
 Then in **Authentication**:
 

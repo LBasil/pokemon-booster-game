@@ -852,7 +852,7 @@ sequenceDiagram
 ### Combats PvP
 
 Page : [PvpView.vue](../../src/views/PvpView.vue)
-(`/challenge/games/pvp`), store `pvp`, migrations 0024, 0025, 0026 et 0027. Demande de
+(`/challenge/games/pvp`), store `pvp`, migrations 0024, 0025, 0026, 0027 et 0028. **Réservé à ses testeurs depuis le 2026-10-05** (0028, demande : « bloque le PvP uniquement pour le joueur Bazouk », après un combat contre un bot gagné en deux tours en tapant toujours la plus grosse attaque : aucun choix tactique) : les autres joueurs voient « Bientôt ». Demande de
 l'utilisateur (2026-10-03) : du PvP en différé, « on attaque le deck de
 qq qui est joué par le serveur », trois formats (toutes les cartes, une
 ère du JCC, un set), deck adverse caché, de l'Elo et un taux de victoire,

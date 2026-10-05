@@ -4,6 +4,7 @@ import { useAchievementsStore } from '@/stores/achievements'
 import { useChallengeStore } from '@/stores/challenge'
 import { useChallengeCollectionStore, useCollectionStore } from '@/stores/collection'
 import { useProfileStore } from '@/stores/profile'
+import { usePvpStore } from '@/stores/pvp'
 import { useTradesStore } from '@/stores/trades'
 import { useWishlistStore } from '@/stores/wishlist'
 
@@ -16,6 +17,7 @@ function resetPlayerStores() {
   useProfileStore().$reset()
   useWishlistStore().$reset()
   useAchievementsStore().$reset()
+  usePvpStore().$reset()
 }
 
 // "Someone signed in on this device before": the landing opens on "Log in"

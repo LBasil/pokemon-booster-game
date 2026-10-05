@@ -16,6 +16,15 @@ export const WEAKNESS_MULTIPLIER = 2
 export const RESISTANCE = 30
 export const MIN_DAMAGE = 10
 
+// Who can play while PvP is being reworked (0028, user 2026-10-05: "bloque le
+// PvP uniquement pour le joueur Bazouk"): lowercased usernames, mirrors
+// pvp_open_to(). Everyone else sees "Coming soon". null = open to all.
+export const PVP_TESTERS = ['bazouk']
+
+/** @param {string | null | undefined} username */
+export const pvpOpenTo = (username, testers = PVP_TESTERS) =>
+  testers === null || testers.includes((username ?? '').trim().toLowerCase())
+
 // Bots (0027): no Elo, coins for the first battles of the game day
 export const BOT_LEVELS = ['easy', 'normal', 'hard']
 export const BOT_COINS = { easy: 10, normal: 25, hard: 50 }

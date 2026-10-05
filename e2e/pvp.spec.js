@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { collectionEntry } from './support/data.js'
-import { mockSupabase, signIn } from './support/supabase.js'
+import { mockSupabase as mockBackend, signIn } from './support/supabase.js'
 
 // PvP battles (migrations 0024 + 0025 + 0026: attack and defense decks). In the mock every challenge Pokémon is Fire
 // with 60 HP: Ember (30, 1 energy) and Flamethrower (90, 3 energies).
@@ -9,6 +9,9 @@ import { mockSupabase, signIn } from './support/supabase.js'
 test.beforeEach(async ({ page }) => {
   await signIn(page)
 })
+
+// PvP is open to its testers only (0028): these tests play as Bazouk
+const mockSupabase = (page, options = {}) => mockBackend(page, { username: 'Bazouk', ...options })
 
 const FIVE = ['sv3pt5-4', 'sv3pt5-7', 'sv3pt5-1', 'sv3pt5-25', 'sv3pt5-5']
 const challengeCollection = [...FIVE, 'sv3pt5-150', 'sv3pt5-190'].map((id) => collectionEntry(id))
@@ -187,6 +190,15 @@ test('formats: one era or one set, and no opponent says why', async ({ page }) =
   // Remembered on this device
   await page.reload()
   await expect(page.getByLabel('Set', { exact: true })).toHaveValue('set:sv3pt5')
+})
+
+test('closed to everyone but the testers', async ({ page }) => {
+  const backend = await mockBackend(page, { challengeCollection })
+  await page.goto('/challenge/games/pvp')
+  await expect(page.getByText('PvP battles are coming soon.')).toBeVisible()
+  await page.goto('/challenge/games')
+  await expect(page.locator('.game-tile').filter({ hasText: 'PvP battles' })).toContainText('Coming soon')
+  expect(backend.calls.filter((call) => call.path.startsWith('/rest/v1/rpc/pvp_'))).toEqual([])
 })
 
 test('before the migration, PvP says it is coming', async ({ page }) => {

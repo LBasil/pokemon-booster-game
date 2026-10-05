@@ -552,7 +552,15 @@ complète : l'import n'est pas repassé). RPC absente (`PGRST202`) ou
 
 ---
 
-## Combats PvP (Défi, migrations 0024 + 0025 + 0026 + 0027)
+## Combats PvP (Défi, migrations 0024 + 0025 + 0026 + 0027 + 0028)
+
+Depuis 0028, PvP est réservé à ses testeurs (`pvp_open_to(user)`, interne :
+pseudos listés dans la fonction, miroir de `PVP_TESTERS` dans
+`src/utils/pvp.js`). Pour les autres : `pvp_state()` renvoie
+`{ ready: false }` (« Bientôt »), `pvp_save_deck`, `pvp_start` et
+`pvp_bot_start` l'erreur `pvp_closed`. Les corps d'avant sont les
+fonctions internes `*_impl` (non appelables) : une migration qui
+redéfinit l'une de ces 4 fonctions redéfinit son `*_impl`.
 
 | RPC | JS | Rôle |
 | --- | --- | --- |

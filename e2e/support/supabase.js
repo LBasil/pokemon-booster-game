@@ -117,7 +117,7 @@ export const PVP_OPPONENT_DECK = ['Oddish', 'Venusaur ex', 'Tangela', 'Exeggcute
 export async function mockSupabase(page, options = {}) {
   const state = {
     collection: options.collection ?? [collectionEntry('sv3pt5-4', 2), collectionEntry('base1-4')],
-    profile: options.profile ?? { id: USER.id, username: 'Ash', is_public: true, showcase_card_id: null, created_at: USER.created_at, accepts_trades: true },
+    profile: options.profile ?? { id: USER.id, username: options.username ?? 'Ash', is_public: true, showcase_card_id: null, created_at: USER.created_at, accepts_trades: true },
     wishlist: [],
     openings: [],
     feed: options.feed ?? [
@@ -439,6 +439,11 @@ export async function mockSupabase(page, options = {}) {
     if (path.startsWith('/rest/v1/rpc/pvp_')) {
       const pv = state.pvp
       if (pv === 'missing') return json({ code: 'PGRST202', message: `Could not find the function public.${path.split('/').pop()} in the schema cache` }, 404)
+      // 0028: testers only (pvp_open_to)
+      if (state.profile.username.toLowerCase() !== 'bazouk') {
+        if (path === '/rest/v1/rpc/pvp_state') return json({ ready: false })
+        if (['/rest/v1/rpc/pvp_save_deck', '/rest/v1/rpc/pvp_start', '/rest/v1/rpc/pvp_bot_start'].includes(path)) return raise('pvp_closed')
+      }
       const fighters = () => state.challengeCollection.map((e) => pvpCard(e.card_id)).filter(Boolean)
       const fits = (card, format) =>
         format === 'all' || format === `era:${SERIES[card.id.split('-')[0]]}` || format === `set:${card.id.split('-')[0]}`
@@ -599,7 +604,7 @@ export async function mockSupabase(page, options = {}) {
         return json({ battle: view(b), state: pvState() })
       }
       if (path === '/rest/v1/rpc/pvp_leaderboard') {
-        const me = pv.board.find((row) => row.username === 'Ash')
+        const me = pv.board.find((row) => row.username === state.profile.username)
         return json({ rows: pv.board, me: me ? { rank: me.rank, elo: me.elo, wins: me.wins, losses: me.losses, draws: me.draws } : null })
       }
     }
