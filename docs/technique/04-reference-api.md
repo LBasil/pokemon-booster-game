@@ -552,7 +552,7 @@ complète : l'import n'est pas repassé). RPC absente (`PGRST202`) ou
 
 ---
 
-## Combats PvP (Défi, migrations 0024 à 0032)
+## Combats PvP (Défi, migrations 0024 à 0033)
 
 Depuis 0030, des combats façon Pokémon JCC Pocket (decks de 20, Banc,
 Énergie à attacher, évolutions, effets d'attaque) ; depuis 0031,
@@ -588,9 +588,19 @@ Coups (`p_action`) ; `card` = index de la carte dans mes 20 (`my_cards`),
 { "type": "retreat", "pos": 2 }
 { "type": "attack", "attack": 0, "target": 1, "switch_to": 2, "energy_to": 1 }
 { "type": "trainer", "card": 14, "pos": 0, "to": 2, "target": 1, "evolve": 6, "discard": [3, 9], "pick": [11] }
+{ "type": "ability", "at": 1, "ability": 0, "pos": 0, "target": 2, "discard": [4], "pick": [8] }
 { "type": "end" }
 { "type": "promote", "pos": 1 }
 ```
+
+`ability` (0033) : le talent `ability` (son index) de mon Pokémon `at` ;
+mêmes choix facultatifs que `trainer`. Erreur `pvp_cannot_use: <raison>`
+(`used`, `not_active`, `not_bench`, `status`, `once`, `hand`,
+`no_target`, `bench_full`), comme `hints.abilities[pos][i]`, qui vaut aussi
+`passive`, `on_bench`, `on_evolve` ou `unknown` (pas joué). Les talents des
+cartes : `abilities[i]` = `{ name, text, name_fr, text_fr, kind, fx, coins,
+playable, active_only, bench_only, many }`. Événement `ability` (`ability`,
+`ability_fr`, `flips`).
 
 `trainer` (0032) : un Dresseur de ma main ; ses choix sont tous
 facultatifs (le serveur choisit ce qui manque) : `pos` (un de mes Pokémon :
@@ -676,7 +686,7 @@ ne sont que des nombres, ses pioches arrivent sans les cartes. Événements
 
 Erreurs : `pvp_closed`, `pvp_invalid_format`, `pvp_invalid_deck`,
 `pvp_no_deck`, `pvp_no_opponent`, `pvp_no_battles_left`,
-`pvp_invalid_energy`, `pvp_cannot_play: <raison>`, `pvp_not_your_turn`, `pvp_invalid_action`, `pvp_bench_full`,
+`pvp_invalid_energy`, `pvp_cannot_play: <raison>`, `pvp_cannot_use: <raison>`, `pvp_not_your_turn`, `pvp_invalid_action`, `pvp_bench_full`,
 `pvp_cannot_evolve_yet`, `pvp_no_energy`, `pvp_cannot_retreat`,
 `pvp_cannot_attack: <raison>` (le client lit le code avant « : »),
 `no_game`. RPC absente (`PGRST202`), `ready: false` ou `engine` < 2 →

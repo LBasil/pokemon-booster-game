@@ -120,7 +120,11 @@ const pvpCard = (id) => {
   return {
     id, name: card.name, name_fr: null, image_small: card.image_small, image_fr: null, hp: ex ? 180 : from ? 90 : 60,
     types: ['Fire'], weaknesses: ['Water'], resistances: [], prizes: ex ? 2 : 1, stage: from ? 'evolution' : 'basic',
-    evolves_from: from, retreat: 1, attacks: FIRE_ATTACKS, abilities: [],
+    evolves_from: from, retreat: 1, attacks: FIRE_ATTACKS,
+    // the mock's one ability (0033): Mewtwo draws a card, once a turn
+    abilities: card.name === 'Mewtwo'
+      ? [{ name: 'Psychic Draw', name_fr: 'Pioche Psy', text: 'Once during your turn, you may draw a card.', text_fr: null, kind: 'active', fx: [{ op: 'draw', n: 1 }], coins: null, playable: true }]
+      : [],
   }
 }
 export const PVP_FOES = ['Oddish', 'Venusaur ex'].map((name, i) => ({
@@ -540,6 +544,8 @@ export async function mockSupabase(page, options = {}) {
             attach: myTurn && b.turn > 1 && !b.me.attached && !!b.me.zone,
             hand: Object.fromEntries(b.me.hand.map((i) => [i, handHint(i)])),
             retreat: myTurn && !!active && !b.me.retreated && b.me.bench.length > 0 && active.energy >= 1,
+            abilities: Object.fromEntries([b.me.active, ...b.me.bench].map((slot, pos) => [pos, slot]).filter(([, slot]) => slot)
+              .map(([pos, slot]) => [pos, (b.cards[slot.c].abilities ?? []).map(() => (!myTurn ? 'not_your_turn' : slot.abTurn === b.turn ? 'used' : null))])),
             attacks: active
               ? b.cards[active.c].attacks.map((a) => (!myTurn ? 'not_your_turn' : b.turn === 1 ? 'first_turn' : missing(active.etypes, a) ? 'energy' : null))
               : [],
@@ -727,6 +733,14 @@ export async function mockSupabase(page, options = {}) {
           b.me.attached = true
           ev(b, { k: 'attach', s: 'a', c: posSlot(a.pos).c, name: b.cards[posSlot(a.pos).c].name, type: b.me.zone })
           b.me.zone = null
+        } else if (a.type === 'ability') {
+          const slot = posSlot(a.at)
+          const ability = slot && b.cards[slot.c].abilities?.[a.ability]
+          if (!ability) return raise('pvp_invalid_action')
+          if (slot.abTurn === b.turn) return raise('pvp_cannot_use: used')
+          slot.abTurn = b.turn
+          ev(b, { k: 'ability', s: 'a', c: slot.c, name: b.cards[slot.c].name, pos: a.at, ab: a.ability, ability: ability.name, ability_fr: ability.name_fr, flips: [] })
+          draw(b)
         } else if (a.type === 'trainer') {
           const card = b.cards[a.card]
           if (!inHand(a.card) || card?.stage !== 'trainer') return raise('pvp_invalid_action')

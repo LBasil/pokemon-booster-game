@@ -112,7 +112,9 @@ texte anglais, ACE SPEC), et l'étape `fr` va chercher le texte français des
 Dresseurs (`effect_fr`, une requête par carte, une seule fois). Mesuré le
 2026-10-05 : 578 Objets / Supporters / Outils sur 2 506 jouables (146 noms),
 les classiques compris ; les textes qui parlent de cartes Énergie, de
-Récompenses ou de Stades restent injouables.
+Récompenses ou de Stades restent injouables. Depuis 0033, chaque talent
+est stocké avec ce que les combats en jouent (`abilityData()` de
+`src/utils/abilityEffects.js` : sorte, effets, jouable) : 489 sur 4 106.
 
 L'API pokemontcg.io est capricieuse : chaque page est retentée 6 fois avec
 un délai croissant, et une pause de 300 ms sépare les pages. Le nombre de

@@ -18,6 +18,7 @@ import path from 'node:path'
 import { createClient } from '@supabase/supabase-js'
 import { parseAttack } from '../src/utils/attackEffects.js'
 import { trainerData } from '../src/utils/trainerEffects.js'
+import { abilityData } from '../src/utils/abilityEffects.js'
 import { cardPriceEur, DEFAULT_USD_TO_EUR } from '../src/utils/cardPrice.js'
 import { matchSet, normalizeNumber, numberOfId } from '../src/utils/tcgdex.js'
 
@@ -224,7 +225,8 @@ async function populateCards(startPage = 1) {
           }
         }) ?? null,
       retreat_cost: card.convertedRetreatCost ?? card.retreatCost?.length ?? 0,
-      abilities: card.abilities?.map((ability) => ({ name: ability.name, text: ability.text ?? '', type: ability.type ?? '' })) ?? null,
+      // what the battles play of each ability (0033): kind, fx, playable...
+      abilities: card.abilities?.map((ability) => abilityData(ability, card.name)) ?? null,
       resistances: card.resistances?.map((resistance) => resistance.type) ?? null,
       // PvP Trainers (0032): what src/utils/trainerEffects.js reads in the text
       trainer: card.supertype === 'Trainer' ? trainerData(card) : null,

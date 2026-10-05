@@ -9,17 +9,20 @@ import { STEP_PARAM, matchesFilter, trainerSteps } from '@/utils/pvp'
 // my / their Pokémon, the Stage 2 for Rare Candy, cards to take from my deck
 // or discard pile), then emits the 'trainer' move. A step with nothing to
 // choose is skipped (the server does what it can), one with a single
-// choice is answered for me.
+// choice is answered for me. An ability of my Pokémon (0033: `ability` =
+// { at, i }) asks the same and emits the 'ability' move.
 const props = defineProps({
   battle: { type: Object, required: true },
-  index: { type: Number, required: true },
+  index: { type: Number, default: -1 },
+  ability: { type: Object, default: null },
 })
 const emit = defineEmits(['play', 'cancel'])
 
 const { t } = useI18n()
 const { cardName } = useCardLocale()
 
-const card = computed(() => props.battle.my_cards[props.index])
+const holder = computed(() => (props.ability ? (props.ability.at === 0 ? props.battle.me.active : props.battle.me.bench[props.ability.at - 1]) : null))
+const card = computed(() => (props.ability ? { fx: holder.value?.card.abilities?.[props.ability.i]?.fx ?? [] } : props.battle.my_cards[props.index]))
 const ops = computed(() => card.value?.fx ?? [])
 const mine = computed(() => [props.battle.me.active, ...props.battle.me.bench].map((slot, pos) => ({ pos, slot })).filter(({ slot }) => slot))
 const theirs = computed(() => [props.battle.them.active, ...props.battle.them.bench].map((slot, pos) => ({ pos, slot })).filter(({ slot }) => slot))
@@ -66,6 +69,8 @@ function offer(key) {
       return pos(theirs.value.filter(({ pos: at }) => at > 0))
     case 'energy':
       return pos(theirs.value.filter(({ slot }) => slot.energy > 0))
+    case 'counter':
+      return pos(theirs.value)
     case 'pick': {
       const search = ops.value.filter((o) => o.op === 'search')
       const recover = ops.value.filter((o) => o.op === 'recover')
@@ -100,7 +105,8 @@ function advance(from) {
     return
   }
   step.value = null
-  emit('play', { type: 'trainer', card: props.index, ...params.value })
+  const move = props.ability ? { type: 'ability', at: props.ability.at, ability: props.ability.i } : { type: 'trainer', card: props.index }
+  emit('play', { ...move, ...params.value })
 }
 
 function choose(value) {

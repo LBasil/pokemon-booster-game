@@ -271,11 +271,13 @@ const benchSize = 3
 const selection = ref(null)
 const pending = ref(null) // an attack waiting for its target / Benched Pokémon
 const trainerPick = ref(null) // a Trainer of my hand being played (PvpTrainerPicker asks its choices)
+const abilityPick = ref(null) // { at, i }: an ability of my Pokémon being used (0033, same picker)
 const sheet = ref(null) // { card, slot } read in full
 
 function select(next) {
   pending.value = null
   trainerPick.value = null
+  abilityPick.value = null
   const same = selection.value && next && selection.value.kind === next.kind && selection.value.index === next.index && selection.value.pos === next.pos
   selection.value = same ? null : next
 }
@@ -348,6 +350,7 @@ async function act(action) {
     recent.value = result.events
     pending.value = null
     trainerPick.value = null
+  abilityPick.value = null
     // Keep my Pokémon picked while it's still there; a played card leaves the hand
     if (selection.value?.kind !== 'mine' || action.type === 'attack' || action.type === 'end' || action.type === 'retreat') selection.value = null
     playSounds(result.events)
@@ -410,6 +413,16 @@ function chooseStep(value) {
 }
 
 const chooseTarget = (pos) => chooseStep(pos)
+
+/**
+ * Why ability i of my Pokémon at pos can't be used now, null if it can
+ * (0033: hints.abilities). Not `?? 'unknown'`: null means usable.
+ */
+function abilityBlock(pos, i) {
+  const list = hints.value.abilities?.[pos] ?? []
+  return i < list.length ? list[i] : 'unknown'
+}
+const abilityName = (ability) => (french.value && ability?.name_fr) || ability?.name || ''
 
 /** A Trainer card's stage line: its kind. */
 const stageLabel = (card) =>
@@ -546,6 +559,11 @@ function describe(e, previous) {
       if (side === 'd') return t(`pvp.ev.${e.k}.d`, { name, count: found.length }, found.length)
       const cards = found.map((i) => cardName(myCard(i))).join(', ')
       return t(e.k === 'search' && e.to === 'bench' ? 'pvp.ev.searchBench.a' : `pvp.ev.${e.k}.a`, { cards })
+    }
+    case 'ability': {
+      let text = t(`pvp.ev.ability.${side}`, { card, ability: (french.value && e.ability_fr) || e.ability || '' })
+      if (e.flips?.length) text += ` ${t('pvp.ev.flips', { flips: e.flips.map((up) => t(up ? 'pvp.heads' : 'pvp.tails')).join(', ') })}`
+      return text
     }
     case 'scoop':
     case 'move_energy':
@@ -791,8 +809,14 @@ onMounted(async () => {
               <p class="pvp-note">{{ t('pvp.promoteHelp') }}</p>
             </template>
 
-            <template v-else-if="trainerPick !== null">
-              <PvpTrainerPicker :battle="battle" :index="trainerPick" @play="act" @cancel="trainerPick = null" />
+            <template v-else-if="trainerPick !== null || abilityPick">
+              <PvpTrainerPicker
+                :battle="battle"
+                :index="trainerPick ?? -1"
+                :ability="abilityPick"
+                @play="act"
+                @cancel="(trainerPick = null), (abilityPick = null)"
+              />
             </template>
 
             <template v-else-if="pending?.need">
@@ -857,6 +881,23 @@ onMounted(async () => {
                   }}
                 </button>
               </div>
+              <!-- Its abilities (0033) -->
+              <ul v-if="selection.kind === 'mine' && selectedCard.abilities?.length" class="pvp-abilities" :aria-label="t('pvp.ability')">
+                <li v-for="(ability, i) in selectedCard.abilities" :key="i">
+                  <button
+                    v-if="abilityBlock(selection.pos, i) === null"
+                    type="button"
+                    class="pvp-choice"
+                    :disabled="busy"
+                    @click="abilityPick = { at: selection.pos, i }"
+                  >
+                    {{ t('pvp.useAbility', { name: abilityName(ability) }) }}
+                  </button>
+                  <p v-else class="pvp-note">
+                    <strong>{{ abilityName(ability) }}</strong> · {{ t(`pvp.abilityBlocks.${abilityBlock(selection.pos, i)}`) }}
+                  </p>
+                </li>
+              </ul>
               <div v-if="selection.kind === 'mine' && selection.pos === 0" class="pvp-attack-buttons" role="group" :aria-label="t('pvp.attacks')">
                 <button
                   v-for="(attack, i) in selectedCard.attacks"
@@ -1159,6 +1200,7 @@ onMounted(async () => {
             <li>{{ t('pvp.rules.retreat') }}</li>
             <li>{{ t('pvp.rules.attack', { resistance: rules.resistance }) }}</li>
             <li>{{ t('pvp.rules.trainers') }}</li>
+            <li>{{ t('pvp.rules.abilities') }}</li>
             <li>{{ t('pvp.rules.conditions') }}</li>
             <li>{{ t('pvp.rules.points', { points: rules.points, turns: rules.turns }) }}</li>
             <li>{{ t('pvp.rules.hidden') }}</li>
@@ -1818,6 +1860,19 @@ onMounted(async () => {
 /* A card the deck's energy can't pay: still allowed, dimmed */
 .pvp-pick.is-off .pvp-pick-card {
   opacity: 0.55;
+}
+
+.pvp-abilities {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvp-abilities .pvp-note {
+  margin: 0;
 }
 
 .pvp-off-note {

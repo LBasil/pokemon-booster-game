@@ -493,7 +493,8 @@
       "pvp_cannot_retreat": "Your Active Pokémon can't retreat now.",
       "pvp_cannot_attack": "This attack can't be used now.",
       "pvp_invalid_energy": "Pick 1 or 2 energy types for this deck.",
-      "pvp_cannot_play": "This Trainer can't be played now."
+      "pvp_cannot_play": "This Trainer can't be played now.",
+      "pvp_cannot_use": "This ability can't be used now."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -1039,7 +1040,7 @@
       "none": "Can't be played"
     },
     "notApplied": "Part of this text isn't played in battles.",
-    "abilityNote": "Abilities aren't played in battles yet.",
+    "abilityNote": "An ability marked “Not played in battles yet” has no effect here.",
     "ability": "Ability",
     "weakness": "Weakness",
     "resistance": "Resistance",
@@ -1161,6 +1162,10 @@
       "move_energy": {
         "a": "An energy moves to your {card}.",
         "d": "An energy moves to their {card}."
+      },
+      "ability": {
+        "a": "Your {card} uses {ability}.",
+        "d": "Their {card} uses {ability}."
       }
     },
     "rules": {
@@ -1176,7 +1181,8 @@
       "elo": "Against players, no coins: you win or lose Elo points, more against a stronger player. Your opponent is drawn among the players closest to your Elo.",
       "limit": "{count} attacks a day, reset at {time}. Defenses are unlimited.",
       "bots": "Bots: the same battle with your attack deck, against a deck the server builds from the format. No Elo, and they don't use your attacks. A win pays {easy}, {normal} or {hard} coins (easy, normal, hard), a draw half, for your first {paid} bot battles of the day; {count} a day in all.",
-      "trainers": "Trainers, like in Pocket: Items as many as you like, 1 Supporter a turn (not on the first turn of the battle), Pokémon Tools attached to a Pokémon until it's knocked out, 1 ACE SPEC per deck. Only the Trainers whose whole text the battles can play: Stadiums and the ones about Energy or Prize cards aren't played yet. You pick what you discard, what you take from your deck and which Pokémon; looking at the top of your deck, the server takes the best card for you."
+      "trainers": "Trainers, like in Pocket: Items as many as you like, 1 Supporter a turn (not on the first turn of the battle), Pokémon Tools attached to a Pokémon until it's knocked out, 1 ACE SPEC per deck. Only the Trainers whose whole text the battles can play: Stadiums and the ones about Energy or Prize cards aren't played yet. You pick what you discard, what you take from your deck and which Pokémon; looking at the top of your deck, the server takes the best card for you.",
+      "abilities": "Abilities, like in Pocket: the ones used from the board once a turn (some only from the Active Spot or the Bench), the ones always on (less damage, no retreat cost, damage back...), and the ones played as you put the Pokémon on your Bench or evolve into it. Only the abilities whose whole text the battles can play; the others are marked."
     },
     "energyReadyType": "A {type} energy to attach this turn",
     "attachType": "Attach the {type} energy",
@@ -1219,7 +1225,8 @@
       "switch": "Which Pokémon comes in?",
       "gust": "Which of their Pokémon comes in?",
       "energy": "Discard an energy from which of their Pokémon?",
-      "pick": "Take up to {count} card | Take up to {count} card | Take up to {count} cards"
+      "pick": "Take up to {count} card | Take up to {count} card | Take up to {count} cards",
+      "counter": "Put the damage on which of their Pokémon?"
     },
     "pickFrom": {
       "deck": "deck",
@@ -1230,7 +1237,31 @@
       "item": "Items: play as many as you like on your turn.",
       "supporter": "Supporters: 1 a turn, not on the first turn of the battle.",
       "tool": "Pokémon Tools: attach it to one of your Pokémon without a Tool; it stays until that Pokémon is knocked out."
-    }
+    },
+    "useAbility": "Use {name}",
+    "abilityBlocks": {
+      "used": "Already used this turn",
+      "not_active": "Only from the Active Spot",
+      "not_bench": "Only from the Bench",
+      "status": "Not under a Special Condition",
+      "once": "Once a battle, already used",
+      "hand": "Not enough cards in your hand to discard",
+      "no_target": "Nothing to use it on",
+      "bench_full": "Your Bench is full",
+      "not_your_turn": "Not your turn",
+      "unknown": "Not played in battles yet",
+      "passive": "Always on",
+      "on_bench": "When you put it on your Bench from your hand",
+      "on_evolve": "When you evolve into it from your hand"
+    },
+    "abilityKinds": {
+      "active": "Once a turn, from the board",
+      "passive": "Always on",
+      "on_bench": "When you put it on your Bench from your hand",
+      "on_evolve": "When you evolve into it from your hand",
+      "unknown": "Not played in battles yet"
+    },
+    "abilityLine": "Ability: {name}"
   },
   "electrodeFlip": {
     "title": "Shiny Electrode Flip",

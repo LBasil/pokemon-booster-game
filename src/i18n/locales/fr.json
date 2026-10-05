@@ -493,7 +493,8 @@
       "pvp_cannot_retreat": "Ton Pokémon Actif ne peut pas battre en retraite maintenant.",
       "pvp_cannot_attack": "Cette attaque ne peut pas être utilisée maintenant.",
       "pvp_invalid_energy": "Choisis 1 ou 2 types d'Énergie pour ce deck.",
-      "pvp_cannot_play": "Ce Dresseur ne peut pas être joué maintenant."
+      "pvp_cannot_play": "Ce Dresseur ne peut pas être joué maintenant.",
+      "pvp_cannot_use": "Ce talent ne peut pas être utilisé maintenant."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -1039,7 +1040,7 @@
       "none": "Ne peut pas être jouée"
     },
     "notApplied": "Une partie de ce texte n'est pas jouée en combat.",
-    "abilityNote": "Les talents ne sont pas encore joués en combat.",
+    "abilityNote": "Un talent marqué « Pas encore joué en combat » n'a pas d'effet ici.",
     "ability": "Talent",
     "weakness": "Faiblesse",
     "resistance": "Résistance",
@@ -1161,6 +1162,10 @@
       "move_energy": {
         "a": "Une Énergie passe sur ton {card}.",
         "d": "Une Énergie passe sur son {card}."
+      },
+      "ability": {
+        "a": "Ton {card} utilise {ability}.",
+        "d": "Son {card} utilise {ability}."
       }
     },
     "rules": {
@@ -1176,7 +1181,8 @@
       "elo": "Contre les joueurs, pas de pièces : tu gagnes ou perds des points Elo, davantage contre un joueur plus fort. Ton adversaire est tiré parmi les joueurs à l'Elo le plus proche du tien.",
       "limit": "{count} attaques par jour, remise à zéro à {time}. Les défenses sont illimitées.",
       "bots": "Bots : le même combat avec ton deck d'attaque, contre un deck que le serveur construit dans le format. Pas d'Elo, et ils n'utilisent pas tes attaques. Une victoire rapporte {easy}, {normal} ou {hard} pièces (facile, normal, difficile), un nul la moitié, pour tes {paid} premiers combats contre un bot de la journée ; {count} par jour en tout.",
-      "trainers": "Les Dresseurs, comme dans Pocket : autant d'Objets que tu veux, 1 Supporter par tour (pas au premier tour du combat), les Outils Pokémon attachés à un Pokémon jusqu'à son K.O., 1 ACE SPEC par deck. Seuls les Dresseurs dont les combats savent jouer tout le texte comptent : les Stades et ceux qui parlent de cartes Énergie ou Récompense ne sont pas encore joués. Tu choisis ce que tu défausses, ce que tu prends dans ton deck et sur quel Pokémon ; quand tu regardes le dessus de ton deck, le serveur prend la meilleure carte pour toi."
+      "trainers": "Les Dresseurs, comme dans Pocket : autant d'Objets que tu veux, 1 Supporter par tour (pas au premier tour du combat), les Outils Pokémon attachés à un Pokémon jusqu'à son K.O., 1 ACE SPEC par deck. Seuls les Dresseurs dont les combats savent jouer tout le texte comptent : les Stades et ceux qui parlent de cartes Énergie ou Récompense ne sont pas encore joués. Tu choisis ce que tu défausses, ce que tu prends dans ton deck et sur quel Pokémon ; quand tu regardes le dessus de ton deck, le serveur prend la meilleure carte pour toi.",
+      "abilities": "Les talents, comme dans Pocket : ceux qu'on utilise depuis le plateau une fois par tour (certains seulement depuis le poste Actif ou le Banc), ceux qui sont toujours actifs (moins de dégâts, pas de coût de Retraite, dégâts renvoyés...), et ceux qui se jouent quand tu poses le Pokémon sur ton Banc ou fais évoluer en lui. Seuls les talents dont les combats savent jouer tout le texte comptent ; les autres sont signalés."
     },
     "energyReadyType": "Une Énergie {type} à attacher ce tour-ci",
     "attachType": "Attacher l'Énergie {type}",
@@ -1219,7 +1225,8 @@
       "switch": "Quel Pokémon entre en jeu ?",
       "gust": "Quel Pokémon adverse entre en jeu ?",
       "energy": "Défausser une Énergie de quel Pokémon adverse ?",
-      "pick": "Prends jusqu'à {count} carte | Prends jusqu'à {count} carte | Prends jusqu'à {count} cartes"
+      "pick": "Prends jusqu'à {count} carte | Prends jusqu'à {count} carte | Prends jusqu'à {count} cartes",
+      "counter": "Sur quel Pokémon adverse mettre les dégâts ?"
     },
     "pickFrom": {
       "deck": "deck",
@@ -1230,7 +1237,31 @@
       "item": "Objets : joue-en autant que tu veux pendant ton tour.",
       "supporter": "Supporters : 1 par tour, pas au premier tour du combat.",
       "tool": "Outils Pokémon : attache-le à l'un de tes Pokémon sans Outil ; il reste jusqu'à ce que ce Pokémon soit mis K.O."
-    }
+    },
+    "useAbility": "Utiliser {name}",
+    "abilityBlocks": {
+      "used": "Déjà utilisé ce tour-ci",
+      "not_active": "Seulement depuis le poste Actif",
+      "not_bench": "Seulement depuis le Banc",
+      "status": "Pas sous un État Spécial",
+      "once": "Une fois par combat, déjà utilisé",
+      "hand": "Pas assez de cartes en main à défausser",
+      "no_target": "Rien sur quoi l'utiliser",
+      "bench_full": "Ton Banc est plein",
+      "not_your_turn": "Pas ton tour",
+      "unknown": "Pas encore joué en combat",
+      "passive": "Toujours actif",
+      "on_bench": "Quand tu le poses sur ton Banc depuis ta main",
+      "on_evolve": "Quand tu fais évoluer en lui depuis ta main"
+    },
+    "abilityKinds": {
+      "active": "Une fois par tour, depuis le plateau",
+      "passive": "Toujours actif",
+      "on_bench": "Quand tu le poses sur ton Banc depuis ta main",
+      "on_evolve": "Quand tu fais évoluer en lui depuis ta main",
+      "unknown": "Pas encore joué en combat"
+    },
+    "abilityLine": "Talent : {name}"
   },
   "electrodeFlip": {
     "title": "Électrode Shiny Flip",

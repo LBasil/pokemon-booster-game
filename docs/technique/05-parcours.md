@@ -926,6 +926,24 @@ sequenceDiagram
   bots en ont 2 / 4 / 6. Simulé (IA difficile contre bots, 1 500 vraies
   cartes, 113 Dresseurs jouables) : 18/20 contre facile, 8/20 contre
   normal, 6/20 contre difficile.
+- **Talents** (0033, « ajoute les talents stp ») : `abilityEffects.js`
+  lit le texte de chaque talent (Talents, Poké-Powers, Poké-Bodies,
+  Pouvoirs Pokémon) ; jouable = tout le texte compris (489 sur 4 106 le
+  2026-10-05, 187 noms ; la traîne parle de cartes Énergie, d'effets
+  d'équipe par type, de Récompenses). Quatre sortes : **activés** (une
+  fois par tour depuis le plateau, certains seulement Actif ou seulement
+  sur le Banc, pas sous un État Spécial pour les vieux Poké-Powers, VSTAR
+  une fois par combat), **passifs** (moins de dégâts, plus de dégâts, pas
+  de coût de Retraite, dégâts renvoyés, pas de Faiblesse, pas d'État
+  Spécial, Banc protégé, Fermeté, évolution dès le premier tour, Pokémon
+  de base sans Retraite), **à la pose sur le Banc** et **à l'évolution**
+  depuis la main (joués d'office, le serveur choisit). Leurs effets sont
+  ceux des Dresseurs (même moteur `pvp_effects`) plus marqueurs de
+  dégâts, monter depuis le Banc et se mettre K.O. En combat : toucher un
+  de mes Pokémon montre ses talents (« Utiliser … » ou pourquoi pas :
+  `hints.abilities`), les choix passent par le même `PvpTrainerPicker`.
+  L'IA utilise les siens en début de tour (pas ceux qui finissent le tour
+  ou la mettent K.O.).
 - **Énergie du deck** (0031) : 1 ou 2 types parmi les 9 qui ont une carte
   Énergie de base (Plante, Feu, Eau, Électrique, Psy, Combat, Obscurité,
   Métal, Fée ; les Pokémon Dragon paient avec d'autres types), choisis

@@ -62,6 +62,9 @@ const conditions = computed(() =>
         <strong>{{ damageLabel(attack) }}</strong>
       </li>
     </ul>
+    <p v-for="(ability, i) in !compact && !trainer ? (card.abilities ?? []) : []" :key="`ab-${i}`" class="pvp-ability-line">
+      {{ t('pvp.abilityLine', { name: (french && ability.name_fr) || ability.name }) }}
+    </p>
     <span v-if="!compact && !trainer" class="pvp-types">
       <span v-for="type in card.types" :key="type" class="pvp-dot" :style="{ '--dot': `var(--pb-type-${type.toLowerCase()}, var(--pb-type-colorless))` }" :title="typeLabel(type)"></span>
       <span v-if="card.weaknesses?.length" class="pvp-weak">{{ t('pvp.weakTo', { types: card.weaknesses.map(typeLabel).join(', ') }) }}</span>
@@ -233,6 +236,13 @@ const conditions = computed(() =>
 
 .pvp-weak {
   font-size: 0.7rem;
+}
+
+.pvp-ability-line {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .pvp-kind {

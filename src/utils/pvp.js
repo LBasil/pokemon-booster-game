@@ -393,8 +393,9 @@ export function matchesFilter(card, op) {
  * the 'trainer' move): 'discard' (a cost, cards of my hand), 'tool' / 'heal' /
  * 'candy' / 'scoop' / 'move_from' (pos: one of my Pokémon), 'evolve' (the
  * Stage 2 for Rare Candy), 'switch' / 'move_to' / 'scoop_to' (to: one of
- * my Pokémon), 'gust' / 'energy' (target: one of theirs), 'pick' (cards of
- * my deck or discard pile). The view skips the ones with nothing to choose.
+ * my Pokémon), 'gust' / 'energy' / 'counter' (target: one of theirs), 'pick'
+ * (cards of my deck or discard pile). The view skips the ones with nothing
+ * to choose. Abilities (0033) ask the same: pass `{ fx }`.
  */
 export function trainerSteps(card) {
   if (card?.kind === 'tool') return ['tool']
@@ -410,6 +411,7 @@ export function trainerSteps(card) {
     else if (op.op === 'switch_self') add('switch')
     else if (op.op === 'gust') add('gust')
     else if (op.op === 'discard_opp_energy' && op.who === 'one') add('energy')
+    else if (op.op === 'counters' && op.who === 'one') add('counter')
     else if (op.op === 'search' || op.op === 'recover') add('pick')
   }
   // the cost first
@@ -419,7 +421,7 @@ export function trainerSteps(card) {
 /** The move's param each choice fills. */
 export const STEP_PARAM = {
   discard: 'discard', tool: 'pos', heal: 'pos', candy: 'pos', scoop: 'pos', move_from: 'pos', evolve: 'evolve',
-  switch: 'to', move_to: 'to', scoop_to: 'to', gust: 'target', energy: 'target', pick: 'pick',
+  switch: 'to', move_to: 'to', scoop_to: 'to', gust: 'target', energy: 'target', counter: 'target', pick: 'pick',
 }
 
 /** HP left as a share of the card's HP (0-100), for the bars. */

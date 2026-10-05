@@ -64,6 +64,7 @@ export const CHALLENGE_ERRORS = [
   'pvp_cannot_retreat',
   'pvp_cannot_attack',
   'pvp_cannot_play',
+  'pvp_cannot_use',
 ]
 
 // PostgREST's answer for an RPC that doesn't exist yet

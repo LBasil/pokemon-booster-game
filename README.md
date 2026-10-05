@@ -52,7 +52,7 @@ How it works inside (every table, RPC and flow, in French):
   seconds; intruders from other lines slip in as the streak grows, and
   "Stop" ends a run keeping its coins. The simplest game, so it pays the least: 3 coins per
   right line (60 per run, 180 a day at most) — and **PvP battles** like Pokémon TCG Pocket (testers only for now,
-  migrations 0028, 0030, 0031 and 0032): two decks of 20 challenge cards per format
+  migrations 0028, 0030 to 0033): two decks of 20 challenge cards per format
   (every card, one era of the TCG, or one set; 2 with the same name at
   most; "Auto deck" builds evolution lines for you), one to attack with
   and one the server plays when you're attacked. A battle: 5 cards in
@@ -60,7 +60,9 @@ How it works inside (every table, RPC and flow, in French):
   play Trainers like in Pocket (Items as many as you like, 1 Supporter a
   turn, Pokémon Tools; every Trainer whose text the battles can read, 578
   of them: Professor's Research, Poké Ball, Potion, Boss's Orders, Rare
-  Candy...), attach the energy your zone brings (each deck plays 1 or 2 energy
+  Candy...), use your Pokémon's abilities (the ones used from the board
+  once a turn, the always-on ones, the ones played as a Pokémon comes in:
+  489 of them read from the cards), attach the energy your zone brings (each deck plays 1 or 2 energy
   types, one of them at random each turn, the next one shown; attacks
   cost their printed energy) to any Pokémon, bench Basics, evolve, retreat, then
   attack. Attack texts are played (coins, special conditions, healing,
@@ -402,6 +404,11 @@ its **SQL editor** and run, in order:
    `src/utils/trainerEffects.js`). Run it after 0031, then a card sync
    (`npm run populate:sync`) so Trainers get their effects and French
    texts; until then decks simply have no Trainers.
+33. `supabase/migrations/0033_pvp_abilities.sql` — Pokémon abilities in
+   PvP (used from the board, always on, played as the Pokémon is benched
+   or evolves; read from each text by `src/utils/abilityEffects.js`). Run
+   it after 0032, then a card sync; until then abilities are shown as
+   "not played yet".
 
 Then in **Authentication**:
 

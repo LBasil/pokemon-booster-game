@@ -265,6 +265,9 @@ describe('Trainers (0032)', () => {
     expect(trainerSteps(candy)).toEqual(['candy', 'evolve'])
     expect(trainerSteps({ kind: 'tool', fx: [] })).toEqual(['tool'])
     expect(trainerSteps(boss)).toEqual(['gust'])
+    // an ability's effects ask the same (0033)
+    expect(trainerSteps({ fx: [{ op: 'counters', n: 10, who: 'one' }] })).toEqual(['counter'])
+    expect(trainerSteps({ fx: [{ op: 'heal', n: 30, who: 'self' }] })).toEqual([])
   })
 })
 

@@ -556,7 +556,22 @@ docs/technique/             technical doc (French, user choice): overview, front
   `pvp_ai_wants` per moment (main / tools / attack). Auto deck 6 (attack)
   / 4 (defense) Trainers, bots 2 / 4 / 6; bot strength = Pokémon only.
   Add a Trainer op = parser + test + SQL case in `pvp_trainer` + AI +
-  `trainerSteps` if it asks a choice + the doc list. Next: abilities.
+  `trainerSteps` if it asks a choice + the doc list.
+  **Abilities** (0033, user 2026-10-05: "ajoute les talents stp"):
+  `src/utils/abilityEffects.js` (`parseAbility(ability, cardName)`, old
+  texts name the Pokémon) reuses the Trainers' sentences
+  (`parseEffectSentence`) and adds counters / switch_in / self_ko /
+  body_* ops; stored per ability in `cards.abilities[i]` (`abilityData`):
+  kind active / passive / on_bench / on_evolve, playable = whole text
+  read (489 / 4,106). Engine: `pvp_effects(g, side, fx, coins, opts,
+  self_pos, event)` is THE effect loop (Trainers call it too); move
+  `{ type: 'ability', at, ability, ...choices }` (`at` = the holder:
+  `pos` stays a choice) once a turn per Pokémon (`ab_turn` / `ab_used`
+  on the slot); passive ones count in `pvp_tool_n` (tool_x + body_x);
+  on_bench / on_evolve via `pvp_trigger` (auto, server picks).
+  `hints.abilities[pos][i]`: null = usable — the view must not use
+  `?? 'unknown'` on it (that bug hid every ability once). AI:
+  `pvp_ai_abilities` at the start of its turn.
 - **Cards in French** (0029, user 2026-10-05: "qu'un joueur FR puisse
   avoir ses cartes en FR"): pokemontcg.io is English only; TCGdex (free,
   no key) has French names, images and texts. `populate.mjs fr` (in
@@ -773,12 +788,12 @@ docs/technique/             technical doc (French, user choice): overview, front
   2026-10-04) · 0026 PvP attack / defense decks + attacks without a
   cost dropped (written 2026-10-04, **to apply**, then check a full
   card sync went through) · 0027 PvP against bots for coins (written
-  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, applied: `pvp_rules().engine` = 3 the same day) · 0032 Trainer cards in PvP (written 2026-10-05, **to apply** after 0031, then a card sync). Every one was
+  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, applied: `pvp_rules().engine` = 3 the same day) · 0032 Trainer cards in PvP (written 2026-10-05, applied the same day) · 0033 Pokémon abilities in PvP (written 2026-10-05, **to apply** after 0032, then a card sync). Every one was
   verified locally with PGlite before being handed over; 0010-0025 have
-  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0032 too) —
+  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0033 too) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 264 unit tests, `npm run test:db` 687 database
-  checks, `npm run test:e2e` 314 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 270 unit tests, `npm run test:db` 710 database
+  checks, `npm run test:e2e` 316 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

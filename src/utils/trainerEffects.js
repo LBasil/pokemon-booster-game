@@ -305,6 +305,12 @@ function parseSentence(s, ctx) {
 }
 
 /**
+ * One sentence of an effect text -> ops, null if unknown (shared with
+ * abilityEffects.js). `ctx` carries the coins and what earlier sentences set up.
+ */
+export const parseEffectSentence = (sentence, ctx) => parseSentence(normalize(sentence), ctx)
+
+/**
  * Parses a Trainer card.
  * @param {{ subtypes?: string[], rules?: string[] }} card - pokemontcg.io
  * @returns {{ kind: string, fx: object[], coins: number | null, playable: boolean, unknown: string[] }}

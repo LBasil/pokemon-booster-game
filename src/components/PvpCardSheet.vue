@@ -10,6 +10,7 @@ import PvpCard from '@/components/PvpCard.vue'
 // damage and text (French when imported, 0029), what the battles don't play
 // of it, its abilities (not played yet), weakness, resistance and retreat.
 // A Trainer (0032): its kind, its text and how that kind is played.
+// Abilities (0033): how each one is played, or "not played yet".
 // `card` null = closed.
 const props = defineProps({
   card: { type: Object, default: null },
@@ -81,6 +82,7 @@ watch(
           <ul class="pvp-sheet-attacks">
             <li v-for="(ability, i) in card.abilities" :key="i">
               <p class="pvp-sheet-attack"><strong>{{ (french && ability.name_fr) || ability.name }}</strong></p>
+              <p class="pvp-sheet-note">{{ t(`pvp.abilityKinds.${ability.playable ? ability.kind : 'unknown'}`) }}</p>
               <p class="pvp-sheet-effect">{{ (french && ability.text_fr) || ability.text }}</p>
             </li>
           </ul>

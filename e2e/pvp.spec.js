@@ -159,6 +159,23 @@ test('a Trainer: a Supporter, not on the first turn, once a turn (0032)', async 
   await expect(hand(page).getByRole('button')).toHaveCount(before + 1)
 })
 
+test('an ability: used from the board, once a turn (0033)', async ({ page }) => {
+  // Mewtwo (the mock's ability: draw a card) is dealt first
+  const deck = ['sv3pt5-150', ...DECK.filter((id) => id !== 'sv3pt5-150'), 'sv3pt5-150']
+  await mockSupabase(page, { challengeCollection, pvp: { decks: { all: { attack: deck } } } })
+  await page.goto('/challenge/games/pvp')
+  await page.getByRole('button', { name: /^Easy/ }).click()
+  await hand(page).getByRole('button', { name: 'Mewtwo' }).click()
+  await page.getByRole('button', { name: 'Start the battle' }).click()
+  await board(page).getByRole('button', { name: /^Active: Mewtwo/ }).click()
+  const before = await hand(page).getByRole('button').count()
+  await page.getByRole('button', { name: 'Use Psychic Draw' }).click()
+  await expect(page.locator('.pvp-log')).toContainText('Your Mewtwo uses Psychic Draw.')
+  await expect(hand(page).getByRole('button')).toHaveCount(before + 1)
+  // Mewtwo stays picked: its ability now says why not
+  await expect(page.locator('.pvp-abilities')).toContainText('Already used this turn')
+})
+
 test('evolve, bench and retreat, with the card details', async ({ page }) => {
   await mockSupabase(page, { challengeCollection, pvp: withDeck })
   await page.goto('/challenge/games/pvp')
