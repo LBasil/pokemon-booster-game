@@ -552,70 +552,105 @@ complète : l'import n'est pas repassé). RPC absente (`PGRST202`) ou
 
 ---
 
-## Combats PvP (Défi, migrations 0024 + 0025 + 0026 + 0027 + 0028)
+## Combats PvP (Défi, migrations 0024 à 0030)
 
-Depuis 0028, PvP est réservé à ses testeurs (`pvp_open_to(user)`, interne :
-pseudos listés dans la fonction, miroir de `PVP_TESTERS` dans
-`src/utils/pvp.js`). Pour les autres : `pvp_state()` renvoie
-`{ ready: false }` (« Bientôt »), `pvp_save_deck`, `pvp_start` et
-`pvp_bot_start` l'erreur `pvp_closed`. Les corps d'avant sont les
-fonctions internes `*_impl` (non appelables) : une migration qui
-redéfinit l'une de ces 4 fonctions redéfinit son `*_impl`.
+Depuis 0030, des combats façon Pokémon JCC Pocket (decks de 20, Banc,
+Énergie à attacher, évolutions, effets d'attaque). Réservé aux testeurs
+(0028 : `pvp_open_to(user)`, interne, pseudos listés dans la fonction,
+miroir de `PVP_TESTERS` dans `src/utils/pvp.js`) : pour les autres,
+`pvp_state()` renvoie `{ ready: false }` (« Bientôt ») et les autres RPC
+l'erreur `pvp_closed`. 0030 vérifie ce droit dans chaque RPC et supprime
+les enveloppes `*_impl` de 0028.
 
 | RPC | JS | Rôle |
 | --- | --- | --- |
-| `pvp_state()` | `fetchPvpState()` | Règles, `ready` (des cartes ont leurs attaques et les sets leur ère), combats restants du jour, formats avec mes cartes jouables, mes decks (`{ format: { attack, defense } }` depuis 0026, chacun `{ cards, valid }` ou absent ; `valid` : toutes les cartes encore possédées ; avant 0026 un seul `{ cards, valid }` par format, que `deckRoles()` lit comme le deck d'attaque), mes Elo par format, combat en cours, mes 10 derniers combats (attaques, défenses et bots, de mon point de vue ; un combat contre un bot a `bot` et `coins`). Depuis 0027 : `battles_left` ne compte que les combats contre des joueurs, plus `bot_battles_left`, `bot_paid_left`, `coins` (portefeuille) et les règles `bot_levels`, `bot_coins`, `bot_paid_per_day`, `bot_battles_per_day` |
-| `pvp_eligible(p_format)` | `fetchPvpEligible(format)` | Mes cartes du Défi jouables dans ce format, meilleure attaque d'abord |
-| `pvp_save_deck(p_format, p_cards, p_role)` (0026 ; sans `p_role` avant) | `savePvpDeck(format, ids, role)` | `role` = `attack` (par défaut) ou `defense` (sinon `pvp_invalid_role`). 5 ids distincts, possédés, jouables, du format ; une carte peut être dans les deux decks. Crée mon Elo du format. Renvoie l'état. Sans 0026 : le deck d'attaque est enregistré à l'ancienne, un deck de défense donne `pvp_roles_unavailable` (côté client) |
-| `pvp_start(p_format)` | `startPvpBattle(format)` | Renvoie le combat en cours s'il y en a un ; sinon attaque avec **mon deck d'attaque** (`pvp_no_deck` sans lui) : tire un adversaire parmi les 5 joueurs d'Elo le plus proche ayant un deck valide (**son deck de défense**, sinon son deck d'attaque ; le dernier adversaire en dernier) et démarre. Renvoie l'état |
-| `pvp_bot_start(p_format, p_level)` (0027) | `startPvpBotBattle(format, level)` | Renvoie le combat en cours s'il y en a un ; sinon combat contre un bot (`easy`, `normal`, `hard`, sinon `pvp_invalid_level`) avec **mon deck d'attaque** (`pvp_no_deck`, `pvp_invalid_deck`) : le serveur tire le deck du bot dans tout le format (`pvp_no_bot_deck` s'il n'y a pas 5 noms différents). Pas d'Elo ; payant si c'est un des 5 premiers combats contre les bots du jour, 20 par jour (`pvp_no_bot_battles_left`). Renvoie l'état. Sans 0027 : `pvp_bots_unavailable` (côté client) |
-| `pvp_play(p_slot, p_attack)` (0025 ; `pvp_play(p_slot)` avant) | `playPvpCard(slot, attack)` | Joue ma carte (0-4) avec une de ses attaques (index dans `attacks`, `null` = pas d'attaque, l'énergie est gardée) contre la carte et l'attaque déjà choisies du défenseur. Renvoie `{ round, battle, state }` |
-| `pvp_forfeit()` | `forfeitPvpBattle()` | Abandon = défaite (Elo ; contre un bot : 0 pièce). Renvoie `{ battle, state }` |
-| `pvp_leaderboard(p_format)` | `fetchPvpLeaderboard(format)` | Top 20 des profils publics ayant combattu (attaques + défenses), et ma ligne (`me`, `null` si pas classé) |
+| `pvp_state()` | `fetchPvpState()` | Règles (`engine` 2, `deck_size` 20, `max_copies` 2, `hand_size`, `bench_size`, `points_to_win` 3, `max_turns` 30, `poison`, `burn`, bots…), `ready` (une synchro a stocké les effets d'attaque `attacks[].fx`, et les sets leur ère), combats restants (joueurs, bots, payants), `coins`, formats avec mes exemplaires de Pokémon, mes decks `{ format: { attack, defense } }` chacun `{ ids, valid }` (ids répétés par exemplaire), mes Elo par format, combat en cours (`battle`), mes 10 derniers combats |
+| `pvp_eligible(p_format)` | `fetchPvpEligible(format)` | Mes Pokémon du Défi qui peuvent entrer dans un deck de ce format (instantanés + `owned` = exemplaires possédés), Pokémon de base d'abord |
+| `pvp_save_deck(p_format, p_cards, p_role)` | `savePvpDeck(format, ids, role)` | 20 ids (un par exemplaire), 2 du même nom au plus, chaque exemplaire possédé, du format, au moins un Pokémon de base (sinon `pvp_invalid_deck`) ; `role` `attack` ou `defense` (`pvp_invalid_role`). Renvoie l'état |
+| `pvp_start(p_format)` | `startPvpBattle(format)` | Renvoie le combat en cours s'il y en a un ; sinon, avec mon deck d'attaque (`pvp_no_deck`, `pvp_invalid_deck`), un adversaire parmi les 5 Elo les plus proches (`pvp_no_opponent`), 10 par jour (`pvp_no_battles_left`). Le combat commence en phase `setup`. Renvoie l'état |
+| `pvp_bot_start(p_format, p_level)` | `startPvpBotBattle(format, level)` | Pareil contre un bot `easy` / `normal` / `hard` (`pvp_invalid_level`) dont le serveur construit le deck (`pvp_no_bot_deck` si le format ne suffit pas) ; 20 par jour (`pvp_no_bot_battles_left`), les 5 premiers payants |
+| `pvp_act(p_action)` (0030) | `pvpAct(action)` | Un coup (voir ci-dessous), validé ; à la fin de mon tour le serveur joue le sien et rend la main. Renvoie `{ battle, events, state }` |
+| `pvp_forfeit()` | `forfeitPvpBattle()` | Abandon = défaite (Elo ; contre un bot : 0 pièce). Renvoie `{ battle, state }` |
+| `pvp_leaderboard(p_format)` | `fetchPvpLeaderboard(format)` | Top 20 des profils publics ayant combattu, et ma ligne (`me`) |
 
-Format : `all`, `era:<sets.series>` ou `set:<id>` (un sous-set n'est pas
-un format : ses cartes comptent pour son parent).
+`pvp_play(p_slot, p_attack)` (0025) est supprimée par 0030.
+
+Coups (`p_action`) ; `card` = index de la carte dans mes 20 (`my_cards`),
+`pos` = 0 pour l'Actif, 1 à 3 pour le Banc :
+
+```json
+{ "type": "setup", "active": 3, "bench": [7, 12] }
+{ "type": "bench", "card": 9 }
+{ "type": "evolve", "card": 4, "pos": 0 }
+{ "type": "attach", "pos": 1 }
+{ "type": "retreat", "pos": 2 }
+{ "type": "attack", "attack": 0, "target": 1, "switch_to": 2, "energy_to": 1 }
+{ "type": "end" }
+{ "type": "promote", "pos": 1 }
+```
+
+`target` (une cible adverse pour `bench_one` / `snipe`), `switch_to` et
+`energy_to` (un de mes Pokémon de Banc) sont facultatifs : le serveur
+choisit s'ils manquent.
 
 Carte (instantané `pvp_card()`) :
 
 ```json
-{ "id": "sv3pt5-6", "name": "Charizard ex", "image_small": "…", "hp": 330,
-  "types": ["Darkness"], "weaknesses": ["Grass"], "resistances": [], "prizes": 2,
-  "attacks": [{ "name": "Burning Darkness", "damage": 180, "times": false, "cost": 3 }] }
+{ "id": "sv3pt5-6", "name": "Charizard ex", "name_fr": "Dracaufeu-ex",
+  "image_small": "…", "image_fr": "https://assets.tcgdex.net/fr/sv/sv03.5/006",
+  "hp": 330, "types": ["Darkness"], "weaknesses": ["Grass"], "resistances": [],
+  "prizes": 2, "stage": "evolution", "evolves_from": "Charmeleon", "retreat": 2,
+  "attacks": [{ "name": "Burning Darkness", "name_fr": "Ténèbres Ardentes", "printed": "180+",
+    "base": 180, "cost": 3, "text": "…", "text_fr": "…",
+    "fx": [{ "op": "per_points_opp", "n": 30 }], "coins": null, "partial": false, "usable": true }],
+  "abilities": [] }
 ```
 
-`attacks` = les attaques qui font des dégâts, la moins chère d'abord ;
-`cost` = nombre d'énergies (5 au maximum) ; `prizes` = récompenses données
-au K.O. (1, 2 pour ex/EX/GX/V/VSTAR/LEGEND, 3 pour VMAX/TAG TEAM/V-UNION/Méga
-ex).
+`stage` : `basic`, `evolution` ou `none` (injouable : moitiés LEGEND…) ;
+`fx` = les effets lus dans le texte (liste des `op` en tête de
+`src/utils/attackEffects.js`), `coins` = 1, N ou `"until"` ; `partial` =
+une partie du texte n'est pas jouée ; `usable` = des dégâts ou un effet
+connu.
 
 Combat (`battle`, vue de l'attaquant) :
 
 ```json
 {
-  "id": 12, "format": "era:Scarlet & Violet", "status": "playing", "round": 2,
-  "my_prizes": 1, "their_prizes": 0, "my_energy": 2, "their_energy": 1, "elo_change": null,
-  "opponent": { "username": "Misty", "elo": 1016 },
-  "mine": [{ "…carte…": "", "slot": 0, "hp_left": 150 }],
-  "theirs": { "left": 4, "seen": [{ "…carte…": "", "slot": 3, "hp_left": 0 }], "deck": null },
-  "log": [{ "a": 0, "d": 3, "a_attack": 0, "d_attack": null, "dealt": 180, "taken": 0, "roll_a": null, "roll_d": null, "ko_theirs": true, "ko_mine": false }]
+  "id": 12, "engine": 2, "format": "all", "status": "playing",
+  "turn": 5, "phase": "play", "current": "a", "first": "d", "winner": null,
+  "bot": "normal", "paid": true, "coins": null, "elo_change": null,
+  "opponent": { "bot": "normal", "username": null, "elo": null },
+  "me": { "points": 1, "deck": 9, "hand_count": 4, "discard": [], "attached": false, "retreated": false, "used_once": false,
+          "active": { "c": 4, "under": [0], "damage": 30, "energy": 2, "status": null, "poisoned": false, "burned": false,
+                      "card": { "…carte…": "" }, "hp_left": 60 },
+          "bench": [], "hand": [{ "index": 9, "card": { "…carte…": "" } }] },
+  "them": { "points": 0, "deck": 11, "hand_count": 5, "discard": [], "active": { "…": "" }, "bench": [], "cards": null },
+  "my_cards": ["…mes 20 instantanés…"],
+  "hints": { "my_turn": true, "setup": false, "promote": false, "attach": true, "retreat": false,
+             "hand": { "9": { "bench": true, "evolve": [] } }, "attacks": [null, "energy"] },
+  "log": [{ "k": "attack", "s": "d", "c": 2, "i": 0, "name": "Oddish", "attack": "Vine Whip", "damage": 20, "flips": [], "t": 4 }]
 }
 ```
 
-Depuis 0027, le combat a aussi `bot` (niveau, `null` contre un joueur),
-`paid` et `coins` (pièces gagnées, à la fin), et `opponent.bot`. Contre un
-bot : `opponent.username` et `opponent.elo` sont `null`, `elo_change`
-vaut 0 à la fin. `opponent.username` est `null` pour un profil privé. `theirs.deck` (tout
-le deck adverse) n'arrive qu'à la fin du combat, la prochaine carte du
-défenseur jamais. `a_attack` / `d_attack` = index de l'attaque (`null` =
-pas d'attaque). `roll_*` = le tirage 1 à 3 d'une attaque « 20× ».
+`phase` : `setup` (je place mes Pokémon), `play`, `promote` (mon Actif est
+K.O. : je choisis le remplaçant), `over`. `hints.attacks[i]` : `null` si
+l'attaque est jouable, sinon pourquoi (`first_turn`, `energy`, `asleep`,
+`paralyzed`, `locked`, `once`, `unusable`, `not_your_turn`).
+`them.cards` (le deck adverse) n'arrive qu'à la fin ; sa main et son deck
+ne sont que des nombres, ses pioches arrivent sans les cartes. Événements
+(`events`, `log`) : `k` = `start`, `turn`, `draw`, `attach`, `bench`,
+`evolve`, `switch`, `attack` (`damage`, `flips`, `failed`, `prevented`),
+`damage`, `heal`, `status`, `cured`, `discard_energy`, `ko` (`points`),
+`promote`, `end`, `over` (`winner`, `reason`) ; `s` = `a` (moi) ou `d` ;
+`name` / `name_fr` / `attack` / `attack_fr` nomment la carte et l'attaque.
 
-Erreurs : `pvp_invalid_format`, `pvp_invalid_deck`, `pvp_no_deck`,
-`pvp_no_opponent` (aucun autre deck valide dans ce format),
-`pvp_no_battles_left` (10 par jour de jeu), `pvp_invalid_card` (emplacement
-inconnu ou carte K.O.), `pvp_invalid_attack` (attaque inconnue),
-`pvp_not_enough_energy` (attaque trop chère pour la réserve), `no_game` (jouer / abandonner sans combat). RPC
-absente (`PGRST202`) ou `ready: false` → store `unavailable`, « Bientôt ».
+Erreurs : `pvp_closed`, `pvp_invalid_format`, `pvp_invalid_deck`,
+`pvp_no_deck`, `pvp_no_opponent`, `pvp_no_battles_left`,
+`pvp_not_your_turn`, `pvp_invalid_action`, `pvp_bench_full`,
+`pvp_cannot_evolve_yet`, `pvp_no_energy`, `pvp_cannot_retreat`,
+`pvp_cannot_attack: <raison>` (le client lit le code avant « : »),
+`no_game`. RPC absente (`PGRST202`), `ready: false` ou `engine` ≠ 2 →
+store `unavailable`, « Bientôt ».
 
 ---
 

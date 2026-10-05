@@ -215,6 +215,7 @@
     "shareDownloaded": "Image downloaded. Share it wherever you like.",
     "shareError": "Couldn't create the image.",
     "frenchName": "In French: {name}",
+    "englishName": "In English: {name}",
     "goalLabel": "Most advanced set:",
     "goalCount": "{owned} / {total} ({percent}%)",
     "goalAria": "{name} completion",
@@ -313,6 +314,8 @@
     "showMore": "Show more ({count})",
     "largeTextLabel": "Larger text",
     "largeTextDesc": "Bigger letters and darker secondary text, easier to read.",
+    "frenchCardsLabel": "Cards in French",
+    "frenchCardsDesc": "When the site is in French, cards show their French name, image and attack texts (cards never printed in French stay in English).",
     "settingsJump": "Settings: sound, larger text…",
     "nameFromEmail": "Your username comes from your email address, and everyone can see it. Pick another one?",
     "nameFromEmailCta": "Change my username"
@@ -468,7 +471,7 @@
       "recycle_copies_unavailable": "Picking how many copies to recycle isn't available yet. Recycle all the extra copies of a card, or try again later.",
       "counter_unavailable": "Counter-offers aren't available yet. Accept or decline this offer, or try again later.",
       "pvp_invalid_format": "This format doesn't exist.",
-      "pvp_invalid_deck": "This deck isn't valid: 5 different cards you own, that can fight in this format.",
+      "pvp_invalid_deck": "This deck doesn't follow the rules: 20 cards you own, 2 with the same name at most, at least one Basic Pokémon.",
       "pvp_no_deck": "Build a deck in this format first.",
       "pvp_no_opponent": "No opponent in this format yet: nobody else has a deck here. Fight a bot meanwhile (below the button), try another format, or come back later.",
       "pvp_no_battles_left": "No battles left today: come back tomorrow.",
@@ -480,7 +483,15 @@
       "pvp_invalid_level": "This bot level doesn't exist.",
       "pvp_no_bot_battles_left": "No bot battles left today: come back tomorrow.",
       "pvp_no_bot_deck": "Not enough different Pokémon in this format to deal a bot a deck. Try another format.",
-      "pvp_bots_unavailable": "Bots are coming soon."
+      "pvp_bots_unavailable": "Bots are coming soon.",
+      "pvp_closed": "PvP battles are coming soon.",
+      "pvp_not_your_turn": "It's not your turn.",
+      "pvp_invalid_action": "That move isn't possible right now.",
+      "pvp_bench_full": "Your Bench is full (3 Pokémon).",
+      "pvp_cannot_evolve_yet": "It can't evolve this turn.",
+      "pvp_no_energy": "No energy to attach this turn.",
+      "pvp_cannot_retreat": "Your Active Pokémon can't retreat now.",
+      "pvp_cannot_attack": "This attack can't be used now."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -741,7 +752,7 @@
       },
       "pvp": {
         "title": "PvP battles",
-        "desc": "Your deck against other players' decks, or bots for coins: energy, prizes, Elo."
+        "desc": "Like Pokémon TCG Pocket: 20-card decks, a Bench, energy and evolutions, against players' decks or bots for coins."
       },
       "boss-raid": {
         "title": "Boss raid",
@@ -834,10 +845,9 @@
   },
   "pvp": {
     "title": "PvP battles",
-    "subtitle": "Build a deck of 5 challenge cards and take on other players' decks. The server plays their deck: they don't need to be online. Manage your energy, take 3 prizes, win Elo points. Not many players yet? Bots pay coins.",
+    "subtitle": "Battles like Pokémon TCG Pocket: a deck of 20 challenge cards, an Active Pokémon and a Bench, one energy a turn, evolutions. Take 3 points to win Elo against other players' decks (the server plays them), or coins against bots.",
     "unavailable": "PvP battles are coming soon.",
     "loadError": "Couldn’t load PvP battles. Try again in a moment.",
-    "hiddenCard": "A card not played yet",
     "hpLabel": "HP left",
     "ko": "KO",
     "hp": "{left} / {hp} HP",
@@ -857,14 +867,14 @@
       "set": "One set"
     },
     "kindHelp": {
-      "all": "Any challenge card can fight. Recent cards hit much harder than old ones.",
+      "all": "Any challenge Pokémon can be in your deck. Recent cards hit much harder than old ones.",
       "era": "Only cards from one era of the TCG (Base, Neo, EX... Scarlet & Violet): their HP and damage are comparable.",
       "set": "Only cards from one set: the fairest format."
     },
     "pickEra": "Era",
     "pickSet": "Set",
     "optionCount": "{name} (no card) | {name} (1 card) | {name} ({count} cards)",
-    "noSets": "You have no card that can fight yet: open challenge boosters first.",
+    "noSets": "You have no Pokémon for a deck yet: open challenge boosters first.",
     "elo": "Elo",
     "record": "Won / lost / drawn",
     "recordValue": "{wins} / {losses} / {draws}",
@@ -876,29 +886,65 @@
     "buildDeck": "Build my deck",
     "editDeck": "Change my deck",
     "buildTitle": {
-      "attack": "Attack deck: pick 5 cards ({format})",
-      "defense": "Defense deck: pick 5 cards ({format})"
+      "attack": "Attack deck ({format})",
+      "defense": "Defense deck ({format})"
     },
-    "notEnough": "You need {deck} cards that can fight in this format, you have none. | You need {deck} cards that can fight in this format, you have 1. | You need {deck} cards that can fight in this format, you have {count}.",
+    "buildHelp": {
+      "attack": "You play this deck when you attack: Basic Pokémon to start, their evolutions to hit hard, 2 copies of the ones that matter.",
+      "defense": "The server plays this deck when someone attacks you: sturdy Pokémon and simple evolution lines work best."
+    },
+    "search": "Search a card",
+    "filter": {
+      "all": "All",
+      "basic": "Basic",
+      "evolution": "Evolutions"
+    },
+    "inDeck": "{count} in the deck",
+    "ownedCopies": "{count} owned",
+    "add": "Add {name}",
+    "remove": "Remove one {name}",
+    "deckEmpty": "Tap a card below to add it. 20 cards, 2 with the same name at most.",
+    "missing": "1 card to go | {count} cards to go",
+    "noBasic": "Put in at least one Basic Pokémon: the battle starts with one.",
+    "orphans": "{names} can't evolve here: what they evolve from isn't in the deck.",
+    "blocked": {
+      "copies": "2 cards with the same name at most",
+      "owned": "You don't own another copy",
+      "full": "The deck is full (20)"
+    },
+    "notEnough": "You need {deck} cards for a deck in this format, you have none. | You need {deck} cards for a deck in this format, you have 1. | You need {deck} cards for a deck in this format, you have {count}.",
     "openBoosters": "Open challenge boosters",
     "saveDeck": "Save the deck",
     "cancel": "Cancel",
-    "deckInvalid": "Some of these cards left your collection (recycled or traded): change your deck to fight again.",
-    "noDeck": "No deck in this format yet. You have no card that can fight here. | No deck in this format yet. You have 1 card that can fight here ({deck} needed). | No deck in this format yet. You have {count} cards that can fight here ({deck} needed).",
+    "clear": "Empty the deck",
+    "deckInvalid": "Some of these cards left your collection (recycled or traded), or the deck is from the old 5-card battles: change it to fight again.",
+    "noDeck": "No deck in this format yet. You have no Pokémon for one here. | No deck in this format yet. You have 1 card for one here ({deck} needed). | No deck in this format yet. You have {count} cards for one here ({deck} needed).",
+    "deckSummary": "{count} cards, {basics} Basic",
     "fight": "Find an opponent",
     "vs": "Against {name}",
-    "privateTrainer": "A private trainer",
-    "round": "Round",
-    "theirCards": "{name}'s cards",
-    "myCards": "My cards",
-    "playOne": "My cards",
-    "playCard": "Pick {name} ({left} / {hp} HP)",
-    "firstRound": "Their first card is already picked. Pick one of yours, then its attack.",
-    "roundDealt": "Your {mine} used {attack}: {damage} damage to {theirs}.",
-    "roundTaken": "{theirs} used {attack}: {damage} damage.",
-    "roll": "(x{roll})",
-    "koTheirs": "{name} is knocked out!",
-    "koMine": "Your {name} is knocked out.",
+    "privateTrainer": "a private trainer",
+    "autoDeck": "Auto deck",
+    "deckRole": {
+      "attack": "You play this deck when you attack.",
+      "defense": "Other players attack this deck: you win or lose Elo when they do."
+    },
+    "defenseFallback": "No defense deck yet: your attack deck defends you meanwhile. Other players attack it, and you win or lose Elo when they do.",
+    "defenseInvalid": "Some of these cards left your collection: your attack deck defends you until you change this one.",
+    "botsTitle": "Train against a bot",
+    "botsHelp": "Same rules, with your attack deck. No Elo: coins instead.",
+    "levels": {
+      "easy": "Easy",
+      "normal": "Normal",
+      "hard": "Hard"
+    },
+    "botName": "a bot ({level})",
+    "botWin": "Win:",
+    "botPaidLeft": "{count} paying bot battle left today | {count} paying bot battles left today",
+    "botUnpaidLeft": "No more coins today: {count} bot battle left for fun. | No more coins today: {count} bot battles left for fun.",
+    "noBotBattlesLeft": "No bot battles left today: come back tomorrow.",
+    "coinsWon": "You earn",
+    "noCoins": "No coins this time.",
+    "unpaid": "No coins: your paying bot battles are used for today.",
     "eloChange": "Elo {change}",
     "result": {
       "won": "You win!",
@@ -925,55 +971,176 @@
     "boardEmpty": "Nobody is ranked in this format yet.",
     "boardError": "Couldn’t load the ranking.",
     "myRank": "You: #{rank}, Elo {elo}",
+    "pointsBadge": "{count} points",
+    "turn": "Turn {turn} / {max}",
+    "myPoints": "My points",
+    "theirPoints": "Their points",
+    "deckLeft": "Deck: {count}",
+    "handCount": "Hand: {count}",
+    "theirSide": "{name}'s side",
+    "mySide": "My side",
+    "active": "Active",
+    "bench": "Bench",
+    "emptySlot": "Empty",
+    "myHand": "My hand ({count})",
+    "yourTurn": "Your turn",
+    "theirTurn": "Their turn",
+    "setupTitle": "Place your Pokémon",
+    "setupHelp": "Tap a Basic Pokémon in your hand to make it your Active Pokémon, then the ones to put on your Bench (up to 3).",
+    "setupStart": "Start the battle",
+    "setupActive": "Active",
+    "setupBenched": "Bench",
+    "promoteTitle": "Your Active Pokémon is knocked out",
+    "promoteHelp": "Tap the Benched Pokémon that takes its place.",
+    "energyReady": "1 energy to attach this turn",
+    "energyUsed": "Energy attached this turn",
+    "energyFirst": "No energy on the first turn",
+    "attach": "Attach the energy",
+    "toBench": "Put on the Bench",
+    "evolveOnto": "Evolve {name}",
+    "retreatHere": "Retreat: {name} goes to the Bench ({cost})",
+    "free": "free",
+    "endTurn": "End my turn",
+    "attackCost": "free | 1 energy | {count} energies",
+    "details": "Card details",
+    "close": "Close",
+    "selectHint": "Tap a card in your hand or one of your Pokémon to see what it can do.",
+    "waitHint": "The server is playing...",
+    "blocks": {
+      "first_turn": "Not on the first turn",
+      "energy": "Not enough energy",
+      "asleep": "Asleep",
+      "paralyzed": "Paralyzed",
+      "locked": "Can't attack this turn",
+      "once": "Once a battle, already used",
+      "unusable": "Its effect isn't played in battles",
+      "not_your_turn": "Not your turn",
+      "no_active": "No Active Pokémon",
+      "unknown": "Not now"
+    },
+    "pickTarget": "Pick the target",
+    "pickSwitch": "Pick who comes in",
+    "pickEnergyTo": "Who gets the energy?",
+    "statuses": {
+      "asleep": "Asleep",
+      "paralyzed": "Paralyzed",
+      "confused": "Confused",
+      "poisoned": "Poisoned",
+      "burned": "Burned"
+    },
+    "stage": {
+      "basic": "Basic",
+      "evolution": "Evolves from {name}",
+      "none": "Can't be played"
+    },
+    "notApplied": "Part of this text isn't played in battles.",
+    "abilityNote": "Abilities aren't played in battles yet.",
+    "ability": "Ability",
+    "weakness": "Weakness",
+    "resistance": "Resistance",
+    "retreatCost": "Retreat",
+    "energyCount": "{count} energy | {count} energy | {count} energies",
+    "attacks": "Attacks",
+    "logTitle": "What just happened",
+    "heads": "heads",
+    "tails": "tails",
+    "ev": {
+      "start": {
+        "a": "You go first.",
+        "d": "{name} goes first."
+      },
+      "turn": {
+        "a": "Your turn.",
+        "d": "{name}'s turn."
+      },
+      "draw": {
+        "a": "You draw {card}.",
+        "d": "{name} draws a card. | {name} draws a card. | {name} draws {count} cards."
+      },
+      "attach": {
+        "a": "You attach an energy to {card}.",
+        "d": "{name} attaches an energy to {card}."
+      },
+      "bench": {
+        "a": "You put {card} on your Bench.",
+        "d": "{name} puts {card} on their Bench."
+      },
+      "evolve": {
+        "a": "Your Pokémon evolves into {card}.",
+        "d": "Their Pokémon evolves into {card}."
+      },
+      "switch": {
+        "a": "{card} is now your Active Pokémon.",
+        "d": "{card} is now their Active Pokémon."
+      },
+      "attack": {
+        "a": "Your {card} uses {attack}: {damage} damage.",
+        "d": "Their {card} uses {attack}: {damage} damage."
+      },
+      "attackNoDamage": {
+        "a": "Your {card} uses {attack}.",
+        "d": "Their {card} uses {attack}."
+      },
+      "failed": {
+        "confused": "{card} is Confused: tails, the attack fails.",
+        "smokescreen": "{card} flips tails: the attack fails.",
+        "tails": "Tails: {attack} does nothing."
+      },
+      "flips": "Coins: {flips}.",
+      "prevented": "The damage is prevented.",
+      "damage": {
+        "a": "Your {card} takes {n} damage.",
+        "d": "Their {card} takes {n} damage."
+      },
+      "heal": {
+        "a": "Your {card} heals {n}.",
+        "d": "Their {card} heals {n}."
+      },
+      "status": {
+        "a": "Your {card} is now {status}.",
+        "d": "Their {card} is now {status}."
+      },
+      "cured": {
+        "a": "Your {card} is no longer {status}.",
+        "d": "Their {card} is no longer {status}."
+      },
+      "discard_energy": {
+        "a": "Your {card} loses {n} energy.",
+        "d": "Their {card} loses {n} energy."
+      },
+      "ko": {
+        "a": "Your {card} is knocked out: {name} takes {points} point(s).",
+        "d": "{card} is knocked out: you take {points} point(s)."
+      },
+      "promote": {
+        "a": "{card} is your new Active Pokémon.",
+        "d": "{card} is their new Active Pokémon."
+      },
+      "end": {
+        "a": "You end your turn.",
+        "d": "{name} ends their turn."
+      },
+      "over": {
+        "a": "You win!",
+        "d": "{name} wins.",
+        "draw": "A draw."
+      },
+      "overTurns": "Last turn: the most points win."
+    },
     "rules": {
-      "deck": "Your decks: {deck} different Pokémon from your challenge collection, each with at least one attack that deals damage. Two decks per format: one you attack with, one the server plays when you are attacked (your attack deck defends until you build it).",
-      "hidden": "The other player's deck is hidden: their cards show up as they're played. The server plays them, picking its card and attack before yours arrive.",
-      "round": "Each round you pick a card and one of its attacks; both cards hit each other, and damage stays from one round to the next. After {rounds} rounds, the most prizes win.",
-      "energy": "Energy: 1 at the start, +1 each round, up to {max}. An attack costs the energies printed on the card: big attacks come late. No attack saves your energy for the next round.",
-      "prizes": "Knocking out a Pokémon takes its prizes: 1 for most, 2 for ex, EX, GX, V and VSTAR, 3 for VMAX, TAG TEAM and Mega ex. {prizes} prizes win.",
-      "damage": "Weakness doubles the damage, resistance takes {resistance} off. “30+” counts 30; “20×” is 20 times 1 to 3.",
+      "deck": "Your decks: 20 Pokémon from your challenge collection, 2 with the same name at most, at least one Basic (each copy must be owned). Two decks per format: one you attack with, one the server plays when you are attacked (your attack deck defends until you build it).",
+      "setup": "You start with 5 cards in hand, always with a Basic Pokémon: put one as your Active Pokémon and up to 3 on your Bench. A coin decides who goes first.",
+      "turn": "Each turn: draw a card, attach 1 energy to any of your Pokémon (not on the first turn of the battle), put Basic Pokémon on your Bench, evolve, retreat once, then attack, which ends your turn. The player going first can't attack on that turn.",
+      "evolve": "Evolve by putting a card on the Pokémon it evolves from, not on its first turn in play nor on your first turn. The energy and damage stay.",
+      "retreat": "Retreat: your Active Pokémon goes to the Bench and one of your Benched Pokémon comes in, for its retreat cost in energy. Special conditions go away.",
+      "attack": "An attack costs its number of energies (any type). Its effects are played: coins, damage per energy or counter, special conditions, healing, damage to the Bench... A text the battles can't play is marked, its damage still counts. Weakness doubles the damage, resistance takes {resistance} off.",
+      "conditions": "Asleep and Paralyzed Pokémon can't attack or retreat (a coin wakes them, Paralysis ends after a turn); Confused ones flip before attacking; Poison deals 10 and Burn 20 between turns.",
+      "points": "Knocking out a Pokémon gives points: 1 for most, 2 for ex, EX, GX, V and VSTAR, 3 for VMAX, TAG TEAM and Mega ex. {points} points win, so does leaving the other side with no Pokémon. After {turns} turns, the most points win.",
+      "hidden": "Against players, the server plays their defense deck while you play: their hand stays hidden, their Pokémon show up as they're played.",
       "elo": "Against players, no coins: you win or lose Elo points, more against a stronger player. Your opponent is drawn among the players closest to your Elo.",
       "limit": "{count} attacks a day, reset at {time}. Defenses are unlimited.",
-      "bots": "Bots: the same battle with your attack deck, against cards the server deals from the format. No Elo, and they don't use your attacks. A win pays {easy}, {normal} or {hard} coins (easy, normal, hard), a draw half, for your first {paid} bot battles of the day; {count} a day in all."
-    },
-    "roundSaved": "Your {mine} didn't attack (energy saved).",
-    "roundTheySaved": "{theirs} didn't attack (saving energy).",
-    "myPrizes": "My prizes",
-    "theirPrizes": "Their prizes",
-    "myEnergy": "My energy",
-    "theirEnergy": "Their energy",
-    "attacksLabel": "Attacks",
-    "cost": "free | 1 energy | {count} energies",
-    "prizesBadge": "{count} prizes",
-    "pickCard": "Pick one of your cards, then its attack.",
-    "attackWith": "{name}: pick an attack",
-    "noAttack": "No attack (save energy)",
-    "buildHelp": {
-      "attack": "You play these cards yourself when you attack: cheap attacks to get going, a big hitter or two to finish.",
-      "defense": "The server plays these cards when someone attacks you, so pick cards that last: lots of HP, and few ex or V (they give 2 or 3 prizes)."
-    },
-    "autoDeck": "Auto deck",
-    "deckRole": {
-      "attack": "You play this deck when you attack.",
-      "defense": "Other players attack this deck: you win or lose Elo when they do."
-    },
-    "defenseFallback": "No defense deck yet: your attack deck defends you meanwhile. Other players attack it, and you win or lose Elo when they do.",
-    "defenseInvalid": "Some of these cards left your collection (recycled or traded): your attack deck defends you until you change this one.",
-    "botsTitle": "Train against a bot",
-    "botsHelp": "Same rules, with your attack deck. No Elo: coins instead.",
-    "levels": {
-      "easy": "Easy",
-      "normal": "Normal",
-      "hard": "Hard"
-    },
-    "botName": "a bot ({level})",
-    "botWin": "Win:",
-    "botPaidLeft": "{count} paying bot battle left today | {count} paying bot battles left today",
-    "botUnpaidLeft": "No more coins today: {count} bot battle left for fun. | No more coins today: {count} bot battles left for fun.",
-    "noBotBattlesLeft": "No bot battles left today: come back tomorrow.",
-    "coinsWon": "You earn",
-    "noCoins": "No coins this time.",
-    "unpaid": "No coins: your paying bot battles are used for today."
+      "bots": "Bots: the same battle with your attack deck, against a deck the server builds from the format. No Elo, and they don't use your attacks. A win pays {easy}, {normal} or {hard} coins (easy, normal, hard), a draw half, for your first {paid} bot battles of the day; {count} a day in all."
+    }
   },
   "electrodeFlip": {
     "title": "Shiny Electrode Flip",

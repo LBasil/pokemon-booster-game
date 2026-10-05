@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useCardLocale } from '@/composables/useCardLocale'
 import { useAuthStore } from '@/stores/auth'
 import { useCollectionStore } from '@/stores/collection'
 import { completionPercent } from '@/utils/progress'
@@ -20,6 +21,7 @@ import { groupFeed } from '@/utils/feed'
 import { timeAgo } from '@/utils/time'
 
 const { t, locale } = useI18n()
+const { cardName, cardImage, fallback } = useCardLocale()
 const auth = useAuthStore()
 const profileStore = useProfileStore()
 const collectionStore = useCollectionStore()
@@ -230,8 +232,8 @@ const firstLoad = computed(() => collectionStore.loading && !collectionStore.loa
 
         <ul v-else class="hub-recent-row" role="list">
           <li v-for="entry in collectionStore.recentEntries" :key="entry.card_id" class="hub-recent-item">
-            <HoloCard :src="entry.cards.image_small || entry.cards.image_url" :alt="entry.cards.name" :max-tilt="10" />
-            <span class="hub-recent-name">{{ entry.cards.name }}</span>
+            <HoloCard :src="cardImage(entry.cards)" :fallback="fallback(entry.cards)" :alt="cardName(entry.cards)" :max-tilt="10" />
+            <span class="hub-recent-name">{{ cardName(entry.cards) }}</span>
             <span v-if="entry.quantity > 1" class="hub-recent-qty">
               {{ t('collection.quantity', { quantity: entry.quantity }) }}
             </span>

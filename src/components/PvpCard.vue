@@ -1,49 +1,63 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { damageLabel, hpPercent } from '@/utils/pvp'
+import { useCardLocale } from '@/composables/useCardLocale'
+import { attackName, damageLabel, hpPercent } from '@/utils/pvp'
 
-// One card in a PvP battle or deck (a pvp_card() snapshot): picture, HP
-// left (bar), its attacks with their energy cost, weakness, and the prizes
-// it gives when knocked out (2 or 3 for ex, V, VMAX...). `hidden` = a
-// defender card not played yet (a card back).
+// One card in a PvP battle or deck (a pvp_card() snapshot, migration 0030),
+// in the player's language. In play (`slot`: damage, energy, special
+// conditions, hp_left) it shows its HP bar, energies and conditions;
+// otherwise its printed HP and stage. `compact` (the board) leaves the
+// attacks to the detail sheet (PvpCardSheet).
 const props = defineProps({
-  card: { type: Object, default: null },
-  hidden: { type: Boolean, default: false },
-  // Show the HP bar (battles); decks only show the printed HP
-  showHp: { type: Boolean, default: false },
+  card: { type: Object, required: true },
+  slot: { type: Object, default: null },
+  compact: { type: Boolean, default: false },
 })
 
 const { t, te } = useI18n()
+const { french, cardName, cardImage, fallback } = useCardLocale()
 const typeLabel = (type) => (te(`collection.types.${type}`) ? t(`collection.types.${type}`) : type)
-const knockedOut = computed(() => props.showHp && props.card?.hp_left === 0)
-const percent = computed(() => (props.card ? hpPercent(props.card) : 0))
+const hpLeft = computed(() => props.slot?.hp_left ?? props.card.hp)
+const percent = computed(() => hpPercent(hpLeft.value, props.card.hp))
+const conditions = computed(() =>
+  props.slot ? [props.slot.status, props.slot.poisoned && 'poisoned', props.slot.burned && 'burned'].filter(Boolean) : [],
+)
 </script>
 
 <template>
-  <div v-if="hidden || !card" class="pvp-card is-hidden" :aria-label="t('pvp.hiddenCard')" role="img">
-    <span class="pvp-back" aria-hidden="true">?</span>
-  </div>
-  <div v-else class="pvp-card" :class="{ 'is-ko': knockedOut }">
-    <img class="pvp-img" :src="card.image_small" alt="" width="245" height="342" loading="lazy" draggable="false" />
-    <span class="pvp-name">{{ card.name }}</span>
-    <span v-if="showHp" class="pvp-hp" role="meter" :aria-label="t('pvp.hpLabel')" aria-valuemin="0" :aria-valuemax="card.hp" :aria-valuenow="card.hp_left">
-      <span class="pvp-hp-bar" :class="{ low: percent <= 30 }"><span :style="{ width: `${percent}%` }"></span></span>
-      <span class="pvp-hp-text">{{ knockedOut ? t('pvp.ko') : t('pvp.hp', { left: card.hp_left, hp: card.hp }) }}</span>
+  <div class="pvp-card" :class="{ compact }">
+    <span class="pvp-img-wrap">
+      <img class="pvp-img" :src="cardImage(card)" :data-fallback="fallback(card)" alt="" width="245" height="342" loading="lazy" draggable="false" />
+      <span v-if="card.prizes > 1" class="pvp-points">{{ t('pvp.pointsBadge', { count: card.prizes }) }}</span>
+      <span v-if="slot && slot.energy" class="pvp-energy" :title="t('pvp.energyCount', { count: slot.energy }, slot.energy)">
+        <span aria-hidden="true">⚡</span>{{ slot.energy }}
+        <span class="visually-hidden">{{ t('pvp.energyCount', { count: slot.energy }, slot.energy) }}</span>
+      </span>
     </span>
-    <span v-else class="pvp-hp-text">{{ t('pvp.hpPrinted', { hp: card.hp }) }}</span>
-    <ul class="pvp-attacks" :aria-label="t('pvp.attacksLabel')">
-      <li v-for="(attack, i) in card.attacks" :key="i">
-        <span class="pvp-cost" :aria-label="t('pvp.cost', { count: attack.cost }, attack.cost)">{{ attack.cost }}</span>
-        <span class="pvp-attack-name">{{ attack.name }}</span>
+    <span class="pvp-name">{{ cardName(card) }}</span>
+    <span v-if="slot" class="pvp-hp" role="meter" :aria-label="t('pvp.hpLabel')" aria-valuemin="0" :aria-valuemax="card.hp" :aria-valuenow="hpLeft">
+      <span class="pvp-hp-bar" :class="{ low: percent <= 30 }"><span :style="{ width: `${percent}%` }"></span></span>
+      <span class="pvp-hp-text">{{ t('pvp.hp', { left: hpLeft, hp: card.hp }) }}</span>
+    </span>
+    <span v-else class="pvp-hp-text">
+      {{ t('pvp.hpPrinted', { hp: card.hp }) }} ·
+      {{ card.stage === 'evolution' ? t('pvp.stage.evolution', { name: card.evolves_from }) : t(`pvp.stage.${card.stage}`) }}
+    </span>
+    <span v-if="conditions.length" class="pvp-conditions">
+      <span v-for="status in conditions" :key="status" class="pvp-condition" :class="`is-${status}`">{{ t(`pvp.statuses.${status}`) }}</span>
+    </span>
+    <ul v-if="!compact" class="pvp-attacks" :aria-label="t('pvp.attacks')">
+      <li v-for="(attack, i) in card.attacks" :key="i" :class="{ unusable: !attack.usable }">
+        <span class="pvp-cost" :aria-label="t('pvp.attackCost', { count: attack.cost }, attack.cost)">{{ attack.cost }}</span>
+        <span class="pvp-attack-name">{{ attackName(attack, french) }}</span>
         <strong>{{ damageLabel(attack) }}</strong>
       </li>
     </ul>
-    <span class="pvp-types">
+    <span v-if="!compact" class="pvp-types">
       <span v-for="type in card.types" :key="type" class="pvp-dot" :style="{ '--dot': `var(--pb-type-${type.toLowerCase()}, var(--pb-type-colorless))` }" :title="typeLabel(type)"></span>
       <span v-if="card.weaknesses?.length" class="pvp-weak">{{ t('pvp.weakTo', { types: card.weaknesses.map(typeLabel).join(', ') }) }}</span>
     </span>
-    <span v-if="card.prizes > 1" class="pvp-prizes">{{ t('pvp.prizesBadge', { count: card.prizes }) }}</span>
   </div>
 </template>
 
@@ -51,18 +65,49 @@ const percent = computed(() => (props.card ? hpPercent(props.card) : 0))
 .pvp-card {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
   min-width: 0;
   height: 100%;
   font-size: 0.75rem;
   text-align: left;
 }
 
+.pvp-img-wrap {
+  position: relative;
+  display: block;
+}
+
 .pvp-img {
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: 245 / 342;
+  object-fit: cover;
   border-radius: 6px;
+}
+
+.pvp-points,
+.pvp-energy {
+  position: absolute;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.pvp-points {
+  top: 0.25rem;
+  right: 0.25rem;
+  background: var(--pb-danger-text);
+  color: var(--pb-bg);
+}
+
+.pvp-energy {
+  bottom: 0.25rem;
+  left: 0.25rem;
+  background: var(--pb-accent);
+  color: var(--pb-accent-ink);
 }
 
 .pvp-name {
@@ -70,6 +115,10 @@ const percent = computed(() => (props.card ? hpPercent(props.card) : 0))
   font-size: 0.8rem;
   line-height: 1.2;
   overflow-wrap: anywhere;
+}
+
+.compact .pvp-name {
+  font-size: 0.72rem;
 }
 
 .pvp-hp {
@@ -100,8 +149,23 @@ const percent = computed(() => (props.card ? hpPercent(props.card) : 0))
 .pvp-hp-text {
   color: var(--pb-text-muted);
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
+.pvp-conditions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+}
+
+.pvp-condition {
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--pb-danger-bg);
+  color: var(--pb-danger-text);
+  font-size: 0.65rem;
+  font-weight: 800;
+}
 
 .pvp-attacks {
   display: flex;
@@ -119,6 +183,10 @@ const percent = computed(() => (props.card ? hpPercent(props.card) : 0))
   min-width: 0;
 }
 
+.pvp-attacks li.unusable {
+  opacity: 0.55;
+}
+
 .pvp-attacks strong {
   margin-left: auto;
 }
@@ -134,16 +202,6 @@ const percent = computed(() => (props.card ? hpPercent(props.card) : 0))
   border: 1px solid var(--pb-border-strong);
   background: var(--pb-input-bg);
   font-size: 0.65rem;
-  font-weight: 800;
-}
-
-.pvp-prizes {
-  align-self: flex-start;
-  padding: 0.05rem 0.45rem;
-  border-radius: 999px;
-  background: var(--pb-danger-bg);
-  color: var(--pb-danger-text);
-  font-size: 0.7rem;
   font-weight: 800;
 }
 
@@ -172,36 +230,5 @@ const percent = computed(() => (props.card ? hpPercent(props.card) : 0))
 
 .pvp-weak {
   font-size: 0.7rem;
-}
-
-.pvp-card.is-ko {
-  opacity: 0.45;
-}
-
-.pvp-card.is-ko .pvp-img {
-  filter: grayscale(1);
-}
-
-.pvp-card.is-hidden {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 245 / 342;
-  height: auto;
-  border-radius: 6px;
-  border: 2px dashed var(--pb-border-strong);
-  background: var(--pb-bg-elevated);
-}
-
-.pvp-back {
-  font-family: var(--pb-font-display);
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: var(--pb-text-muted);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pvp-hp-bar span {
-    transition: none;
-  }
 }
 </style>

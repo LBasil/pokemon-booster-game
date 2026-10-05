@@ -11,6 +11,8 @@ const props = defineProps({
   alt: { type: String, required: true },
   maxTilt: { type: Number, default: 14 },
   eager: { type: Boolean, default: false },
+  // English image if a French one (TCGdex) fails to load (main.js)
+  fallback: { type: String, default: null },
 })
 
 const el = ref(null)
@@ -50,6 +52,7 @@ function onPointerLeave() {
         :srcset="srcset"
         :sizes="sizes"
         :alt="alt"
+        :data-fallback="fallback"
         draggable="false"
         :loading="eager ? 'eager' : 'lazy'"
         decoding="async"

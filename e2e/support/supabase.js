@@ -86,32 +86,38 @@ export const EVOLUTION_QUESTIONS = [
   { cards: [evoCard('sv3pt5-26', 'Raichu'), evoCard('sv3pt5-25', 'Pikachu')], chain: ['sv3pt5-25', 'sv3pt5-26'] },
 ]
 
-// PvP battles (migrations 0024 + 0025): every card of the mock is a Fire Pokémon
-// with 60 HP, weak to Water: Ember (30, 1 energy) and Flamethrower (90, 3
-// energies). The opponent's deck: 5 Grass cards weak to Fire (Ember knocks
-// one out) that always use Vine Whip (20, 1 energy), played in this order.
-// Venusaur ex gives 2 prizes: Oddish + Venusaur ex = 3, a win.
+// PvP battles like Pokémon TCG Pocket (migration 0030). Every challenge
+// Pokémon of the mock is Fire, weak to Water, retreat 1: Ember (30, 1
+// energy) and Flamethrower (90, 3 energies, discards an energy). Basics have
+// 60 HP; Charmeleon, Wartortle and Ivysaur evolve from their Basic (90 HP),
+// Charizard ex from Charmeleon (180 HP, 2 points). The opponent: Oddish
+// (Active) and Venusaur ex (Bench, 2 points), Grass, weak to Fire, 60 HP,
+// Vine Whip (20, 1 energy): Ember knocks either out, so Oddish + Venusaur ex
+// = 3 points, a win. The server's turn: draw, attach to its Active, Vine Whip.
 const SERIES = { sv3pt5: 'Scarlet & Violet', base1: 'Base' }
+const EVOLVES_FROM = { Charmeleon: 'Charmander', Wartortle: 'Squirtle', Ivysaur: 'Bulbasaur', 'Charizard ex': 'Charmeleon' }
 const FIRE_ATTACKS = [
-  { name: 'Ember', damage: 30, times: false, cost: 1 },
-  { name: 'Flamethrower', damage: 90, times: false, cost: 3 },
+  { name: 'Ember', name_fr: 'Flammèche', printed: '30', base: 30, cost: 1, text: '', text_fr: null, fx: [], coins: null, partial: false, usable: true },
+  {
+    name: 'Flamethrower', name_fr: 'Lance-Flammes', printed: '90', base: 90, cost: 3, text: 'Discard an Energy from this Pokémon.',
+    text_fr: 'Défaussez une Énergie de ce Pokémon.', fx: [{ op: 'discard_self', n: 1 }], coins: null, partial: false, usable: true,
+  },
 ]
 const pvpCard = (id) => {
   const card = byId[id]
-  return card?.national_pokedex_number
-    ? { id, name: card.name, image_small: card.image_small, hp: 60, types: ['Fire'], weaknesses: ['Water'], resistances: [], prizes: 1, attacks: FIRE_ATTACKS }
-    : null
+  if (!card?.national_pokedex_number) return null
+  const from = EVOLVES_FROM[card.name] ?? null
+  const ex = card.name.endsWith(' ex')
+  return {
+    id, name: card.name, name_fr: null, image_small: card.image_small, image_fr: null, hp: ex ? 180 : from ? 90 : 60,
+    types: ['Fire'], weaknesses: ['Water'], resistances: [], prizes: ex ? 2 : 1, stage: from ? 'evolution' : 'basic',
+    evolves_from: from, retreat: 1, attacks: FIRE_ATTACKS, abilities: [],
+  }
 }
-export const PVP_OPPONENT_DECK = ['Oddish', 'Venusaur ex', 'Tangela', 'Exeggcute', 'Paras'].map((name, i) => ({
-  id: `foe-${i}`,
-  name,
-  image_small: `https://images.e2e.test/foe-${i}.png`,
-  hp: 60,
-  types: ['Grass'],
-  weaknesses: ['Fire'],
-  resistances: [],
-  prizes: name.endsWith(' ex') ? 2 : 1,
-  attacks: [{ name: 'Vine Whip', damage: 20, times: false, cost: 1 }],
+export const PVP_FOES = ['Oddish', 'Venusaur ex'].map((name, i) => ({
+  id: `foe-${i}`, name, name_fr: null, image_small: `https://images.e2e.test/foe-${i}.png`, image_fr: null, hp: 60, types: ['Grass'],
+  weaknesses: ['Fire'], resistances: [], prizes: name.endsWith(' ex') ? 2 : 1, stage: 'basic', evolves_from: null, retreat: 1, abilities: [],
+  attacks: [{ name: 'Vine Whip', name_fr: 'Fouet Lianes', printed: '20', base: 20, cost: 1, text: '', fx: [], coins: null, partial: false, usable: true }],
 }))
 
 export async function mockSupabase(page, options = {}) {
@@ -178,13 +184,14 @@ export async function mockSupabase(page, options = {}) {
     // (`next` = the first one); noStop: true = before 0019 (no stop RPC)
     evolutionChain:
       options.evolutionChain === 'missing' ? 'missing' : { ready: true, paidUsed: 0, best: 0, todayCoins: 0, run: null, next: 0, ...options.evolutionChain },
-    // PvP battles (migration 0024): 'missing' = not applied; opponent: false =
-    // nobody else has a deck; decks / ratings by format; board = leaderboard rows;
-    // bots (0027): botsToday = bot battles started today, noBots = 0027 not applied
+    // PvP battles (migration 0030): 'missing' = not applied; engine 1 = before
+    // 0030 ("Coming soon"); opponent: false = nobody else has a deck; decks =
+    // { format: { attack: [ids], defense: [ids] } }; board = leaderboard rows;
+    // botsToday = bot battles started today; deckSize = the rules' 20
     pvp:
       options.pvp === 'missing'
         ? 'missing'
-        : { ready: true, battlesLeft: 10, opponent: true, decks: {}, ratings: {}, battle: null, history: [], board: [], botsToday: 0, noBots: false, ...options.pvp },
+        : { engine: 2, ready: true, deckSize: 20, battlesLeft: 10, opponent: true, decks: {}, ratings: {}, battle: null, history: [], board: [], botsToday: 0, ...options.pvp },
   }
   const challengeState = () => {
     const c = state.challenge
@@ -207,6 +214,10 @@ export async function mockSupabase(page, options = {}) {
     route.fulfill({ status: 200, contentType: 'image/png', body: png }),
   )
   await page.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.fulfill({ status: 200, body: '' }))
+  // French card images (TCGdex, 0029): a /missing/ one fails, to check the English fallback
+  await page.route(/assets\.tcgdex\.net/, (route) =>
+    route.request().url().includes('/missing/') ? route.fulfill({ status: 404, body: '' }) : route.fulfill({ status: 200, contentType: 'image/png', body: png }),
+  )
 
   await page.route(`${HOST}/**`, async (route) => {
     const req = route.request()
@@ -435,127 +446,110 @@ export async function mockSupabase(page, options = {}) {
         return json({ streak: run.streak, run_coins: run.coins, state: ecState() })
       }
     }
-    // ---- PvP battles (migrations 0024-0026; decks: { format: { attack, defense } }, or { cards, valid } before 0026) ----
+    // ---- PvP battles (migration 0030: Pocket-style; 0028: testers only) ----
     if (path.startsWith('/rest/v1/rpc/pvp_')) {
       const pv = state.pvp
       if (pv === 'missing') return json({ code: 'PGRST202', message: `Could not find the function public.${path.split('/').pop()} in the schema cache` }, 404)
-      // 0028: testers only (pvp_open_to)
       if (state.profile.username.toLowerCase() !== 'bazouk') {
         if (path === '/rest/v1/rpc/pvp_state') return json({ ready: false })
-        if (['/rest/v1/rpc/pvp_save_deck', '/rest/v1/rpc/pvp_start', '/rest/v1/rpc/pvp_bot_start'].includes(path)) return raise('pvp_closed')
+        return raise('pvp_closed')
       }
-      const fighters = () => state.challengeCollection.map((e) => pvpCard(e.card_id)).filter(Boolean)
+      const DECK = pv.deckSize
+      const owned = () => state.challengeCollection.map((e) => ({ card: pvpCard(e.card_id), owned: e.quantity })).filter((e) => e.card)
       const fits = (card, format) =>
         format === 'all' || format === `era:${SERIES[card.id.split('-')[0]]}` || format === `set:${card.id.split('-')[0]}`
       const rating = (format) => (pv.ratings[format] ??= { elo: 1000, wins: 0, losses: 0, draws: 0, def_wins: 0, def_losses: 0, def_draws: 0 })
-      const view = (b) => ({
-        id: b.id,
-        format: b.format,
-        status: b.status,
-        round: b.round,
-        my_prizes: b.my_prizes,
-        their_prizes: b.their_prizes,
-        my_energy: b.my_energy,
-        their_energy: b.their_energy,
-        elo_change: b.elo_change,
-        bot: b.bot ?? null,
-        paid: b.paid ?? false,
-        coins: b.coins ?? null,
-        opponent: b.opponent,
-        log: b.log,
-        mine: b.mine.map((card, slot) => ({ ...card, slot, hp_left: b.myHp[slot] })),
-        theirs: {
-          left: b.theirHp.filter((hp) => hp > 0).length,
-          seen: b.seen.map((slot) => ({ ...PVP_OPPONENT_DECK[slot], slot, hp_left: b.theirHp[slot] })),
-          deck: b.status === 'playing' ? null : PVP_OPPONENT_DECK.map((card, slot) => ({ ...card, slot, hp_left: b.theirHp[slot] })),
-        },
-      })
-      const pvState = () => {
-        const owned = fighters()
-        const sets = [...new Set(owned.map((card) => card.id.split('-')[0]))]
+      const validDeck = (ids, format) => {
+        if (ids.length !== DECK) return false
+        const counts = {}
+        const names = {}
+        for (const id of ids) {
+          const card = pvpCard(id)
+          if (!card || !fits(card, format)) return false
+          counts[id] = (counts[id] ?? 0) + 1
+          names[card.name] = (names[card.name] ?? 0) + 1
+        }
+        const qty = (id) => state.challengeCollection.find((e) => e.card_id === id)?.quantity ?? 0
+        return Object.entries(counts).every(([id, n]) => qty(id) >= n) && Object.values(names).every((n) => n <= 2) && ids.some((id) => pvpCard(id).stage === 'basic')
+      }
+      const slotOf = (c, turn = 0) => ({ c, under: [], damage: 0, energy: 0, turn_in: turn, status: null, poisoned: false, burned: false })
+      const ev = (b, e) => b.events.push({ ...e, t: b.turn })
+      // The board as pvp_battle_view() sends it
+      const view = (b) => {
+        const mySlot = (slot) => slot && { ...slot, card: b.cards[slot.c], hp_left: b.cards[slot.c].hp - slot.damage }
+        const theirSlot = (slot) => slot && { ...slot, card: PVP_FOES[slot.c], hp_left: PVP_FOES[slot.c].hp - slot.damage }
+        const myTurn = b.phase === 'play' && b.status === 'playing'
+        const active = b.me.active
+        const handHint = (i) => {
+          const card = b.cards[i]
+          const positions = [b.me.active, ...b.me.bench].map((slot, pos) => ({ slot, pos })).filter(({ slot }) => slot)
+          return {
+            bench: myTurn && card.stage === 'basic' && b.me.bench.length < 3,
+            evolve: myTurn && b.turn > 2 && card.stage === 'evolution'
+              ? positions.filter(({ slot }) => b.cards[slot.c].name === card.evolves_from && slot.turn_in < b.turn).map(({ pos }) => pos)
+              : [],
+          }
+        }
         return {
-          deck_size: 5, prizes_to_win: 3, max_rounds: 20, battles_per_day: 10, start_energy: 1, energy_per_round: 1, max_energy: 5,
-          start_elo: 1000, k_factor: 32, weakness_multiplier: 2, resistance: 30, min_damage: 10,
+          id: b.id, engine: 2, format: b.format, status: b.status, turn: b.turn, phase: b.phase, current: 'a', first: 'a', winner: b.winner ?? null,
+          elo_change: b.elo_change ?? null, bot: b.bot ?? null, paid: b.paid ?? false, coins: b.coins ?? null, opponent: b.opponent,
+          me: {
+            points: b.me.points, deck: b.me.deck.length, hand_count: b.me.hand.length, discard: [], attached: b.me.attached, retreated: b.me.retreated,
+            active: mySlot(active), bench: b.me.bench.map(mySlot), hand: b.me.hand.map((index) => ({ index, card: b.cards[index] })),
+          },
+          them: {
+            points: b.them.points, deck: 10, hand_count: 4, discard: [], active: theirSlot(b.them.active), bench: b.them.bench.map(theirSlot),
+            cards: b.status === 'playing' ? null : PVP_FOES,
+          },
+          my_cards: b.cards,
+          hints: {
+            my_turn: myTurn, setup: b.phase === 'setup', promote: b.phase === 'promote',
+            attach: myTurn && b.turn > 1 && !b.me.attached,
+            hand: Object.fromEntries(b.me.hand.map((i) => [i, handHint(i)])),
+            retreat: myTurn && !!active && !b.me.retreated && b.me.bench.length > 0 && active.energy >= 1,
+            attacks: active
+              ? b.cards[active.c].attacks.map((a) => (!myTurn ? 'not_your_turn' : b.turn === 1 ? 'first_turn' : a.cost > active.energy ? 'energy' : null))
+              : [],
+          },
+          log: b.log.slice(-60),
+        }
+      }
+      const pvState = () => {
+        const mine = owned()
+        const copies = (list) => list.reduce((sum, e) => sum + e.owned, 0)
+        const sets = [...new Set(mine.map((e) => e.card.id.split('-')[0]))]
+        return {
+          engine: pv.engine, deck_size: DECK, max_copies: 2, hand_size: 5, bench_size: 3, points_to_win: 3, max_turns: 30, battles_per_day: 10,
+          start_elo: 1000, k_factor: 32, weakness_multiplier: 2, resistance: 30, poison: 10, burn: 20,
+          bot_levels: ['easy', 'normal', 'hard'], bot_coins: { easy: 10, normal: 25, hard: 50 }, bot_paid_per_day: 5, bot_battles_per_day: 20,
           ready: pv.ready,
           battles_left: pv.battlesLeft,
+          bot_battles_left: Math.max(20 - pv.botsToday, 0),
+          bot_paid_left: Math.max(5 - pv.botsToday, 0),
+          coins: state.challenge.coins,
           formats: {
-            all: owned.length,
-            eras: ['Base', 'Scarlet & Violet'].map((series) => ({ format: `era:${series}`, series, owned: owned.filter((card) => fits(card, `era:${series}`)).length })),
-            sets: sets.map((id) => ({ format: `set:${id}`, set_id: id, name: SETS.find((set) => set.id === id)?.name ?? id, series: SERIES[id], owned: owned.filter((card) => fits(card, `set:${id}`)).length })),
+            all: copies(mine),
+            eras: ['Base', 'Scarlet & Violet'].map((series) => ({ format: `era:${series}`, series, owned: copies(mine.filter((e) => fits(e.card, `era:${series}`))) })),
+            sets: sets.map((id) => ({
+              format: `set:${id}`, set_id: id, name: SETS.find((set) => set.id === id)?.name ?? id, name_fr: null, series: SERIES[id],
+              owned: copies(mine.filter((e) => fits(e.card, `set:${id}`))),
+            })),
           },
-          decks: pv.decks,
+          decks: Object.fromEntries(Object.entries(pv.decks).map(([format, roles]) => [format, Object.fromEntries(Object.entries(roles).map(([role, ids]) => [role, { ids, valid: validDeck(ids, format) }]))])),
           ratings: pv.ratings,
           battle: pv.battle && pv.battle.status === 'playing' ? view(pv.battle) : null,
           history: pv.history,
-          ...(pv.noBots
-            ? {}
-            : {
-                bot_levels: ['easy', 'normal', 'hard'], bot_coins: { easy: 10, normal: 25, hard: 50 }, bot_paid_per_day: 5, bot_battles_per_day: 20,
-                bot_battles_left: Math.max(20 - pv.botsToday, 0),
-                bot_paid_left: Math.max(5 - pv.botsToday, 0),
-                coins: state.challenge.coins,
-              }),
         }
-      }
-      if (path === '/rest/v1/rpc/pvp_state') return json(pvState())
-      if (path === '/rest/v1/rpc/pvp_eligible') return json(fighters().filter((card) => fits(card, args.p_format)))
-      if (path === '/rest/v1/rpc/pvp_save_deck') {
-        const cards = (args.p_cards ?? []).map(pvpCard)
-        if (cards.length !== 5 || new Set(args.p_cards).size !== 5 || cards.some((card) => !card || !fits(card, args.p_format))) return raise('pvp_invalid_deck')
-        // Before 0026 (`noRoles`): one deck, saved without a role
-        if (pv.noRoles) {
-          if ('p_role' in args) return json({ code: 'PGRST202', message: 'Could not find the function public.pvp_save_deck(p_cards, p_format, p_role) in the schema cache' }, 404)
-          pv.decks[args.p_format] = { cards, valid: true }
-        } else {
-          const role = args.p_role ?? 'attack'
-          if (!['attack', 'defense'].includes(role)) return raise('pvp_invalid_role')
-          pv.decks[args.p_format] = { ...pv.decks[args.p_format], [role]: { cards, valid: true } }
-        }
-        rating(args.p_format)
-        return json(pvState())
-      }
-      if (path === '/rest/v1/rpc/pvp_start') {
-        if (pv.battle?.status === 'playing') return json(pvState())
-        if (!pv.battlesLeft) return raise('pvp_no_battles_left')
-        const entry = pv.decks[args.p_format]
-        const deck = entry && ('cards' in entry ? entry : entry.attack)
-        if (!deck) return raise('pvp_no_deck')
-        if (!pv.opponent) return raise('pvp_no_opponent')
-        pv.battlesLeft--
-        pv.battle = {
-          id: Date.now(), format: args.p_format, status: 'playing', round: 0, my_prizes: 0, their_prizes: 0, my_energy: 1, their_energy: 1, elo_change: null,
-          opponent: { username: 'Misty', elo: 1000 }, log: [], mine: deck.cards, myHp: deck.cards.map((card) => card.hp),
-          theirHp: PVP_OPPONENT_DECK.map((card) => card.hp), seen: [], next: 0,
-        }
-        return json(pvState())
-      }
-      if (path === '/rest/v1/rpc/pvp_bot_start') {
-        if (pv.noBots) return json({ code: 'PGRST202', message: 'Could not find the function public.pvp_bot_start(p_format, p_level) in the schema cache' }, 404)
-        if (pv.battle?.status === 'playing') return json(pvState())
-        if (!['easy', 'normal', 'hard'].includes(args.p_level)) return raise('pvp_invalid_level')
-        if (pv.botsToday >= 20) return raise('pvp_no_bot_battles_left')
-        const entry = pv.decks[args.p_format]
-        const deck = entry && ('cards' in entry ? entry : entry.attack)
-        if (!deck) return raise('pvp_no_deck')
-        pv.battle = {
-          id: Date.now(), format: args.p_format, status: 'playing', round: 0, my_prizes: 0, their_prizes: 0, my_energy: 1, their_energy: 1, elo_change: null,
-          bot: args.p_level, paid: pv.botsToday < 5, coins: null,
-          opponent: { bot: args.p_level, username: null, elo: null }, log: [], mine: deck.cards, myHp: deck.cards.map((card) => card.hp),
-          theirHp: PVP_OPPONENT_DECK.map((card) => card.hp), seen: [], next: 0,
-        }
-        pv.botsToday++
-        return json(pvState())
       }
       const finish = (b, status) => {
+        b.status = status
         if (b.bot) {
-          b.status = status
           b.elo_change = 0
           b.coins = b.paid ? Math.floor({ easy: 10, normal: 25, hard: 50 }[b.bot] * (status === 'won' ? 1 : status === 'draw' ? 0.5 : 0)) : 0
           state.challenge.coins += b.coins
           pv.history.unshift({ id: b.id, format: b.format, at: new Date().toISOString(), role: 'attack', result: status === 'forfeit' ? 'lost' : status, elo_change: 0, bot: b.bot, coins: b.coins, opponent: null })
           return
         }
-        b.status = status
         b.elo_change = status === 'won' ? 16 : status === 'draw' ? 0 : -16
         const r = rating(b.format)
         r.elo += b.elo_change
@@ -564,38 +558,175 @@ export async function mockSupabase(page, options = {}) {
         else r.losses++
         pv.history.unshift({ id: b.id, format: b.format, at: new Date().toISOString(), role: 'attack', result: status === 'forfeit' ? 'lost' : status, elo_change: b.elo_change, opponent: 'Misty' })
       }
-      if (path === '/rest/v1/rpc/pvp_play') {
+      const draw = (b) => {
+        if (!b.me.deck.length) return
+        const c = b.me.deck.shift()
+        b.me.hand.push(c)
+        ev(b, { k: 'draw', s: 'a', cards: [c] })
+      }
+      // Knock outs, points, the server's promotion, the end
+      const checkKo = (b) => {
+        const them = b.them.active
+        if (them && them.damage >= PVP_FOES[them.c].hp) {
+          b.me.points += PVP_FOES[them.c].prizes
+          ev(b, { k: 'ko', s: 'd', c: them.c, name: PVP_FOES[them.c].name, points: PVP_FOES[them.c].prizes })
+          b.them.active = b.them.bench.shift() ?? null
+          if (b.them.active) ev(b, { k: 'promote', s: 'd', c: b.them.active.c, name: PVP_FOES[b.them.active.c].name })
+        }
+        const me = b.me.active
+        if (me && me.damage >= b.cards[me.c].hp) {
+          b.them.points += b.cards[me.c].prizes
+          ev(b, { k: 'ko', s: 'a', c: me.c, name: b.cards[me.c].name, points: b.cards[me.c].prizes })
+          b.me.active = null
+          if (b.me.bench.length) b.phase = 'promote'
+        }
+        const won = b.me.points >= 3 || !b.them.active
+        const lost = b.them.points >= 3 || (!b.me.active && !b.me.bench.length)
+        if (won || lost) {
+          b.winner = won && !lost ? 'a' : lost && !won ? 'd' : 'draw'
+          ev(b, { k: 'over', winner: b.winner })
+          finish(b, b.winner === 'a' ? 'won' : b.winner === 'd' ? 'lost' : 'draw')
+          return true
+        }
+        return false
+      }
+      // The server's turn, then mine starts
+      const serverTurn = (b) => {
+        b.turn++
+        ev(b, { k: 'turn', s: 'd' })
+        ev(b, { k: 'draw', s: 'd', n: 1 })
+        const them = b.them.active
+        them.energy++
+        ev(b, { k: 'attach', s: 'd', c: them.c, name: PVP_FOES[them.c].name })
+        const target = b.me.active
+        target.damage += 20
+        ev(b, { k: 'attack', s: 'd', c: them.c, i: 0, name: PVP_FOES[them.c].name, attack: 'Vine Whip', damage: 20, flips: [], prevented: false })
+        if (checkKo(b) || b.phase === 'promote') return
+        startMyTurn(b)
+      }
+      const startMyTurn = (b) => {
+        b.turn++
+        b.me.attached = false
+        b.me.retreated = false
+        ev(b, { k: 'turn', s: 'a' })
+        draw(b)
+      }
+      const newBattle = (format, ids, extra) => {
+        const order = [...ids.keys()]
+        return {
+          id: Date.now(), format, status: 'playing', turn: 0, phase: 'setup', cards: ids.map(pvpCard), events: [], log: [],
+          me: { hand: order.slice(0, 5), deck: order.slice(5), active: null, bench: [], points: 0, attached: false, retreated: false },
+          them: { active: slotOf(0), bench: [slotOf(1)], points: 0 },
+          ...extra,
+        }
+      }
+      if (path === '/rest/v1/rpc/pvp_state') return json(pvState())
+      if (path === '/rest/v1/rpc/pvp_eligible') {
+        return json(owned().filter((e) => fits(e.card, args.p_format)).map((e) => ({ ...e.card, owned: e.owned })))
+      }
+      if (path === '/rest/v1/rpc/pvp_save_deck') {
+        const role = args.p_role ?? 'attack'
+        if (!['attack', 'defense'].includes(role)) return raise('pvp_invalid_role')
+        if (!validDeck(args.p_cards ?? [], args.p_format)) return raise('pvp_invalid_deck')
+        pv.decks[args.p_format] = { ...pv.decks[args.p_format], [role]: args.p_cards }
+        rating(args.p_format)
+        return json(pvState())
+      }
+      if (path === '/rest/v1/rpc/pvp_start' || path === '/rest/v1/rpc/pvp_bot_start') {
+        if (pv.battle?.status === 'playing') return json(pvState())
+        const bot = path.endsWith('pvp_bot_start') ? args.p_level : null
+        if (bot && !['easy', 'normal', 'hard'].includes(bot)) return raise('pvp_invalid_level')
+        if (!bot && !pv.battlesLeft) return raise('pvp_no_battles_left')
+        if (bot && pv.botsToday >= 20) return raise('pvp_no_bot_battles_left')
+        const ids = pv.decks[args.p_format]?.attack
+        if (!ids) return raise('pvp_no_deck')
+        if (!validDeck(ids, args.p_format)) return raise('pvp_invalid_deck')
+        if (!bot && !pv.opponent) return raise('pvp_no_opponent')
+        if (bot) {
+          pv.battle = newBattle(args.p_format, ids, { bot, paid: pv.botsToday < 5, opponent: { bot, username: null, elo: null } })
+          pv.botsToday++
+        } else {
+          pv.battle = newBattle(args.p_format, ids, { opponent: { bot: null, username: 'Misty', elo: 1000 } })
+          pv.battlesLeft--
+        }
+        return json(pvState())
+      }
+      if (path === '/rest/v1/rpc/pvp_act') {
         const b = pv.battle
         if (!b || b.status !== 'playing') return raise('no_game')
-        const slot = args.p_slot
-        if (!(b.myHp[slot] > 0)) return raise('pvp_invalid_card')
-        const mine = b.mine[slot]
-        const myAttack = args.p_attack === null ? null : mine.attacks[args.p_attack]
-        if (args.p_attack !== null && !myAttack) return raise('pvp_invalid_attack')
-        if (myAttack && myAttack.cost > b.my_energy) return raise('pvp_not_enough_energy')
-        const d = b.next
-        const theirs = PVP_OPPONENT_DECK[d]
-        const theirAttack = theirs.attacks[0]
-        const hit = (from, attack, to) =>
-          attack ? Math.max(10, attack.damage * (from.types.some((type) => to.weaknesses.includes(type)) ? 2 : 1)) : 0
-        const dealt = hit(mine, myAttack, theirs)
-        const taken = hit(theirs, theirAttack, mine)
-        b.theirHp[d] = Math.max(0, b.theirHp[d] - dealt)
-        b.myHp[slot] = Math.max(0, b.myHp[slot] - taken)
-        if (!b.seen.includes(d)) b.seen.push(d)
-        const round = {
-          a: slot, d, a_attack: args.p_attack, d_attack: 0, dealt, taken, roll_a: null, roll_d: null,
-          ko_theirs: b.theirHp[d] === 0, ko_mine: b.myHp[slot] === 0,
+        const a = args.p_action ?? {}
+        b.events = []
+        const active = b.me.active
+        const inHand = (c) => b.me.hand.includes(c)
+        const take = (c) => b.me.hand.splice(b.me.hand.indexOf(c), 1)
+        const posSlot = (pos) => (pos === 0 ? b.me.active : b.me.bench[pos - 1])
+        if (a.type === 'setup') {
+          if (b.phase !== 'setup' || !inHand(a.active) || b.cards[a.active].stage !== 'basic') return raise('pvp_invalid_action')
+          take(a.active)
+          b.me.active = slotOf(a.active)
+          for (const c of a.bench ?? []) {
+            take(c)
+            b.me.bench.push(slotOf(c))
+          }
+          b.phase = 'play'
+          ev(b, { k: 'start', first: 'a' })
+          startMyTurn(b)
+        } else if (a.type === 'promote') {
+          if (b.phase !== 'promote' || !b.me.bench[a.pos - 1]) return raise('pvp_invalid_action')
+          b.me.active = b.me.bench.splice(a.pos - 1, 1)[0]
+          ev(b, { k: 'promote', s: 'a', c: b.me.active.c, name: b.cards[b.me.active.c].name })
+          b.phase = 'play'
+          startMyTurn(b)
+        } else if (b.phase !== 'play') {
+          return raise('pvp_not_your_turn')
+        } else if (a.type === 'attach') {
+          if (b.me.attached || b.turn === 1 || !posSlot(a.pos)) return raise('pvp_no_energy')
+          posSlot(a.pos).energy++
+          b.me.attached = true
+          ev(b, { k: 'attach', s: 'a', c: posSlot(a.pos).c, name: b.cards[posSlot(a.pos).c].name })
+        } else if (a.type === 'bench') {
+          if (!inHand(a.card) || b.cards[a.card].stage !== 'basic') return raise('pvp_invalid_action')
+          if (b.me.bench.length >= 3) return raise('pvp_bench_full')
+          take(a.card)
+          b.me.bench.push(slotOf(a.card, b.turn))
+          ev(b, { k: 'bench', s: 'a', c: a.card, name: b.cards[a.card].name })
+        } else if (a.type === 'evolve') {
+          const slot = posSlot(a.pos)
+          if (!inHand(a.card) || !slot || b.cards[a.card].evolves_from !== b.cards[slot.c].name) return raise('pvp_invalid_action')
+          if (b.turn <= 2 || slot.turn_in >= b.turn) return raise('pvp_cannot_evolve_yet')
+          take(a.card)
+          slot.under.push(slot.c)
+          slot.c = a.card
+          slot.turn_in = b.turn
+          ev(b, { k: 'evolve', s: 'a', c: a.card, name: b.cards[a.card].name })
+        } else if (a.type === 'retreat') {
+          if (b.me.retreated || !b.me.bench[a.pos - 1] || active.energy < 1) return raise('pvp_cannot_retreat')
+          active.energy--
+          const incoming = b.me.bench[a.pos - 1]
+          b.me.bench[a.pos - 1] = active
+          b.me.active = incoming
+          b.me.retreated = true
+          ev(b, { k: 'switch', s: 'a', c: incoming.c, name: b.cards[incoming.c].name })
+        } else if (a.type === 'attack' || a.type === 'end') {
+          if (a.type === 'attack') {
+            const attack = b.cards[active.c].attacks[a.attack]
+            if (b.turn === 1) return raise('pvp_cannot_attack: first_turn')
+            if (!attack || attack.cost > active.energy) return raise('pvp_cannot_attack: energy')
+            const damage = attack.base * 2 // Fire on Grass
+            b.them.active.damage += damage
+            if (attack.fx.length) active.energy--
+            ev(b, { k: 'attack', s: 'a', c: active.c, i: a.attack, name: b.cards[active.c].name, attack: attack.name, damage, flips: [], prevented: false })
+            if (checkKo(b)) {
+              b.log.push(...b.events)
+              return json({ battle: view(b), events: b.events, state: pvState() })
+            }
+          } else ev(b, { k: 'end', s: 'a' })
+          serverTurn(b)
+        } else {
+          return raise('pvp_invalid_action')
         }
-        b.my_prizes += round.ko_theirs ? theirs.prizes : 0
-        b.their_prizes += round.ko_mine ? mine.prizes : 0
-        b.my_energy = Math.min(5, b.my_energy - (myAttack?.cost ?? 0) + 1)
-        b.their_energy = Math.min(5, b.their_energy - theirAttack.cost + 1)
-        b.round++
-        b.log.push(round)
-        b.next = b.theirHp.findIndex((hp) => hp > 0)
-        if (b.my_prizes >= 3 || b.their_prizes >= 3 || b.round >= 20) finish(b, b.my_prizes > b.their_prizes ? 'won' : b.my_prizes < b.their_prizes ? 'lost' : 'draw')
-        return json({ round, battle: view(b), state: pvState() })
+        b.log.push(...b.events)
+        return json({ battle: view(b), events: b.events, state: pvState() })
       }
       if (path === '/rest/v1/rpc/pvp_forfeit') {
         const b = pv.battle

@@ -21,6 +21,7 @@ import HoloCard from '@/components/HoloCard.vue'
 import PokedexGrid from '@/components/PokedexGrid.vue'
 import RecycleDuplicates from '@/components/RecycleDuplicates.vue'
 import WishlistGrid from '@/components/WishlistGrid.vue'
+import { useCardLocale } from '@/composables/useCardLocale'
 import { useWishlistStore } from '@/stores/wishlist'
 
 // Serves both modes: /collection and /challenge/collection (the separate
@@ -32,6 +33,7 @@ const isChallenge = props.mode === 'challenge'
 const routes = modeRoutes(props.mode)
 
 const { t, locale } = useI18n()
+const { cardName, cardImage, fallback } = useCardLocale()
 const route = useRoute()
 const router = useRouter()
 const collectionStore = useModeCollectionStore(props.mode)
@@ -395,11 +397,11 @@ function rarityChip(card) {
                 type="button"
                 class="coll-card"
                 :data-tier="rarityTier(entry.cards)"
-                :aria-label="t('collection.openCard', { name: entry.cards.name })"
+                :aria-label="t('collection.openCard', { name: cardName(entry.cards) })"
                 @click="openDetail('results', index)"
               >
                 <span class="coll-card-img">
-                  <HoloCard :src="entry.cards.image_small || entry.cards.image_url" alt="" :max-tilt="10" />
+                  <HoloCard :src="cardImage(entry.cards)" :fallback="fallback(entry.cards)" alt="" :max-tilt="10" />
                   <span v-if="entry.quantity > 1" class="coll-qty">
                     {{ t('collection.quantity', { quantity: entry.quantity }) }}
                   </span>
@@ -408,7 +410,7 @@ function rarityChip(card) {
                     <span class="visually-hidden">{{ t('trades.notForTrade') }}</span>
                   </span>
                 </span>
-                <span class="coll-card-name">{{ entry.cards.name }}</span>
+                <span class="coll-card-name">{{ cardName(entry.cards) }}</span>
                 <span v-if="rarityChip(entry.cards)" class="coll-card-rarity" :data-tier="rarityTier(entry.cards)">
                   {{ rarityChip(entry.cards) }}
                 </span>

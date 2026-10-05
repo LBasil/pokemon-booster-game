@@ -34,7 +34,12 @@ const normalize = (text) =>
  */
 export function cardNameMatches(card, needle) {
   if (!needle) return true
-  return normalize(card.name).includes(needle) || normalize(frenchName(card.national_pokedex_number)).includes(needle)
+  return (
+    normalize(card.name).includes(needle) ||
+    normalize(frenchName(card.national_pokedex_number)).includes(needle) ||
+    // the French card name (0029): "Dracaufeu-ex", trainers, energies
+    normalize(card.name_fr).includes(needle)
+  )
 }
 
 /** `query` lowercased, trimmed and without accents, for cardNameMatches(). */

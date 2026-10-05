@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useCardLocale } from '@/composables/useCardLocale'
 import { resetTimeLabel } from '@/utils/challenge'
 import { fetchCardsByIds } from '@/api/cards'
 import { fetchPlayerAchievements } from '@/api/achievements'
@@ -24,6 +25,7 @@ const props = defineProps({
 const routes = modeRoutes(props.mode)
 
 const { t, locale } = useI18n()
+const { cardName, cardImage, fallback } = useCardLocale()
 // The daily reset (00:00 UTC) in the player's own time
 const resetTime = computed(() => resetTimeLabel(locale.value))
 const setsStore = useSetsStore()
@@ -244,15 +246,15 @@ function chip(card) {
                 </span>
               </span>
               <span v-if="cardsById[opening.best_card_id]" class="history-best" :data-tier="rarityTier(cardsById[opening.best_card_id])">
-                <img :src="cardsById[opening.best_card_id].image_small" :alt="cardsById[opening.best_card_id].name" loading="lazy" />
+                <img :src="cardImage(cardsById[opening.best_card_id])" :data-fallback="fallback(cardsById[opening.best_card_id])" :alt="cardName(cardsById[opening.best_card_id])" loading="lazy" />
               </span>
               <svg class="history-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
             </button>
 
             <ul v-if="expanded.has(opening.id)" class="history-cards" role="list">
               <li v-for="(card, i) in packCards(opening)" :key="`${card.id}-${i}`" class="history-card">
-                <img :src="card.image_small" :alt="card.name" loading="lazy" />
-                <span class="history-card-name">{{ card.name }}</span>
+                <img :src="cardImage(card)" :data-fallback="fallback(card)" :alt="cardName(card)" loading="lazy" />
+                <span class="history-card-name">{{ cardName(card) }}</span>
                 <span v-if="chip(card)" class="history-chip" :data-tier="rarityTier(card)">{{ chip(card) }}</span>
               </li>
             </ul>

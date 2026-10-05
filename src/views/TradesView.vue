@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useCardLocale } from '@/composables/useCardLocale'
 import { useRoute } from 'vue-router'
 import { fetchChallengeCollectionOf } from '@/api/challenge'
 import { fetchPublicProfile } from '@/api/profiles'
@@ -24,6 +25,7 @@ import UsernameCombobox from '@/components/UsernameCombobox.vue'
 // (migration 0021) loads it into the composer, sides swapped, to send back
 // changed: the first offer ends as "countered".
 const { t, locale } = useI18n()
+const { cardName, cardImage, fallback } = useCardLocale()
 const route = useRoute()
 const trades = useTradesStore()
 const myCollection = useChallengeCollectionStore()
@@ -331,7 +333,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
                   <span class="trade-side-label">{{ trade.status === 'accepted' ? t('trades.youGave') : t('trades.youOffered') }}</span>
                   <ul class="trade-cards" role="list">
                     <li v-for="card in trade.offer" :key="card.id" :data-tier="rarityTier(card)">
-                      <img :src="card.image_small" :alt="card.name" :title="card.name" loading="lazy" />
+                      <img :src="cardImage(card)" :data-fallback="fallback(card)" :alt="cardName(card)" :title="cardName(card)" loading="lazy" />
                     </li>
                   </ul>
                 </div>
@@ -340,7 +342,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
                   <span class="trade-side-label">{{ trade.status === 'accepted' ? t('trades.youGot') : t('trades.youAsked') }}</span>
                   <ul v-if="trade.request.length" class="trade-cards" role="list">
                     <li v-for="card in trade.request" :key="card.id" :data-tier="rarityTier(card)">
-                      <img :src="card.image_small" :alt="card.name" :title="card.name" loading="lazy" />
+                      <img :src="cardImage(card)" :data-fallback="fallback(card)" :alt="cardName(card)" :title="cardName(card)" loading="lazy" />
                     </li>
                   </ul>
                   <p v-else class="trade-gift">{{ t('trades.gift') }}</p>
@@ -369,7 +371,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
                   <span class="trade-side-label">{{ t('trades.youGet') }}</span>
                   <ul class="trade-cards" role="list">
                     <li v-for="card in trade.offer" :key="card.id" :data-tier="rarityTier(card)">
-                      <img :src="card.image_small" :alt="card.name" :title="card.name" loading="lazy" />
+                      <img :src="cardImage(card)" :data-fallback="fallback(card)" :alt="cardName(card)" :title="cardName(card)" loading="lazy" />
                     </li>
                   </ul>
                 </div>
@@ -378,7 +380,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
                   <span class="trade-side-label">{{ t('trades.youGive') }}</span>
                   <ul v-if="trade.request.length" class="trade-cards" role="list">
                     <li v-for="card in trade.request" :key="card.id" :data-tier="rarityTier(card)">
-                      <img :src="card.image_small" :alt="card.name" :title="card.name" loading="lazy" />
+                      <img :src="cardImage(card)" :data-fallback="fallback(card)" :alt="cardName(card)" :title="cardName(card)" loading="lazy" />
                     </li>
                   </ul>
                   <p v-else class="trade-gift">{{ t('trades.gift') }}</p>
@@ -444,12 +446,12 @@ const ago = (iso) => timeAgo(iso, locale.value)
               <p class="trade-pref-desc">{{ t('trades.locksHint') }}</p>
               <ul v-if="lockedCards.length" class="trade-lock-list" role="list">
                 <li v-for="card in lockedCards" :key="card.id" class="trade-lock">
-                  <span>{{ card.name }}</span>
+                  <span>{{ cardName(card) }}</span>
                   <button
                     type="button"
                     class="trade-lock-remove"
-                    :aria-label="t('trades.unlock', { name: card.name })"
-                    :title="t('trades.unlock', { name: card.name })"
+                    :aria-label="t('trades.unlock', { name: cardName(card) })"
+                    :title="t('trades.unlock', { name: cardName(card) })"
                     @click="unlock(card.id)"
                   >
                     ×
@@ -504,8 +506,8 @@ const ago = (iso) => timeAgo(iso, locale.value)
                     :disabled="trades.isLocked(entry.card_id) || (!giving.includes(entry.card_id) && giving.length >= TRADE_MAX_CARDS)"
                     @click="giving = toggleCard(giving, entry.card_id)"
                   >
-                    <img :src="entry.cards.image_small" alt="" loading="lazy" />
-                    <span class="picker-name">{{ entry.cards.name }}</span>
+                    <img :src="cardImage(entry.cards)" :data-fallback="fallback(entry.cards)" alt="" loading="lazy" />
+                    <span class="picker-name">{{ cardName(entry.cards) }}</span>
                     <span class="picker-owned">{{ ownedLabel(entry.card_id) }}</span>
                     <span v-if="trades.isLocked(entry.card_id)" class="picker-locked">{{ t('trades.notForTrade') }}</span>
                   </button>
@@ -533,8 +535,8 @@ const ago = (iso) => timeAgo(iso, locale.value)
                     :disabled="entry.tradable === false || (!asking.includes(entry.card_id) && asking.length >= TRADE_MAX_CARDS)"
                     @click="asking = toggleCard(asking, entry.card_id)"
                   >
-                    <img :src="entry.cards.image_small" alt="" loading="lazy" />
-                    <span class="picker-name">{{ entry.cards.name }}</span>
+                    <img :src="cardImage(entry.cards)" :data-fallback="fallback(entry.cards)" alt="" loading="lazy" />
+                    <span class="picker-name">{{ cardName(entry.cards) }}</span>
                     <span class="picker-owned" :data-new="!ownedQty[entry.card_id] || undefined">{{ ownedLabel(entry.card_id) }}</span>
                     <span v-if="entry.tradable === false" class="picker-locked">{{ t('trades.notForTrade') }}</span>
                   </button>
@@ -579,7 +581,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
                   <span class="trade-side-label">{{ t('trades.youGive') }}</span>
                   <ul class="trade-cards" role="list">
                     <li v-for="card in trade.offer" :key="card.id" :data-tier="rarityTier(card)">
-                      <img :src="card.image_small" :alt="card.name" :title="card.name" loading="lazy" />
+                      <img :src="cardImage(card)" :data-fallback="fallback(card)" :alt="cardName(card)" :title="cardName(card)" loading="lazy" />
                     </li>
                   </ul>
                 </div>
@@ -588,7 +590,7 @@ const ago = (iso) => timeAgo(iso, locale.value)
                   <span class="trade-side-label">{{ t('trades.youGet') }}</span>
                   <ul v-if="trade.request.length" class="trade-cards" role="list">
                     <li v-for="card in trade.request" :key="card.id" :data-tier="rarityTier(card)">
-                      <img :src="card.image_small" :alt="card.name" :title="card.name" loading="lazy" />
+                      <img :src="cardImage(card)" :data-fallback="fallback(card)" :alt="cardName(card)" :title="cardName(card)" loading="lazy" />
                     </li>
                   </ul>
                   <p v-else class="trade-gift">{{ t('trades.gift') }}</p>

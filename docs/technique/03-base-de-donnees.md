@@ -64,6 +64,8 @@ service role) depuis pokemontcg.io. Actuellement 176 sets et 20 670 cartes.
 | `logo_url`, `symbol_url` | text | Images du set. Depuis 2026, les nouveaux sets sont sur `images.scrydex.com` avec un autre schéma d'URL : on stocke ce que l'API donne au lieu de deviner l'URL à partir de l'id |
 | `parent_set_id` | text → `sets.id` | Renseigné pour un **sous-set** (Trainer Gallery, Galarian Gallery, Shiny Vault, Classic Collection) : le set dont les boosters contiennent ses cartes |
 | `subset_rate` | numeric 0–1 | Chance qu'un booster du parent contienne une carte de ce sous-set (TG 25 %, Shiny Vault 30 %, les autres 33 %) |
+| `tcgdex_id` | text | Le set TCGdex aux mêmes cartes (`sv03.5` pour `sv3pt5`), trouvé par l'import `fr` (0029) en comparant numéros et noms anglais ; `''` = aucun (Celebrations Classic Collection…), `null` = pas encore cherché |
+| `name_fr` | text | Nom français du set (TCGdex, 0029 ; « Set de Base ») |
 
 Lecture : tout le monde. Écriture client : aucune.
 
@@ -80,7 +82,11 @@ Lecture : tout le monde. Écriture client : aucune.
 | `national_pokedex_number` | int | Numéro du Pokédex national (onglet Pokédex, succès) |
 | `weaknesses` | text[] | Types de faiblesse imprimés sur la carte (`{Fire}`), remplis par l'import depuis 0015 ; sert à « Super efficace ! ». `null` tant que l'import n'est pas repassé |
 | `evolves_from` | text | Nom du stade précédent imprimé sur la carte (`Charmeleon` pour Dracaufeu), rempli par l'import depuis 0018 ; sert à « Chaîne d'évolution » (lignée = Niveau 2 → le Niveau 1 qu'il nomme → la carte de base que celui-ci nomme). Index sur `cards.name` et `cards.evolves_from` (0019) pour suivre les lignées |
-| `attacks` | jsonb | Attaques imprimées `[{ name, damage, cost }]` (`cost` = nombre d'énergies, importé depuis 0025 ; une attaque sans `cost` est ignorée par `pvp_card()` depuis 0026, jamais gratuite), `damage` tel quel (`"30"`, `"30+"`, `"20×"`, `""` = effet seul), remplies par l'import depuis 0024 ; servent aux combats PvP (`pvp_card()` garde la meilleure). Mesuré le 2026-10-03 : 99,8 % des Pokémon ont une attaque, 94 % une attaque qui fait des dégâts |
+| `attacks` | jsonb | Attaques imprimées `[{ name, damage, cost, text, base, fx, coins, partial }]` : `cost` = nombre d'énergies (depuis 0025 ; une attaque sans `cost` est ignorée par `pvp_card()`, jamais gratuite), `damage` tel quel (`"30"`, `"30+"`, `"20×"`, `""` = effet seul), et depuis 0029 le texte imprimé (anglais) et ce que les combats en jouent (`src/utils/attackEffects.js` à l'import : dégâts de base, effets, pièces, `partial` = une partie du texte n'est pas jouée). Remplies par l'import depuis 0024 |
+| `retreat_cost` | int | Coût de Retraite en Énergies (0029) |
+| `abilities` | jsonb | Talents imprimés `[{ name, text, type }]` (0029 ; montrés en combat, pas encore joués) |
+| `name_fr`, `image_fr` | text | Nom et image français (TCGdex, 0029) : `image_fr` est l'URL de base, le client ajoute `/low.webp` ou `/high.webp`. `null` pour une carte jamais sortie en français (Set de Base 2, Gym…) : le site l'affiche en anglais |
+| `attacks_fr`, `abilities_fr` | jsonb | Noms et textes français des attaques et talents `[{ name, effect }]`, dans le même ordre que `attacks` / `abilities` (TCGdex, 0029) |
 | `resistances` | text[] | Types de résistance imprimés (`{Fighting}`), depuis 0024 ; −30 en combat PvP |
 | `set_id` | text → `sets.id` | Set de la carte |
 
@@ -286,9 +292,10 @@ premier), `cards` (les cartes montrées, lignée + intrus, mélangées),
 `game_day`. Une seule partie `playing` par joueur (index unique).
 **Aucun accès client** : l'ordre ne doit pas fuiter.
 
-### `pvp_decks`, `pvp_ratings`, `pvp_battles` (0024, 0025, 0026, 0027)
+### `pvp_decks`, `pvp_ratings`, `pvp_battles` (0024 à 0030)
 
-- `pvp_decks` : `(user_id, format, role)` → `card_ids` (5 ids). Deux
+- `pvp_decks` : `(user_id, format, role)` → `card_ids` (20 ids depuis
+  0030, un par exemplaire ; 5 avant, devenus invalides). Deux
   decks par format (`all`, `era:<série>`, `set:<id>`) depuis 0026 :
   `role` = `attack` (celui que je joue) ou `defense` (celui que le
   serveur joue quand on m'attaque). Sans deck de défense valide, le deck
@@ -309,8 +316,17 @@ premier), `cards` (les cartes montrées, lignée + intrus, mélangées),
   bouge de l'opposé), `game_day`. Un seul combat `playing` par attaquant.
   Combat contre un bot (0027) : `defender` vide, `bot` (`easy`, `normal`,
   `hard`), `paid` (dans les 5 premiers combats contre les bots du jour),
-  `coins` (pièces versées à la fin) ; une contrainte impose exactement un
-  des deux (`defender` ou `bot`).
+  `coins` (pièces versées à la fin) ; une contrainte impose exactement un
+  des deux (`defender` ou `bot`). Depuis 0030 (`engine` = 2), l'état
+  complet est dans `game` (jsonb : `turn`, `phase`, `stage`, `current`,
+  `first`, `level` de l'IA, `promote`, `winner`, et pour chaque camp `a` /
+  `d` ses 20 cartes, son deck mélangé, sa main, sa défausse, son Actif et
+  son Banc (`{ c, under, damage, energy, status, poisoned, burned,
+  turn_in, lock_attack, no_retreat, reduce, prevent, smoke, weaken }`),
+  ses points) ; `log` garde les 300 derniers événements ; `a_hp` / `d_hp`
+  / énergies / récompenses de l'ancien moteur ne servent plus. Les
+  combats de l'ancien moteur en cours au passage de 0030 finissent en
+  nul, sans Elo ni pièces.
 
 **Aucun accès client** sur les trois : les decks sont cachés, l'Elo est
 écrit par le serveur.
@@ -354,7 +370,10 @@ elles servent de briques aux RPC décrites dans la
 | `minigame_rules`, `minigame_min_ratio`, `minigame_pair`, `minigame_card` | Règles et tirage des paires du mini-jeu |
 | `super_effective_rules`, `super_effective_types`, `super_effective_option_count`, `super_effective_ready`, `super_effective_question`, `super_effective_card` | Règles, cartes jouables et tirage des questions de « Super efficace ! » (`card` = la carte sans sa faiblesse) |
 | `evolution_chain_rules`, `evolution_chain_intruders`, `evolution_chain_ready`, `evolution_chain_line`, `evolution_chain_question`, `evolution_chain_cards` | Règles, lignées complètes et tirage des questions de « Chaîne d'évolution » (`line(2 ou 3)` = une lignée ou `null`, `cards` = nom + image, sans stade) |
-| `pvp_rules`, `pvp_prizes`, `pvp_card`, `pvp_fits`, `pvp_valid_format`, `pvp_damage`, `pvp_deck_cards`, `pvp_defender_pick`, `pvp_rating`, `pvp_elo_change`, `pvp_finish`, `pvp_battle_view` | Combats PvP : règles, récompenses selon les sous-types, carte jouable (`null` sinon), appartenance à un format, dégâts d'une attaque, deck encore valide, IA du défenseur, Elo (lignes verrouillées par id : deux joueurs qui s'attaquent en même temps ne s'interbloquent pas), vue de l'attaquant |
+| `pvp_rules`, `pvp_prizes`, `pvp_card`, `pvp_fits`, `pvp_valid_format`, `pvp_deck_cards`, `pvp_rating`, `pvp_elo_change`, `pvp_finish`, `pvp_battle_view`, `pvp_open_to` | Combats PvP : règles, points selon les sous-types, instantané d'une carte (`null` si ce n'est pas un Pokémon), appartenance à un format, deck valide, Elo (lignes verrouillées par id : deux joueurs qui s'attaquent en même temps ne s'interbloquent pas), vue de l'attaquant, testeurs (0028) |
+| `pvp_game_new`, `pvp_new_side`, `pvp_do`, `pvp_attack`, `pvp_attack_block`, `pvp_checkup`, `pvp_ko`, `pvp_run`, `pvp_hints`, `pvp_switch`, `pvp_promote`, `pvp_draw`, `pvp_hurt`, `pvp_heal`, `pvp_condition`, `pvp_named_events`, `pvp_public_events` et petits outils (`pvp_slot`, `pvp_set`, `pvp_ev`…) | Le moteur façon Pocket (0030) : une partie en jsonb, un coup validé, une attaque et ses effets, entre deux tours (Poison, Brûlure, Sommeil, Paralysie), K.O. et points, déroulé des tours jusqu'au coup du joueur, ce qu'il peut faire, événements nommés (pioches adverses cachées) |
+| `pvp_ai_setup`, `pvp_ai_turn`, `pvp_ai_attack_value`, `pvp_ai_bench_pick`, `pvp_ai_weakest`, `pvp_bot_deck` | L'IA qui joue l'autre camp (facile / normal / difficile) et le deck de 20 d'un bot |
+| `set_cards_fr` | Écriture en lot des colonnes françaises des cartes par l'import (0029, service role) |
 | `electrode_flip_rules`, `electrode_flip_layout`, `electrode_flip_deal`, `electrode_flip_view`, `electrode_flip_today`, `electrode_flip_end` | Règles, distribution et fin des plateaux d'« Électrode Shiny Flip » (`view` = ce que voit le client) |
 | `handle_new_user`, `unique_username`, `profiles_before_update` | Création du profil, pseudo libre, contrôle de la vitrine |
 | `link_subsets`, `guess_subset_parent`, `subset_default_rate` | Relie les nouveaux sous-sets à leur parent (service role, appelé par l'import) |
@@ -396,6 +415,8 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0026 | `pvp_attack_defense_decks` | Combats PvP : deck d'attaque et deck de défense par format (`pvp_decks.role`), `pvp_save_deck(format, cards, role)` ; une attaque sans coût importé est ignorée au lieu d'être gratuite (écrite le 2026-10-04, **à appliquer**) |
 | 0027 | `pvp_bots` | Combats PvP contre des bots (facile, normal, difficile) : `pvp_bot_start`, `pvp_bot_deck`, colonnes `bot` / `paid` / `coins` de `pvp_battles`, pièces au lieu d'Elo, type `pvp_bot` du journal (écrite le 2026-10-04, **à appliquer** après 0026) |
 | 0028 | `pvp_testers_only` | PvP réservé à ses testeurs (Bazouk) pendant qu'on retravaille les règles : `pvp_open_to(user)` (l'interrupteur, miroir de `PVP_TESTERS`), `pvp_state` / `pvp_save_deck` / `pvp_start` / `pvp_bot_start` renommées en `*_impl` et enveloppées par une vérification (écrite le 2026-10-05, **à appliquer** après 0027) |
+| 0029 | `cards_fr_battle_data` | Cartes en français (`cards.name_fr`, `image_fr`, `attacks_fr`, `abilities_fr`, `sets.tcgdex_id`, `name_fr`, `set_cards_fr()`) et données des combats façon Pocket (`cards.retreat_cost`, `abilities` ; textes et effets dans `attacks`) (écrite le 2026-10-05, **à appliquer** après 0028, puis une synchro complète) |
+| 0030 | `pvp_pocket` | Combats PvP façon Pokémon JCC Pocket : decks de 20, Banc, Énergie, évolutions, retraite, effets d'attaque, États Spéciaux, points ; `pvp_act`, moteur et IA en SQL, `pvp_battles.game` / `engine` ; supprime `pvp_play` et les enveloppes de 0028 (écrite le 2026-10-05, **à appliquer** après 0029) |
 
 Les migrations 0001 à 0025 sont appliquées sur le projet réel (vérifié le
 2026-10-04 : `pvp_rules()` renvoie les règles de 0025).

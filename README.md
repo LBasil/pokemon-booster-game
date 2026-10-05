@@ -51,20 +51,22 @@ How it works inside (every table, RPC and flow, in French):
   stage is hidden), tap them from the Basic to the last stage within 15
   seconds; intruders from other lines slip in as the streak grows, and
   "Stop" ends a run keeping its coins. The simplest game, so it pays the least: 3 coins per
-  right line (60 per run, 180 a day at most) — and **PvP battles** (testers only for now, migration 0028):
-  build two decks of 5 challenge cards per format (every card, one era
-  of the TCG, or one set), one to attack with and one the server plays
-  when you're attacked ("Auto deck" picks either for you), and attack
-  other players' defense decks, which the server plays (their cards stay
-  hidden until played). Each round you
-  pick a card and one of its printed attacks you can pay for: energy
-  starts at 1 and grows by 1 a round (5 at most), so big attacks come
-  late; knocked out Pokémon give prizes like in the real game (2 for ex,
-  V, GX..., 3 for VMAX), 3 prizes win. Elo per format and a win rate, no
-  coins, 10 attacks a day. Not many players yet? **Bots** (easy, normal,
-  hard) play the same battle against your attack deck with cards dealt
-  from the format: no Elo, but a win pays 10 / 25 / 50 coins (a draw half)
-  for the first 5 bot battles of the day, 20 a day in all. One more is teased as
+  right line (60 per run, 180 a day at most) — and **PvP battles** like Pokémon TCG Pocket (testers only for now,
+  migrations 0028 + 0030): two decks of 20 challenge Pokémon per format
+  (every card, one era of the TCG, or one set; 2 with the same name at
+  most; "Auto deck" builds evolution lines for you), one to attack with
+  and one the server plays when you're attacked. A battle: 5 cards in
+  hand, an Active Pokémon and up to 3 on the Bench; each turn draw,
+  attach one energy to any Pokémon, bench Basics, evolve, retreat, then
+  attack. Attack texts are played (coins, special conditions, healing,
+  Bench damage, energy discards, damage per energy...; what isn't played
+  is marked), weakness and resistance too; knocked out Pokémon give
+  points (2 for ex, V, GX..., 3 for VMAX), 3 points win. The server plays
+  the other side (another player's defense deck, or a bot) and the board
+  shows what just happened and what you can do. Elo per format, 10
+  attacks a day; **bots** (easy, normal, hard): no Elo, but a win pays
+  10 / 25 / 50 coins (a draw half) for the first 5 bot battles of the
+  day, 20 a day in all. One more is teased as
   "Coming soon" (**Boss raid**). Packs
   keep the real pull rates (no pity timer), except that 1 booster in 500 is
   a "god pack" (holos and better only). **Trade cards** with other
@@ -98,10 +100,12 @@ How it works inside (every table, RPC and flow, in French):
 - **Collection**: every card you've pulled with completion stats and an
   estimated value (Cardmarket, or TCGplayer converted to euros for recent
   sets that have no Cardmarket price); search, filter by set, rarity or duplicates,
-  and sort — all kept in the URL. The search knows the **French Pokémon
-  names** too ("Dracaufeu" finds Charizard; card names are English only),
-  the card detail says the French name, and the Pokédex names species in
-  French. The detail's rarity is the site's own (translated), with the
+  and sort — all kept in the URL. **Cards in French**: with the site in
+  French, cards show their French name and image (from TCGdex; the ones
+  never printed in French stay English, and Profile > Settings > "Cards
+  in French" turns it off). The search knows French names too
+  ("Dracaufeu" finds Charizard), the card detail gives the English name,
+  and the Pokédex names species in French. The detail's rarity is the site's own (translated), with the
   one printed on the card as a note. Next to the overall progress,
   the **most advanced set** ("Base: 1 / 102") is a goal within reach (also
   on both hubs). Tabs for:
@@ -370,7 +374,17 @@ its **SQL editor** and run, in order:
 28. `supabase/migrations/0028_pvp_testers_only.sql` — closes PvP to
    everyone but its testers (Bazouk) while its rules are reworked; others
    see "Coming soon". Run it after 0027. To reopen: `pvp_open_to()` returns
-   true, and `PVP_TESTERS = null` in `src/utils/pvp.js`.
+   true (0030 redefines it the same way), and `PVP_TESTERS = null` in
+   `src/utils/pvp.js`.
+29. `supabase/migrations/0029_cards_fr_battle_data.sql` — French card
+   names, images and texts (from TCGdex) and the card data the new PvP
+   needs (retreat costs, abilities, attack texts). Run it after 0028, then
+   a full `npm run populate:sync` (the French step alone:
+   `npm run populate:fr`).
+30. `supabase/migrations/0030_pvp_pocket.sql` — PvP rebuilt like Pokémon
+   TCG Pocket (20-card decks, Bench, energy, evolutions, effects, points;
+   `pvp_act`). Run it after 0029; PvP says "Coming soon" until a sync has
+   stored the attack effects.
 
 Then in **Authentication**:
 
@@ -415,7 +429,7 @@ Behind a network that intercepts HTTPS (Node fails with
 `SELF_SIGNED_CERT_IN_CHAIN`), prefix the command with `NODE_USE_SYSTEM_CA=1`.
 
 **Card sync.** `.github/workflows/sync-cards.yml` runs
-`npm run populate:sync` (sets + cards + price snapshot) every day at
+`npm run populate:sync` (sets + cards + price snapshot + French data) every day at
 midnight and noon, Paris time (GitHub can start scheduled runs late). Add
 three repository secrets in **Settings > Secrets and variables > Actions**:
 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `POKEMONTCG_API_KEY`. It can
@@ -468,6 +482,7 @@ with a real account.
 | `npm run test:e2e`       | End-to-end tests (Playwright, mocked Supabase)                  |
 | `npm run populate:sets`  | Import the `sets` table from pokemontcg.io                      |
 | `npm run populate:cards` | Import the `cards` table (+ today's price snapshot)             |
-| `npm run populate:sync`  | Sets + cards + prices in one go (what the sync Action runs)     |
+| `npm run populate:fr`    | French names, images and attack texts from TCGdex (migration 0029) |
+| `npm run populate:sync`  | Sets + cards + prices + French data in one go (what the sync Action runs) |
 
 See [CLAUDE.md](./CLAUDE.md) for the full project rules and current state.

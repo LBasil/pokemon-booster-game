@@ -1,5 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
+import { useCardLocale } from '@/composables/useCardLocale'
 import { useWishlistStore } from '@/stores/wishlist'
 import { cardNumber } from '@/utils/collection'
 
@@ -8,6 +9,7 @@ import { cardNumber } from '@/utils/collection'
 defineEmits(['open'])
 
 const { t } = useI18n()
+const { cardName, cardImage, fallback } = useCardLocale()
 const wishlist = useWishlistStore()
 </script>
 
@@ -28,16 +30,16 @@ const wishlist = useWishlistStore()
 
     <ul v-else class="wish-grid" role="list">
       <li v-for="(entry, index) in wishlist.entries" :key="entry.card_id" class="wish-item">
-        <button type="button" class="wish-card" :aria-label="entry.cards.name" @click="$emit('open', index)">
-          <img :src="entry.cards.image_small || entry.cards.image_url" alt="" loading="lazy" />
+        <button type="button" class="wish-card" :aria-label="cardName(entry.cards)" @click="$emit('open', index)">
+          <img :src="cardImage(entry.cards)" :data-fallback="fallback(entry.cards)" alt="" loading="lazy" />
         </button>
         <div class="wish-row">
-          <span class="wish-name">{{ entry.cards.name }}</span>
+          <span class="wish-name">{{ cardName(entry.cards) }}</span>
           <button
             type="button"
             class="wish-remove"
-            :aria-label="t('wishlist.remove', { name: entry.cards.name })"
-            :title="t('wishlist.remove', { name: entry.cards.name })"
+            :aria-label="t('wishlist.remove', { name: cardName(entry.cards) })"
+            :title="t('wishlist.remove', { name: cardName(entry.cards) })"
             @click="wishlist.toggle(entry.cards)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg>

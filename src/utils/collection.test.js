@@ -136,6 +136,11 @@ describe('filterEntries by French name', () => {
     expect(filterEntries(entries, { query: 'canartich' }).map((e) => e.card_id)).toEqual(['b'])
     expect(filterEntries(entries, { query: 'oak' }).map((e) => e.card_id)).toEqual(['c'])
   })
+
+  it('matches the French card name once imported (trainers too)', () => {
+    const entries = [{ card_id: 'c', quantity: 1, cards: { id: 'c', name: 'Professor Oak', name_fr: 'Professeur Chen', set_id: 'x' } }]
+    expect(filterEntries(entries, { query: 'professeur chen' }).map((e) => e.card_id)).toEqual(['c'])
+  })
 })
 
 describe('filterEntries by Pokédex number', () => {

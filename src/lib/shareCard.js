@@ -39,7 +39,7 @@ const holo = (ctx, x0, y0, x1, y1) => {
  * @param {{ card: object, title: string, subtitle: string, brand: string }} options
  * @returns {Promise<Blob>}
  */
-export async function renderShareImage({ card, title, subtitle, brand }) {
+export async function renderShareImage({ card, image, title, subtitle, brand }) {
   await document.fonts?.ready
   const canvas = document.createElement('canvas')
   canvas.width = W
@@ -62,7 +62,9 @@ export async function renderShareImage({ card, title, subtitle, brand }) {
   }
 
   // Card with a holo halo
-  const img = await loadImage(card.image_url || card.image_small)
+  // `image`: the French one when the card is shown in French, else English
+  const english = card.image_url || card.image_small
+  const img = await loadImage(image || english).catch((err) => (image && image !== english ? loadImage(english) : Promise.reject(err)))
   const cardW = 620
   const cardH = Math.round(cardW * (img.height / img.width))
   const cardX = (W - cardW) / 2
@@ -99,8 +101,8 @@ export async function renderShareImage({ card, title, subtitle, brand }) {
  * Shares (or downloads) the image.
  * @returns {Promise<'shared'|'downloaded'|'cancelled'>}
  */
-export async function shareCard({ card, title, subtitle, brand, text }) {
-  const blob = await renderShareImage({ card, title, subtitle, brand })
+export async function shareCard({ card, image, title, subtitle, brand, text }) {
+  const blob = await renderShareImage({ card, image, title, subtitle, brand })
   const file = new File([blob], `${card.id}.png`, { type: 'image/png' })
   if (navigator.canShare?.({ files: [file] })) {
     try {

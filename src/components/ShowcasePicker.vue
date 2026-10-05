@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useCardLocale } from '@/composables/useCardLocale'
 import { filterEntries, sortEntries } from '@/utils/collection'
 
 // Dialog to pick the profile's showcase card among owned cards, rarest
@@ -14,6 +15,7 @@ const props = defineProps({
 const emit = defineEmits(['select', 'close'])
 
 const { t } = useI18n()
+const { cardName, cardImage, fallback } = useCardLocale()
 const dialog = ref(null)
 const query = ref('')
 
@@ -73,10 +75,10 @@ function pick(cardId) {
             class="picker-card"
             :class="{ selected: entry.card_id === selectedId }"
             :aria-pressed="entry.card_id === selectedId"
-            :aria-label="entry.cards.name"
+            :aria-label="cardName(entry.cards)"
             @click="pick(entry.card_id)"
           >
-            <img :src="entry.cards.image_small || entry.cards.image_url" alt="" loading="lazy" />
+            <img :src="cardImage(entry.cards)" :data-fallback="fallback(entry.cards)" alt="" loading="lazy" />
           </button>
         </li>
       </ul>

@@ -1,20 +1,23 @@
-// PvP battle rules. Mirrors pvp_rules(), pvp_prizes(), pvp_damage() and
-// pvp_elo_change() in supabase/migrations/0025_pvp_energy_prizes.sql, and the
-// bot rules of 0027_pvp_bots.sql — change both together. The server stays the authority (it sends the rules with its
-// state and plays every round): these only drive labels and previews.
+// PvP battles like Pokémon TCG Pocket (migration 0030). Mirrors pvp_rules(),
+// pvp_prizes(), pvp_deck_cards() and pvp_bot_deck() in
+// supabase/migrations/0030_pvp_pocket.sql, and the bot coins of
+// 0027_pvp_bots.sql — change both together. The server stays the authority:
+// it plays every move and sends what I can do now (`battle.hints`); these
+// drive the deck builder, labels and previews.
 
-export const DECK_SIZE = 5
-export const PRIZES_TO_WIN = 3
-export const MAX_ROUNDS = 20
+export const DECK_SIZE = 20
+export const MAX_COPIES = 2
+export const HAND_SIZE = 5
+export const BENCH_SIZE = 3
+export const POINTS_TO_WIN = 3
+export const MAX_TURNS = 30
 export const BATTLES_PER_DAY = 10
-export const START_ENERGY = 1
-export const ENERGY_PER_ROUND = 1
-export const MAX_ENERGY = 5
 export const START_ELO = 1000
 export const K_FACTOR = 32
 export const WEAKNESS_MULTIPLIER = 2
 export const RESISTANCE = 30
-export const MIN_DAMAGE = 10
+export const POISON = 10
+export const BURN = 20
 
 // Who can play while PvP is being reworked (0028, user 2026-10-05: "bloque le
 // PvP uniquement pour le joueur Bazouk"): lowercased usernames, mirrors
@@ -41,7 +44,7 @@ export function botCoins(level, status, paid = true, coins = BOT_COINS) {
   return Math.floor((coins[level] ?? 0) * share)
 }
 
-/** Prizes a card gives when knocked out, from its subtypes (the real TCG's rule boxes). */
+/** Points a card gives when knocked out, from its subtypes (the real TCG's rule boxes). */
 export function prizesFor(subtypes = []) {
   const has = (type) => subtypes.includes(type)
   if (['VMAX', 'TAG TEAM', 'V-UNION'].some(has) || (has('MEGA') && has('ex'))) return 3
@@ -49,36 +52,10 @@ export function prizesFor(subtypes = []) {
   return 1
 }
 
-/**
- * Damage of one card's attack on another (card snapshots from the server:
- * types, weaknesses, resistances; attack: damage, times). No attack = 0.
- * @param {number} [roll] - 1 to 3, multiplies a "20×" attack
- */
-export function damageAgainst(from, attack, to, roll = 1) {
-  if (!attack) return 0
-  const types = from.types ?? []
-  const weak = types.some((type) => (to?.weaknesses ?? []).includes(type))
-  const resisted = types.some((type) => (to?.resistances ?? []).includes(type))
-  const base = attack.damage * (attack.times ? roll : 1) * (weak ? WEAKNESS_MULTIPLIER : 1) - (resisted ? RESISTANCE : 0)
-  return Math.max(MIN_DAMAGE, base)
-}
-
-/** Energy after a round: the attack's cost paid, then +1 for the next round, 5 at most. */
-export const energyAfter = (energy, attack) => Math.min(energy - (attack?.cost ?? 0) + ENERGY_PER_ROUND, MAX_ENERGY)
-
-/** Whether an attack can be paid for with this much energy. */
-export const canPay = (attack, energy) => (attack?.cost ?? 0) <= energy
-
 /** Elo points `a` gains (or loses, negative) for a result against `b`: 1 win, 0.5 draw, 0 loss. */
 export function eloChange(a, b, score) {
   return Math.round(K_FACTOR * (score - 1 / (1 + 10 ** ((b - a) / 400))))
 }
-
-/** Attack damage as printed: "30", or "30×" for a multiplied one. */
-export const damageLabel = (attack) => `${attack.damage}${attack.times ? '×' : ''}`
-
-/** The strongest damage among a card's attacks (deck builder sort and preview). */
-export const bestDamage = (card) => Math.max(0, ...(card?.attacks ?? []).map((attack) => attack.damage))
 
 /**
  * Wins, losses, draws and win rate (%, rounded, null before any battle) of a
@@ -101,105 +78,160 @@ export function parseFormat(format) {
   return kind ? { kind, value } : { kind: 'all', value: null }
 }
 
-/**
- * The deck after tapping a card in the builder: removes it if picked, adds it
- * while there's room.
- */
-export function toggleDeckCard(deck, id, size = DECK_SIZE) {
-  if (deck.includes(id)) return deck.filter((picked) => picked !== id)
-  return deck.length < size ? [...deck, id] : deck
-}
-
-/** The two decks of a format (0026): 'attack' = the one I play, 'defense' = the one the server plays for me. */
+/** The two decks of a format: 'attack' = the one I play, 'defense' = the one the server plays for me. */
 export const DECK_ROLES = ['attack', 'defense']
 
-/**
- * A format's decks as `{ attack, defense }` (each `{ cards, valid }` or null).
- * Before 0026 the server sent one deck `{ cards, valid }`: it did both jobs.
- */
+/** A format's decks as `{ attack, defense }`, each `{ ids, valid }` or null. */
 export function deckRoles(entry) {
-  if (!entry) return { attack: null, defense: null }
-  if ('cards' in entry) return { attack: entry, defense: null }
-  return { attack: entry.attack ?? null, defense: entry.defense ?? null }
+  return { attack: entry?.attack ?? null, defense: entry?.defense ?? null }
 }
 
-/** The deck that defends me in a format: my defense deck while it's valid, else my attack deck. */
-export function defendingDeck(entry) {
-  const { attack, defense } = deckRoles(entry)
-  return defense?.valid ? { role: 'defense', deck: defense } : attack ? { role: 'attack', deck: attack } : null
+// ---------- Deck builder ----------
+
+/** How many copies of each card id a deck holds. */
+export function deckCounts(ids) {
+  const counts = new Map()
+  for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1)
+  return counts
 }
 
-// Auto deck weights. Energy comes 1 a round (5 at most), so damage per
-// energy wins long battles; a 2-3 prize card knocked out is most of the 3
-// prizes. Attack (I pick every move) leans on damage, defense (the server's
-// simple AI plays it) on HP per prize: it has to survive misplays.
+/**
+ * Why a card can't go in the deck now, null if it can: 'full' (20),
+ * 'copies' (2 of that name already), 'owned' (every copy I own is in).
+ * @param {string[]} ids - the deck
+ * @param {{ id: string, name: string, owned?: number }} card
+ * @param {Map<string, object>} cardsById - eligible cards, for the names in the deck
+ */
+export function addBlock(ids, card, cardsById, size = DECK_SIZE) {
+  if (ids.length >= size) return 'full'
+  if (ids.filter((id) => cardsById.get(id)?.name === card.name).length >= MAX_COPIES) return 'copies'
+  if (ids.filter((id) => id === card.id).length >= (card.owned ?? MAX_COPIES)) return 'owned'
+  return null
+}
+
+/** The deck with one more copy of a card (unchanged if it can't take it). */
+export const addCard = (ids, card, cardsById, size = DECK_SIZE) => (addBlock(ids, card, cardsById, size) ? ids : [...ids, card.id])
+
+/** The deck with one copy of a card less. */
+export function removeCard(ids, id) {
+  const i = ids.lastIndexOf(id)
+  return i < 0 ? ids : [...ids.slice(0, i), ...ids.slice(i + 1)]
+}
+
+/**
+ * What a deck still needs before it can be saved, and its warnings.
+ * @returns {{ ready: boolean, missing: number, basics: number, orphans: string[] }}
+ *   orphans: evolutions whose "evolves from" Pokémon isn't in the deck (legal, but stuck in hand)
+ */
+export function deckCheck(ids, cardsById, size = DECK_SIZE) {
+  const cards = ids.map((id) => cardsById.get(id)).filter(Boolean)
+  const names = new Set(cards.map((card) => card.name))
+  const basics = cards.filter((card) => card.stage === 'basic').length
+  const orphans = [...new Set(cards.filter((card) => card.stage === 'evolution' && !names.has(card.evolves_from)).map((card) => card.name))]
+  return { ready: cards.length === size && basics > 0, missing: Math.max(0, size - cards.length), basics, orphans }
+}
+
+// Auto deck: each card scores damage per energy (one energy a turn), its best
+// hit and its HP per point given (relative to the best here); the role
+// weighs them (attack: I play it; defense: the server's AI does, so bulk).
 const AUTO_WEIGHTS = {
   attack: { perEnergy: 1, burst: 0.5, bulk: 0.7 },
   defense: { perEnergy: 0.7, burst: 0.4, bulk: 1 },
 }
-const AUTO_MAX_MULTI_PRIZE = 2
-const AUTO_MIN_CHEAP = 2
 
-const expectedDamage = (attack) => attack.damage * (attack.times ? 2 : 1)
-
-/**
- * A deck picked from my eligible cards (`pvp_eligible` snapshots: hp,
- * prizes, types, attacks with cost). Each card scores damage per energy,
- * its best hit and its HP per prize (each relative to the best card here),
- * weighted for the role; then the best are taken one by one, with: no two
- * cards of the same name, at most 2 cards worth 2+ prizes, at least 2 cards
- * with an attack for 1 energy or less (round 1 has a single energy), and
- * fewer cards sharing a type (one weakness doesn't sweep the deck).
- * @param {object[]} cards
- * @param {'attack' | 'defense'} [role]
- * @returns {string[]} card ids, up to `size`
- */
-export function autoDeck(cards, role = 'attack', size = DECK_SIZE) {
+function scoreCards(cards, role) {
   const weights = AUTO_WEIGHTS[role] ?? AUTO_WEIGHTS.attack
-  const stats = cards
-    .filter((card) => card.attacks?.length)
-    .map((card) => ({
+  const stats = cards.map((card) => {
+    const usable = (card.attacks ?? []).filter((a) => a.usable !== false)
+    return {
       card,
-      perEnergy: Math.max(...card.attacks.map((a) => expectedDamage(a) / Math.max(a.cost ?? 0, 1))),
-      burst: Math.max(...card.attacks.map(expectedDamage)),
+      perEnergy: Math.max(0, ...usable.map((a) => (a.base ?? 0) / Math.max(a.cost ?? 0, 1))),
+      burst: Math.max(0, ...usable.map((a) => a.base ?? 0)),
       bulk: (card.hp ?? 0) / Math.max(card.prizes ?? 1, 1),
-      cheap: card.attacks.some((a) => (a.cost ?? 0) <= 1),
-      multi: (card.prizes ?? 1) > 1,
-      type: card.types?.[0] ?? null,
-    }))
+    }
+  })
   const top = (key) => Math.max(1, ...stats.map((s) => s[key]))
   const max = { perEnergy: top('perEnergy'), burst: top('burst'), bulk: top('bulk') }
-  for (const s of stats) {
-    s.score = Object.entries(weights).reduce((sum, [key, weight]) => sum + (weight * s[key]) / max[key], 0)
-  }
-  stats.sort((a, b) => b.score - a.score || a.card.id.localeCompare(b.card.id))
-
-  const picked = []
-  const cheapLeft = () => Math.max(0, Math.min(AUTO_MIN_CHEAP, stats.filter((s) => s.cheap).length) - picked.filter((s) => s.cheap).length)
-  while (picked.length < size) {
-    const mustBeCheap = cheapLeft() >= size - picked.length
-    let best = null
-    let bestScore = -Infinity
-    for (const s of stats) {
-      if (picked.includes(s) || picked.some((p) => p.card.name === s.card.name)) continue
-      if (s.multi && picked.filter((p) => p.multi).length >= AUTO_MAX_MULTI_PRIZE) continue
-      if (mustBeCheap && !s.cheap) continue
-      const score = s.score * 0.85 ** picked.filter((p) => p.type && p.type === s.type).length
-      if (score > bestScore) {
-        best = s
-        bestScore = score
-      }
-    }
-    if (!best) break
-    picked.push(best)
-  }
-  // Short of names / cheap cards: fill with the best left, rules relaxed
-  for (const s of stats) {
-    if (picked.length >= size) break
-    if (!picked.includes(s)) picked.push(s)
-  }
-  return picked.map((s) => s.card.id)
+  return new Map(stats.map((s) => [s.card.id, Object.entries(weights).reduce((sum, [key, w]) => sum + (w * s[key]) / max[key], 0)]))
 }
 
+/**
+ * A deck from my eligible cards (`pvp_eligible`: stage, evolves_from,
+ * owned copies, attacks), built like the bots' (pvp_bot_deck): a Stage 2
+ * line, up to two Stage 1 lines, then Basics, 2 copies of each when I own
+ * them, the best scores first; the best single copies fill what's left.
+ * @param {object[]} cards
+ * @param {'attack' | 'defense'} [role]
+ * @returns {string[]} card ids (with repeats), up to `size`
+ */
+export function autoDeck(cards, role = 'attack', size = DECK_SIZE) {
+  const playable = cards.filter((card) => card.stage !== 'none' && (card.attacks ?? []).some((a) => a.usable !== false))
+  const score = scoreCards(playable, role)
+  const byId = new Map(playable.map((card) => [card.id, card]))
+  // The best printing of each name, at each stage
+  const best = new Map()
+  for (const card of playable) {
+    const kept = best.get(card.name)
+    if (!kept || score.get(card.id) > score.get(kept.id)) best.set(card.name, card)
+  }
+  const named = [...best.values()]
+  const basicNamed = (name) => named.find((card) => card.name === name && card.stage === 'basic')
+  const evolutionNamed = (name) => named.find((card) => card.name === name && card.stage === 'evolution')
+  const lines = []
+  for (const top of named.filter((card) => card.stage === 'evolution')) {
+    const stage1 = evolutionNamed(top.evolves_from)
+    const basic = stage1 ? basicNamed(stage1.evolves_from) : basicNamed(top.evolves_from)
+    if (stage1 && basic) lines.push([basic, stage1, top])
+    else if (!stage1 && basic) lines.push([basic, top])
+  }
+  for (const basic of named.filter((card) => card.stage === 'basic')) lines.push([basic])
+  const lineScore = (line) => line.reduce((sum, card) => sum + score.get(card.id), 0) / line.length
+  lines.sort((a, b) => b.length - a.length || lineScore(b) - lineScore(a) || a[0].id.localeCompare(b[0].id))
+
+  let ids = []
+  let stage2 = 0
+  let stage1 = 0
+  for (const line of lines) {
+    if (line.some((card) => ids.some((id) => byId.get(id).name === card.name))) continue
+    if (line.length === 3 && stage2 >= 1) continue
+    if (line.length === 2 && stage1 >= 2) continue
+    const copies = Math.min(MAX_COPIES, ...line.map((card) => card.owned ?? MAX_COPIES))
+    if (ids.length + copies * line.length > size) continue
+    for (const card of line) for (let i = 0; i < copies; i++) ids = addCard(ids, card, byId, size)
+    stage2 += line.length === 3
+    stage1 += line.length === 2
+    if (ids.length >= size) break
+  }
+  // Fill: the best cards left (Basics first, they can always be played)
+  const rest = [...playable].sort((a, b) => (b.stage === 'basic') - (a.stage === 'basic') || score.get(b.id) - score.get(a.id))
+  for (const card of rest) {
+    if (ids.length >= size) break
+    if (card.stage === 'evolution' && !ids.some((id) => byId.get(id).name === card.evolves_from)) continue
+    while (!addBlock(ids, card, byId, size)) ids = [...ids, card.id]
+  }
+  return ids
+}
+
+// ---------- Battle ----------
+
 /** HP left as a share of the card's HP (0-100), for the bars. */
-export const hpPercent = (card) => (card.hp ? Math.max(0, Math.min(100, (100 * (card.hp_left ?? card.hp)) / card.hp)) : 0)
+export const hpPercent = (hpLeft, hp) => (hp ? Math.max(0, Math.min(100, (100 * hpLeft) / hp)) : 0)
+
+/** An attack's damage as printed ("30", "20×", "60+"), or its base. */
+export const damageLabel = (attack) => attack?.printed || (attack?.base ? String(attack.base) : '')
+
+/** The effect text to show: French when wanted and imported. */
+export const attackText = (attack, french) => (french && attack?.text_fr) || attack?.text || ''
+
+/** The attack's name to show. */
+export const attackName = (attack, french) => (french && attack?.name_fr) || attack?.name || ''
+
+/** Whether an attack needs me to pick a target / a Benched Pokémon, and which. */
+export function attackChoices(attack) {
+  const ops = new Set((attack?.fx ?? []).map((op) => op.op))
+  return {
+    target: ops.has('snipe') ? 'any' : ops.has('bench_one') ? 'bench' : null,
+    switchTo: ops.has('switch_self'),
+    energyTo: ops.has('move_energy'),
+  }
+}

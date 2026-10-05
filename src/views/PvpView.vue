@@ -2,10 +2,12 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import * as sfx from '@/lib/sfx'
+import { useCardLocale } from '@/composables/useCardLocale'
 import { useChallengeStore } from '@/stores/challenge'
 import { usePvpStore } from '@/stores/pvp'
 import { useSettingsStore } from '@/stores/settings'
 import { resetTimeLabel } from '@/utils/challenge'
+import { searchNeedle } from '@/utils/collection'
 import {
   BATTLES_PER_DAY,
   BOT_BATTLES_PER_DAY,
@@ -14,47 +16,47 @@ import {
   BOT_PAID_PER_DAY,
   DECK_ROLES,
   DECK_SIZE,
-  MAX_ENERGY,
-  MAX_ROUNDS,
-  PRIZES_TO_WIN,
+  MAX_TURNS,
+  POINTS_TO_WIN,
   RESISTANCE,
+  addBlock,
+  attackChoices,
+  attackName,
   autoDeck,
-  canPay,
   damageLabel,
+  deckCheck,
+  deckCounts,
   parseFormat,
   record,
-  toggleDeckCard,
+  removeCard,
 } from '@/utils/pvp'
 import AppHeader from '@/components/AppHeader.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
 import PvpCard from '@/components/PvpCard.vue'
+import PvpCardSheet from '@/components/PvpCardSheet.vue'
 
-// PvP battles (challenge mode, migrations 0024 + 0025 + 0026), asynchronous: I
-// save two decks of 5 challenge cards per format (every card, one TCG era, one
-// set): an attack deck I play, a defense deck the server plays when I'm
-// attacked (until I save one, the attack deck defends). "Auto deck" fills the
-// builder with autoDeck(), to save as is or change. Then I attack: the server finds a player of close Elo with a deck in that format
-// and plays it against mine, its cards hidden until they're played. Each
-// round I pick a card, then one of its attacks I can pay for (energy: 1 at
-// the start, +1 a round, 5 at most) or no attack to save energy; both cards
-// hit each other. Knocked out cards give prizes (2 or 3 for ex, V, VMAX...),
-// 3 win. Elo only, no coins. Bots (0027, few players): the same battle against
-// a deck the server deals (easy / normal / hard), with my attack deck: no Elo,
-// coins for the first wins of the day, and they don't use the daily attacks.
+// PvP battles like Pokémon TCG Pocket (challenge mode, migration 0030),
+// asynchronous. Per format (every card, one TCG era, one set) I keep two
+// decks of 20 challenge Pokémon (2 of a name at most): an attack deck I play
+// and a defense deck the server plays when I'm attacked. A battle: place a
+// Basic Active and up to 3 Benched Pokémon, then each turn attach the energy,
+// bench, evolve, retreat, attack. I send one move at a time; the server
+// validates it, plays the other side (a player's defense deck or a bot) and
+// sends back the board, what happened (`events`) and what I can do now
+// (`hints`), so the rules live in one place. Bots pay coins, players move Elo.
 // The format is remembered on this device (`pb-pvp-format`).
 const FORMAT_KEY = 'pb-pvp-format'
 const KINDS = ['all', 'era', 'set']
+const FILTERS = ['all', 'basic', 'evolution']
 
 const { t, locale } = useI18n()
+const { french, cardName } = useCardLocale()
 const pvp = usePvpStore()
 const challenge = useChallengeStore()
 const settings = useSettingsStore()
 const resetTime = computed(() => resetTimeLabel(locale.value))
 
 const format = ref(readFormat())
-const building = ref(null) // the deck role being built, null = not building
-const picks = ref([])
-const eligibleLoading = ref(false)
 const busy = ref(false)
 const errorMessage = ref('')
 const finished = ref(null) // the battle just over, kept on screen until "Back"
@@ -79,9 +81,8 @@ watch(format, (value) => {
 
 const rules = computed(() => ({
   deck: pvp.state?.deck_size ?? DECK_SIZE,
-  prizes: pvp.state?.prizes_to_win ?? PRIZES_TO_WIN,
-  energy: pvp.state?.max_energy ?? MAX_ENERGY,
-  rounds: pvp.state?.max_rounds ?? MAX_ROUNDS,
+  points: pvp.state?.points_to_win ?? POINTS_TO_WIN,
+  turns: pvp.state?.max_turns ?? MAX_TURNS,
   battles: pvp.state?.battles_per_day ?? BATTLES_PER_DAY,
   resistance: pvp.state?.resistance ?? RESISTANCE,
   botCoins: pvp.state?.bot_coins ?? BOT_COINS,
@@ -96,18 +97,19 @@ const errorFor = (err) => t(err?.code ? `challenge.errors.${err.code}` : 'challe
 const kind = computed(() => parseFormat(format.value).kind)
 const eras = computed(() => pvp.formats.eras ?? [])
 const sets = computed(() => pvp.formats.sets ?? [])
+const setName = (set) => (french.value && set.name_fr) || set.name
 
 function formatLabel(key) {
   const { kind: k, value } = parseFormat(key)
   if (k === 'all') return t('pvp.formats.all')
   if (k === 'era') return t('pvp.formats.era', { name: value })
-  return sets.value.find((s) => s.set_id === value)?.name ?? value
+  const set = sets.value.find((s) => s.set_id === value)
+  return set ? setName(set) : value
 }
 
-/** My eligible cards in the selected format. */
+/** My Pokémon copies in the selected format. */
 const ownedHere = computed(() => {
-  const { kind: k } = parseFormat(format.value)
-  if (k === 'all') return pvp.formats.all ?? 0
+  if (kind.value === 'all') return pvp.formats.all ?? 0
   return [...eras.value, ...sets.value].find((f) => f.format === format.value)?.owned ?? 0
 })
 
@@ -115,7 +117,7 @@ function pickKind(next) {
   if (next === kind.value) return
   building.value = null
   if (next === 'all') format.value = 'all'
-  // The era / set where I have the most cards that can fight
+  // The era / set where I have the most cards
   else {
     const list = next === 'era' ? eras.value : sets.value
     const best = [...list].sort((a, b) => b.owned - a.owned)[0]
@@ -128,52 +130,86 @@ function pickFormat(event) {
   format.value = event.target.value
 }
 
-// ---------- Deck ----------
+// ---------- Decks ----------
 
-// { attack, defense }: each { cards, valid } or null
+// { attack, defense }: each { ids, valid } or null
 const decks = computed(() => pvp.decks[format.value] ?? { attack: null, defense: null })
 const rating = computed(() => pvp.ratings[format.value] ?? null)
 const myRecord = computed(() => record(rating.value))
 const eligible = computed(() => pvp.eligible[format.value] ?? [])
+const eligibleById = computed(() => new Map(eligible.value.map((card) => [card.id, card])))
+const eligibleLoading = ref(false)
 const canFight = computed(() => decks.value.attack?.valid && pvp.battlesLeft > 0 && !building.value)
 const canFightBot = computed(() => decks.value.attack?.valid && pvp.botBattlesLeft > 0 && !building.value)
 
-const autoPicks = (role) => autoDeck(eligible.value, role, rules.value.deck)
-
-/**
- * Opens the builder for one deck: its saved cards, or with `auto` the
- * picks of autoDeck() (nothing is saved until "Save the deck").
- * @param {'attack' | 'defense'} role
- */
-async function editDeck(role, { auto = false } = {}) {
-  building.value = role
-  const saved = decks.value[role]
-  picks.value = saved?.valid ? saved.cards.map((card) => card.id) : []
+async function loadEligible({ force = false } = {}) {
   eligibleLoading.value = true
-  errorMessage.value = ''
   try {
-    await pvp.loadEligible(format.value, { force: true })
-    // Cards that left the collection since can't stay picked
-    const ids = new Set(eligible.value.map((card) => card.id))
-    picks.value = auto ? autoPicks(role) : picks.value.filter((id) => ids.has(id))
+    await pvp.loadEligible(format.value, { force })
   } catch (err) {
     errorMessage.value = errorFor(err)
-    building.value = null
   } finally {
     eligibleLoading.value = false
   }
 }
 
-function fillAuto() {
-  picks.value = autoPicks(building.value)
+/** A deck's cards grouped: [{ card, count }], Basics first, by name. */
+function grouped(ids) {
+  return [...deckCounts(ids)]
+    .map(([id, count]) => ({ id, count, card: eligibleById.value.get(id) }))
+    .filter((entry) => entry.card)
+    .sort((a, b) => (a.card.stage === 'basic' ? 0 : 1) - (b.card.stage === 'basic' ? 0 : 1) || cardName(a.card).localeCompare(cardName(b.card)))
 }
 
-function togglePick(id) {
-  picks.value = toggleDeckCard(picks.value, id, rules.value.deck)
+// Builder: the role being built (null = not building) and its 20 ids
+const building = ref(null)
+const picks = ref([])
+const search = ref('')
+const filter = ref('all')
+const check = computed(() => deckCheck(picks.value, eligibleById.value, rules.value.deck))
+const pickedGroups = computed(() => grouped(picks.value))
+const counts = computed(() => deckCounts(picks.value))
+const shown = computed(() => {
+  const needle = searchNeedle(search.value)
+  return eligible.value.filter(
+    (card) =>
+      (filter.value === 'all' || card.stage === filter.value) &&
+      (!needle || searchNeedle(card.name).includes(needle) || searchNeedle(card.name_fr ?? '').includes(needle)),
+  )
+})
+
+/**
+ * Opens the builder for one deck: its saved cards (minus the ones I no
+ * longer own enough of), or with `auto` the picks of autoDeck(). Nothing is
+ * saved until "Save the deck".
+ * @param {'attack' | 'defense'} role
+ */
+async function editDeck(role, { auto = false } = {}) {
+  building.value = role
+  errorMessage.value = ''
+  await loadEligible({ force: true })
+  if (auto) {
+    picks.value = autoDeck(eligible.value, role, rules.value.deck)
+    return
+  }
+  let kept = []
+  for (const id of decks.value[role]?.ids ?? []) {
+    const card = eligibleById.value.get(id)
+    if (card && !addBlock(kept, card, eligibleById.value, rules.value.deck)) kept = [...kept, id]
+  }
+  picks.value = kept
+}
+
+function addPick(card) {
+  if (!addBlock(picks.value, card, eligibleById.value, rules.value.deck)) picks.value = [...picks.value, card.id]
+}
+
+const removePick = (id) => {
+  picks.value = removeCard(picks.value, id)
 }
 
 async function saveDeck() {
-  if (busy.value || picks.value.length !== rules.value.deck) return
+  if (busy.value || !check.value.ready) return
   busy.value = true
   errorMessage.value = ''
   try {
@@ -189,59 +225,102 @@ async function saveDeck() {
 // ---------- Battle ----------
 
 const battle = computed(() => finished.value ?? pvp.battle)
-// The card picked in my hand, before choosing its attack
-const selectedSlot = ref(null)
-const selected = computed(() => {
-  const card = battle.value?.mine[selectedSlot.value]
-  return card && card.hp_left > 0 && !finished.value ? card : null
+const hints = computed(() => battle.value?.hints ?? {})
+const myTurn = computed(() => !finished.value && hints.value.my_turn)
+const opponentName = computed(() => {
+  const opponent = battle.value?.opponent
+  if (opponent?.bot) return botName(opponent.bot)
+  return opponent?.username ?? t('pvp.privateTrainer')
 })
-const unseen = computed(() => (battle.value ? Math.max(0, rules.value.deck - battle.value.theirs.seen.length) : 0))
+const botName = (level) => t('pvp.botName', { level: t(`pvp.levels.${level}`) })
+const myCard = (index) => battle.value?.my_cards?.[index] ?? null
+/** My Pokémon in play by position: 0 = Active, 1-3 = Bench. */
+const mySlot = (pos) => (pos === 0 ? battle.value?.me.active : battle.value?.me.bench[pos - 1]) ?? null
+const theirSlot = (pos) => (pos === 0 ? battle.value?.them.active : battle.value?.them.bench[pos - 1]) ?? null
+const benchSize = 3
 
-function scrollToBattle() {
-  nextTick(() => battleEl.value?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }))
+// What I tapped: { kind: 'hand', index } | { kind: 'mine' | 'theirs', pos }
+const selection = ref(null)
+const pending = ref(null) // an attack waiting for its target / Benched Pokémon
+const sheet = ref(null) // { card, slot } read in full
+
+function select(next) {
+  pending.value = null
+  const same = selection.value && next && selection.value.kind === next.kind && selection.value.index === next.index && selection.value.pos === next.pos
+  selection.value = same ? null : next
 }
 
-/** @param {string | null} [level] - a bot level, null = a player */
-async function fight(level = null) {
-  if (busy.value || !(level ? canFightBot.value : canFight.value)) return
-  busy.value = true
-  errorMessage.value = ''
-  finished.value = null
-  try {
-    if (level) await pvp.startBot(format.value, level)
-    else await pvp.start(format.value)
-    scrollToBattle()
-  } catch (err) {
-    errorMessage.value = errorFor(err)
-  } finally {
-    busy.value = false
+const selectedCard = computed(() => {
+  const s = selection.value
+  if (!s || !battle.value) return null
+  if (s.kind === 'hand') return myCard(s.index)
+  return (s.kind === 'mine' ? mySlot(s.pos) : theirSlot(s.pos))?.card ?? null
+})
+const selectedSlot = computed(() => {
+  const s = selection.value
+  if (!s || s.kind === 'hand') return null
+  return s.kind === 'mine' ? mySlot(s.pos) : theirSlot(s.pos)
+})
+const handHints = computed(() => (selection.value?.kind === 'hand' ? hints.value.hand?.[selection.value.index] : null))
+
+function openSheet(card, slot = null) {
+  sheet.value = card ? { card, slot } : null
+}
+
+// Setup: my Active and Benched picks among the Basics in my hand
+const setupActive = ref(null)
+const setupBench = ref([])
+
+function tapHand(entry) {
+  if (busy.value || finished.value) return
+  if (hints.value.setup) {
+    if (entry.card.stage !== 'basic') return openSheet(entry.card)
+    if (setupActive.value === entry.index) setupActive.value = null
+    else if (setupBench.value.includes(entry.index)) setupBench.value = setupBench.value.filter((i) => i !== entry.index)
+    else if (setupActive.value === null) setupActive.value = entry.index
+    else if (setupBench.value.length < benchSize) setupBench.value = [...setupBench.value, entry.index]
+    return
   }
+  select({ kind: 'hand', index: entry.index })
 }
 
-function selectCard(slot) {
-  selectedSlot.value = selectedSlot.value === slot ? null : slot
+function tapMine(pos) {
+  if (busy.value || finished.value) return
+  if (hints.value.promote) {
+    if (pos > 0) act({ type: 'promote', pos })
+    return
+  }
+  select({ kind: 'mine', pos })
 }
 
-/** @param {number | null} attack - index in the selected card's attacks, null = no attack */
-async function play(attack) {
-  const slot = selected.value?.slot
-  if (busy.value || finished.value || slot === undefined) return
+function tapTheirs(pos) {
+  if (pending.value?.need === 'target') return chooseTarget(pos)
+  select({ kind: 'theirs', pos })
+}
+
+/** The events of my last move (and the server's turn), else the battle's last ones. */
+const recent = ref([])
+const logLines = computed(() => describeAll(recent.value.length ? recent.value : (battle.value?.log ?? []).slice(-12)))
+const logEl = ref(null)
+
+watch(logLines, async () => {
+  await nextTick()
+  if (logEl.value) logEl.value.scrollTop = logEl.value.scrollHeight
+})
+
+async function act(action) {
+  if (busy.value) return
   busy.value = true
   errorMessage.value = ''
   confirmForfeit.value = false
   try {
-    const result = await pvp.play(slot, attack)
-    // Keep the card picked for the next round while it stands
-    if (result.round.ko_mine) selectedSlot.value = null
-    if (result.battle.status === 'playing') {
-      sfx.flip(settings.sound)
-      if (result.round.ko_theirs) sfx.rare(settings.sound)
-      if (result.round.ko_mine) sfx.buzz(settings.vibration)
-    } else {
-      finished.value = result.battle
-      if (result.battle.status === 'won') sfx.hit(settings.sound)
-      else sfx.buzz(settings.vibration)
-    }
+    const result = await pvp.act(action)
+    recent.value = result.events
+    pending.value = null
+    // Keep my Pokémon picked while it's still there; a played card leaves the hand
+    if (selection.value?.kind !== 'mine' || action.type === 'attack' || action.type === 'end' || action.type === 'retreat') selection.value = null
+    playSounds(result.events)
+    if (result.battle.status !== 'playing') finished.value = result.battle
   } catch (err) {
     errorMessage.value = errorFor(err)
     // The battle is gone server side: back to the lobby
@@ -250,6 +329,56 @@ async function play(attack) {
     busy.value = false
   }
 }
+
+function playSounds(events) {
+  if (events.some((e) => e.k === 'over')) {
+    const over = events.find((e) => e.k === 'over')
+    if (over.winner === 'a') sfx.hit(settings.sound)
+    else sfx.buzz(settings.vibration)
+    return
+  }
+  if (events.some((e) => e.k === 'ko' && e.s === 'd')) sfx.rare(settings.sound)
+  else if (events.some((e) => e.k === 'ko' && e.s === 'a')) sfx.buzz(settings.vibration)
+  else sfx.flip(settings.sound)
+}
+
+function startBattle() {
+  if (setupActive.value === null) return
+  act({ type: 'setup', active: setupActive.value, bench: setupBench.value })
+}
+
+/** Why an attack of my Active can't be used, null if it can (the server's hints: null = usable). */
+function attackBlock(i) {
+  const blocks = hints.value.attacks ?? []
+  return i < blocks.length ? blocks[i] : 'unknown'
+}
+
+// An attack: some need a target or one of my Benched Pokémon first
+function useAttack(i) {
+  const attack = mySlot(0)?.card.attacks[i]
+  if (!attack) return
+  const choices = attackChoices(attack)
+  const theirBench = battle.value.them.bench.length
+  const myBench = battle.value.me.bench.length
+  const steps = []
+  if (choices.target === 'bench' && theirBench > 1) steps.push('target')
+  if (choices.target === 'any' && theirBench > 0) steps.push('target')
+  if (choices.switchTo && myBench > 1) steps.push('switch_to')
+  if (choices.energyTo && myBench > 1) steps.push('energy_to')
+  pending.value = { attack: i, steps, choices: {}, need: steps[0] ?? null, anyTarget: choices.target === 'any' }
+  if (!steps.length) act({ type: 'attack', attack: i })
+}
+
+function chooseStep(value) {
+  const p = pending.value
+  if (!p?.need) return
+  const choices = { ...p.choices, [p.need]: value }
+  const rest = p.steps.slice(p.steps.indexOf(p.need) + 1)
+  if (rest.length) pending.value = { ...p, choices, need: rest[0] }
+  else act({ type: 'attack', attack: p.attack, ...choices })
+}
+
+const chooseTarget = (pos) => chooseStep(pos)
 
 async function forfeit() {
   if (busy.value) return
@@ -271,37 +400,114 @@ async function forfeit() {
   }
 }
 
+function resetBattleUi() {
+  selection.value = null
+  pending.value = null
+  recent.value = []
+  setupActive.value = null
+  setupBench.value = []
+}
+
 function backToLobby() {
   if (finished.value) format.value = finished.value.format
   finished.value = null
-  selectedSlot.value = null
+  resetBattleUi()
+  loadEligible()
 }
 
-/** The last round, told from my side: cards and attacks by name. */
-const lastRound = computed(() => {
-  const round = battle.value?.log.at(-1)
-  if (!round) return null
-  const mine = battle.value.mine[round.a]
-  const theirs = (battle.value.theirs.deck ?? battle.value.theirs.seen).find((card) => card.slot === round.d)
-  return {
-    ...round,
-    mine: mine?.name ?? '',
-    theirs: theirs?.name ?? '',
-    myAttack: round.a_attack === null ? null : (mine?.attacks[round.a_attack]?.name ?? ''),
-    theirAttack: round.d_attack === null ? null : (theirs?.attacks[round.d_attack]?.name ?? ''),
-  }
-})
+function scrollToBattle() {
+  nextTick(() => battleEl.value?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }))
+}
 
-const botName = (level) => t('pvp.botName', { level: t(`pvp.levels.${level}`) })
-const opponentName = computed(() => {
-  const opponent = battle.value?.opponent
-  if (opponent?.bot) return botName(opponent.bot)
-  return opponent?.username ?? t('pvp.privateTrainer')
-})
+/** @param {string | null} [level] - a bot level, null = a player */
+async function fight(level = null) {
+  if (busy.value || !(level ? canFightBot.value : canFight.value)) return
+  busy.value = true
+  errorMessage.value = ''
+  finished.value = null
+  resetBattleUi()
+  try {
+    if (level) await pvp.startBot(format.value, level)
+    else await pvp.start(format.value)
+    scrollToBattle()
+  } catch (err) {
+    errorMessage.value = errorFor(err)
+  } finally {
+    busy.value = false
+  }
+}
 
 const resultTitle = computed(() => (finished.value ? t(`pvp.result.${finished.value.status}`) : ''))
-
 const signed = (n) => (n > 0 ? `+${n}` : String(n ?? 0))
+const energyLine = computed(() => {
+  if (!battle.value || !myTurn.value) return ''
+  if (hints.value.attach) return t('pvp.energyReady')
+  return battle.value.turn === 1 ? t('pvp.energyFirst') : t('pvp.energyUsed')
+})
+
+// ---------- The log ----------
+
+const eventName = (e) => (french.value && e.name_fr) || e.name || ''
+const eventAttack = (e) => (french.value && e.attack_fr) || e.attack || ''
+
+function describe(e, previous) {
+  const side = e.s === 'a' ? 'a' : 'd'
+  const card = eventName(e)
+  const name = opponentName.value
+  switch (e.k) {
+    case 'start':
+      return t(`pvp.ev.start.${e.first === 'a' ? 'a' : 'd'}`, { name })
+    case 'turn':
+      return t(`pvp.ev.turn.${side}`, { name })
+    case 'draw':
+      if (side === 'a') {
+        const cards = (e.cards ?? []).map((i) => cardName(myCard(i))).filter(Boolean)
+        return cards.length ? t('pvp.ev.draw.a', { card: cards.join(', ') }) : ''
+      }
+      return e.n ? t('pvp.ev.draw.d', { name, count: e.n }, e.n) : ''
+    case 'attach':
+    case 'bench':
+    case 'evolve':
+    case 'switch':
+    case 'promote':
+      return t(`pvp.ev.${e.k}.${side}`, { name, card })
+    case 'attack': {
+      let text
+      if (e.failed) text = t(`pvp.ev.failed.${e.failed}`, { card, attack: eventAttack(e) })
+      else if (e.damage > 0) text = t(`pvp.ev.attack.${side}`, { card, attack: eventAttack(e), damage: e.damage })
+      else text = t(`pvp.ev.attackNoDamage.${side}`, { card, attack: eventAttack(e) })
+      if (e.flips?.length) text += ` ${t('pvp.ev.flips', { flips: e.flips.map((up) => t(up ? 'pvp.heads' : 'pvp.tails')).join(', ') })}`
+      if (e.prevented) text += ` ${t('pvp.ev.prevented')}`
+      return text
+    }
+    case 'damage':
+      // The attack line already says the damage on the Active
+      if (e.pos === 0 && previous?.k === 'attack' && previous.s !== e.s) return ''
+      return t(`pvp.ev.damage.${side}`, { card, n: e.n })
+    case 'heal':
+    case 'discard_energy':
+      return t(`pvp.ev.${e.k}.${side}`, { card, n: e.n })
+    case 'status':
+    case 'cured':
+      return t(`pvp.ev.${e.k}.${side}`, { card, status: t(`pvp.statuses.${e.status}`).toLowerCase() })
+    case 'ko':
+      return t(`pvp.ev.ko.${side}`, { card, name, points: e.points })
+    case 'end':
+      return t(`pvp.ev.end.${side}`, { name })
+    case 'over': {
+      const text = t(`pvp.ev.over.${e.winner === 'a' ? 'a' : e.winner === 'd' ? 'd' : 'draw'}`, { name })
+      return e.reason === 'turns' ? `${t('pvp.ev.overTurns')} ${text}` : text
+    }
+    default:
+      return ''
+  }
+}
+
+function describeAll(events) {
+  return events
+    .map((e, i) => ({ text: describe(e, events[i - 1]), turn: e.k === 'turn', key: `${i}-${e.k}-${e.t}` }))
+    .filter((line) => line.text)
+}
 
 // ---------- Leaderboard ----------
 
@@ -318,7 +524,9 @@ async function loadBoard() {
 }
 
 watch(format, () => {
-  if (pvp.loaded && !pvp.unavailable) loadBoard()
+  if (!pvp.loaded || pvp.unavailable) return
+  loadBoard()
+  if (!battle.value) loadEligible()
 })
 
 onMounted(async () => {
@@ -329,6 +537,7 @@ onMounted(async () => {
   // A remembered format that no longer exists (set renamed, new device)
   else if (!['all', ...eras.value.map((e) => e.format), ...sets.value.map((s) => s.format)].includes(format.value)) format.value = 'all'
   loadBoard()
+  if (!pvp.battle) loadEligible()
 })
 </script>
 
@@ -361,115 +570,246 @@ onMounted(async () => {
 
           <dl class="pvp-score">
             <div>
-              <dt>{{ t('pvp.myPrizes') }}</dt>
-              <dd>{{ battle.my_prizes }} / {{ rules.prizes }}</dd>
+              <dt>{{ t('pvp.myPoints') }}</dt>
+              <dd>{{ battle.me.points }} / {{ rules.points }}</dd>
             </div>
             <div>
-              <dt>{{ t('pvp.round') }}</dt>
-              <dd>{{ battle.round }} / {{ rules.rounds }}</dd>
+              <dt class="visually-hidden">{{ t('pvp.turn', { turn: battle.turn, max: rules.turns }) }}</dt>
+              <dd aria-hidden="true">{{ t('pvp.turn', { turn: battle.turn, max: rules.turns }) }}</dd>
             </div>
             <div>
-              <dt>{{ t('pvp.theirPrizes') }}</dt>
-              <dd>{{ battle.their_prizes }} / {{ rules.prizes }}</dd>
+              <dt>{{ t('pvp.theirPoints') }}</dt>
+              <dd>{{ battle.them.points }} / {{ rules.points }}</dd>
             </div>
           </dl>
 
-          <div class="pvp-energies">
-            <span class="pvp-energy" role="meter" :aria-label="t('pvp.myEnergy')" aria-valuemin="0" :aria-valuemax="rules.energy" :aria-valuenow="battle.my_energy">
-              <span class="pvp-energy-label">{{ t('pvp.myEnergy') }}</span>
-              <span class="pvp-pips" aria-hidden="true"><span v-for="n in rules.energy" :key="n" :class="{ on: n <= battle.my_energy }"></span></span>
-              <strong>{{ battle.my_energy }}</strong>
-            </span>
-            <span class="pvp-energy" role="meter" :aria-label="t('pvp.theirEnergy')" aria-valuemin="0" :aria-valuemax="rules.energy" :aria-valuenow="battle.their_energy">
-              <span class="pvp-energy-label">{{ t('pvp.theirEnergy') }}</span>
-              <span class="pvp-pips" aria-hidden="true"><span v-for="n in rules.energy" :key="n" :class="{ on: n <= battle.their_energy }"></span></span>
-              <strong>{{ battle.their_energy }}</strong>
-            </span>
-          </div>
-
-          <h3 class="pvp-side-title">{{ t('pvp.theirCards', { name: opponentName }) }}</h3>
-          <ul class="pvp-row pvp-theirs" :aria-label="t('pvp.theirCards', { name: opponentName })">
-            <li v-for="card in battle.theirs.deck ?? battle.theirs.seen" :key="card.slot" :class="{ 'is-last': lastRound?.d === card.slot }">
-              <PvpCard :card="card" show-hp />
-            </li>
-            <template v-if="!battle.theirs.deck">
-              <li v-for="n in unseen" :key="`hidden-${n}`"><PvpCard hidden /></li>
-            </template>
-          </ul>
-
-          <p class="pvp-feedback" role="status" aria-live="polite">
-            <template v-if="finished">
-              <strong :class="finished.status === 'won' ? 'pvp-good' : finished.status === 'draw' ? '' : 'pvp-bad'">{{ resultTitle }}</strong>
-              <span v-if="!finished.bot">{{ t('pvp.eloChange', { change: signed(finished.elo_change) }) }}</span>
-              <span v-else-if="finished.coins" class="pvp-coins-won">{{ t('pvp.coinsWon') }} <CoinAmount :amount="finished.coins" signed /></span>
-              <span v-else>{{ t(finished.paid ? 'pvp.noCoins' : 'pvp.unpaid') }}</span>
-            </template>
-            <template v-else-if="lastRound">
-              <span v-if="lastRound.myAttack === null">{{ t('pvp.roundSaved', { mine: lastRound.mine }) }}</span>
-              <span v-else>
-                {{ t('pvp.roundDealt', { mine: lastRound.mine, attack: lastRound.myAttack, theirs: lastRound.theirs, damage: lastRound.dealt }) }}
-                <template v-if="lastRound.roll_a">{{ t('pvp.roll', { roll: lastRound.roll_a }) }}</template>
+          <!-- Their side -->
+          <div class="pvp-side is-theirs" role="group" :aria-label="t('pvp.theirSide', { name: opponentName })">
+            <div class="pvp-side-head">
+              <span class="pvp-side-title">{{ t('pvp.theirSide', { name: opponentName }) }}</span>
+              <span class="pvp-chips">
+                <span class="pvp-chip">{{ t('pvp.handCount', { count: battle.them.hand_count }) }}</span>
+                <span class="pvp-chip">{{ t('pvp.deckLeft', { count: battle.them.deck }) }}</span>
               </span>
-              <span v-if="lastRound.theirAttack === null">{{ t('pvp.roundTheySaved', { theirs: lastRound.theirs }) }}</span>
-              <span v-else>
-                {{ t('pvp.roundTaken', { theirs: lastRound.theirs, attack: lastRound.theirAttack, damage: lastRound.taken }) }}
-                <template v-if="lastRound.roll_d">{{ t('pvp.roll', { roll: lastRound.roll_d }) }}</template>
-              </span>
-              <strong v-if="lastRound.ko_theirs" class="pvp-good">{{ t('pvp.koTheirs', { name: lastRound.theirs }) }}</strong>
-              <strong v-if="lastRound.ko_mine" class="pvp-bad">{{ t('pvp.koMine', { name: lastRound.mine }) }}</strong>
-            </template>
-            <template v-else>{{ t('pvp.firstRound') }}</template>
-          </p>
-
-          <h3 class="pvp-side-title">{{ finished ? t('pvp.myCards') : t('pvp.playOne') }}</h3>
-          <ul class="pvp-row pvp-mine" :aria-label="t('pvp.myCards')">
-            <li v-for="card in battle.mine" :key="card.slot">
+            </div>
+            <ul class="pvp-bench" :aria-label="t('pvp.bench')">
+              <li v-for="n in benchSize" :key="n">
+                <button
+                  v-if="theirSlot(n)"
+                  type="button"
+                  class="pvp-slot"
+                  :class="{ 'is-selected': selection?.kind === 'theirs' && selection.pos === n, 'is-target': pending?.need === 'target' }"
+                  :aria-label="`${cardName(theirSlot(n).card)}, ${t('pvp.hp', { left: theirSlot(n).hp_left, hp: theirSlot(n).card.hp })}`"
+                  @click="tapTheirs(n)"
+                >
+                  <PvpCard :card="theirSlot(n).card" :slot="theirSlot(n)" compact />
+                </button>
+                <span v-else class="pvp-empty">{{ t('pvp.emptySlot') }}</span>
+              </li>
+            </ul>
+            <div class="pvp-active-row">
               <button
+                v-if="theirSlot(0)"
                 type="button"
-                class="pvp-play"
-                :class="{ 'is-last': lastRound?.a === card.slot, 'is-selected': selected?.slot === card.slot }"
-                :aria-pressed="selected?.slot === card.slot"
-                :disabled="busy || !!finished || card.hp_left === 0"
-                :aria-label="t('pvp.playCard', { name: card.name, left: card.hp_left, hp: card.hp })"
-                @click="selectCard(card.slot)"
+                class="pvp-slot is-active"
+                :class="{ 'is-selected': selection?.kind === 'theirs' && selection.pos === 0, 'is-target': pending?.need === 'target' && pending.anyTarget }"
+                :aria-label="`${t('pvp.active')}: ${cardName(theirSlot(0).card)}, ${t('pvp.hp', { left: theirSlot(0).hp_left, hp: theirSlot(0).card.hp })}`"
+                :disabled="pending?.need === 'target' && !pending.anyTarget"
+                @click="tapTheirs(0)"
               >
-                <PvpCard :card="card" show-hp />
+                <PvpCard :card="theirSlot(0).card" :slot="theirSlot(0)" compact />
               </button>
-            </li>
-          </ul>
-
-          <!-- The picked card's attacks: the ones I can't pay for yet stay greyed -->
-          <div v-if="selected" class="pvp-attack-panel" role="group" :aria-label="t('pvp.attackWith', { name: selected.name })">
-            <p class="pvp-side-title">{{ t('pvp.attackWith', { name: selected.name }) }}</p>
-            <div class="pvp-attack-buttons">
-              <button
-                v-for="(attack, i) in selected.attacks"
-                :key="i"
-                type="button"
-                class="pvp-attack-button"
-                :disabled="busy || !canPay(attack, battle.my_energy)"
-                @click="play(i)"
-              >
-                <span class="pvp-attack-cost">{{ t('pvp.cost', { count: attack.cost }, attack.cost) }}</span>
-                <span class="pvp-attack-title">{{ attack.name }}</span>
-                <strong>{{ damageLabel(attack) }}</strong>
-              </button>
-              <button type="button" class="pvp-attack-button is-skip" :disabled="busy" @click="play(null)">
-                <span class="pvp-attack-title">{{ t('pvp.noAttack') }}</span>
-              </button>
+              <span v-else class="pvp-empty is-active">{{ t('pvp.emptySlot') }}</span>
             </div>
           </div>
-          <p v-else-if="!finished" class="pvp-note pvp-hint">{{ t('pvp.pickCard') }}</p>
 
-          <div class="pvp-actions">
-            <button v-if="finished" type="button" class="btn btn-primary glow-button" @click="backToLobby">{{ t('pvp.back') }}</button>
-            <button v-else type="button" class="btn btn-sm" :class="confirmForfeit ? 'btn-danger' : 'btn-outline-secondary'" :disabled="busy" @click="forfeit">
+          <!-- What happened -->
+          <div ref="logEl" class="pvp-log" role="log" aria-live="polite" :aria-label="t('pvp.logTitle')">
+            <p v-for="line in logLines" :key="line.key" :class="{ 'is-turn': line.turn }">{{ line.text }}</p>
+            <p v-if="busy" class="pvp-muted">{{ t('pvp.waitHint') }}</p>
+          </div>
+
+          <!-- My side -->
+          <div class="pvp-side is-mine" role="group" :aria-label="t('pvp.mySide')">
+            <div class="pvp-active-row">
+              <button
+                v-if="mySlot(0)"
+                type="button"
+                class="pvp-slot is-active"
+                :class="{ 'is-selected': selection?.kind === 'mine' && selection.pos === 0 }"
+                :aria-label="`${t('pvp.active')}: ${cardName(mySlot(0).card)}, ${t('pvp.hp', { left: mySlot(0).hp_left, hp: mySlot(0).card.hp })}`"
+                :disabled="!!finished || hints.promote"
+                @click="tapMine(0)"
+              >
+                <PvpCard :card="mySlot(0).card" :slot="mySlot(0)" compact />
+              </button>
+              <span v-else-if="hints.setup && setupActive !== null" class="pvp-slot is-active is-setup">
+                <PvpCard :card="myCard(setupActive)" compact />
+              </span>
+              <span v-else class="pvp-empty is-active">{{ hints.setup ? t('pvp.setupActive') : t('pvp.emptySlot') }}</span>
+            </div>
+            <ul class="pvp-bench" :aria-label="t('pvp.bench')">
+              <li v-for="n in benchSize" :key="n">
+                <button
+                  v-if="mySlot(n)"
+                  type="button"
+                  class="pvp-slot"
+                  :class="{
+                    'is-selected': selection?.kind === 'mine' && selection.pos === n,
+                    'is-target': hints.promote || pending?.need === 'switch_to' || pending?.need === 'energy_to',
+                  }"
+                  :aria-label="`${cardName(mySlot(n).card)}, ${t('pvp.hp', { left: mySlot(n).hp_left, hp: mySlot(n).card.hp })}`"
+                  :disabled="!!finished"
+                  @click="pending?.need === 'switch_to' || pending?.need === 'energy_to' ? chooseStep(n) : tapMine(n)"
+                >
+                  <PvpCard :card="mySlot(n).card" :slot="mySlot(n)" compact />
+                </button>
+                <span v-else-if="hints.setup && setupBench[n - 1] !== undefined" class="pvp-slot is-setup">
+                  <PvpCard :card="myCard(setupBench[n - 1])" compact />
+                </span>
+                <span v-else class="pvp-empty">{{ t('pvp.emptySlot') }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- My hand -->
+          <div class="pvp-hand-wrap">
+            <p class="pvp-side-title">{{ t('pvp.myHand', { count: battle.me.hand.length }) }}</p>
+            <ul class="pvp-hand" :aria-label="t('pvp.myHand', { count: battle.me.hand.length })">
+              <li v-for="entry in battle.me.hand" :key="entry.index">
+                <button
+                  type="button"
+                  class="pvp-slot"
+                  :class="{
+                    'is-selected': (selection?.kind === 'hand' && selection.index === entry.index) || setupActive === entry.index || setupBench.includes(entry.index),
+                    'is-playable': hints.setup ? entry.card.stage === 'basic' : hints.hand?.[entry.index]?.bench || hints.hand?.[entry.index]?.evolve?.length,
+                  }"
+                  :aria-label="cardName(entry.card)"
+                  :aria-pressed="setupActive === entry.index || setupBench.includes(entry.index)"
+                  :disabled="!!finished"
+                  @click="tapHand(entry)"
+                >
+                  <PvpCard :card="entry.card" compact />
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <!-- What I can do -->
+          <div class="pvp-panel-actions">
+            <template v-if="finished">
+              <p class="pvp-feedback" role="status">
+                <strong :class="finished.status === 'won' ? 'pvp-good' : finished.status === 'draw' ? '' : 'pvp-bad'">{{ resultTitle }}</strong>
+                <span v-if="!finished.bot">{{ t('pvp.eloChange', { change: signed(finished.elo_change) }) }}</span>
+                <span v-else-if="finished.coins" class="pvp-coins-won">{{ t('pvp.coinsWon') }} <CoinAmount :amount="finished.coins" signed /></span>
+                <span v-else>{{ t(finished.paid ? 'pvp.noCoins' : 'pvp.unpaid') }}</span>
+              </p>
+              <button type="button" class="btn btn-primary glow-button" @click="backToLobby">{{ t('pvp.back') }}</button>
+            </template>
+
+            <template v-else-if="hints.setup">
+              <p class="pvp-panel-title">{{ t('pvp.setupTitle') }}</p>
+              <p class="pvp-note">{{ t('pvp.setupHelp') }}</p>
+              <button type="button" class="btn btn-primary glow-button" :disabled="busy || setupActive === null" @click="startBattle">
+                {{ t('pvp.setupStart') }}
+              </button>
+            </template>
+
+            <template v-else-if="hints.promote">
+              <p class="pvp-panel-title">{{ t('pvp.promoteTitle') }}</p>
+              <p class="pvp-note">{{ t('pvp.promoteHelp') }}</p>
+            </template>
+
+            <template v-else-if="pending?.need">
+              <p class="pvp-panel-title">{{ t(pending.need === 'target' ? 'pvp.pickTarget' : pending.need === 'switch_to' ? 'pvp.pickSwitch' : 'pvp.pickEnergyTo') }}</p>
+              <div class="pvp-choice-buttons">
+                <template v-if="pending.need === 'target'">
+                  <button v-if="pending.anyTarget && theirSlot(0)" type="button" class="pvp-choice" @click="chooseStep(0)">{{ cardName(theirSlot(0).card) }}</button>
+                  <button v-for="n in battle.them.bench.length" :key="n" type="button" class="pvp-choice" @click="chooseStep(n)">{{ cardName(theirSlot(n).card) }}</button>
+                </template>
+                <template v-else>
+                  <button v-for="n in battle.me.bench.length" :key="n" type="button" class="pvp-choice" @click="chooseStep(n)">{{ cardName(mySlot(n).card) }}</button>
+                </template>
+                <button type="button" class="btn btn-outline-secondary btn-sm" @click="pending = null">{{ t('pvp.cancel') }}</button>
+              </div>
+            </template>
+
+            <template v-else-if="selectedCard">
+              <div class="pvp-panel-head">
+                <p class="pvp-panel-title">{{ cardName(selectedCard) }}</p>
+                <button type="button" class="btn btn-outline-secondary btn-sm" @click="openSheet(selectedCard, selectedSlot)">{{ t('pvp.details') }}</button>
+              </div>
+              <!-- A card in my hand -->
+              <div v-if="selection.kind === 'hand'" class="pvp-choice-buttons">
+                <button v-if="handHints?.bench" type="button" class="pvp-choice" :disabled="busy" @click="act({ type: 'bench', card: selection.index })">
+                  {{ t('pvp.toBench') }}
+                </button>
+                <button
+                  v-for="pos in handHints?.evolve ?? []"
+                  :key="pos"
+                  type="button"
+                  class="pvp-choice"
+                  :disabled="busy"
+                  @click="act({ type: 'evolve', card: selection.index, pos })"
+                >
+                  {{ t('pvp.evolveOnto', { name: cardName(mySlot(pos).card) }) }}
+                </button>
+              </div>
+              <!-- One of my Pokémon -->
+              <div v-else-if="selection.kind === 'mine'" class="pvp-choice-buttons">
+                <button v-if="hints.attach" type="button" class="pvp-choice" :disabled="busy" @click="act({ type: 'attach', pos: selection.pos })">
+                  {{ t('pvp.attach') }}
+                </button>
+                <button
+                  v-if="selection.pos > 0 && hints.retreat"
+                  type="button"
+                  class="pvp-choice"
+                  :disabled="busy"
+                  @click="act({ type: 'retreat', pos: selection.pos })"
+                >
+                  {{
+                    t('pvp.retreatHere', {
+                      name: cardName(mySlot(0).card),
+                      cost: mySlot(0).card.retreat ? t('pvp.energyCount', { count: mySlot(0).card.retreat }, mySlot(0).card.retreat) : t('pvp.free'),
+                    })
+                  }}
+                </button>
+              </div>
+              <div v-if="selection.kind === 'mine' && selection.pos === 0" class="pvp-attack-buttons" role="group" :aria-label="t('pvp.attacks')">
+                <button
+                  v-for="(attack, i) in selectedCard.attacks"
+                  :key="i"
+                  type="button"
+                  class="pvp-attack-button"
+                  :disabled="busy || attackBlock(i) !== null"
+                  @click="useAttack(i)"
+                >
+                  <span class="pvp-attack-cost">{{ t('pvp.attackCost', { count: attack.cost }, attack.cost) }}</span>
+                  <span class="pvp-attack-title">
+                    {{ attackName(attack, french) }}
+                    <small v-if="attackBlock(i)">{{ t(`pvp.blocks.${attackBlock(i)}`) }}</small>
+                  </span>
+                  <strong>{{ damageLabel(attack) }}</strong>
+                </button>
+              </div>
+            </template>
+
+            <p v-else-if="myTurn" class="pvp-note pvp-hint">{{ t('pvp.selectHint') }}</p>
+
+            <div v-if="!finished && !hints.setup" class="pvp-turn-bar">
+              <span class="pvp-energy-line">{{ energyLine }}</span>
+              <button type="button" class="btn btn-primary" :disabled="busy || !myTurn || !!pending" @click="act({ type: 'end' })">{{ t('pvp.endTurn') }}</button>
+            </div>
+          </div>
+
+          <div v-if="!finished" class="pvp-actions">
+            <button type="button" class="btn btn-sm" :class="confirmForfeit ? 'btn-danger' : 'btn-outline-secondary'" :disabled="busy" @click="forfeit">
               {{ confirmForfeit ? t('pvp.forfeitConfirm') : t('pvp.forfeit') }}
             </button>
           </div>
         </section>
 
-        <!-- ============ Lobby: format, deck, fight ============ -->
+        <!-- ============ Lobby: format, decks, fight ============ -->
         <section v-else class="pvp-lobby" aria-labelledby="pvp-lobby-title">
           <h2 id="pvp-lobby-title" class="pb-section-title">{{ t('pvp.formatTitle') }}</h2>
           <div class="pvp-kinds" role="tablist" :aria-label="t('pvp.formatTitle')">
@@ -497,7 +837,7 @@ onMounted(async () => {
             <label for="pvp-set">{{ t('pvp.pickSet') }}</label>
             <select v-if="sets.length" id="pvp-set" class="form-select" :value="format" @change="pickFormat">
               <option v-for="set in sets" :key="set.format" :value="set.format">
-                {{ t('pvp.optionCount', { name: set.name, count: set.owned }, set.owned) }}
+                {{ t('pvp.optionCount', { name: setName(set), count: set.owned }, set.owned) }}
               </option>
             </select>
             <span v-else class="pvp-note">{{ t('pvp.noSets') }}</span>
@@ -523,36 +863,80 @@ onMounted(async () => {
           <div v-if="building" class="pvp-builder">
             <div class="pvp-builder-head">
               <h3 class="pvp-side-title">{{ t(`pvp.buildTitle.${building}`, { format: formatLabel(format) }) }}</h3>
-              <span class="pvp-count" :class="{ full: picks.length === rules.deck }">{{ picks.length }} / {{ rules.deck }}</span>
+              <span class="pvp-count" :class="{ full: check.ready }">{{ picks.length }} / {{ rules.deck }}</span>
             </div>
             <p class="pvp-note">{{ t(`pvp.buildHelp.${building}`) }}</p>
-            <div v-if="eligibleLoading" class="pb-skeleton pvp-builder-skeleton" aria-busy="true"></div>
-            <p v-else-if="eligible.length < rules.deck" class="pvp-note">
-              {{ t('pvp.notEnough', { count: eligible.length, deck: rules.deck }, eligible.length) }}
-              <RouterLink :to="{ name: 'challenge-boosters' }">{{ t('pvp.openBoosters') }}</RouterLink>
-            </p>
-            <ul v-if="!eligibleLoading && eligible.length" class="pvp-grid">
-              <li v-for="card in eligible" :key="card.id">
-                <button
-                  type="button"
-                  class="pvp-pick"
-                  :class="{ 'is-picked': picks.includes(card.id) }"
-                  :aria-pressed="picks.includes(card.id)"
-                  :disabled="!picks.includes(card.id) && picks.length >= rules.deck"
-                  @click="togglePick(card.id)"
-                >
-                  <PvpCard :card="card" />
-                  <span v-if="picks.includes(card.id)" class="pvp-pick-badge" aria-hidden="true">{{ picks.indexOf(card.id) + 1 }}</span>
-                </button>
-              </li>
-            </ul>
+
+            <div class="pvp-deck-list" role="group" :aria-label="t(`pvp.deckTitle.${building}`)">
+              <p v-if="!picks.length" class="pvp-note">{{ t('pvp.deckEmpty') }}</p>
+              <ul v-else class="pvp-deck-lines">
+                <li v-for="entry in pickedGroups" :key="entry.id">
+                  <button type="button" class="pvp-line-button" :aria-label="t('pvp.remove', { name: cardName(entry.card) })" @click="removePick(entry.id)">−</button>
+                  <span class="pvp-line-count">{{ entry.count }}×</span>
+                  <span class="pvp-line-name">{{ cardName(entry.card) }}</span>
+                  <span class="pvp-muted pvp-line-stage">
+                    {{ entry.card.stage === 'evolution' ? t('pvp.stage.evolution', { name: entry.card.evolves_from }) : t(`pvp.stage.${entry.card.stage}`) }}
+                  </span>
+                </li>
+              </ul>
+              <p v-if="check.missing" class="pvp-note">{{ t('pvp.missing', { count: check.missing }, check.missing) }}</p>
+              <p v-if="picks.length && !check.basics" class="pvp-warning" role="alert">{{ t('pvp.noBasic') }}</p>
+              <p v-if="check.orphans.length" class="pvp-note pvp-warn-text">{{ t('pvp.orphans', { names: check.orphans.join(', ') }) }}</p>
+            </div>
+
             <div class="pvp-actions">
-              <button type="button" class="btn btn-primary" :disabled="busy || picks.length !== rules.deck" @click="saveDeck">{{ t('pvp.saveDeck') }}</button>
-              <button type="button" class="btn btn-outline-secondary" :disabled="busy || eligibleLoading || !eligible.length" @click="fillAuto">
+              <button type="button" class="btn btn-primary" :disabled="busy || !check.ready" @click="saveDeck">{{ t('pvp.saveDeck') }}</button>
+              <button type="button" class="btn btn-outline-secondary" :disabled="busy || eligibleLoading || !eligible.length" @click="picks = autoDeck(eligible, building, rules.deck)">
                 {{ t('pvp.autoDeck') }}
               </button>
+              <button type="button" class="btn btn-outline-secondary" :disabled="busy || !picks.length" @click="picks = []">{{ t('pvp.clear') }}</button>
               <button type="button" class="btn btn-outline-secondary" :disabled="busy" @click="building = null">{{ t('pvp.cancel') }}</button>
             </div>
+
+            <div class="pvp-filters">
+              <input v-model="search" type="search" class="form-control" :placeholder="t('pvp.search')" :aria-label="t('pvp.search')" />
+              <div class="pvp-kinds" role="group" :aria-label="t('pvp.search')">
+                <button v-for="item in FILTERS" :key="item" type="button" :aria-pressed="filter === item" :class="{ active: filter === item }" @click="filter = item">
+                  {{ t(`pvp.filter.${item}`) }}
+                </button>
+              </div>
+            </div>
+            <div v-if="eligibleLoading" class="pb-skeleton pvp-builder-skeleton" aria-busy="true"></div>
+            <p v-else-if="ownedHere < rules.deck" class="pvp-note">
+              {{ t('pvp.notEnough', { count: ownedHere, deck: rules.deck }, ownedHere) }}
+              <RouterLink :to="{ name: 'challenge-boosters' }">{{ t('pvp.openBoosters') }}</RouterLink>
+            </p>
+            <ul v-if="!eligibleLoading && shown.length" class="pvp-grid">
+              <li v-for="card in shown" :key="card.id">
+                <div class="pvp-pick" :class="{ 'is-picked': counts.get(card.id) }">
+                  <button type="button" class="pvp-pick-card" :aria-label="t('pvp.details')" @click="openSheet(card)">
+                    <PvpCard :card="card" />
+                  </button>
+                  <div class="pvp-pick-row">
+                    <button
+                      type="button"
+                      class="pvp-line-button"
+                      :aria-label="t('pvp.remove', { name: cardName(card) })"
+                      :disabled="!counts.get(card.id)"
+                      @click="removePick(card.id)"
+                    >
+                      −
+                    </button>
+                    <span class="pvp-pick-count">{{ counts.get(card.id) ?? 0 }} / {{ Math.min(card.owned, 2) }}</span>
+                    <button
+                      type="button"
+                      class="pvp-line-button"
+                      :aria-label="t('pvp.add', { name: cardName(card) })"
+                      :title="addBlock(picks, card, eligibleById, rules.deck) ? t(`pvp.blocked.${addBlock(picks, card, eligibleById, rules.deck)}`) : null"
+                      :disabled="!!addBlock(picks, card, eligibleById, rules.deck)"
+                      @click="addPick(card)"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </li>
+            </ul>
           </div>
 
           <!-- Saved decks: attack, defense -->
@@ -573,8 +957,11 @@ onMounted(async () => {
                 <p v-if="!decks[role].valid" class="pvp-warning" role="alert">
                   {{ t(role === 'defense' && decks.attack?.valid ? 'pvp.defenseInvalid' : 'pvp.deckInvalid') }}
                 </p>
-                <ul class="pvp-row">
-                  <li v-for="(card, i) in decks[role].cards" :key="i"><PvpCard :card="card" /></li>
+                <ul v-if="grouped(decks[role].ids).length" class="pvp-deck-lines is-summary">
+                  <li v-for="entry in grouped(decks[role].ids)" :key="entry.id">
+                    <span class="pvp-line-count">{{ entry.count }}×</span>
+                    <span class="pvp-line-name">{{ cardName(entry.card) }}</span>
+                  </li>
                 </ul>
                 <p class="pvp-note">{{ t(`pvp.deckRole.${role}`) }}</p>
               </template>
@@ -590,8 +977,8 @@ onMounted(async () => {
             </p>
           </div>
 
-          <!-- Bots: the same battle, for coins (0027) -->
-          <div v-if="pvp.botsAvailable" class="pvp-bots" role="group" aria-labelledby="pvp-bots-title">
+          <!-- Bots: the same battle, for coins -->
+          <div class="pvp-bots" role="group" aria-labelledby="pvp-bots-title">
             <h3 id="pvp-bots-title" class="pvp-side-title">{{ t('pvp.botsTitle') }}</h3>
             <p class="pvp-note">{{ t('pvp.botsHelp') }}</p>
             <div class="pvp-bot-buttons">
@@ -656,15 +1043,18 @@ onMounted(async () => {
         <section class="pvp-panel pvp-rules" aria-labelledby="pvp-rules-title">
           <h2 id="pvp-rules-title" class="pvp-rules-title">{{ t('minigame.rulesTitle') }}</h2>
           <ul>
-            <li>{{ t('pvp.rules.deck', { deck: rules.deck }) }}</li>
+            <li>{{ t('pvp.rules.deck') }}</li>
+            <li>{{ t('pvp.rules.setup') }}</li>
+            <li>{{ t('pvp.rules.turn') }}</li>
+            <li>{{ t('pvp.rules.evolve') }}</li>
+            <li>{{ t('pvp.rules.retreat') }}</li>
+            <li>{{ t('pvp.rules.attack', { resistance: rules.resistance }) }}</li>
+            <li>{{ t('pvp.rules.conditions') }}</li>
+            <li>{{ t('pvp.rules.points', { points: rules.points, turns: rules.turns }) }}</li>
             <li>{{ t('pvp.rules.hidden') }}</li>
-            <li>{{ t('pvp.rules.round', { rounds: rules.rounds }) }}</li>
-            <li>{{ t('pvp.rules.energy', { max: rules.energy }) }}</li>
-            <li>{{ t('pvp.rules.prizes', { prizes: rules.prizes }) }}</li>
-            <li>{{ t('pvp.rules.damage', { resistance: rules.resistance }) }}</li>
             <li>{{ t('pvp.rules.elo') }}</li>
             <li>{{ t('pvp.rules.limit', { count: rules.battles, time: resetTime }) }}</li>
-            <li v-if="pvp.botsAvailable">
+            <li>
               {{ t('pvp.rules.bots', { easy: rules.botCoins.easy, normal: rules.botCoins.normal, hard: rules.botCoins.hard, paid: rules.botPaid, count: rules.botBattles }) }}
             </li>
           </ul>
@@ -672,6 +1062,7 @@ onMounted(async () => {
       </template>
 
       <RouterLink :to="{ name: 'challenge-games' }" class="pvp-back"><span aria-hidden="true">←</span> {{ t('games.back') }}</RouterLink>
+      <PvpCardSheet :card="sheet?.card ?? null" :slot="sheet?.slot ?? null" @close="sheet = null" />
     </main>
   </div>
 </template>
@@ -722,11 +1113,20 @@ onMounted(async () => {
 
 .pvp-battle {
   scroll-margin-top: 0.75rem;
+  padding: 0.75rem;
   box-shadow: var(--pb-shadow-card);
 }
 
+@media (min-width: 576px) {
+  .pvp-battle {
+    padding: 1.25rem;
+  }
+}
+
 .pvp-battle-head,
-.pvp-builder-head {
+.pvp-builder-head,
+.pvp-side-head,
+.pvp-panel-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -748,13 +1148,20 @@ onMounted(async () => {
   color: var(--pb-text-muted);
 }
 
-.pvp-format-chip {
+.pvp-format-chip,
+.pvp-chip {
   padding: 0.15rem 0.6rem;
   border-radius: 999px;
   border: 1px solid var(--pb-border-strong);
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--pb-text-muted);
+}
+
+.pvp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
 }
 
 .pvp-score,
@@ -768,7 +1175,7 @@ onMounted(async () => {
 .pvp-score > div,
 .pvp-stats > div {
   min-width: 0;
-  padding: 0.6rem 0.75rem;
+  padding: 0.5rem 0.6rem;
   border-radius: var(--pb-radius-md);
   border: 1px solid var(--pb-border);
   background: var(--pb-bg-elevated);
@@ -785,150 +1192,212 @@ onMounted(async () => {
 .pvp-stats dd {
   margin: 0.2rem 0 0;
   font-family: var(--pb-font-display);
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   overflow-wrap: anywhere;
 }
 
-.pvp-side-title {
+.pvp-side-title,
+.pvp-panel-title {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
-/* 5 cards: one row from tablets, 3 + 2 on phones */
-.pvp-row,
-.pvp-grid {
+/* ----- Board ----- */
+
+.pvp-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.6rem;
+  border-radius: var(--pb-radius-md);
+  border: 1px solid var(--pb-border);
+  background: var(--pb-bg-elevated);
+}
+
+.pvp-side.is-mine {
+  border-color: var(--pb-border-strong);
+}
+
+.pvp-bench {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
-  margin: 0;
+  max-width: 20rem;
+  width: 100%;
+  margin: 0 auto;
   padding: 0;
   list-style: none;
 }
 
-@media (min-width: 768px) {
-  /* Capped: full-width cards on a PC were ~300px tall each */
-  .pvp-row {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    width: 100%;
-    max-width: 46rem;
-    margin-inline: auto;
-  }
-
-  .pvp-grid {
-    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
-  }
-}
-
-.pvp-row > li,
-.pvp-grid > li {
+.pvp-bench > li {
   min-width: 0;
 }
 
-.pvp-theirs > li {
-  padding: 0.35rem;
-  border-radius: var(--pb-radius-md);
-  border: 2px solid transparent;
+.pvp-active-row {
+  display: flex;
+  justify-content: center;
 }
 
-.pvp-theirs > li.is-last {
-  border-color: var(--pb-danger-text);
+/* After .pvp-slot's width: 100% would win otherwise */
+.pvp-active-row > .pvp-slot,
+.pvp-active-row > .pvp-empty {
+  width: min(8.5rem, 40%);
 }
 
-.pvp-play,
-.pvp-pick {
+.pvp-slot {
   position: relative;
+  display: block;
   width: 100%;
-  height: 100%;
-  padding: 0.35rem;
+  padding: 0.25rem;
   border-radius: var(--pb-radius-md);
   border: 2px solid var(--pb-border-strong);
-  background: var(--pb-bg-elevated);
+  background: var(--pb-surface);
   color: var(--pb-text);
   cursor: pointer;
+  text-align: left;
   transition:
     transform 0.2s var(--pb-ease-out),
     border-color 0.2s;
 }
 
-.pvp-play:disabled,
-.pvp-pick:disabled {
+.pvp-slot.is-setup {
+  cursor: default;
+  border-style: dashed;
+}
+
+.pvp-slot:disabled {
   cursor: default;
 }
 
-.pvp-pick:disabled:not(.is-picked) {
-  opacity: 0.5;
-}
-
-@media (hover: hover) {
-  .pvp-play:not(:disabled):hover,
-  .pvp-pick:not(:disabled):hover {
-    transform: translateY(-2px);
-    border-color: var(--pb-ring);
-  }
-}
-
-.pvp-play:focus-visible,
-.pvp-pick:focus-visible {
-  outline: 2px solid var(--pb-focus);
-  outline-offset: 2px;
-}
-
-.pvp-play.is-last {
-  border-color: var(--pb-ring);
-}
-
-.pvp-play.is-selected {
+.pvp-slot.is-selected {
   border-color: var(--pb-accent);
   box-shadow: 0 0 0 2px var(--pb-accent);
 }
 
-.pvp-energies {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
+.pvp-slot.is-target {
+  border-color: var(--pb-ring);
+  box-shadow: 0 0 0 2px var(--pb-ring);
 }
 
-.pvp-energy {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
+.pvp-slot.is-playable:not(.is-selected) {
+  border-color: var(--pb-ring);
+}
+
+.pvp-slot:focus-visible {
+  outline: 2px solid var(--pb-focus);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .pvp-slot:not(:disabled):not(.is-setup):hover {
+    transform: translateY(-2px);
+  }
+}
+
+.pvp-empty {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 245 / 342;
+  border-radius: var(--pb-radius-md);
+  border: 2px dashed var(--pb-border);
+  color: var(--pb-text-muted);
+  font-size: 0.7rem;
   font-weight: 700;
 }
 
-.pvp-energy-label {
-  color: var(--pb-text-muted);
-}
-
-.pvp-pips {
-  display: flex;
-  gap: 3px;
-}
-
-.pvp-pips span {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 50%;
-  border: 1px solid var(--pb-border-strong);
-  background: var(--pb-input-bg);
-}
-
-.pvp-pips span.on {
-  border-color: var(--pb-coin);
-  background: var(--pb-coin);
-}
-
-.pvp-attack-panel {
+.pvp-log {
   display: flex;
   flex-direction: column;
+  gap: 0.15rem;
+  max-height: 9rem;
+  min-height: 3rem;
+  overflow-y: auto;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--pb-radius-md);
+  background: var(--pb-input-bg);
+  font-size: 0.82rem;
+}
+
+.pvp-log p {
+  margin: 0;
+}
+
+/* "a bot (Easy) draws a card." starts a line */
+.pvp-log p::first-letter,
+.pvp-side-head .pvp-side-title::first-letter {
+  text-transform: uppercase;
+}
+
+.pvp-side-head .pvp-side-title {
+  display: block;
+}
+
+.pvp-log p.is-turn {
+  margin-top: 0.3rem;
+  font-weight: 800;
+}
+
+.pvp-hand-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+/* The hand scrolls sideways inside its own box, never the page */
+.pvp-hand {
+  display: flex;
   gap: 0.5rem;
+  margin: 0;
+  padding: 0.25rem 0.1rem 0.5rem;
+  list-style: none;
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.pvp-hand > li {
+  flex: none;
+  width: 5.75rem;
+}
+
+.pvp-panel-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
   padding: 0.75rem;
   border-radius: var(--pb-radius-md);
   border: 1px solid var(--pb-border-strong);
   background: var(--pb-bg-elevated);
+}
+
+.pvp-choice-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pvp-choice {
+  min-width: 0;
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--pb-radius-md);
+  border: 2px solid var(--pb-accent);
+  background: var(--pb-surface);
+  color: var(--pb-text);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.pvp-choice:disabled {
+  opacity: 0.5;
+}
+
+.pvp-choice:focus-visible {
+  outline: 2px solid var(--pb-focus);
+  outline-offset: 2px;
 }
 
 .pvp-attack-buttons {
@@ -956,13 +1425,7 @@ onMounted(async () => {
 }
 
 .pvp-attack-button:disabled {
-  opacity: 0.5;
-}
-
-.pvp-attack-button.is-skip {
-  border-style: dashed;
-  border-color: var(--pb-border-strong);
-  color: var(--pb-text-muted);
+  opacity: 0.6;
 }
 
 .pvp-attack-button:focus-visible {
@@ -971,7 +1434,8 @@ onMounted(async () => {
 }
 
 @media (hover: hover) {
-  .pvp-attack-button:not(:disabled):hover {
+  .pvp-attack-button:not(:disabled):hover,
+  .pvp-choice:not(:disabled):hover {
     background: var(--pb-bg-elevated);
   }
 }
@@ -986,33 +1450,36 @@ onMounted(async () => {
 }
 
 .pvp-attack-title {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
+.pvp-attack-title small {
+  font-weight: 600;
+  color: var(--pb-text-muted);
+}
+
+.pvp-turn-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--pb-border);
+}
+
+.pvp-energy-line {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--pb-text-muted);
+}
+
 .pvp-hint {
   text-align: center;
-}
-
-.pvp-pick.is-picked {
-  border-color: var(--pb-accent);
-}
-
-.pvp-pick-badge {
-  position: absolute;
-  top: -0.55rem;
-  left: -0.55rem;
-  display: grid;
-  place-items: center;
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 50%;
-  background: var(--pb-accent);
-  color: var(--pb-accent-ink);
-  font-family: var(--pb-font-display);
-  font-size: 0.8rem;
-  font-weight: 800;
 }
 
 .pvp-feedback {
@@ -1020,7 +1487,6 @@ onMounted(async () => {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.25rem 0.75rem;
-  min-height: 1.75rem;
   margin: 0;
   color: var(--pb-text-muted);
   text-align: center;
@@ -1040,6 +1506,8 @@ onMounted(async () => {
   justify-content: center;
   gap: 0.5rem;
 }
+
+/* ----- Lobby ----- */
 
 .pvp-kinds {
   display: flex;
@@ -1110,6 +1578,155 @@ onMounted(async () => {
 
 .pvp-count.full {
   color: var(--pb-success-text);
+}
+
+.pvp-deck-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border-radius: var(--pb-radius-md);
+  border: 1px solid var(--pb-border);
+  background: var(--pb-bg-elevated);
+}
+
+.pvp-deck-lines {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 0.3rem 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvp-deck-lines li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+
+.pvp-line-count {
+  flex: none;
+  font-family: var(--pb-font-display);
+  font-weight: 700;
+}
+
+.pvp-line-name {
+  min-width: 0;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pvp-line-stage {
+  min-width: 0;
+  font-size: 0.72rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pvp-line-button {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-surface);
+  color: var(--pb-text);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pvp-line-button:disabled {
+  opacity: 0.4;
+}
+
+.pvp-line-button:focus-visible {
+  outline: 2px solid var(--pb-focus);
+  outline-offset: 2px;
+}
+
+.pvp-warn-text {
+  color: var(--pb-danger-text);
+}
+
+.pvp-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pvp-filters .form-control {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.pvp-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 576px) {
+  .pvp-grid {
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  }
+}
+
+.pvp-grid > li {
+  min-width: 0;
+}
+
+.pvp-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  height: 100%;
+  padding: 0.35rem;
+  border-radius: var(--pb-radius-md);
+  border: 2px solid var(--pb-border-strong);
+  background: var(--pb-bg-elevated);
+}
+
+.pvp-pick.is-picked {
+  border-color: var(--pb-accent);
+}
+
+.pvp-pick-card {
+  flex: 1;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  text-align: left;
+}
+
+.pvp-pick-card:focus-visible {
+  outline: 2px solid var(--pb-focus);
+  outline-offset: 2px;
+}
+
+.pvp-pick-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.pvp-pick-count {
+  font-family: var(--pb-font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
 }
 
 .pvp-builder-skeleton {

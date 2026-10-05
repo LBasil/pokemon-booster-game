@@ -852,17 +852,20 @@ sequenceDiagram
 ### Combats PvP
 
 Page : [PvpView.vue](../../src/views/PvpView.vue)
-(`/challenge/games/pvp`), store `pvp`, migrations 0024, 0025, 0026, 0027 et 0028. **Réservé à ses testeurs depuis le 2026-10-05** (0028, demande : « bloque le PvP uniquement pour le joueur Bazouk », après un combat contre un bot gagné en deux tours en tapant toujours la plus grosse attaque : aucun choix tactique) : les autres joueurs voient « Bientôt ». Demande de
-l'utilisateur (2026-10-03) : du PvP en différé, « on attaque le deck de
-qq qui est joué par le serveur », trois formats (toutes les cartes, une
-ère du JCC, un set), deck adverse caché, de l'Elo et un taux de victoire,
-pas de pièces, adversaire tiré au hasard parmi les Elo proches. Puis, le
-même jour (« sinon je mets une carte avec une attaque à 130 et je gagne
-auto ») : deux règles du vrai jeu, l'énergie et les cartes Récompense
-(migration 0025, 0024 étant déjà appliquée). Le 2026-10-04 (« il faudrait
-un système de création de deck auto et je pense qu'on doit séparer le
-deck d'attaque et de défense ») : deux decks par format et « Deck auto »
-(migration 0026).
+(`/challenge/games/pvp`), composants `PvpCard` et `PvpCardSheet`, store
+`pvp`, migrations 0024 à 0030. **Réservé à ses testeurs depuis le
+2026-10-05** (0028, `pvp_open_to()` côté serveur et `PVP_TESTERS` côté
+client : « bloque le PvP uniquement pour le joueur Bazouk ») : les autres
+joueurs voient « Bientôt ».
+
+Historique : du PvP en différé à 5 cartes (0024, 2026-10-03), puis
+l'énergie et les récompenses (0025), deux decks par format et « Deck
+auto » (0026), des bots qui rapportent des pièces (0027). Le 2026-10-05,
+un combat contre un bot gagné en deux tours en tapant toujours la plus
+grosse attaque (« aucun choix tactique ») a mené à la refonte **façon
+Pokémon JCC Pocket** (0030, « je crois qu'on est obligé de faire comme le
+TCG classique (genre pocket) », decks de 20 avec 2 exemplaires, en
+différé).
 
 ```mermaid
 sequenceDiagram
@@ -870,109 +873,113 @@ sequenceDiagram
   participant PV as PvpView
   participant DB as Postgres
 
-  PV->>DB: pvp_state() : formats, decks, Elo, combat en cours
-  J->>PV: choisit le format, monte son deck d'attaque et son deck de défense (5 cartes, ou « Deck auto »)
+  PV->>DB: pvp_state() : formats, decks (ids), Elo, combat en cours
+  J->>PV: monte un deck de 20 (ou « Deck auto »)
   PV->>DB: pvp_eligible(format) puis pvp_save_deck(format, ids, role)
-  J->>PV: « Trouver un adversaire »
-  PV->>DB: pvp_start(format)
-  DB-->>PV: adversaire (Elo proche), son deck de défense caché, sa 1re carte et attaque déjà choisies
-  loop jusqu'à 3 récompenses (ou 20 manches)
-    J->>PV: touche une de ses cartes, puis une attaque payable (ou « pas d'attaque »)
-    PV->>DB: pvp_play(slot, attaque)
-    DB-->>PV: dégâts des deux côtés, énergie, K.O. et récompenses, carte adverse révélée
+  J->>PV: « Trouver un adversaire » ou un bot
+  PV->>DB: pvp_start(format) / pvp_bot_start(format, niveau)
+  DB-->>PV: 5 cartes en main, l'adversaire déjà placé
+  J->>PV: place son Actif et son Banc
+  PV->>DB: pvp_act({ type: 'setup', ... })
+  loop chaque coup
+    J->>PV: attacher, poser, faire évoluer, retraite, attaquer, finir le tour
+    PV->>DB: pvp_act(action)
+    DB->>DB: valide, applique ; à la fin de mon tour, joue celui de l'adversaire (pvp_run)
+    DB-->>PV: plateau, événements (journal), ce que je peux faire (hints)
   end
-  DB->>DB: pvp_finish : Elo des deux joueurs
+  DB->>DB: pvp_finish : Elo des deux joueurs, ou pièces contre un bot
 ```
 
-- **Deck** : 5 Pokémon différents de la collection du Défi, avec une
-  attaque qui fait des dégâts (environ 6 % des cartes n'ont que des
-  attaques à effet). **Deux decks par format** (0026) : le deck
-  d'attaque, que je joue, et le deck de défense, que le serveur joue
-  quand on m'attaque. Tant que je n'ai pas de deck de défense (ou qu'il
-  n'est plus valide), mon deck d'attaque défend. Une carte peut être dans
-  les deux. Une carte recyclée ou échangée rend le deck invalide (« change
-  ton deck »), et un joueur sans deck valide n'est plus tiré comme
-  adversaire.
-- **Deck auto** (`autoDeck(cards, role)` dans `src/utils/pvp.js`) : remplit
-  le constructeur (rien n'est enregistré avant « Enregistrer le deck »).
-  Chaque carte est notée sur ses dégâts par énergie, sa plus grosse
-  attaque et ses PV par récompense (chacun rapporté à la meilleure carte
-  disponible), pondérés selon le rôle : l'attaque mise sur les dégâts, la
-  défense sur la solidité (l'IA du serveur la joue moins bien qu'un
-  joueur). Puis les meilleures, une à une : jamais deux fois le même nom,
-  2 cartes à 2+ récompenses au plus, au moins 2 cartes avec une attaque à
-  1 énergie ou moins (la manche 1 n'en a qu'une), et un malus aux types
-  déjà pris (une faiblesse ne balaie pas tout le deck). Simulé le
-  2026-10-04 sur 2 553 vraies cartes, IA contre IA, collections de 25 à
-  80 cartes : environ 58 % contre « les 5 plus grosses attaques », 95 %
-  contre 5 cartes au hasard ; les variantes de poids testées restaient à
-  ±3 % (le bruit), les réglages n'ont donc pas été poussés plus loin.
-- **Formats** : toutes les cartes (les cartes récentes écrasent les
-  anciennes, d'où les deux autres), une **ère** du JCC (`sets.series` :
-  choix de l'utilisateur plutôt que la génération du Pokémon, pour que PV
-  et dégâts se valent) ou un **set** (le plus équitable). Le format choisi
-  est retenu sur l'appareil (`pb-pvp-format`).
-- **Manche** : le serveur choisit la carte et l'attaque du défenseur
-  **avant** de recevoir celles de l'attaquant (`d_next`, `d_next_attack`).
-  Les deux cartes se frappent ; les PV restent d'une manche à l'autre.
-- **Énergie** : chaque camp a une réserve, 1 au départ, +1 par manche,
-  5 au maximum, gardée d'une manche à l'autre. On choisit une carte puis
-  une de ses attaques payables (coût imprimé = nombre d'énergies), ou
-  « pas d'attaque » pour économiser. Les grosses attaques (130 coûte
-  souvent 3 ou 4) arrivent donc tard et pas à chaque manche. Mesuré le
-  2026-10-03 sur 28 250 attaques : 20 de dégâts en médiane pour 1 énergie,
-  30 pour 2, 70 pour 3, 110 pour 4, 160 pour 5.
-- **Récompenses** (**miroir** : `pvp_prizes()` et `prizesFor`) : un K.O.
-  rapporte 1 récompense, 2 pour un ex/EX/GX/V/VSTAR/LEGEND, 3 pour un
-  VMAX/TAG TEAM/V-UNION/Méga ex (les vraies règles ; V-UNION en vaut 4 en
-  vrai). 3 récompenses gagnent ; après 20 manches, le plus de récompenses
-  gagne, sinon nul. Un deck de grosses cartes tombe en 1 ou 2 K.O.
-- **Dégâts** (**miroir** : `pvp_damage()` et `src/utils/pvp.js`) :
-  l'attaque choisie ; « 30+ » vaut 30, « 20× » vaut 20 × un tirage de 1 à
-  3 ; faiblesse ×2, résistance −30, 10 au minimum (0 sans attaque).
-- **IA du défenseur** : chaque carte vivante × chaque attaque payable (ou
-  aucune) reçoit un score : les dégâts sur la dernière carte de
-  l'attaquant (si elle est encore debout), moins la moitié de ce que
-  celle-ci renverrait ; « pas d'attaque » vaut 40 % de la plus grosse
-  attaque pas encore payable (économiser). Plus un peu de hasard.
-- **Équilibre** (simulé le 2026-10-03 sur les vraies cartes, IA contre IA)
-  : les « 5 plus grosses attaques » battent un deck au hasard mais plus
-  un deck construit (32 % contre 5 bonnes cartes à 1 récompense en format
-  libre). En format libre, les attaquants rapides à 1 récompense sont les
-  plus forts, sauf contre un deck mixte (2 grosses + 3 rapides : 50 %) ;
-  par ère, les écarts sont plus serrés.
-- **Elo** : K = 32 par format, les deux joueurs bougent (le défenseur
-  gagne s'il résiste). Abandon = défaite. 10 attaques par jour de jeu,
-  défenses illimitées. Un combat en cours revient au rechargement (pas
-  d'esquive).
-- **Adversaire** : parmi les 5 decks valides d'Elo le plus proche, au
-  hasard, le dernier adversaire en dernier. Les profils privés peuvent
-  être tirés, sans leur nom (« Un dresseur privé ») ; le classement ne
-  montre que les profils publics.
-- **Avant l'import** : tant qu'aucune carte n'a ses attaques,
-  `pvp_state()` renvoie `ready: false` et le jeu affiche « Bientôt ».
-  Une attaque importée avant 0025 (sans `cost`) est ignorée depuis 0026 :
-  le 2026-10-04, la synchro de minuit s'était arrêtée en route et ~7 400
-  cartes avaient encore des attaques sans coût, lues comme gratuites
-  (« une attaque à trois énergies marquée 0 »).
-- **Bots** (0027, demande du 2026-10-04 : « met un pvp contre des bots,
-  lui il donne des pièces au pire, j'ai pas assez de joueurs ») : sous
-  « Trouver un adversaire », trois boutons Facile / Normal / Difficile
-  lancent le même combat (mêmes règles, même IA, mon deck d'attaque)
-  contre un deck que le serveur tire du format (`pvp_bot_deck`) : 400
-  cartes jouables au hasard, notées comme `autoDeck` (dégâts par énergie,
-  plus grosse attaque, PV par récompense), coupées en 5 paliers ; facile
-  prend le palier 2, normal le 4, difficile le 5, 5 noms différents. Pas
-  d'Elo (le classement reste entre joueurs) et pas compté dans les 10
-  attaques du jour. Une victoire rapporte 10 / 25 / 50 pièces, un nul la
-  moitié (arrondie en dessous), une défaite ou un abandon rien, pour les 5
-  premiers combats contre les bots lancés dans la journée (décidé au
-  départ : abandonner ne rend pas la place) ; 20 par jour en tout, les
-  suivants pour le plaisir. 250 pièces par jour au plus, proche des
-  autres mini-jeux (180 à 300). Le message « pas d'adversaire » renvoie
-  vers les bots.
-
----
+- **Deck** : 20 Pokémon de la collection du Défi, 2 du même nom au
+  maximum, au moins un Pokémon de base, chaque exemplaire possédé
+  (`collections.quantity`). Pas encore de cartes Dresseur. Deux decks par
+  format (attaque, défense) comme depuis 0026 ; les decks à 5 cartes
+  d'avant 0030 sont invalides (« modifie-le »). Constructeur : recherche
+  (noms EN et FR), filtres De base / Évolutions, − / + par carte (bloqué à
+  2 du même nom ou aux exemplaires possédés), liste du deck groupée,
+  avertissements (cartes manquantes, aucun Pokémon de base, évolution
+  dont le Pokémon de départ manque).
+- **Deck auto** (`autoDeck` dans `src/utils/pvp.js`, construit comme les
+  decks des bots) : une lignée à 3 stades, jusqu'à deux lignées à 2
+  stades, puis des Pokémon de base, 2 exemplaires de chacun quand ils sont
+  possédés, les meilleurs scores d'abord (dégâts par énergie, plus grosse
+  attaque, PV par point ; pondérés selon le rôle) ; le reste en
+  exemplaires simples.
+- **Mise en place** : 5 cartes en main, toujours avec un Pokémon de base ;
+  je touche mon Actif puis jusqu'à 3 Pokémon de Banc, « Commencer le
+  combat ». L'adversaire est placé par le serveur ; une pièce décide qui
+  commence.
+- **Un tour** : pioche (rien si le deck est vide), puis dans l'ordre que
+  je veux : attacher **1 Énergie** (n'importe quel Pokémon ; pas au tout
+  premier tour du combat), poser des Pokémon de base (Banc de 3),
+  **évoluer** (pas au premier tour du joueur, pas un Pokémon posé ou
+  évolué ce tour-ci ; les Énergies et dégâts restent), **retraite** une
+  fois (coût de Retraite en Énergies, impossible Endormi / Paralysé),
+  puis **attaquer** (finit le tour ; pas au premier tour de celui qui
+  commence) ou « Finir mon tour ». Énergie incolore : une attaque coûte
+  son nombre d'Énergies.
+- **Attaques et effets** : `src/utils/attackEffects.js` lit le texte
+  anglais de chaque attaque à l'import (`populate.mjs`) et le transforme
+  en effets (`cards.attacks[].fx`) : pièces (une, N, jusqu'à pile),
+  bonus si face, « ne fait rien si pile », États Spéciaux, soins, dégâts
+  au Banc (un ou tous), contrecoup, défausse d'Énergies, dégâts par
+  Énergie / marqueur / Pokémon de Banc / point, protections et blocages
+  pour le tour suivant, pioche, appel d'un Pokémon de base, changement
+  d'Actif, « une fois par combat » (GX, VSTAR). Mesuré le 2026-10-05 sur
+  22 557 attaques : 59 % entièrement comprises, 26 % sans texte (dégâts
+  seuls), le reste partiellement : leurs dégâts et effets connus
+  s'appliquent, la fiche de la carte dit « une partie de ce texte n'est
+  pas jouée ». Une attaque sans dégâts ni effet connu n'est pas jouable.
+  Faiblesse ×2, Résistance −30 (sur l'Actif seulement). Quand une attaque
+  demande une cible (un Pokémon du Banc adverse) ou un Pokémon de mon
+  Banc, l'écran me la fait choisir ; sinon le serveur choisit.
+- **États Spéciaux** : Endormi et Paralysé empêchent d'attaquer et de
+  battre en retraite (une pièce réveille entre les tours, la Paralysie
+  dure jusqu'à la fin du tour suivant de son propriétaire) ; Confus : une
+  pièce avant d'attaquer, pile = l'attaque échoue (comme Pocket) ;
+  Empoisonné 10 et Brûlé 20 entre les tours (puis une pièce guérit la
+  Brûlure). La retraite et l'évolution les soignent.
+- **Points** (**miroir** : `pvp_prizes()` et `prizesFor`) : 1 par K.O.,
+  2 pour ex/EX/GX/V/VSTAR, 3 pour VMAX/TAG TEAM/Méga-ex. 3 points
+  gagnent, laisser l'adversaire sans Pokémon aussi ; après 30 tours, le
+  plus de points l'emporte. Après un K.O., je choisis le Pokémon de Banc
+  qui devient Actif.
+- **Le serveur joue l'autre camp** (`pvp_ai_turn`) : il fait évoluer ce
+  qu'il peut, remplit son Banc, bat en retraite quand son Actif ne peut
+  plus frapper ou va tomber (normal / difficile), attache l'Énergie à son
+  Actif jusqu'à payer sa meilleure attaque puis au Pokémon de Banc le plus
+  près de la sienne, et attaque avec le meilleur coup attendu (un K.O.
+  avant tout). Facile : énergie en partie au hasard, attaque au hasard,
+  jamais de retraite. Les decks de défense des joueurs sont joués en
+  « difficile ».
+- **Ce que l'écran montre** : en haut le côté adverse (Banc, Actif, main
+  et deck en nombres), un journal de ce qui vient de se passer
+  (`events` : pioches, Énergies, attaques et pièces, dégâts, États, K.O.,
+  noms EN/FR), mon côté, ma main (défile dans sa propre boîte). Toucher
+  une carte ouvre ce qu'elle peut faire, d'après les **indications du
+  serveur** (`hints` : Énergie disponible, retraite possible, pour chaque
+  attaque pourquoi elle est bloquée, pour chaque carte de la main poser
+  ou faire évoluer sur quels Pokémon) : les règles ne sont écrites qu'en
+  SQL. « Détails de la carte » ouvre `PvpCardSheet` (attaques, textes en
+  français si importés, Faiblesse, Résistance, Retraite, talents marqués
+  « pas encore joués »).
+- **Simulé le 2026-10-05** (IA contre IA, 4 000 vraies cartes, decks de
+  bots) : difficile bat normal 9 fois sur 10, normal bat facile 10 sur 10,
+  15 tours en moyenne (11 entre bons decks).
+- **Formats, Elo, adversaire, bots, limites** : inchangés depuis
+  0024-0027 (toutes les cartes / une ère / un set, retenu sur l'appareil
+  `pb-pvp-format` ; K = 32, les deux joueurs bougent, abandon = défaite,
+  10 attaques par jour, défenses illimitées ; adversaire parmi les 5 Elo
+  les plus proches ; bots Facile / Normal / Difficile : pas d'Elo,
+  10 / 25 / 50 pièces pour les 5 premiers combats du jour, 20 par jour en
+  tout). Le deck d'un bot (`pvp_bot_deck`) : 1 500 cartes jouables du
+  format au hasard, classées comme `autoDeck`, puis une lignée à 3
+  stades, deux à 2 stades et des Pokémon de base, 2 exemplaires chacun,
+  au plus près du niveau (facile : bas du classement, difficile : haut).
+- **Avant la synchro** : tant qu'aucune carte n'a ses effets d'attaque
+  (`attacks[].fx`, synchro après 0029), `pvp_state()` renvoie
+  `ready: false` (« Bientôt ») ; un serveur sans 0030 aussi (`engine`
+  absent).
 
 ## 9. Communauté : fil et classements
 

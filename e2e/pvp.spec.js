@@ -2,10 +2,11 @@ import { expect, test } from '@playwright/test'
 import { collectionEntry } from './support/data.js'
 import { mockSupabase as mockBackend, signIn } from './support/supabase.js'
 
-// PvP battles (migrations 0024 + 0025 + 0026: attack and defense decks). In the mock every challenge Pokémon is Fire
-// with 60 HP: Ember (30, 1 energy) and Flamethrower (90, 3 energies).
-// Misty's deck is PVP_OPPONENT_DECK: Grass cards weak to Fire (Ember knocks
-// one out) using Vine Whip (20); Oddish first (1 prize), then Venusaur ex (2).
+// PvP battles like Pokémon TCG Pocket (migration 0030). In the mock every
+// challenge Pokémon is Fire, weak to Water: Ember (30, 1 energy) and
+// Flamethrower (90, 3 energies). The opponent: Oddish (Active) and Venusaur ex
+// (Bench, 2 points), Grass, weak to Fire, 60 HP: Ember knocks either out
+// (3 points = a win). The server's turn: draw, attach, Vine Whip (20).
 test.beforeEach(async ({ page }) => {
   await signIn(page)
 })
@@ -13,10 +14,32 @@ test.beforeEach(async ({ page }) => {
 // PvP is open to its testers only (0028): these tests play as Bazouk
 const mockSupabase = (page, options = {}) => mockBackend(page, { username: 'Bazouk', ...options })
 
-const FIVE = ['sv3pt5-4', 'sv3pt5-7', 'sv3pt5-1', 'sv3pt5-25', 'sv3pt5-5']
-const challengeCollection = [...FIVE, 'sv3pt5-150', 'sv3pt5-190'].map((id) => collectionEntry(id))
+// 10 names, 2 copies each: a full deck of 20
+const POKEMON = ['sv3pt5-4', 'sv3pt5-7', 'sv3pt5-1', 'sv3pt5-25', 'sv3pt5-5', 'sv3pt5-8', 'sv3pt5-2', 'sv3pt5-150', 'sv3pt5-6', 'base1-4']
+const challengeCollection = POKEMON.map((id) => collectionEntry(id, 2))
+// A saved deck, in the order the mock deals it: Charmander, Charmander,
+// Charmeleon, Squirtle, Bulbasaur in hand; Charmeleon drawn on turn 1
+const DECK = ['sv3pt5-4', 'sv3pt5-4', 'sv3pt5-5', 'sv3pt5-7', 'sv3pt5-1', 'sv3pt5-5', 'sv3pt5-7', 'sv3pt5-1', 'sv3pt5-25', 'sv3pt5-25',
+  'sv3pt5-8', 'sv3pt5-8', 'sv3pt5-2', 'sv3pt5-2', 'sv3pt5-150', 'sv3pt5-150', 'sv3pt5-6', 'sv3pt5-6', 'base1-4', 'base1-4']
+const withDeck = { decks: { all: { attack: DECK } } }
 
-test('PvP is listed with the mini-games', async ({ page }) => {
+const board = (page) => page.locator('.pvp-battle')
+const hand = (page) => page.getByRole('list', { name: /My hand/ })
+
+async function setUp(page) {
+  await hand(page).getByRole('button', { name: 'Charmander' }).first().click()
+  await hand(page).getByRole('button', { name: 'Squirtle' }).click()
+  await page.getByRole('button', { name: 'Start the battle' }).click()
+  await expect(page.locator('.pvp-log')).toContainText('You go first.')
+}
+
+// My Active is the second "Active:" button (theirs comes first); a second tap unselects it
+async function attachToActive(page) {
+  if (!(await page.getByRole('button', { name: 'Attach the energy' }).isVisible())) await board(page).getByRole('button', { name: /^Active: / }).nth(1).click()
+  await page.getByRole('button', { name: 'Attach the energy' }).click()
+}
+
+test('PvP is listed with the mini-games, with its rules', async ({ page }) => {
   await mockSupabase(page)
   await page.goto('/challenge/games')
   const tile = page.locator('.game-tile').filter({ hasText: 'PvP battles' })
@@ -25,171 +48,154 @@ test('PvP is listed with the mini-games', async ({ page }) => {
   await expect(page).toHaveURL(/\/challenge\/games\/pvp$/)
   await expect(page.getByRole('heading', { level: 1, name: 'PvP battles' })).toBeVisible()
   await expect(page.locator('a[href="/challenge/games"]:visible').first()).toHaveClass(/active|router-link-active/)
-  await expect(page.locator('.pvp-rules')).toContainText('Against players, no coins')
-  await expect(page.locator('.pvp-rules')).toContainText('Bots: the same battle')
+  await expect(page.locator('.pvp-rules')).toContainText('20 Pokémon from your challenge collection')
+  await expect(page.locator('.pvp-rules')).toContainText('Asleep and Paralyzed')
 })
 
-test('build a deck, attack and win Elo', async ({ page }) => {
+test('auto deck: 20 cards in lines, 2 of a name, saved', async ({ page }) => {
   const backend = await mockSupabase(page, { challengeCollection })
   await page.goto('/challenge/games/pvp')
-
-  // No deck yet: the button to fight waits for one
   const attackDeck = page.getByRole('group', { name: 'Attack deck' })
-  const defenseDeck = page.getByRole('group', { name: 'Defense deck' })
-  await expect(attackDeck).toContainText('You have 6 cards that can fight here')
-  await expect(page.getByRole('button', { name: 'Find an opponent' })).toBeDisabled()
-
-  await attackDeck.getByRole('button', { name: 'Build my deck' }).click()
-  await expect(page.locator('.pvp-builder')).toContainText('Attack deck: pick 5 cards')
-  const picks = page.locator('.pvp-pick')
-  await expect(picks).toHaveCount(6) // the Trainer can't fight
-  await expect(page.getByRole('button', { name: 'Save the deck' })).toBeDisabled()
-  for (const name of ['Charmander', 'Squirtle', 'Bulbasaur', 'Pikachu', 'Charmeleon']) {
-    await picks.filter({ hasText: name }).click()
-  }
-  await expect(page.locator('.pvp-count')).toHaveText('5 / 5')
-  await expect(picks.filter({ hasText: 'Mewtwo' })).toBeDisabled()
+  await attackDeck.getByRole('button', { name: 'Auto deck' }).click()
+  await expect(page.locator('.pvp-count')).toHaveText('20 / 20')
+  await expect(page.locator('.pvp-deck-lines li')).toHaveCount(10)
+  await expect(page.locator('.pvp-deck-lines')).toContainText('2×Charmeleon')
   await page.getByRole('button', { name: 'Save the deck' }).click()
-  await expect(attackDeck.locator('.pvp-row > li')).toHaveCount(5)
-  const saved = backend.calls.find((call) => call.path === '/rest/v1/rpc/pvp_save_deck')
-  expect(JSON.parse(saved.body)).toEqual({ p_format: 'all', p_cards: FIVE, p_role: 'attack' })
-  // No defense deck yet: the attack deck defends
-  await expect(defenseDeck).toContainText('your attack deck defends you meanwhile')
-
-  // The battle: their deck is hidden
-  await page.getByRole('button', { name: 'Find an opponent' }).click()
-  await expect(page.getByRole('heading', { name: /Against Misty/ })).toBeVisible()
-  await expect(page.locator('.pvp-theirs .is-hidden')).toHaveCount(5)
-
-  const mine = page.locator('.pvp-play')
-  const panel = page.locator('.pvp-attack-panel')
-  const myEnergy = page.getByRole('meter', { name: 'My energy' })
-  await expect(page.locator('.pvp-hint')).toHaveText('Pick one of your cards, then its attack.')
-  await expect(myEnergy).toHaveAttribute('aria-valuenow', '1')
-
-  // A card, then an attack I can pay for (Flamethrower needs 3 energies)
-  await mine.nth(0).click()
-  await expect(panel).toContainText('Charmander: pick an attack')
-  await expect(panel.getByRole('button', { name: /Flamethrower/ })).toBeDisabled()
-  await panel.getByRole('button', { name: /Ember/ }).click()
-  await expect(page.locator('.pvp-feedback')).toContainText('Your Charmander used Ember: 60 damage to Oddish.')
-  await expect(page.locator('.pvp-feedback')).toContainText('Oddish used Vine Whip: 20 damage.')
-  await expect(page.locator('.pvp-feedback')).toContainText('Oddish is knocked out!')
-  await expect(page.locator('.pvp-theirs .is-hidden')).toHaveCount(4)
-  await expect(page.locator('.pvp-theirs')).toContainText('Oddish')
-  await expect(page.locator('.pvp-score')).toContainText('1 / 3')
-  const sent = backend.calls.filter((call) => call.path === '/rest/v1/rpc/pvp_play').at(-1)
-  expect(JSON.parse(sent.body)).toEqual({ p_slot: 0, p_attack: 0 })
-
-  // No attack: the energy is saved (the card stays picked)
-  await panel.getByRole('button', { name: 'No attack (save energy)' }).click()
-  await expect(page.locator('.pvp-feedback')).toContainText('Your Charmander didn’t attack (energy saved).'.replace('’', "'"))
-  await expect(myEnergy).toHaveAttribute('aria-valuenow', '2')
-
-  // Venusaur ex gives 2 prizes: 1 + 2 = 3, a win
-  await mine.nth(1).click()
-  await expect(panel).toContainText('Squirtle: pick an attack')
-  await panel.getByRole('button', { name: /Ember/ }).click()
-
-  await expect(page.locator('.pvp-feedback')).toContainText('You win!')
-  await expect(page.locator('.pvp-feedback')).toContainText('Elo +16')
-  // Over: their whole deck shows, no card can play
-  await expect(page.locator('.pvp-theirs .is-hidden')).toHaveCount(0)
-  await expect(page.locator('.pvp-theirs > li')).toHaveCount(5)
-  await expect(mine.first()).toBeDisabled()
-
-  await page.getByRole('button', { name: 'Back to battles' }).click()
-  await expect(page.locator('.pvp-history')).toContainText('You attacked Misty')
-  await expect(page.locator('.pvp-history')).toContainText('+16')
-  await expect(page.locator('.pvp-stats')).toContainText('1016')
-  await expect(page.locator('.pvp-stats')).toContainText('100%')
-  await expect(page.locator('.pvp-start')).toContainText('9 battles left today')
+  await expect(page.locator('.pvp-builder')).toHaveCount(0)
+  await expect(attackDeck.locator('.pvp-deck-lines li')).toHaveCount(10)
+  const saved = JSON.parse(backend.calls.find((call) => call.path === '/rest/v1/rpc/pvp_save_deck').body)
+  expect(saved.p_cards).toHaveLength(20)
+  expect(saved.p_role).toBe('attack')
 })
 
-test('a battle in progress comes back, and giving up asks first', async ({ page }) => {
-  const backend = await mockSupabase(page, { challengeCollection })
+test('the builder: 2 copies at most, a Basic needed, lone evolutions flagged', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection })
   await page.goto('/challenge/games/pvp')
   await page.getByRole('group', { name: 'Attack deck' }).getByRole('button', { name: 'Build my deck' }).click()
-  for (const name of ['Charmander', 'Squirtle', 'Bulbasaur', 'Pikachu', 'Charmeleon']) await page.locator('.pvp-pick').filter({ hasText: name }).click()
-  await page.getByRole('button', { name: 'Save the deck' }).click()
-  await page.getByRole('button', { name: 'Find an opponent' }).click()
-  await page.locator('.pvp-play').first().click()
-  await page.locator('.pvp-attack-panel').getByRole('button', { name: /Ember/ }).click()
-  await expect(page.locator('.pvp-feedback')).toContainText('Oddish is knocked out!')
+  await page.getByRole('button', { name: 'Add Charmeleon' }).click()
+  await expect(page.getByRole('alert')).toContainText('Put in at least one Basic Pokémon')
+  await expect(page.locator('.pvp-deck-list')).toContainText("Charmeleon can't evolve here")
+  await page.getByRole('button', { name: 'Add Charmeleon' }).click()
+  await expect(page.getByRole('button', { name: 'Add Charmeleon' })).toBeDisabled()
+  await page.getByRole('button', { name: 'Add Charmander' }).click()
+  await expect(page.locator('.pvp-deck-list')).not.toContainText("can't evolve")
+  await expect(page.locator('.pvp-deck-list')).toContainText('17 cards to go')
+  await expect(page.getByRole('button', { name: 'Save the deck' })).toBeDisabled()
+  // Search and filters
+  await page.getByPlaceholder('Search a card').fill('squir')
+  await expect(page.locator('.pvp-grid > li')).toHaveCount(1)
+})
 
-  await page.reload()
-  await expect(page.getByRole('heading', { name: /Against Misty/ })).toBeVisible()
+test('a bot battle: set up, the server plays, attach, attack, knock out, win coins', async ({ page }) => {
+  const backend = await mockSupabase(page, { challengeCollection, pvp: withDeck })
+  await page.goto('/challenge/games/pvp')
+  await page.getByRole('button', { name: /^Easy/ }).click()
+  await expect(page.getByText('Place your Pokémon')).toBeVisible()
+  await expect(hand(page).getByRole('button')).toHaveCount(5)
+  await setUp(page)
+  await expect(page.locator('.pvp-turn-bar')).toContainText('No energy on the first turn')
+
+  // My first turn: no attack yet
+  await board(page).getByRole('button', { name: /^Active: Charmander/ }).click()
+  await expect(page.getByRole('button', { name: /Ember/ })).toBeDisabled()
+  await expect(page.getByRole('button', { name: /Ember/ })).toContainText('Not on the first turn')
+  await page.getByRole('button', { name: 'End my turn' }).click()
+  await expect(page.locator('.pvp-log')).toContainText('Their Oddish uses Vine Whip: 20 damage.')
+  await expect(page.locator('.pvp-log')).toContainText('Your turn.')
+
+  // Turn 3: energy on Charmander, Ember knocks Oddish out
+  await attachToActive(page)
+  await expect(page.locator('.pvp-turn-bar')).toContainText('Energy attached this turn')
+  await page.getByRole('button', { name: /Ember/ }).click()
+  await expect(page.locator('.pvp-log')).toContainText('Your Charmander uses Ember: 60 damage.')
+  await expect(page.locator('.pvp-log')).toContainText('Oddish is knocked out: you take 1 point(s).')
   await expect(page.locator('.pvp-score')).toContainText('1 / 3')
 
+  // Turn 5: Venusaur ex (2 points) falls too: a win
+  await attachToActive(page)
+  await page.getByRole('button', { name: /Ember/ }).click()
+  await expect(page.locator('.pvp-feedback')).toContainText('You win!')
+  await expect(page.locator('.pvp-feedback')).toContainText('You earn')
+  const acts = backend.calls.filter((call) => call.path === '/rest/v1/rpc/pvp_act').map((call) => JSON.parse(call.body).p_action.type)
+  expect(acts).toEqual(['setup', 'end', 'attach', 'attack', 'attach', 'attack'])
+  await page.getByRole('button', { name: 'Back to battles' }).click()
+  await expect(page.locator('.pvp-history')).toContainText('You fought a bot (Easy)')
+})
+
+test('evolve, bench and retreat, with the card details', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection, pvp: withDeck })
+  await page.goto('/challenge/games/pvp')
+  await page.getByRole('button', { name: /^Normal/ }).click()
+  await setUp(page)
+  // A Basic from the hand to the Bench
+  await hand(page).getByRole('button', { name: 'Bulbasaur' }).click()
+  await page.getByRole('button', { name: 'Put on the Bench' }).click()
+  await expect(board(page).getByRole('list', { name: 'Bench' }).nth(1)).toContainText('Bulbasaur')
+  // No evolving on the first turn
+  await hand(page).getByRole('button', { name: 'Charmeleon' }).first().click()
+  await expect(page.getByRole('button', { name: 'Evolve Charmander' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'End my turn' }).click()
+  await expect(page.locator('.pvp-log')).toContainText('Your turn.')
+  // Turn 3: Charmander evolves into Charmeleon
+  await hand(page).getByRole('button', { name: 'Charmeleon' }).first().click()
+  await page.getByRole('button', { name: 'Evolve Charmander' }).click()
+  await expect(page.locator('.pvp-log')).toContainText('Your Pokémon evolves into Charmeleon.')
+  await expect(board(page).getByRole('button', { name: /^Active: Charmeleon/ })).toBeVisible()
+  // Details: the attacks' texts
+  await board(page).getByRole('button', { name: /^Active: Charmeleon/ }).click()
+  await page.getByRole('button', { name: 'Card details' }).click()
+  await expect(page.getByRole('dialog')).toContainText('Discard an Energy from this Pokémon.')
+  await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click()
+  // Retreat: an energy, then Squirtle comes in
+  await attachToActive(page)
+  await board(page).getByRole('list', { name: 'Bench' }).nth(1).getByRole('button', { name: /^Squirtle/ }).click()
+  await page.getByRole('button', { name: /^Retreat: Charmeleon goes to the Bench/ }).click()
+  await expect(page.locator('.pvp-log')).toContainText('Squirtle is now your Active Pokémon.')
+})
+
+test('a player battle: against Misty, giving up asks first and loses Elo', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection, pvp: withDeck })
+  await page.goto('/challenge/games/pvp')
+  await page.getByRole('button', { name: 'Find an opponent' }).click()
+  await expect(page.getByRole('heading', { name: 'Against Misty' })).toBeVisible()
+  await setUp(page)
   await page.getByRole('button', { name: 'Give up' }).click()
-  expect(backend.calls.some((call) => call.path === '/rest/v1/rpc/pvp_forfeit')).toBe(false)
   await page.getByRole('button', { name: 'Sure? Give up (a loss)' }).click()
   await expect(page.locator('.pvp-feedback')).toContainText('You gave up.')
   await expect(page.locator('.pvp-feedback')).toContainText('Elo -16')
 })
 
-test('auto deck: a defense deck picked for me, saved apart from the attack deck', async ({ page }) => {
-  const backend = await mockSupabase(page, { challengeCollection })
+test('a battle in progress comes back after a reload', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection, pvp: withDeck })
   await page.goto('/challenge/games/pvp')
-  const defenseDeck = page.getByRole('group', { name: 'Defense deck' })
-  await defenseDeck.getByRole('button', { name: 'Auto deck' }).click()
-  // The builder opens with 5 cards picked, nothing saved yet
-  await expect(page.locator('.pvp-builder')).toContainText('Defense deck: pick 5 cards')
-  await expect(page.locator('.pvp-count')).toHaveText('5 / 5')
-  await expect(page.locator('.pvp-pick.is-picked')).toHaveCount(5)
-  expect(backend.calls.some((call) => call.path === '/rest/v1/rpc/pvp_save_deck')).toBe(false)
-  // Changed by hand, then "Auto deck" again fills it back
-  await page.locator('.pvp-pick.is-picked').first().click()
-  await expect(page.locator('.pvp-count')).toHaveText('4 / 5')
-  await page.locator('.pvp-builder').getByRole('button', { name: 'Auto deck' }).click()
-  await expect(page.locator('.pvp-count')).toHaveText('5 / 5')
-  await page.getByRole('button', { name: 'Save the deck' }).click()
-
-  await expect(defenseDeck.locator('.pvp-row > li')).toHaveCount(5)
-  await expect(defenseDeck).toContainText('Other players attack this deck')
-  const saved = JSON.parse(backend.calls.find((call) => call.path === '/rest/v1/rpc/pvp_save_deck').body)
-  expect(saved.p_role).toBe('defense')
-  expect(new Set(saved.p_cards).size).toBe(5)
-  // A defense deck alone can't attack
-  await expect(page.getByRole('button', { name: 'Find an opponent' })).toBeDisabled()
-  await expect(page.getByRole('group', { name: 'Attack deck' })).toContainText('No deck in this format yet')
-})
-
-test('before 0026: one deck for both, a defense deck says it is not there yet', async ({ page }) => {
-  const backend = await mockSupabase(page, { challengeCollection, pvp: { noRoles: true } })
-  await page.goto('/challenge/games/pvp')
-  await page.getByRole('group', { name: 'Attack deck' }).getByRole('button', { name: 'Auto deck' }).click()
-  await page.getByRole('button', { name: 'Save the deck' }).click()
-  await expect(page.getByRole('group', { name: 'Attack deck' }).locator('.pvp-row > li')).toHaveCount(5)
-  const saves = backend.calls.filter((call) => call.path === '/rest/v1/rpc/pvp_save_deck').map((call) => JSON.parse(call.body))
-  expect(saves.at(-1)).not.toHaveProperty('p_role')
-  await expect(page.getByRole('button', { name: 'Find an opponent' })).toBeEnabled()
-
-  await page.getByRole('group', { name: 'Defense deck' }).getByRole('button', { name: 'Auto deck' }).click()
-  await page.getByRole('button', { name: 'Save the deck' }).click()
-  await expect(page.getByRole('alert')).toContainText("Defense decks aren't available yet")
+  await page.getByRole('button', { name: /^Hard/ }).click()
+  await setUp(page)
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'Against a bot (Hard)' })).toBeVisible()
+  await expect(board(page).getByRole('button', { name: /^Active: Charmander/ })).toBeVisible()
 })
 
 test('formats: one era or one set, and no opponent says why', async ({ page }) => {
-  await mockSupabase(page, {
-    challengeCollection,
-    pvp: { opponent: false, decks: { 'era:Scarlet & Violet': { cards: [], valid: true } } },
-  })
+  await mockSupabase(page, { challengeCollection, pvp: { opponent: false, decks: { 'era:Scarlet & Violet': { attack: DECK.slice(0, 18).concat(['sv3pt5-6', 'sv3pt5-6']) } } } })
   await page.goto('/challenge/games/pvp')
   const kinds = page.getByRole('tablist', { name: 'Format' })
   await kinds.getByRole('tab', { name: 'One era' }).click()
   await expect(page.getByLabel('Era', { exact: true })).toHaveValue('era:Scarlet & Violet')
-  await expect(page.getByLabel('Era', { exact: true }).locator('option')).toHaveText(['Base (no card)', 'Scarlet & Violet (6 cards)'])
-  await page.getByRole('button', { name: 'Find an opponent' }).click()
-  await expect(page.getByRole('alert')).toContainText('No opponent in this format yet')
-
+  await expect(page.getByLabel('Era', { exact: true }).locator('option')).toHaveText(['Base (2 cards)', 'Scarlet & Violet (18 cards)'])
   await kinds.getByRole('tab', { name: 'One set' }).click()
   await expect(page.getByLabel('Set', { exact: true })).toHaveValue('set:sv3pt5')
-  await expect(page.locator('.pvp-board-skeleton, .pvp-panel')).not.toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Ranking: 151' })).toBeVisible()
   // Remembered on this device
   await page.reload()
   await expect(page.getByLabel('Set', { exact: true })).toHaveValue('set:sv3pt5')
+  await kinds.getByRole('tab', { name: 'Every card' }).click()
+})
+
+test('no opponent in a format says so', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection, pvp: { ...withDeck, opponent: false } })
+  await page.goto('/challenge/games/pvp')
+  await page.getByRole('button', { name: 'Find an opponent' }).click()
+  await expect(page.getByRole('alert')).toContainText('No opponent in this format yet')
 })
 
 test('closed to everyone but the testers', async ({ page }) => {
@@ -201,7 +207,7 @@ test('closed to everyone but the testers', async ({ page }) => {
   expect(backend.calls.filter((call) => call.path.startsWith('/rest/v1/rpc/pvp_'))).toEqual([])
 })
 
-test('before the migration, PvP says it is coming', async ({ page }) => {
+test('before the migrations, PvP says it is coming', async ({ page }) => {
   await mockSupabase(page, { pvp: 'missing' })
   await page.goto('/challenge/games/pvp')
   await expect(page.getByText('PvP battles are coming soon.')).toBeVisible()
@@ -209,58 +215,29 @@ test('before the migration, PvP says it is coming', async ({ page }) => {
   await expect(page.locator('.game-tile').filter({ hasText: 'PvP battles' })).toContainText('Coming soon')
 })
 
-test('bots: the same battle for coins, no Elo, and no player battle used', async ({ page }) => {
-  const backend = await mockSupabase(page, { challengeCollection, pvp: { opponent: false } })
+test('a server still on the 5-card battles (before 0030) says it is coming', async ({ page }) => {
+  await mockSupabase(page, { pvp: { engine: undefined } })
   await page.goto('/challenge/games/pvp')
-  const bots = page.getByRole('group', { name: 'Train against a bot' })
-  await expect(bots).toContainText('5 paying bot battles left today')
-  // No attack deck yet: bots wait for it too
-  await expect(bots.getByRole('button', { name: /Hard/ })).toBeDisabled()
-
-  await page.getByRole('group', { name: 'Attack deck' }).getByRole('button', { name: 'Build my deck' }).click()
-  for (const name of ['Charmander', 'Squirtle', 'Bulbasaur', 'Pikachu', 'Charmeleon']) await page.locator('.pvp-pick').filter({ hasText: name }).click()
-  await page.getByRole('button', { name: 'Save the deck' }).click()
-  // Nobody else has a deck: the error points to the bots
-  await page.getByRole('button', { name: 'Find an opponent' }).click()
-  await expect(page.getByRole('alert')).toContainText('Fight a bot meanwhile')
-
-  await bots.getByRole('button', { name: /Hard/ }).click()
-  const start = backend.calls.find((call) => call.path === '/rest/v1/rpc/pvp_bot_start')
-  expect(JSON.parse(start.body)).toEqual({ p_format: 'all', p_level: 'hard' })
-  await expect(page.getByRole('heading', { name: /Against a bot \(Hard\)/ })).toBeVisible()
-  await expect(page.locator('.pvp-elo')).toHaveCount(0)
-
-  const panel = page.locator('.pvp-attack-panel')
-  await page.locator('.pvp-play').nth(0).click()
-  await panel.getByRole('button', { name: /Ember/ }).click()
-  await expect(page.locator('.pvp-feedback')).toContainText('Oddish is knocked out!')
-  await page.locator('.pvp-play').nth(1).click()
-  await panel.getByRole('button', { name: /Ember/ }).click()
-  await expect(page.locator('.pvp-feedback')).toContainText('You win!')
-  await expect(page.locator('.pvp-coins-won')).toContainText('+50')
-  await expect(page.locator('.pvp-feedback')).not.toContainText('Elo')
-  await expect(page.locator('.mode-strip')).toContainText('1,050')
-
-  await page.getByRole('button', { name: 'Back to battles' }).click()
-  await expect(page.locator('.pvp-history')).toContainText('You fought a bot (Hard)')
-  await expect(page.locator('.pvp-history .pvp-change')).toContainText('+50')
-  await expect(page.locator('.pvp-stats')).toContainText('1000')
-  await expect(page.locator('.pvp-start')).toContainText('10 battles left today')
-  await expect(bots).toContainText('4 paying bot battles left today')
+  await expect(page.getByText('PvP battles are coming soon.')).toBeVisible()
 })
 
 test('bots: past the paying battles, they play for fun', async ({ page }) => {
-  await mockSupabase(page, { challengeCollection, pvp: { botsToday: 5 } })
+  await mockSupabase(page, { challengeCollection, pvp: { ...withDeck, botsToday: 5 } })
   await page.goto('/challenge/games/pvp')
-  const bots = page.getByRole('group', { name: 'Train against a bot' })
-  await expect(bots).toContainText('No more coins today: 15 bot battles left for fun.')
-  await expect(bots.locator('.pvp-bot-reward')).toHaveCount(0)
+  await expect(page.locator('.pvp-bots')).toContainText('No more coins today: 15 bot battles left for fun.')
+  await expect(page.locator('.pvp-bot-reward')).toHaveCount(0)
 })
 
-test('before 0027, no bots', async ({ page }) => {
-  await mockSupabase(page, { challengeCollection, pvp: { noBots: true } })
+test('the board and the builder never scroll sideways on the narrowest phone', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 })
+  await mockSupabase(page, { challengeCollection, pvp: withDeck })
   await page.goto('/challenge/games/pvp')
-  await expect(page.getByRole('group', { name: 'Attack deck' })).toBeVisible()
-  await expect(page.getByRole('group', { name: 'Train against a bot' })).toHaveCount(0)
-  await expect(page.locator('.pvp-rules')).not.toContainText('Bots:')
+  await page.getByRole('group', { name: 'Defense deck' }).getByRole('button', { name: 'Build my deck' }).click()
+  await page.getByRole('button', { name: 'Add Charmander' }).click()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
+  await page.getByRole('button', { name: 'Cancel' }).click()
+  await page.getByRole('button', { name: /^Easy/ }).click()
+  await setUp(page)
+  await board(page).getByRole('button', { name: /^Active: Charmander/ }).click()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
 })

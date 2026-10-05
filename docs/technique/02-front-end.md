@@ -24,7 +24,10 @@ views/  ──►  stores/ + composables/  ──►  api/  ──►  lib/supab
 [src/main.js](../../src/main.js) crée l'app, branche Pinia, le routeur et
 l'i18n, applique le thème sauvegardé (`useThemeStore().init()`), prépare la
 PWA (`setupPwa()`) et, en production seulement, surveille les nouveaux
-déploiements (`watchAppVersion()`).
+déploiements (`watchAppVersion()`). Il écoute aussi les erreurs de
+chargement d'image (phase de capture) : une image de carte française
+(TCGdex) qui ne charge pas repasse sur l'anglaise de son attribut
+`data-fallback` (voir `useCardLocale`).
 
 [src/App.vue](../../src/App.vue) :
 
@@ -161,10 +164,10 @@ ne recharge pas si c'est déjà chargé (sauf `force`), et expose `loading`,
 | `minigame` | État de « Plus ou moins » | page du jeu, hub des jeux | `unavailable` si la migration 0013 manque ; répercute le solde de pièces dans `challenge` |
 | `electrodeFlip` | État d'« Électrode Shiny Flip » : niveau, pièces restantes, records, plateau en cours | page du jeu, hub des jeux | `flip(index)`, `cashOut()` ; `unavailable` si la migration 0014 manque ; répercute le solde de pièces |
 | `superEffective` | État de « Super efficace ! » : parties payées restantes, record, partie en cours | page du jeu, hub des jeux | `unavailable` si la migration 0015 manque **ou** si aucune carte n'a encore ses faiblesses (`ready: false`) ; répercute le solde de pièces |
-| `pvp` | Combats PvP : decks d'attaque et de défense (`decks[format]` = `{ attack, defense }`, quelle que soit la version du serveur) et Elo par format, combats restants du jour, combat en cours, historique (attaques et défenses), cartes jouables par format (`eligible`), classements (`boards`) | page des combats, hub des jeux | `loadEligible(format)`, `saveDeck(format, ids, role)`, `start(format)`, `play(slot, attack)` (`attack` = index dans les attaques de la carte, `null` = pas d'attaque), `forfeit()`, `loadBoard(format)`, `startBot(format, level)` (0027 : combat contre un bot, `botsAvailable`, `botBattlesLeft`, `botPaidLeft` ; les pièces gagnées passent au portefeuille du store `challenge`) ; `bestElo` pour la tuile ; `unavailable` si la migration 0024 manque, si aucune carte n'a encore ses attaques (`ready: false`) **ou** si je ne suis pas testeur (0028 : `pvpOpenTo(pseudo du profil)`, vérifié avant d'appeler le serveur) ; remis à zéro au changement de compte |
+| `pvp` | Combats PvP façon Pocket (0030) : decks d'attaque et de défense par format (`decks[format]` = `{ attack, defense }`, chacun `{ ids, valid }`), Elo, combats restants (joueurs, bots, payants), combat en cours, historique, cartes possibles par format avec leurs exemplaires (`eligible`), classements (`boards`) | page des combats, hub des jeux | `loadEligible(format)`, `saveDeck(format, ids, role)`, `start(format)`, `startBot(format, level)`, `act(action)` (un coup, voir 04 référence API ; le combat revient joué jusqu'à mon coup suivant, avec `events`), `forfeit()`, `loadBoard(format)` ; les pièces gagnées contre un bot passent au portefeuille du store `challenge` ; `bestElo` pour la tuile ; `unavailable` si je ne suis pas testeur (0028 : `pvpOpenTo(pseudo du profil)`, vérifié avant d'appeler le serveur), si le serveur n'est pas sur le moteur 0030 (`engine` ≠ 2), si la synchro n'a pas stocké les effets d'attaque (`ready: false`) ou si les RPC manquent ; remis à zéro au changement de compte |
 | `evolutionChain` | État de « Chaîne d'évolution » : parties payées restantes, record, partie en cours | page du jeu, hub des jeux | `answer(order)`, `stop()` (sans la RPC de 0019 : la partie s'arrête à l'écran et expire côté serveur) ; `unavailable` si la migration 0018 manque **ou** si aucune lignée complète n'est encore connue (`ready: false`) ; répercute le solde de pièces |
 | `achievements` | Toasts, taux par mode, données serveur par mode | `check(mode)` un peu partout | Voir [Parcours > Succès](05-parcours.md#7-succès) |
-| `settings` | `sound`, `vibration`, `effects`, `animations`, `recycleKeep` (exemplaires gardés au recyclage, 1 à 4), `largeText` (texte agrandi : `html.pb-text-large`, posé par `App.vue`) | — | Par appareil (`localStorage`). `liteAnimations` = animations légères sur écran tactile en mode `auto` |
+| `settings` | `sound`, `vibration`, `effects`, `animations`, `recycleKeep` (exemplaires gardés au recyclage, 1 à 4), `largeText` (texte agrandi : `html.pb-text-large`, posé par `App.vue`), `frenchCards` (cartes en français quand le site l'est, 0029 ; vrai par défaut) | — | Par appareil (`localStorage`). `liteAnimations` = animations légères sur écran tactile en mode `auto` |
 | `theme` | `isLight` | `main.js` | Pose `data-bs-theme` sur `<html>` (Bootstrap + tokens suivent) |
 
 ---
@@ -210,6 +213,7 @@ Deux mécanismes transversaux :
 | [useModeAchievements(mode, username?)](../../src/composables/useModeAchievements.js) | Les succès d'un joueur dans un mode, **les siens** (stores) ou **ceux d'un profil public** (chargés). Expose aussi `entries` (la collection de ce mode) et `server` (données de `player_achievements`) : le profil en tire ses statistiques |
 | [useGames()](../../src/composables/useGames.js) | La liste des mini-jeux (`utils/games.js`) avec leur statut du jour, pour la page des jeux et la tuile du hub du Défi |
 | [useAchievementText()](../../src/composables/useAchievementText.js) | Titre et description traduits d'un succès |
+| [useCardLocale()](../../src/composables/useCardLocale.js) | Nom et image d'une carte dans la langue du joueur (0029) : `french` (site en français et réglage « Cartes en français »), `cardName(card)`, `cardImage(card, 'small' / 'large')`, `cardSrcset(card)`, `fallback(card)` (l'image anglaise, à mettre en `data-fallback` sur l'`<img>` ou en prop `fallback` de `HoloCard`). Une carte sans colonnes françaises (jamais sortie en français, ou chargée par une RPC qui ne les renvoie pas : fil, classements, mini-jeux) s'affiche en anglais |
 
 ---
 
@@ -236,7 +240,10 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `sets.js` | URL des logos, sous-sets (`isSubset`, `packSetId`, `subsetsOf`), `groupSetsByYear`, `starterSets` (Set de base, 151 et le set le plus récent, proposés au premier booster) |
 | `feed.js` | `groupFeed(pulls)` : tirages consécutifs d'un même joueur dans le même mode en une entrée (le plus rare en avant), pour le fil de Communauté et « En direct » de l'accueil |
 | `pokemonNamesFr.js` | Généré par `node scripts/region-tools.mjs fr-names` (ne pas éditer) : `frenchName(dex)`, nom français officiel de chaque Pokémon (PokéAPI). Les noms de cartes sont en anglais ; la recherche et la fiche d'une carte s'en servent |
-| `pvp.js` | Règles des combats PvP (**miroir** de `pvp_rules()` / `pvp_prizes()` / `pvp_damage()` / `pvp_elo_change()`) : `prizesFor`, `damageAgainst(from, attack, to)`, `energyAfter`, `canPay`, `bestDamage`, `eloChange`, `record` (victoires, défaites, nuls et taux, attaques + défenses), `parseFormat` (`all`, `era:<série>`, `set:<id>`), `toggleDeckCard`, `hpPercent` ; decks (0026) : `DECK_ROLES`, `deckRoles` (lit aussi le deck unique d'avant 0026), `defendingDeck`, `autoDeck(cards, role)` (le « Deck auto », voir 05 parcours) ; bots (0027, **miroir** de `pvp_rules()`) : `BOT_LEVELS`, `BOT_COINS`, `BOT_PAID_PER_DAY`, `BOT_BATTLES_PER_DAY`, `botCoins(level, status, paid)` ; testeurs (0028, **miroir** de `pvp_open_to()`) : `PVP_TESTERS` (`null` = ouvert à tous), `pvpOpenTo(username)` |
+| `pvp.js` | Combats PvP façon Pocket (0030, **miroir** de `pvp_rules()`, `pvp_prizes()`, `pvp_deck_cards()`, `pvp_bot_deck()`) : constantes (`DECK_SIZE` 20, `MAX_COPIES` 2, `BENCH_SIZE`, `POINTS_TO_WIN`, `MAX_TURNS`…), `prizesFor`, `eloChange`, `record`, `parseFormat`, `DECK_ROLES`, `deckRoles` ; constructeur : `deckCounts`, `addBlock` (pourquoi une carte ne peut pas entrer : `full`, `copies`, `owned`), `addCard`, `removeCard`, `deckCheck` (prêt, cartes manquantes, Pokémon de base, évolutions orphelines), `autoDeck(cards, role)` (lignées comme les bots) ; affichage : `hpPercent`, `damageLabel`, `attackName` / `attackText` (FR si importé), `attackChoices` (l'attaque demande-t-elle une cible ou un Pokémon de Banc) ; bots : `BOT_LEVELS`, `BOT_COINS`, `botCoins` ; testeurs (0028, **miroir** de `pvp_open_to()`) : `PVP_TESTERS` (`null` = ouvert à tous), `pvpOpenTo(username)` |
+| `attackEffects.js` | `parseAttack({ damage, text })` : le texte anglais d'une attaque → `{ damage (base), fx, coins, partial, unknown }` (ops listés en tête du fichier ; interprétés par `pvp_attack` en SQL), `attackUsable`, `sentences`. Utilisé par `scripts/populate.mjs` |
+| `tcgdex.js` | Cartes françaises (0029) : `normalizeNumber` (« 006 » = « 6 », « TG01 » = « TG1 »), `numberOfId`, `matchSet(nos cartes, sets TCGdex)` (≥ 60 % de numéros + noms en commun), `tcgdexImage(base, size)` (`/low.webp`, `/high.webp`) |
+| `cardLocale.js` | `cardNameIn`, `cardImageIn`, `cardSrcsetIn`, `englishImage` : le cœur pur de `useCardLocale` |
 | `games.js` | Registre des mini-jeux |
 | `beta.js` | `BETA_END` (null tant que la bêta dure) + `isBetaTester(createdAt)` : inscrit avant la fin de la bêta |
 | `cards.js`, `progress.js`, `time.js`, `tilt.js`, `appVersion.js`, `chunkError.js` | Petits utilitaires (regroupement, pourcentage, « il y a 3 min », inclinaison 3D, détection de build, erreur de chunk) |
@@ -251,14 +258,15 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | `BoosterArt` | Booster dessiné en CSS : logo du set, symbole, carte phare dans une fenêtre. Sans logo = booster générique « n'importe quel set ». Taille via `--booster-w` |
 | `BoosterPack` | Le booster qu'on déchire. Deux copies découpées en zigzag ; `TEAR_MS = 1300`. Version `lite` : une seule copie qui se comprime et éclate en `TEAR_MS_LITE = 550` |
 | `CardStack` | Pile face cachée : chaque tap retourne la carte suivante ; balayage sur tactile. Les cartes rares « se chargent » 0,55 s avant de se retourner avec un flash |
-| `HoloCard` | Carte avec inclinaison 3D + reflet holographique qui suivent le pointeur |
+| `HoloCard` | Carte avec inclinaison 3D + reflet holographique qui suivent le pointeur ; prop `fallback` = l'image anglaise si la française ne charge pas |
 | `CardDetail` | Fiche plein écran (flèches, balayage), historique de prix, liste de souhaits, fabrication/recyclage en Défi |
 | `SetPicker` | Grille de sets cherchable, groupée par année (sous-sets masqués), avec la complétion de chaque set commencé (prop `owned`) |
 | `PriceChart` | Courbe du prix d'une carte (un relevé par jour d'import) |
 | `PokedexGrid`, `WishlistGrid`, `ShowcasePicker`, `RecycleDuplicates` | Onglets Pokédex et souhaits, choix de la vitrine, recyclage (tout, ou « Choisir… » par carte ou par rareté, − / + pour le nombre d'exemplaires) |
 | `SetGoal` | « Série la plus avancée : Base, 1 / 102 (1 %) » + barre : un objectif à portée du débutant, sous la progression globale (hubs Illimité et Défi, collection ; prop `to` = lien vers le classeur) |
 | `CopyStepper` | − n/max + : nombre d'exemplaires à recycler (liste « Choisir… » et fiche d'une carte) |
-| `PvpCard` | Une carte de combat PvP (instantané `pvp_card()`) : image, PV (barre si `show-hp`), ses attaques (coût en énergie, dégâts imprimés), types, faiblesse et récompenses (« 2 récompenses » pour un ex…) ; `hidden` = dos de carte (carte adverse pas encore jouée) |
+| `PvpCard` | Une carte de combat PvP (instantané `pvp_card()`, 0030) dans la langue du joueur : image, nom, points (« 2 points » pour un ex) ; en jeu (`slot`) : barre de PV, Énergies attachées, États Spéciaux ; sinon PV imprimés et stade ; `compact` (plateau) sans la liste des attaques |
+| `PvpCardSheet` | La fiche complète d'une carte PvP (`<dialog>`) : attaques avec coût, dégâts et texte (français si importé), « une partie de ce texte n'est pas jouée », Faiblesse, Résistance, Retraite, talents (pas encore joués) |
 | `BetaBadge` | Pastille « Bêta-testeur » (bordure holo + reflet qui passe, coupé sans effets / mouvement réduit), `compact` = juste « β ». Profil et tuile profil du hub |
 | `UsernameCombobox` | Champ pseudo avec suggestions des dresseurs publics (`searchUsernames`, 200 ms après la frappe, 8 au maximum, flèches + Entrée, Échap). Événement `pick` au choix d'une suggestion. Partenaire d'échange |
 | `AchievementTile`, `AchievementToasts` | Tuile d'un succès, notifications « succès débloqué » (et, dans la même pile, les toasts d'échange du store `trades`) |

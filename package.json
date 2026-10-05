@@ -10,6 +10,7 @@
     "test": "vitest run",
     "populate:sets": "node scripts/populate.mjs sets",
     "populate:cards": "node scripts/populate.mjs cards",
+    "populate:fr": "node scripts/populate.mjs fr",
     "populate:sync": "node scripts/populate.mjs sync",
     "test:e2e": "playwright test",
     "test:db": "node supabase/tests/run.mjs"

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useCardLocale } from '@/composables/useCardLocale'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchChallengeCollectionOf } from '@/api/challenge'
 import { fetchPublicCollection, fetchPublicProfile } from '@/api/profiles'
@@ -33,6 +34,7 @@ const props = defineProps({
 })
 
 const { t, locale } = useI18n()
+const { cardName, cardImage, cardSrcset, fallback } = useCardLocale()
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
@@ -431,15 +433,16 @@ async function logout() {
               <div class="showcase-card" :data-tier="rarityTier(showcaseCard)">
                 <span class="showcase-glow" aria-hidden="true"></span>
                 <HoloCard
-                  :src="showcaseCard.image_small || showcaseCard.image_url"
-                  :srcset="showcaseCard.image_small && showcaseCard.image_url ? `${showcaseCard.image_small} 245w, ${showcaseCard.image_url} 734w` : null"
+                  :src="cardImage(showcaseCard)"
+                  :srcset="cardSrcset(showcaseCard)"
+                  :fallback="fallback(showcaseCard)"
                   sizes="280px"
-                  :alt="showcaseCard.name"
+                  :alt="cardName(showcaseCard)"
                   eager
                 />
               </div>
               <p class="showcase-caption">
-                <strong>{{ showcaseCard.name }}</strong>
+                <strong>{{ cardName(showcaseCard) }}</strong>
                 <span v-if="rarityLabelKey(showcaseCard) !== 'common' && rarityLabelKey(showcaseCard) !== 'uncommon'">
                   · {{ t(`boosters.bucket.${rarityLabelKey(showcaseCard)}`) }}
                 </span>
@@ -544,8 +547,8 @@ async function logout() {
             <h2 class="pb-section-title">{{ t('profile.topCards') }}</h2>
             <ul class="top-grid" role="list">
               <li v-for="(entry, index) in topCards" :key="entry.card_id">
-                <button type="button" class="top-card" :aria-label="entry.cards.name" @click="openDetail('top', index)">
-                  <HoloCard :src="entry.cards.image_small || entry.cards.image_url" alt="" :max-tilt="10" />
+                <button type="button" class="top-card" :aria-label="cardName(entry.cards)" @click="openDetail('top', index)">
+                  <HoloCard :src="cardImage(entry.cards)" :fallback="fallback(entry.cards)" alt="" :max-tilt="10" />
                 </button>
               </li>
             </ul>
@@ -578,11 +581,11 @@ async function logout() {
               <p v-if="!challengeMatches.length" class="challenge-desc">{{ t('collection.noResults') }}</p>
               <ul class="challenge-grid" role="list">
                 <li v-for="(entry, index) in challengeVisible" :key="entry.card_id" class="challenge-card">
-                  <button type="button" class="top-card" :aria-label="entry.cards.name" @click="openDetail('challenge', index)">
-                    <img :src="entry.cards.image_small || entry.cards.image_url" alt="" loading="lazy" />
+                  <button type="button" class="top-card" :aria-label="cardName(entry.cards)" @click="openDetail('challenge', index)">
+                    <img :src="cardImage(entry.cards)" :data-fallback="fallback(entry.cards)" alt="" loading="lazy" />
                     <span v-if="entry.quantity > 1" class="challenge-qty">×{{ entry.quantity }}</span>
                   </button>
-                  <span class="challenge-name">{{ entry.cards.name }}</span>
+                  <span class="challenge-name">{{ cardName(entry.cards) }}</span>
                   <template v-if="browsingChallenge">
                     <span v-if="entry.tradable === false" class="challenge-locked">{{ t('trades.notForTrade') }}</span>
                     <RouterLink v-else-if="canTrade" :to="askRoute(entry)" class="challenge-ask">{{ t('profile.askForCard') }}</RouterLink>
@@ -655,6 +658,13 @@ async function logout() {
                   <span class="switch-desc">{{ t('profile.largeTextDesc') }}</span>
                 </span>
                 <input type="checkbox" class="form-check-input pb-switch" role="switch" :checked="settings.largeText" @change="settings.set('largeText', $event.target.checked)" />
+              </label>
+              <label class="switch-row form-switch">
+                <span>
+                  <span class="switch-title">{{ t('profile.frenchCardsLabel') }}</span>
+                  <span class="switch-desc">{{ t('profile.frenchCardsDesc') }}</span>
+                </span>
+                <input type="checkbox" class="form-check-input pb-switch" role="switch" :checked="settings.frenchCards" @change="settings.set('frenchCards', $event.target.checked)" />
               </label>
               <div class="switch-row switch-row-wrap">
                 <span>

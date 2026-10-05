@@ -4,7 +4,7 @@ import {
   fetchPvpLeaderboard,
   fetchPvpState,
   forfeitPvpBattle,
-  playPvpCard,
+  pvpAct,
   savePvpDeck,
   startPvpBattle,
   startPvpBotBattle,
@@ -14,15 +14,15 @@ import { useChallengeStore } from '@/stores/challenge'
 import { useProfileStore } from '@/stores/profile'
 import { deckRoles, pvpOpenTo } from '@/utils/pvp'
 
-// PvP battles (challenge mode, migrations 0024 + 0025 + 0026 + 0027): my attack and
-// defense decks and Elo per format,
-// battles left today, the battle in progress and my history. The server
-// picks the opponent, plays their deck and moves both ratings. Bots (0027):
-// the server deals the deck, no Elo, coins (the header's wallet follows
-// `state.coins`). `botsAvailable` false = 0027 not applied: no bot section.
-// `unavailable` = migration 0024/0025 not applied yet, or no card has its attacks + costs
-// yet (populate hasn't run since), or I'm not a tester (`pvpOpenTo`, the
-// server checks it too since 0028): "Coming soon".
+// PvP battles like Pokémon TCG Pocket (challenge mode, migration 0030): my
+// attack and defense decks (20 cards) and Elo per format, battles left
+// today, the battle in progress and my history. The server deals, plays the
+// opponent's side (a player's defense deck or a bot) and sends what I can do
+// (`battle.hints`); I send one move at a time (`act`). Bots: no Elo, coins
+// (the header's wallet follows `state.coins`).
+// `unavailable` ("Coming soon") = I'm not a tester (`pvpOpenTo`, the server
+// checks it too since 0028), the server isn't on the Pocket engine yet
+// (0030 not applied), or no card sync stored the attack effects (`ready`).
 const isMissingRpc = (err) => err?.code === 'PGRST202' || /could not find the function/i.test(err?.message ?? '')
 
 export const usePvpStore = defineStore('pvp', {
@@ -32,17 +32,16 @@ export const usePvpStore = defineStore('pvp', {
     loaded: false,
     unavailable: false,
     error: null,
-    eligible: {}, // format -> my cards that can fight there
+    eligible: {}, // format -> my cards that can be in a deck there
     boards: {}, // format -> pvp_leaderboard() payload
   }),
   getters: {
     battle: (s) => s.state?.battle ?? null,
     battlesLeft: (s) => s.state?.battles_left ?? 0,
-    botsAvailable: (s) => typeof s.state?.bot_battles_left === 'number',
     botBattlesLeft: (s) => s.state?.bot_battles_left ?? 0,
     botPaidLeft: (s) => s.state?.bot_paid_left ?? 0,
     formats: (s) => s.state?.formats ?? { all: 0, eras: [], sets: [] },
-    // format -> { attack, defense } (each { cards, valid } or null), whatever the server's version
+    // format -> { attack, defense } (each { ids, valid } or null)
     decks: (s) => Object.fromEntries(Object.entries(s.state?.decks ?? {}).map(([format, entry]) => [format, deckRoles(entry)])),
     ratings: (s) => s.state?.ratings ?? {},
     history: (s) => s.state?.history ?? [],
@@ -70,7 +69,7 @@ export const usePvpStore = defineStore('pvp', {
           return
         }
         this.state = await fetchPvpState()
-        this.unavailable = this.state?.ready === false
+        this.unavailable = this.state?.ready === false || this.state?.engine !== 2
         this.loaded = true
       } catch (err) {
         if (isMissingRpc(err)) this.unavailable = true
@@ -110,12 +109,11 @@ export const usePvpStore = defineStore('pvp', {
     },
 
     /**
-     * @param {number} slot - my card (0-4)
-     * @param {number | null} attack - index in the card's `attacks`, null = no attack
-     * @returns {Promise<{ round: object, battle: object, state: object }>}
+     * One move (pvpAct); the battle comes back with the server's moves done.
+     * @returns {Promise<{ battle: object, events: object[], state: object }>}
      */
-    async play(slot, attack) {
-      const result = await playPvpCard(slot, attack)
+    async act(action) {
+      const result = await pvpAct(action)
       this.state = result.state
       if (result.battle.status !== 'playing') {
         delete this.boards[result.battle.format]

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useCardLocale } from '@/composables/useCardLocale'
 import { useChallengeStore } from '@/stores/challenge'
 import { useChallengeCollectionStore } from '@/stores/collection'
 import { useSettingsStore } from '@/stores/settings'
@@ -18,6 +19,7 @@ import CopyStepper from '@/components/CopyStepper.vue'
 const emit = defineEmits(['recycled', 'error'])
 
 const { t, locale } = useI18n()
+const { cardName, cardImage, fallback } = useCardLocale()
 const challenge = useChallengeStore()
 const collection = useChallengeCollectionStore()
 const trades = useTradesStore()
@@ -166,9 +168,9 @@ const recyclePicked = () => recycleCopies(picked.value)
             <li v-for="entry in group.entries" :key="entry.card_id" class="pick-row" :class="{ picked: copiesOf(entry) }">
               <label class="pick-label">
                 <input type="checkbox" class="form-check-input" :checked="copiesOf(entry) > 0" @change="toggle(entry)" />
-                <img :src="entry.cards.image_small" alt="" loading="lazy" class="pick-img" />
+                <img :src="cardImage(entry.cards)" :data-fallback="fallback(entry.cards)" alt="" loading="lazy" class="pick-img" />
                 <span class="pick-name">
-                  {{ entry.cards.name }}
+                  {{ cardName(entry.cards) }}
                   <span class="pick-meta">
                     {{ t('challenge.pick.extra', { count: extraOf(entry) }, extraOf(entry)) }}
                     <span v-if="trades.isLocked(entry.card_id)" class="pick-lock">· {{ t('trades.notForTrade') }}</span>
@@ -181,7 +183,7 @@ const recyclePicked = () => recycleCopies(picked.value)
                   v-if="extraOf(entry) > 1"
                   :model-value="copiesOf(entry)"
                   :max="extraOf(entry)"
-                  :name="entry.cards.name"
+                  :name="cardName(entry.cards)"
                   @update:model-value="setCopies(entry, $event)"
                 />
                 <CoinAmount class="pick-coins" :amount="(copiesOf(entry) || extraOf(entry)) * recycleValue(entry.cards)" signed />

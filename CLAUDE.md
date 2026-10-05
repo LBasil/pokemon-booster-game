@@ -475,72 +475,68 @@ docs/technique/             technical doc (French, user choice): overview, front
   one): 3 paid runs, 3 coins x first 20 = 180 a day max vs 300 for the
   others. `ready` false -> "Coming soon". Mirror:
   `src/utils/evolutionChain.js`. Ledger kind `evolution_chain`.
-  **"PvP battles"** (0024 + 0025 + 0026, user 2026-10-03: asynchronous, "on attaque le
-  deck de qq qui est joué par le serveur"; `/challenge/games/pvp`,
-  `PvpView` + `usePvpStore` + `PvpCard`): decks of 5 different
-  challenge Pokémon per format (`all`, `era:<sets.series>` = TCG era, the
-  user's pick over the Pokémon's generation, `set:<id>`, a subset's cards
-  count for its parent). **Two decks per format** (0026, user
-  2026-10-04: "séparer le deck d'attaque et de défense"):
-  `pvp_decks.role` 'attack' (I play it) | 'defense' (the server plays it
-  when I'm attacked); no valid defense deck -> the attack deck defends.
-  `pvp_save_deck(format, cards, role = 'attack')`; `pvp_state().decks` =
-  `{ format: { attack, defense } }`, read through `deckRoles()` (also
-  reads 0025's single `{ cards, valid }`). **"Auto deck"** (same day):
-  `autoDeck(cards, role)` in `src/utils/pvp.js` fills the builder, the
-  player saves; scores damage per energy / best hit / HP per prize,
-  weighted per role, then picks with no repeated name, <= 2 multi-prize
-  cards, >= 2 cheap attackers, a type malus (simulated: ~58% vs "5
-  biggest attacks", tuning stayed within noise). `pvp_start` attacks
-  with my attack deck and picks among the 5 players of closest Elo with
-  a valid (defense, else attack) deck (last opponent last, private
-  profiles drawn without their name); the defender's next card + attack
-  are stored (`d_next`, `d_next_attack`) before the attacker plays, both
-  cards hit each other, HP carries over, 20 rounds max. **Game design**
-  (0025, user, 2026-10-03: "sinon je mets une carte avec une attaque à 130 et je
-  gagne auto"; 0024 was already applied, so it's a new migration): energy (1 at the start, +1 a round, 5 max, kept) pays the
-  attack picked each round (printed cost, `cards.attacks[].cost`) or "no
-  attack" saves it; prizes like the real TCG (`pvp_prizes()`: ex/EX/GX/V/
-  VSTAR/LEGEND 2, VMAX/TAG TEAM/V-UNION/Mega ex 3), 3 prizes win.
-  Simulated on real cards (scratch script, IA vs IA): biggest hitters no
-  longer win against built decks; cheap 1-prize attackers lead the `all`
-  format, a 2 big + 3 cheap deck holds them at 50%. Attacks
-  (`cards.attacks` [{name, damage, cost}] (cost since 0025: `ready` waits for a
-  sync that stored it; since 0026 an attack without a `cost` is dropped
-  by `pvp_card()`, never free: the 2026-10-04 midnight sync stopped
-  halfway and ~7,400 cards showed 3-energy attacks as "0"), new in 0024 with `resistances`
-  and `sets.series`, filled by `populate.mjs`, `OPTIONAL_COLUMNS` per
-  table now): "30+" = 30, "20×" = 20 x a 1-3 roll, weakness x2, resistance
-  -30, min 10; effect-only attacks are dropped and cards with none can't
-  be in a deck (~6%). The view: tap a card, then one of its attacks
-  (`.pvp-attack-panel`, unaffordable ones greyed). Elo only (user: no coins, K 32, both
-  players move, forfeit = loss), win rate = attacks + defenses, 10
-  attacks per game day. Deck hidden until played (`theirs.seen`, whole
-  deck once over). Mirror: `src/utils/pvp.js`. `ready` false (no attacks
-  yet) -> "Coming soon".
-  **Bots** (0027, user 2026-10-04: "met un pvp contre des bots, lui il
-  donne des pièces au pire, j'ai pas assez de joueurs"): `pvp_bot_start(
-  format, level)` (easy | normal | hard) = the same battle (`pvp_play`,
-  `pvp_forfeit` unchanged) with my attack deck against `pvp_bot_deck()`:
-  5 different names from 400 random fighting cards of the format, scored
-  like `autoDeck` into 5 tiers (easy 2, normal 4, hard 5).
-  `pvp_battles.defender` null + `bot`, `paid`, `coins`. No Elo, not in
-  the 10 daily attacks; coins (`BOT_COINS` 10/25/50, draw half) for the
-  first 5 bot battles started that game day (a forfeit uses the slot),
-  20 a day in all; ledger kind `pvp_bot`. `pvp_state()` adds
-  `bot_battles_left`, `bot_paid_left`, `coins`; no `bot_battles_left` =
-  0027 missing -> no bot section (`botsAvailable`). Mirror:
-  `src/utils/pvp.js` (`botCoins`).
+  **"PvP battles"** (`/challenge/games/pvp`, `PvpView` + `usePvpStore` +
+  `PvpCard` + `PvpCardSheet`), rebuilt **like Pokémon TCG Pocket** in
+  0030 (user, 2026-10-05: a bot battle was won in 2 rounds by spamming the
+  biggest attack, "aucun choix tactique"; "comme le TCG classique (genre
+  pocket)", "deck de 20 avec 2x la même carte", "on reste en différé").
+  History: 0024 asynchronous 5-card battles, 0025 energy + prizes, 0026
+  attack / defense decks + `autoDeck`, 0027 bots for coins, all replaced
+  by 0030's engine (formats, Elo, bots, coins and limits kept).
+  Rules: 20 challenge Pokémon per deck, 2 of a name, each copy owned, 1
+  Basic at least, no Trainers yet; 5-card hand with a Basic, Active + 3
+  Bench, a coin for who starts; a turn = draw, attach 1 colorless energy
+  (not on turn 1), bench Basics, evolve (not on a player's first turn nor
+  a Pokémon played this turn), retreat once, attack (ends the turn; not
+  on turn 1); weakness x2, resistance -30; Asleep / Paralyzed / Confused
+  (tails = fails, like Pocket) / Poisoned 10 / Burned 20; points 1 / 2
+  (ex, V...) / 3 (VMAX...), 3 win, or the other side has no Pokémon; 30
+  turns max. **The engine lives in SQL** (`pvp_game_new`, `pvp_do`,
+  `pvp_attack`, `pvp_checkup`, `pvp_ko`, `pvp_run`, AI `pvp_ai_turn`
+  easy / normal / hard; player defenders play "hard"); the whole state is
+  `pvp_battles.game` (jsonb, `engine` 2). The client sends one move
+  (`pvp_act`: setup, bench, evolve, attach, retreat, attack + target /
+  switch_to / energy_to, end, promote) and gets back the board, `events`
+  (the log, named EN/FR by `pvp_named_events`, the defender's draws
+  hidden) and **`hints`** (what I can do, why an attack is blocked: null
+  = usable — `?? 'unknown'` once turned every usable attack into "Not
+  now"), so the rules are never duplicated in JS; `src/utils/pvp.js`
+  only mirrors constants, deck validation (`addBlock`, `deckCheck`) and
+  `autoDeck` (lines like `pvp_bot_deck`). **Attack effects**:
+  `src/utils/attackEffects.js` turns the English text into ops at import
+  (`populate.mjs`: `attacks[].base/fx/coins/partial`), `pvp_attack`
+  interprets them; 59% of 22,557 attacks fully read, 26% have no text,
+  the rest partly ("Part of this text isn't played"). Add an op =
+  parser + test + SQL case + the doc list. **Simulate before tuning**:
+  a scratch PGlite script loading real cards (pokemontcg.io via curl:
+  Python's urllib gets a 403) and playing AI vs AI found the `null`
+  `prevented` bug (no damage at all) and set the bot levels (hard beats
+  normal 9/10, normal beats easy 10/10). `ready` = some card has
+  `attacks[].fx` (a sync after 0029); `engine` != 2 or `ready` false ->
+  "Coming soon". The e2e mock (`e2e/support/supabase.js`) runs a small
+  scripted engine (Oddish then Venusaur ex, Ember knocks both out).
   **Testers only** (0028, user 2026-10-05: "bloque le PvP uniquement pour
-  le joueur Bazouk"; a bot battle won in 2 rounds by always hitting the
-  biggest affordable attack, "aucun choix tactique"): `pvp_open_to(user)`
-  (usernames in SQL) mirrored by `PVP_TESTERS` / `pvpOpenTo()` in
-  `src/utils/pvp.js`; others get `pvp_state() = { ready: false }` ("Coming
-  soon") and `pvp_closed`. `pvp_state` / `pvp_save_deck` / `pvp_start` /
-  `pvp_bot_start` are wrappers over renamed `*_impl` functions: a later
-  migration redefines the `*_impl`, not the wrapper. The e2e PvP specs
-  play as Bazouk (mock `username` option). Next: rework the rules so a
-  battle has real decisions (to settle with the user).
+  le joueur Bazouk"): `pvp_open_to(user)` (usernames in SQL, checked
+  inline by every RPC since 0030, which dropped 0028's `*_impl`
+  wrappers) mirrored by `PVP_TESTERS` / `pvpOpenTo()`; others get
+  `pvp_state() = { ready: false }` ("Coming soon") and `pvp_closed`. The
+  e2e PvP specs play as Bazouk (mock `username` option).
+- **Cards in French** (0029, user 2026-10-05: "qu'un joueur FR puisse
+  avoir ses cartes en FR"): pokemontcg.io is English only; TCGdex (free,
+  no key) has French names, images and texts. `populate.mjs fr` (in
+  `sync`) matches sets by number + English name (`matchSet`, 60%; 172 of
+  176), then fills `cards.name_fr`, `image_fr` (base URL + `/low.webp`
+  or `/high.webp`), `attacks_fr`, `abilities_fr` through
+  `set_cards_fr()`; ~93% of cards have a French print (Base Set 2, Gym,
+  Legendary Collection... never did). Client: `useCardLocale()`
+  (`cardName`, `cardImage`, `cardSrcset`, `fallback`) when the site is
+  French and `settings.frenchCards` (Profile > Settings) is on; every
+  card `<img>` gets `data-fallback` (HoloCard: `fallback` prop) and
+  main.js swaps in the English image if the French one fails. RPCs that
+  return their own card columns (feed, boards, mini-games) stay English.
+  The search matches `name_fr`; CardDetail then says "En anglais : ...".
+- **French copy says "tu"** (the whole site tutoie, 0 "vous"): new FR
+  strings too (the first PvP rewrite used "vous" and had to be redone).
 - **Never let a player lose track of the mode** (user priority): every
   challenge page shows AppHeader's `.mode-strip` ("Challenge mode", coins,
   "Leave" → `/game`, phones included); Community and profiles
@@ -714,7 +710,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   categories, rates, unlock toasts), challenge mode (coins, daily reward,
   daily + weekly missions, recycle, craft, god packs, mini-games "Higher
   or lower", "Shiny Electrode Flip", "Super effective!" and "Evolution chain" (needs 0018 + a
-  card import), PvP battles (needs 0024 + 0025 + a card sync; bots for coins since 0027), trades with live
+  card import), PvP battles like TCG Pocket (0030 + a sync after 0029; testers only, 0028), cards in French (0029), trades with live
   updates, opt-out and cards kept out of trades), PWA, EN/FR, both themes.
 - What each migration does (details in each file's header comment):
   0001 schema · 0002 first RPCs (unused) · 0003 realistic packs + rarity
@@ -741,12 +737,12 @@ docs/technique/             technical doc (French, user choice): overview, front
   2026-10-04) · 0026 PvP attack / defense decks + attacks without a
   cost dropped (written 2026-10-04, **to apply**, then check a full
   card sync went through) · 0027 PvP against bots for coins (written
-  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027). Every one was
+  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, **to apply** after 0029). Every one was
   verified locally with PGlite before being handed over; 0010-0025 have
-  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0028 too) —
+  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0030 too) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 234 unit tests, `npm run test:db` 542 database
-  checks, `npm run test:e2e` 302 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 244 unit tests, `npm run test:db` 620 database
+  checks, `npm run test:e2e` 310 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

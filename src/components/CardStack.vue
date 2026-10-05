@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useCardLocale } from '@/composables/useCardLocale'
 import { rarityTier } from '@/utils/rarity'
 
 // Face-down pile of a pack's cards. Each tap flips the next card face-up and
@@ -19,6 +20,7 @@ const props = defineProps({
 const emit = defineEmits(['tap'])
 
 const { t } = useI18n()
+const { cardName, cardImage, cardSrcset, fallback } = useCardLocale()
 
 const SWIPE_THRESHOLD = 70 // px before a drag counts as a throw
 const HIT_LOCK_MS = 1100 // taps are ignored while a hit charges and flips
@@ -121,10 +123,11 @@ function styleOf(item, index) {
         </span>
         <span class="face face-front">
           <img
-            :src="item.card.image_small || item.card.image_url"
-            :srcset="item.card.image_small && item.card.image_url ? `${item.card.image_small} 245w, ${item.card.image_url} 734w` : null"
+            :src="cardImage(item.card)"
+            :srcset="cardSrcset(item.card)"
+            :data-fallback="fallback(item.card)"
             sizes="(max-width: 576px) 68vw, 300px"
-            :alt="stateOf(index) === 'current' ? item.card.name : ''"
+            :alt="stateOf(index) === 'current' ? cardName(item.card) : ''"
             draggable="false"
           />
           <span class="face-shine" aria-hidden="true"></span>

@@ -53,6 +53,15 @@ export const CHALLENGE_ERRORS = [
   'pvp_no_bot_battles_left',
   'pvp_no_bot_deck',
   'pvp_bots_unavailable',
+  // testers only (migration 0028), Pocket-style battles (migration 0030)
+  'pvp_closed',
+  'pvp_not_your_turn',
+  'pvp_invalid_action',
+  'pvp_bench_full',
+  'pvp_cannot_evolve_yet',
+  'pvp_no_energy',
+  'pvp_cannot_retreat',
+  'pvp_cannot_attack',
 ]
 
 // PostgREST's answer for an RPC that doesn't exist yet
@@ -61,7 +70,9 @@ const MISSING_FUNCTION = 'PGRST202'
 async function call(name, args) {
   const { data, error } = await supabase.rpc(name, args)
   if (error) {
-    if (CHALLENGE_ERRORS.includes(error.message)) throw Object.assign(new Error(error.message), { code: error.message })
+    // "pvp_cannot_attack: energy": the code, then why
+    const code = CHALLENGE_ERRORS.find((known) => error.message === known || error.message?.startsWith(`${known}: `))
+    if (code) throw Object.assign(new Error(error.message), { code })
     throw error
   }
   return data
@@ -319,30 +330,22 @@ export const stopEvolutionChain = () => call('evolution_chain_stop')
 // ---------- PvP battles (migrations 0024 + 0025: energy, prizes; 0026: attack and defense decks) ----------
 
 /**
- * Rules, whether attacks are loaded (`ready`), formats with my eligible card
- * counts, my decks and ratings per format, battles left today, the battle in
- * progress and my last 10 battles (attacks and defenses).
+ * Rules (`engine` 2 = Pocket-style, migration 0030), whether the card data
+ * is synced (`ready`), formats with my playable copies, my decks (ids) and
+ * ratings per format, battles left today, the battle in progress and my
+ * last 10 battles (attacks and defenses). Not a tester: `{ ready: false }`.
  */
 export const fetchPvpState = () => call('pvp_state')
 
-/** My challenge cards that can fight in a format ('all', 'era:<series>', 'set:<id>'), best attack first. */
+/** My challenge Pokémon that can be in a deck of a format ('all', 'era:<series>', 'set:<id>'), with `owned` copies. */
 export const fetchPvpEligible = (format) => call('pvp_eligible', { p_format: format })
 
 /**
- * Saves one of my decks (5 card ids) for a format: 'attack' (the one I play)
- * or 'defense' (the one the server plays when I'm attacked); returns the
- * state. Before 0026 there is one deck for both: an attack deck is saved the
- * old way, a defense deck errors `pvp_roles_unavailable`.
+ * Saves one of my decks (20 card ids, a card repeated per copy) for a
+ * format: 'attack' (the one I play) or 'defense' (the one the server plays
+ * when I'm attacked); returns the state.
  */
-export async function savePvpDeck(format, cardIds, role = 'attack') {
-  try {
-    return await call('pvp_save_deck', { p_format: format, p_cards: cardIds, p_role: role })
-  } catch (err) {
-    if (err?.code !== MISSING_FUNCTION) throw err
-  }
-  if (role !== 'attack') throw Object.assign(new Error('pvp_roles_unavailable'), { code: 'pvp_roles_unavailable' })
-  return call('pvp_save_deck', { p_format: format, p_cards: cardIds })
-}
+export const savePvpDeck = (format, cardIds, role = 'attack') => call('pvp_save_deck', { p_format: format, p_cards: cardIds, p_role: role })
 
 /** Finds an opponent and starts a battle (or returns the one in progress); returns the state. */
 export const startPvpBattle = (format) => call('pvp_start', { p_format: format })
@@ -362,12 +365,14 @@ export async function startPvpBotBattle(format, level) {
 }
 
 /**
- * Plays my card at `slot` (0-4) with one of its attacks (index in its
- * `attacks`, null = no attack, saving the energy) against the defender's
- * next card.
- * @returns {Promise<{ round: object, battle: object, state: object }>}
+ * One move in the battle in progress (migration 0030): { type: 'setup',
+ * active, bench }, 'bench' (card), 'evolve' (card, pos), 'attach' (pos),
+ * 'retreat' (pos), 'attack' (attack, target?, switch_to?, energy_to?),
+ * 'end', 'promote' (pos). Card = index in my cards, pos = 0 Active, 1-3 Bench.
+ * The server then plays on until it's my move again.
+ * @returns {Promise<{ battle: object, events: object[], state: object }>}
  */
-export const playPvpCard = (slot, attack) => call('pvp_play', { p_slot: slot, p_attack: attack })
+export const pvpAct = (action) => call('pvp_act', { p_action: action })
 
 /** Gives up the battle in progress (a loss). */
 export const forfeitPvpBattle = () => call('pvp_forfeit')

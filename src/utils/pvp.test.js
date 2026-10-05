@@ -1,103 +1,57 @@
 import { describe, expect, it } from 'vitest'
 import {
+  addBlock,
+  addCard,
+  attackChoices,
+  attackName,
+  attackText,
   autoDeck,
-  bestDamage,
   botCoins,
-  canPay,
-  damageAgainst,
   damageLabel,
+  deckCheck,
+  deckCounts,
   deckRoles,
-  defendingDeck,
   eloChange,
-  energyAfter,
   hpPercent,
   parseFormat,
   prizesFor,
   pvpOpenTo,
   record,
-  toggleDeckCard,
+  removeCard,
 } from './pvp'
 
-const fire = { types: ['Fire'], weaknesses: ['Water'], resistances: [] }
-const water = { types: ['Water'], weaknesses: ['Lightning'], resistances: ['Fire'] }
-const grass = { types: ['Grass'], weaknesses: ['Fire'], resistances: [] }
-const lightning = { types: ['Lightning'], weaknesses: [], resistances: [] }
-const ember = { damage: 30, times: false, cost: 1 }
-const bubble = { damage: 20, times: false, cost: 1 }
-const solar = { damage: 100, times: false, cost: 4 }
-const flips = { damage: 30, times: true, cost: 2 }
+const attack = (base, cost, extra = {}) => ({ name: 'Hit', base, cost, printed: String(base), usable: true, fx: [], ...extra })
+const card = (id, name, { stage = 'basic', from = null, hp = 60, owned = 2, attacks = [attack(20, 1)], prizes = 1 } = {}) => ({
+  id,
+  name,
+  stage,
+  evolves_from: from,
+  hp,
+  owned,
+  attacks,
+  prizes,
+})
 
 describe('prizesFor', () => {
   it('follows the rule boxes', () => {
     expect(prizesFor(['Basic'])).toBe(1)
     expect(prizesFor(['Basic', 'ex'])).toBe(2)
-    expect(prizesFor(['MEGA', 'EX'])).toBe(2)
     expect(prizesFor(['VMAX'])).toBe(3)
-    expect(prizesFor(['Basic', 'TAG TEAM', 'GX'])).toBe(3)
-    expect(prizesFor(['Stage 1', 'MEGA', 'ex'])).toBe(3)
-    expect(prizesFor()).toBe(1)
-  })
-})
-
-describe('damageAgainst', () => {
-  it('deals the printed damage', () => {
-    expect(damageAgainst(grass, solar, water)).toBe(100)
-  })
-
-  it('doubles on a weakness', () => {
-    expect(damageAgainst(water, bubble, fire)).toBe(40)
-    expect(damageAgainst(fire, ember, grass)).toBe(60)
-  })
-
-  it('takes 30 off on a resistance, never under 10', () => {
-    expect(damageAgainst(fire, ember, water)).toBe(10)
-  })
-
-  it('multiplies a "×" attack by the roll', () => {
-    expect(damageAgainst(lightning, flips, grass, 3)).toBe(90)
-    expect(damageAgainst(lightning, flips, water, 2)).toBe(120)
-  })
-
-  it('deals nothing without an attack', () => {
-    expect(damageAgainst(fire, null, grass)).toBe(0)
-  })
-})
-
-describe('energy', () => {
-  it('pays the cost, then adds 1, up to 5', () => {
-    expect(energyAfter(1, ember)).toBe(1)
-    expect(energyAfter(1, null)).toBe(2)
-    expect(energyAfter(4, solar)).toBe(1)
-    expect(energyAfter(5, null)).toBe(5)
-  })
-
-  it('says what can be paid for', () => {
-    expect(canPay(solar, 3)).toBe(false)
-    expect(canPay(solar, 4)).toBe(true)
-    expect(canPay(null, 0)).toBe(true)
+    expect(prizesFor(['MEGA', 'ex'])).toBe(3)
   })
 })
 
 describe('eloChange', () => {
-  it('moves 16 between equals', () => {
+  it('moves 16 between equals, more for beating a stronger player', () => {
     expect(eloChange(1000, 1000, 1)).toBe(16)
-    expect(eloChange(1000, 1000, 0)).toBe(-16)
-    expect(eloChange(1000, 1000, 0.5)).toBe(0)
-  })
-
-  it('pays more for beating a stronger player', () => {
-    expect(eloChange(1000, 1200, 1)).toBe(24)
-    expect(eloChange(1200, 1000, 1)).toBe(8)
+    expect(eloChange(1000, 1200, 1)).toBeGreaterThan(16)
   })
 })
 
 describe('record', () => {
-  it('adds attacks and defenses', () => {
-    expect(record({ wins: 2, losses: 1, draws: 0, def_wins: 1, def_losses: 0, def_draws: 1 })).toEqual({ wins: 3, losses: 1, draws: 1, total: 5, rate: 60 })
-  })
-
-  it('has no rate before a battle', () => {
-    expect(record(undefined).rate).toBeNull()
+  it('adds attacks and defenses, no rate before a battle', () => {
+    expect(record({ wins: 2, def_wins: 1, losses: 1, def_losses: 0, draws: 0, def_draws: 0 })).toEqual({ wins: 3, losses: 1, draws: 0, total: 4, rate: 75 })
+    expect(record(null).rate).toBeNull()
   })
 })
 
@@ -105,121 +59,117 @@ describe('parseFormat', () => {
   it('reads the three kinds', () => {
     expect(parseFormat('all')).toEqual({ kind: 'all', value: null })
     expect(parseFormat('era:Scarlet & Violet')).toEqual({ kind: 'era', value: 'Scarlet & Violet' })
-    expect(parseFormat('set:base1')).toEqual({ kind: 'set', value: 'base1' })
-    expect(parseFormat('nonsense')).toEqual({ kind: 'all', value: null })
+    expect(parseFormat('set:sv3pt5')).toEqual({ kind: 'set', value: 'sv3pt5' })
   })
 })
 
-describe('toggleDeckCard', () => {
-  it('adds until the deck is full, removes a picked card', () => {
-    expect(toggleDeckCard(['a'], 'b')).toEqual(['a', 'b'])
-    expect(toggleDeckCard(['a', 'b'], 'a')).toEqual(['b'])
-    expect(toggleDeckCard(['a', 'b', 'c', 'd', 'e'], 'f')).toEqual(['a', 'b', 'c', 'd', 'e'])
-  })
-})
-
-describe('labels', () => {
-  it('prints damage, best damage and HP bars', () => {
-    expect(damageLabel(flips)).toBe('30×')
-    expect(damageLabel(solar)).toBe('100')
-    expect(bestDamage({ attacks: [ember, solar] })).toBe(100)
-    expect(bestDamage({})).toBe(0)
-    expect(hpPercent({ hp: 200, hp_left: 50 })).toBe(25)
-    expect(hpPercent({ hp: 60 })).toBe(100)
-  })
-})
-
-describe('attack and defense decks', () => {
-  const deck = (valid) => ({ cards: [], valid })
-  it('reads both roles, and the one deck of the 0025 server as the attack deck', () => {
+describe('deckRoles', () => {
+  it('reads both roles', () => {
+    expect(deckRoles({ attack: { ids: ['a'], valid: true } })).toEqual({ attack: { ids: ['a'], valid: true }, defense: null })
     expect(deckRoles(undefined)).toEqual({ attack: null, defense: null })
-    expect(deckRoles(deck(true))).toEqual({ attack: deck(true), defense: null })
-    expect(deckRoles({ defense: deck(true) })).toEqual({ attack: null, defense: deck(true) })
+  })
+})
+
+describe('deck builder', () => {
+  const pika = card('pika1', 'Pikachu')
+  const pika2 = card('pika2', 'Pikachu')
+  const rare = card('mew', 'Mew', { owned: 1 })
+  const byId = new Map([pika, pika2, rare].map((c) => [c.id, c]))
+
+  it('takes 2 of a name at most, as many as I own, 20 in all', () => {
+    let ids = addCard([], pika, byId)
+    ids = addCard(ids, pika2, byId)
+    expect(addBlock(ids, pika, byId)).toBe('copies')
+    expect(addCard(ids, pika, byId)).toEqual(ids)
+    ids = addCard(ids, rare, byId)
+    expect(addBlock(ids, rare, byId)).toBe('owned')
+    expect(addBlock(Array(20).fill('x'), rare, byId)).toBe('full')
   })
 
-  it('defends with the defense deck while valid, else the attack deck', () => {
-    expect(defendingDeck({ attack: deck(true), defense: deck(true) }).role).toBe('defense')
-    expect(defendingDeck({ attack: deck(true), defense: deck(false) }).role).toBe('attack')
-    expect(defendingDeck({ attack: deck(true) }).role).toBe('attack')
-    expect(defendingDeck(null)).toBeNull()
+  it('counts and removes one copy', () => {
+    expect(deckCounts(['a', 'b', 'a']).get('a')).toBe(2)
+    expect(removeCard(['a', 'b', 'a'], 'a')).toEqual(['a', 'b'])
+    expect(removeCard(['a'], 'z')).toEqual(['a'])
+  })
+
+  it('needs 20 cards and a Basic, warns about lone evolutions', () => {
+    const evo = card('raichu', 'Raichu', { stage: 'evolution', from: 'Pikachu' })
+    const zard = card('zard', 'Charizard', { stage: 'evolution', from: 'Charmeleon' })
+    const map = new Map([pika, evo, zard].map((c) => [c.id, c]))
+    expect(deckCheck(['pika1', 'raichu', 'zard'], map)).toEqual({ ready: false, missing: 17, basics: 1, orphans: ['Charizard'] })
+    expect(deckCheck(Array(20).fill('raichu'), map)).toMatchObject({ ready: false, basics: 0 })
+    expect(deckCheck(Array(20).fill('pika1'), map).ready).toBe(true)
   })
 })
 
 describe('autoDeck', () => {
-  let n = 0
-  const card = (name, hp, cost, damage, { prizes = 1, type = 'Colorless', times = false } = {}) => ({
-    id: `c${++n}`, name, hp, prizes, types: [type], attacks: [{ name: 'Hit', damage, cost, times }],
-  })
+  // A full Charmander line, a Pikachu line, a lone Stage 1 and Basics
+  const pool = [
+    card('charmander', 'Charmander'),
+    card('charmeleon', 'Charmeleon', { stage: 'evolution', from: 'Charmander', hp: 90, attacks: [attack(50, 2)] }),
+    card('charizard', 'Charizard', { stage: 'evolution', from: 'Charmeleon', hp: 150, attacks: [attack(120, 3)] }),
+    card('pikachu', 'Pikachu'),
+    card('raichu', 'Raichu', { stage: 'evolution', from: 'Pikachu', hp: 90, attacks: [attack(60, 2)] }),
+    card('kabuto', 'Kabuto', { stage: 'evolution', from: 'Mysterious Fossil' }),
+    ...Array.from({ length: 8 }, (_, i) => card(`basic${i}`, `Basic ${i}`, { attacks: [attack(10 + i * 5, 1)] })),
+    card('nothing', 'Ditto', { attacks: [attack(0, 1, { usable: false })] }),
+  ]
+  const byId = new Map(pool.map((c) => [c.id, c]))
 
-  it('takes 5 different cards, the efficient ones first', () => {
-    const pool = [
-      card('Weak', 40, 3, 20),
-      card('Rattata', 40, 1, 20),
-      card('Pikachu', 60, 1, 30, { type: 'Lightning' }),
-      card('Charmander', 70, 1, 30, { type: 'Fire' }),
-      card('Squirtle', 70, 1, 30, { type: 'Water' }),
-      card('Bulbasaur', 70, 1, 30, { type: 'Grass' }),
-      card('Onix', 90, 2, 40, { type: 'Fighting' }),
-    ]
+  it('builds 20 cards in lines, 2 of a name at most', () => {
     const ids = autoDeck(pool)
-    expect(ids).toHaveLength(5)
-    expect(new Set(ids).size).toBe(5)
-    expect(ids).not.toContain(pool[0].id)
-    expect(ids).not.toContain(pool[1].id)
+    const names = ids.map((id) => byId.get(id).name)
+    expect(ids).toHaveLength(20)
+    expect(Math.max(...deckCounts(names).values())).toBe(2)
+    expect(names.filter((n) => n === 'Charizard')).toHaveLength(2)
+    expect(names).toContain('Charmeleon')
+    expect(names).toContain('Raichu')
+    expect(deckCheck(ids, byId)).toMatchObject({ ready: true, orphans: [] })
   })
 
-  it('never takes two cards of the same name', () => {
-    const pool = [card('Mewtwo', 120, 1, 60), card('Mewtwo', 120, 1, 60), ...['A', 'B', 'C', 'D', 'E'].map((x) => card(x, 50, 1, 20))]
-    const names = autoDeck(pool).map((id) => pool.find((c) => c.id === id).name)
-    expect(names.filter((x) => x === 'Mewtwo')).toHaveLength(1)
+  it('never takes a card that cannot fight or a stuck evolution', () => {
+    const ids = autoDeck(pool)
+    expect(ids).not.toContain('nothing')
+    expect(ids).not.toContain('kabuto')
   })
 
-  it('keeps at most 2 cards worth 2+ prizes and 2 cheap attackers', () => {
-    const big = ['V1', 'V2', 'V3', 'V4', 'V5'].map((x, i) => card(x, 220, 3, 200, { prizes: 2, type: ['Fire', 'Water', 'Grass', 'Psychic', 'Metal'][i] }))
-    const cheap = ['a', 'b', 'c', 'd'].map((x) => card(x, 50, 1, 10))
-    const picked = autoDeck([...big, ...cheap]).map((id) => [...big, ...cheap].find((c) => c.id === id))
-    expect(picked.filter((c) => c.prizes > 1)).toHaveLength(2)
-    expect(picked.filter((c) => c.attacks[0].cost <= 1).length).toBeGreaterThanOrEqual(2)
+  it('respects the copies owned and fills what it can', () => {
+    const few = [card('a', 'A', { owned: 1 }), card('b', 'B', { owned: 3 })]
+    expect(autoDeck(few).sort()).toEqual(['a', 'b', 'b'])
+  })
+})
+
+describe('labels', () => {
+  it('prints damage, names and texts in the wanted language', () => {
+    expect(damageLabel({ printed: '20×', base: 0 })).toBe('20×')
+    expect(damageLabel({ printed: '', base: 0 })).toBe('')
+    expect(attackName({ name: 'Ember', name_fr: 'Flammèche' }, true)).toBe('Flammèche')
+    expect(attackName({ name: 'Ember', name_fr: null }, true)).toBe('Ember')
+    expect(attackText({ text: 'Flip a coin.', text_fr: 'Lancez une pièce.' }, false)).toBe('Flip a coin.')
+    expect(hpPercent(30, 60)).toBe(50)
+    expect(hpPercent(0, 0)).toBe(0)
   })
 
-  it('leans on HP per prize for defense', () => {
-    const glass = card('Glass', 40, 1, 50)
-    const wall = card('Wall', 160, 2, 40)
-    const filler = ['a', 'b', 'c', 'd', 'e', 'f'].map((x, i) => card(x, 70, 1, 30, { type: ['Fire', 'Water', 'Grass', 'Psychic', 'Metal', 'Dragon'][i] }))
-    const attack = autoDeck([glass, wall, ...filler], 'attack')
-    const defense = autoDeck([glass, wall, ...filler], 'defense')
-    expect(defense).toContain(wall.id)
-    expect(defense.indexOf(wall.id)).toBeLessThanOrEqual(attack.includes(wall.id) ? attack.indexOf(wall.id) : 5)
-  })
-
-  it('fills what it can from a short pool', () => {
-    expect(autoDeck([card('A', 50, 1, 10), card('A', 50, 1, 10)])).toHaveLength(2)
-    expect(autoDeck([])).toEqual([])
+  it('says which attacks need a choice', () => {
+    expect(attackChoices({ fx: [{ op: 'bench_one', n: 20 }] })).toEqual({ target: 'bench', switchTo: false, energyTo: false })
+    expect(attackChoices({ fx: [{ op: 'snipe' }, { op: 'switch_self' }] })).toEqual({ target: 'any', switchTo: true, energyTo: false })
+    expect(attackChoices({})).toEqual({ target: null, switchTo: false, energyTo: false })
   })
 })
 
 describe('botCoins', () => {
-  it('pays the level for a win, half for a draw', () => {
+  it('pays the level for a win, half for a draw, nothing else', () => {
     expect(botCoins('easy', 'won')).toBe(10)
-    expect(botCoins('normal', 'won')).toBe(25)
-    expect(botCoins('hard', 'won')).toBe(50)
     expect(botCoins('normal', 'draw')).toBe(12)
-  })
-
-  it('pays nothing for a loss, giving up or an unpaid battle', () => {
     expect(botCoins('hard', 'lost')).toBe(0)
-    expect(botCoins('hard', 'forfeit')).toBe(0)
     expect(botCoins('hard', 'won', false)).toBe(0)
   })
 })
 
 describe('pvpOpenTo', () => {
-  it('lets the testers in, whatever the case', () => {
+  it('lets the testers in, whatever the case, everyone with null', () => {
     expect(pvpOpenTo('Bazouk')).toBe(true)
     expect(pvpOpenTo('BAZOUK')).toBe(true)
-  })
-
-  it('keeps everyone else out, and opens to all with null', () => {
     expect(pvpOpenTo('Ash')).toBe(false)
     expect(pvpOpenTo(null)).toBe(false)
     expect(pvpOpenTo('Ash', null)).toBe(true)

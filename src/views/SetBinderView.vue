@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useCardLocale } from '@/composables/useCardLocale'
 import { useRoute } from 'vue-router'
 import { fetchSetCards } from '@/api/cards'
 import { modeRoutes } from '@/router/modes'
@@ -28,6 +29,7 @@ const isChallenge = props.mode === 'challenge'
 const routes = modeRoutes(props.mode)
 
 const { t, locale } = useI18n()
+const { cardName, cardImage, fallback } = useCardLocale()
 const route = useRoute()
 const collectionStore = useModeCollectionStore(props.mode)
 const challenge = useChallengeStore()
@@ -142,12 +144,12 @@ const openEntry = computed(() => {
             class="binder-slot"
             :class="{ missing: !slot.quantity }"
             :data-tier="rarityTier(slot.card)"
-            :aria-label="slot.quantity ? slot.card.name : t('binder.missingCard', { number: cardNumber(slot.card.id), name: slot.card.name })"
+            :aria-label="slot.quantity ? cardName(slot.card) : t('binder.missingCard', { number: cardNumber(slot.card.id), name: cardName(slot.card) })"
             @click="openIndex = index"
           >
             <span class="binder-img">
-              <HoloCard v-if="slot.quantity" :src="slot.card.image_small || slot.card.image_url" alt="" :max-tilt="8" />
-              <img v-else :src="slot.card.image_small || slot.card.image_url" alt="" loading="lazy" />
+              <HoloCard v-if="slot.quantity" :src="cardImage(slot.card)" :fallback="fallback(slot.card)" alt="" :max-tilt="8" />
+              <img v-else :src="cardImage(slot.card)" :data-fallback="fallback(slot.card)" alt="" loading="lazy" />
               <span v-if="slot.quantity > 1" class="binder-qty">x{{ slot.quantity }}</span>
               <span v-if="!isChallenge && wishlist.has(slot.card.id)" class="binder-wish" :title="t('binder.wanted')">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg>

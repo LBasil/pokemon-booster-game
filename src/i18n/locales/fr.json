@@ -215,6 +215,7 @@
     "shareDownloaded": "Image téléchargée. Partage-la où tu veux.",
     "shareError": "Impossible de créer l'image.",
     "frenchName": "En français : {name}",
+    "englishName": "En anglais : {name}",
     "goalLabel": "Série la plus avancée :",
     "goalCount": "{owned} / {total} ({percent} %)",
     "goalAria": "Progression de {name}",
@@ -313,6 +314,8 @@
     "showMore": "Voir plus ({count})",
     "largeTextLabel": "Texte plus grand",
     "largeTextDesc": "Lettres plus grandes et textes secondaires plus foncés, plus faciles à lire.",
+    "frenchCardsLabel": "Cartes en français",
+    "frenchCardsDesc": "Les cartes montrent leur nom, leur image et le texte de leurs attaques en français (celles jamais sorties en français restent en anglais).",
     "settingsJump": "Réglages : son, texte plus grand…",
     "nameFromEmail": "Ton pseudo vient de ton adresse email, et tout le monde peut le voir. En choisir un autre ?",
     "nameFromEmailCta": "Changer mon pseudo"
@@ -468,7 +471,7 @@
       "recycle_copies_unavailable": "Choisir combien de copies recycler n'est pas encore disponible. Recycle toutes les copies en trop d'une carte, ou réessaie plus tard.",
       "counter_unavailable": "Les contre-offres ne sont pas encore disponibles. Accepte ou refuse cette offre, ou réessaie plus tard.",
       "pvp_invalid_format": "Ce format n'existe pas.",
-      "pvp_invalid_deck": "Ce deck n'est pas valide : 5 cartes différentes que tu possèdes, capables de combattre dans ce format.",
+      "pvp_invalid_deck": "Ce deck ne respecte pas les règles : 20 cartes que tu possèdes, 2 du même nom au maximum, au moins un Pokémon de base.",
       "pvp_no_deck": "Monte d'abord un deck dans ce format.",
       "pvp_no_opponent": "Pas encore d'adversaire dans ce format : personne d'autre n'y a de deck. Affronte un bot en attendant (sous le bouton), essaie un autre format, ou reviens plus tard.",
       "pvp_no_battles_left": "Plus de combats aujourd'hui : reviens demain.",
@@ -480,7 +483,15 @@
       "pvp_invalid_level": "Ce niveau de bot n'existe pas.",
       "pvp_no_bot_battles_left": "Plus de combats contre les bots aujourd'hui : reviens demain.",
       "pvp_no_bot_deck": "Pas assez de Pokémon différents dans ce format pour donner un deck à un bot. Essaie un autre format.",
-      "pvp_bots_unavailable": "Les bots arrivent bientôt."
+      "pvp_bots_unavailable": "Les bots arrivent bientôt.",
+      "pvp_closed": "Les combats PvP arrivent bientôt.",
+      "pvp_not_your_turn": "Ce n'est pas ton tour.",
+      "pvp_invalid_action": "Ce coup n'est pas possible maintenant.",
+      "pvp_bench_full": "Ton Banc est plein (3 Pokémon).",
+      "pvp_cannot_evolve_yet": "Il ne peut pas évoluer ce tour-ci.",
+      "pvp_no_energy": "Pas d'Énergie à attacher ce tour-ci.",
+      "pvp_cannot_retreat": "Ton Pokémon Actif ne peut pas battre en retraite maintenant.",
+      "pvp_cannot_attack": "Cette attaque ne peut pas être utilisée maintenant."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -741,7 +752,7 @@
       },
       "pvp": {
         "title": "Combats PvP",
-        "desc": "Ton deck contre ceux des autres joueurs, ou contre des bots pour des pièces : énergie, récompenses, Elo."
+        "desc": "Comme Pokémon JCC Pocket : decks de 20 cartes, un Banc, des Énergies et des évolutions, contre les decks des joueurs ou des bots pour des pièces."
       },
       "boss-raid": {
         "title": "Raid de boss",
@@ -834,16 +845,15 @@
   },
   "pvp": {
     "title": "Combats PvP",
-    "subtitle": "Monte un deck de 5 cartes du défi et affronte les decks des autres joueurs. Le serveur joue leur deck : pas besoin qu'ils soient connectés. Gère ton énergie, prends 3 récompenses, gagne des points Elo. Pas encore beaucoup de joueurs ? Les bots rapportent des pièces.",
+    "subtitle": "Des combats comme dans Pokémon JCC Pocket : un deck de 20 cartes du défi, un Pokémon Actif et un Banc, une Énergie par tour, des évolutions. Marque 3 points pour gagner de l'Elo contre les decks des autres joueurs (joués par le serveur), ou des pièces contre des bots.",
     "unavailable": "Les combats PvP arrivent bientôt.",
     "loadError": "Impossible de charger les combats PvP. Réessaie dans un instant.",
-    "hiddenCard": "Une carte pas encore jouée",
     "hpLabel": "PV restants",
     "ko": "K.O.",
     "hp": "{left} / {hp} PV",
     "hpPrinted": "{hp} PV",
-    "weakTo": "Faible contre {types}",
-    "battlesLeftLine": "{count} combat restant aujourd'hui | {count} combats restants aujourd'hui",
+    "weakTo": "Faiblesse : {types}",
+    "battlesLeftLine": "Encore {count} combat aujourd'hui | Encore {count} combats aujourd'hui",
     "noBattlesLeft": "Plus de combats aujourd'hui : reviens demain.",
     "eloShort": "Elo {elo}",
     "formats": {
@@ -854,55 +864,91 @@
     "kinds": {
       "all": "Toutes les cartes",
       "era": "Une ère",
-      "set": "Une extension"
+      "set": "Un set"
     },
     "kindHelp": {
-      "all": "Toutes les cartes du défi peuvent combattre. Les cartes récentes frappent bien plus fort que les anciennes.",
+      "all": "N'importe quel Pokémon du défi peut entrer dans ton deck. Les cartes récentes tapent bien plus fort que les anciennes.",
       "era": "Seulement les cartes d'une ère du JCC (Base, Neo, EX... Écarlate et Violet) : leurs PV et leurs dégâts se valent.",
-      "set": "Seulement les cartes d'une extension : le format le plus équitable."
+      "set": "Seulement les cartes d'un set : le format le plus équitable."
     },
     "pickEra": "Ère",
-    "pickSet": "Extension",
+    "pickSet": "Set",
     "optionCount": "{name} (aucune carte) | {name} (1 carte) | {name} ({count} cartes)",
-    "noSets": "Tu n'as encore aucune carte capable de combattre : ouvre d'abord des boosters du défi.",
+    "noSets": "Tu n'as pas encore de Pokémon pour un deck : ouvre d'abord des boosters du défi.",
     "elo": "Elo",
-    "record": "Gagnés / perdus / nuls",
+    "record": "Victoires / défaites / nuls",
     "recordValue": "{wins} / {losses} / {draws}",
     "winRate": "Taux de victoire",
     "deckTitle": {
       "attack": "Deck d'attaque",
       "defense": "Deck de défense"
     },
-    "buildDeck": "Monter mon deck",
-    "editDeck": "Changer mon deck",
+    "buildDeck": "Créer mon deck",
+    "editDeck": "Modifier mon deck",
     "buildTitle": {
-      "attack": "Deck d'attaque : choisis 5 cartes ({format})",
-      "defense": "Deck de défense : choisis 5 cartes ({format})"
+      "attack": "Deck d'attaque ({format})",
+      "defense": "Deck de défense ({format})"
     },
-    "notEnough": "Il te faut {deck} cartes capables de combattre dans ce format, tu n'en as aucune. | Il te faut {deck} cartes capables de combattre dans ce format, tu en as 1. | Il te faut {deck} cartes capables de combattre dans ce format, tu en as {count}.",
+    "buildHelp": {
+      "attack": "Tu joues ce deck quand tu attaques : des Pokémon de base pour démarrer, leurs évolutions pour frapper fort, 2 exemplaires de ceux qui comptent.",
+      "defense": "Le serveur joue ce deck quand on t'attaque : des Pokémon solides et des lignées d'évolution simples marchent le mieux."
+    },
+    "search": "Chercher une carte",
+    "filter": {
+      "all": "Toutes",
+      "basic": "De base",
+      "evolution": "Évolutions"
+    },
+    "inDeck": "{count} dans le deck",
+    "ownedCopies": "{count} possédée(s)",
+    "add": "Ajouter {name}",
+    "remove": "Retirer un {name}",
+    "deckEmpty": "Touche une carte ci-dessous pour l'ajouter. 20 cartes, 2 du même nom au maximum.",
+    "missing": "Encore 1 carte | Encore {count} cartes",
+    "noBasic": "Mets au moins un Pokémon de base : le combat commence avec l'un d'eux.",
+    "orphans": "{names} ne peut pas évoluer ici : le Pokémon dont il évolue n'est pas dans le deck.",
+    "blocked": {
+      "copies": "2 cartes du même nom au maximum",
+      "owned": "Tu n'as pas d'autre exemplaire",
+      "full": "Le deck est complet (20)"
+    },
+    "notEnough": "Il faut {deck} cartes pour un deck dans ce format, tu n'en as aucune. | Il faut {deck} cartes pour un deck dans ce format, tu en as 1. | Il faut {deck} cartes pour un deck dans ce format, tu en as {count}.",
     "openBoosters": "Ouvrir des boosters du défi",
     "saveDeck": "Enregistrer le deck",
     "cancel": "Annuler",
-    "deckInvalid": "Certaines de ces cartes ont quitté ta collection (recyclées ou échangées) : change ton deck pour combattre à nouveau.",
-    "noDeck": "Pas encore de deck dans ce format. Tu n'as aucune carte capable de combattre ici. | Pas encore de deck dans ce format. Tu as 1 carte capable de combattre ici (il en faut {deck}). | Pas encore de deck dans ce format. Tu as {count} cartes capables de combattre ici (il en faut {deck}).",
+    "clear": "Vider le deck",
+    "deckInvalid": "Certaines de ces cartes ont quitté ta collection (recyclées ou échangées), ou le deck date des anciens combats à 5 cartes : modifie-le pour combattre à nouveau.",
+    "noDeck": "Pas encore de deck dans ce format. Tu n'as aucun Pokémon pour en faire un ici. | Pas encore de deck dans ce format. Tu as 1 carte pour en faire un ici ({deck} nécessaires). | Pas encore de deck dans ce format. Tu as {count} cartes pour en faire un ici ({deck} nécessaires).",
+    "deckSummary": "{count} cartes, {basics} de base",
     "fight": "Trouver un adversaire",
     "vs": "Contre {name}",
-    "privateTrainer": "Un dresseur privé",
-    "round": "Manche",
-    "theirCards": "Les cartes de {name}",
-    "myCards": "Mes cartes",
-    "playOne": "Mes cartes",
-    "playCard": "Choisir {name} ({left} / {hp} PV)",
-    "firstRound": "Sa première carte est déjà choisie. Choisis l'une des tiennes, puis son attaque.",
-    "roundDealt": "Ton {mine} utilise {attack} : {damage} dégâts à {theirs}.",
-    "roundTaken": "{theirs} utilise {attack} : {damage} dégâts.",
-    "roll": "(x{roll})",
-    "koTheirs": "{name} est K.O. !",
-    "koMine": "Ton {name} est K.O.",
+    "privateTrainer": "un dresseur privé",
+    "autoDeck": "Deck auto",
+    "deckRole": {
+      "attack": "Tu joues ce deck quand tu attaques.",
+      "defense": "Les autres joueurs attaquent ce deck : tu gagnes ou perds de l'Elo à chaque fois."
+    },
+    "defenseFallback": "Pas encore de deck de défense : ton deck d'attaque te défend en attendant. Les autres joueurs l'attaquent, et tu gagnes ou perds de l'Elo à chaque fois.",
+    "defenseInvalid": "Certaines de ces cartes ont quitté ta collection : ton deck d'attaque te défend tant que tu ne modifies pas celui-ci.",
+    "botsTitle": "S'entraîner contre un bot",
+    "botsHelp": "Mêmes règles, avec ton deck d'attaque. Pas d'Elo : des pièces à la place.",
+    "levels": {
+      "easy": "Facile",
+      "normal": "Normal",
+      "hard": "Difficile"
+    },
+    "botName": "un bot ({level})",
+    "botWin": "Victoire :",
+    "botPaidLeft": "Encore {count} combat payant contre un bot aujourd'hui | Encore {count} combats payants contre un bot aujourd'hui",
+    "botUnpaidLeft": "Plus de pièces aujourd'hui : encore {count} combat contre un bot pour le plaisir. | Plus de pièces aujourd'hui : encore {count} combats contre un bot pour le plaisir.",
+    "noBotBattlesLeft": "Plus de combats contre les bots aujourd'hui : reviens demain.",
+    "coinsWon": "Tu gagnes",
+    "noCoins": "Pas de pièces cette fois.",
+    "unpaid": "Pas de pièces : tes combats payants contre les bots sont épuisés pour aujourd'hui.",
     "eloChange": "Elo {change}",
     "result": {
-      "won": "Victoire !",
-      "lost": "Défaite.",
+      "won": "Tu gagnes !",
+      "lost": "Tu perds.",
       "draw": "Match nul.",
       "forfeit": "Tu as abandonné."
     },
@@ -922,58 +968,179 @@
     },
     "noHistory": "Aucun combat pour l'instant. Tes défenses s'afficheront ici aussi.",
     "boardTitle": "Classement : {format}",
-    "boardEmpty": "Personne n'est encore classé dans ce format.",
+    "boardEmpty": "Personne n'est classé dans ce format pour l'instant.",
     "boardError": "Impossible de charger le classement.",
-    "myRank": "Toi : n°{rank}, Elo {elo}",
+    "myRank": "Toi : n° {rank}, Elo {elo}",
+    "pointsBadge": "{count} points",
+    "turn": "Tour {turn} / {max}",
+    "myPoints": "Mes points",
+    "theirPoints": "Ses points",
+    "deckLeft": "Deck : {count}",
+    "handCount": "Main : {count}",
+    "theirSide": "Côté {name}",
+    "mySide": "Mon côté",
+    "active": "Actif",
+    "bench": "Banc",
+    "emptySlot": "Vide",
+    "myHand": "Ma main ({count})",
+    "yourTurn": "À toi de jouer",
+    "theirTurn": "Tour de l'adversaire",
+    "setupTitle": "Place tes Pokémon",
+    "setupHelp": "Touche un Pokémon de base de ta main pour en faire ton Pokémon Actif, puis ceux à mettre sur ton Banc (3 au maximum).",
+    "setupStart": "Commencer le combat",
+    "setupActive": "Actif",
+    "setupBenched": "Banc",
+    "promoteTitle": "Ton Pokémon Actif est K.O.",
+    "promoteHelp": "Touche le Pokémon de ton Banc qui prend sa place.",
+    "energyReady": "1 Énergie à attacher ce tour-ci",
+    "energyUsed": "Énergie attachée ce tour-ci",
+    "energyFirst": "Pas d'Énergie au premier tour",
+    "attach": "Attacher l'Énergie",
+    "toBench": "Mettre sur le Banc",
+    "evolveOnto": "Faire évoluer {name}",
+    "retreatHere": "Retraite : {name} va sur le Banc ({cost})",
+    "free": "gratuit",
+    "endTurn": "Finir mon tour",
+    "attackCost": "gratuite | 1 Énergie | {count} Énergies",
+    "details": "Détails de la carte",
+    "close": "Fermer",
+    "selectHint": "Touche une carte de ta main ou l'un de tes Pokémon pour voir ce qu'il peut faire.",
+    "waitHint": "Le serveur joue...",
+    "blocks": {
+      "first_turn": "Pas au premier tour",
+      "energy": "Pas assez d'Énergie",
+      "asleep": "Endormi",
+      "paralyzed": "Paralysé",
+      "locked": "Ne peut pas attaquer ce tour-ci",
+      "once": "Une fois par combat, déjà utilisée",
+      "unusable": "Son effet n'est pas joué en combat",
+      "not_your_turn": "Pas ton tour",
+      "no_active": "Pas de Pokémon Actif",
+      "unknown": "Pas maintenant"
+    },
+    "pickTarget": "Choisis la cible",
+    "pickSwitch": "Choisis qui entre en jeu",
+    "pickEnergyTo": "Qui reçoit l'Énergie ?",
+    "statuses": {
+      "asleep": "Endormi",
+      "paralyzed": "Paralysé",
+      "confused": "Confus",
+      "poisoned": "Empoisonné",
+      "burned": "Brûlé"
+    },
+    "stage": {
+      "basic": "De base",
+      "evolution": "Évolue de {name}",
+      "none": "Ne peut pas être jouée"
+    },
+    "notApplied": "Une partie de ce texte n'est pas jouée en combat.",
+    "abilityNote": "Les talents ne sont pas encore joués en combat.",
+    "ability": "Talent",
+    "weakness": "Faiblesse",
+    "resistance": "Résistance",
+    "retreatCost": "Retraite",
+    "energyCount": "{count} Énergie | {count} Énergie | {count} Énergies",
+    "attacks": "Attaques",
+    "logTitle": "Ce qui vient de se passer",
+    "heads": "face",
+    "tails": "pile",
+    "ev": {
+      "start": {
+        "a": "Tu commences.",
+        "d": "{name} commence."
+      },
+      "turn": {
+        "a": "À toi de jouer.",
+        "d": "Au tour de {name}."
+      },
+      "draw": {
+        "a": "Tu pioches {card}.",
+        "d": "{name} pioche une carte. | {name} pioche une carte. | {name} pioche {count} cartes."
+      },
+      "attach": {
+        "a": "Tu attaches une Énergie à {card}.",
+        "d": "{name} attache une Énergie à {card}."
+      },
+      "bench": {
+        "a": "Tu mets {card} sur ton Banc.",
+        "d": "{name} met {card} sur son Banc."
+      },
+      "evolve": {
+        "a": "Ton Pokémon évolue en {card}.",
+        "d": "Son Pokémon évolue en {card}."
+      },
+      "switch": {
+        "a": "{card} est maintenant ton Pokémon Actif.",
+        "d": "{card} est maintenant son Pokémon Actif."
+      },
+      "attack": {
+        "a": "Ton {card} utilise {attack} : {damage} dégâts.",
+        "d": "Son {card} utilise {attack} : {damage} dégâts."
+      },
+      "attackNoDamage": {
+        "a": "Ton {card} utilise {attack}.",
+        "d": "Son {card} utilise {attack}."
+      },
+      "failed": {
+        "confused": "{card} est Confus : pile, l'attaque échoue.",
+        "smokescreen": "{card} fait pile : l'attaque échoue.",
+        "tails": "Pile : {attack} ne fait rien."
+      },
+      "flips": "Pièces : {flips}.",
+      "prevented": "Les dégâts sont évités.",
+      "damage": {
+        "a": "Ton {card} subit {n} dégâts.",
+        "d": "Son {card} subit {n} dégâts."
+      },
+      "heal": {
+        "a": "Ton {card} récupère {n} PV.",
+        "d": "Son {card} récupère {n} PV."
+      },
+      "status": {
+        "a": "Ton {card} est maintenant {status}.",
+        "d": "Son {card} est maintenant {status}."
+      },
+      "cured": {
+        "a": "Ton {card} n'est plus {status}.",
+        "d": "Son {card} n'est plus {status}."
+      },
+      "discard_energy": {
+        "a": "Ton {card} perd {n} Énergie(s).",
+        "d": "Son {card} perd {n} Énergie(s)."
+      },
+      "ko": {
+        "a": "Ton {card} est K.O. : {name} marque {points} point(s).",
+        "d": "{card} est K.O. : tu marques {points} point(s)."
+      },
+      "promote": {
+        "a": "{card} est ton nouveau Pokémon Actif.",
+        "d": "{card} est son nouveau Pokémon Actif."
+      },
+      "end": {
+        "a": "Tu finis ton tour.",
+        "d": "{name} finit son tour."
+      },
+      "over": {
+        "a": "Tu gagnes !",
+        "d": "{name} gagne.",
+        "draw": "Match nul."
+      },
+      "overTurns": "Dernier tour : le plus de points l'emporte."
+    },
     "rules": {
-      "deck": "Tes decks : {deck} Pokémon différents de ta collection du défi, chacun avec au moins une attaque qui inflige des dégâts. Deux decks par format : un pour attaquer, un que le serveur joue quand on t'attaque (ton deck d'attaque défend tant que tu ne l'as pas monté).",
-      "hidden": "Le deck de l'autre joueur est caché : ses cartes apparaissent quand elles sont jouées. Le serveur les joue et choisit sa carte et son attaque avant que les tiennes n'arrivent.",
-      "round": "À chaque manche, tu choisis une carte et une de ses attaques ; les deux cartes se frappent, et les dégâts restent d'une manche à l'autre. Après {rounds} manches, le plus de récompenses l'emporte.",
-      "energy": "Énergie : 1 au départ, +1 à chaque manche, jusqu'à {max}. Une attaque coûte les énergies imprimées sur la carte : les grosses attaques arrivent tard. Ne pas attaquer garde ton énergie pour la manche suivante.",
-      "prizes": "Mettre un Pokémon K.O. rapporte ses récompenses : 1 pour la plupart, 2 pour les ex, EX, GX, V et VSTAR, 3 pour les VMAX, TAG TEAM et Méga ex. {prizes} récompenses donnent la victoire.",
-      "damage": "La faiblesse double les dégâts, la résistance en retire {resistance}. « 30+ » compte 30 ; « 20× » vaut 20 fois 1 à 3.",
-      "elo": "Contre les joueurs, pas de pièces : tu gagnes ou perds des points Elo, plus contre un joueur plus fort. Ton adversaire est tiré parmi les joueurs les plus proches de ton Elo.",
-      "limit": "{count} attaques par jour, remises à zéro à {time}. Les défenses sont illimitées.",
-      "bots": "Bots : le même combat avec ton deck d'attaque, contre des cartes que le serveur tire du format. Pas d'Elo, et ils n'utilisent pas tes attaques. Une victoire rapporte {easy}, {normal} ou {hard} pièces (facile, normal, difficile), un match nul la moitié, pour tes {paid} premiers combats contre les bots de la journée ; {count} par jour en tout."
-    },
-    "roundSaved": "Ton {mine} n'attaque pas (énergie gardée).",
-    "roundTheySaved": "{theirs} n'attaque pas (il garde son énergie).",
-    "myPrizes": "Mes récompenses",
-    "theirPrizes": "Ses récompenses",
-    "myEnergy": "Mon énergie",
-    "theirEnergy": "Son énergie",
-    "attacksLabel": "Attaques",
-    "cost": "gratuite | 1 énergie | {count} énergies",
-    "prizesBadge": "{count} récompenses",
-    "pickCard": "Choisis une de tes cartes, puis son attaque.",
-    "attackWith": "{name} : choisis une attaque",
-    "noAttack": "Pas d'attaque (garder l'énergie)",
-    "buildHelp": {
-      "attack": "Tu joues ces cartes toi-même quand tu attaques : des attaques pas chères pour démarrer, une ou deux grosses frappes pour finir.",
-      "defense": "Le serveur joue ces cartes quand quelqu'un t'attaque, alors choisis des cartes qui tiennent : beaucoup de PV, et peu d'ex ou de V (ils donnent 2 ou 3 récompenses)."
-    },
-    "autoDeck": "Deck auto",
-    "deckRole": {
-      "attack": "Tu joues ce deck quand tu attaques.",
-      "defense": "Les autres joueurs attaquent ce deck : tu gagnes ou perds des points Elo à chaque fois."
-    },
-    "defenseFallback": "Pas encore de deck de défense : ton deck d'attaque te défend en attendant. Les autres joueurs l'attaquent, et tu gagnes ou perds des points Elo à chaque fois.",
-    "defenseInvalid": "Certaines de ces cartes ont quitté ta collection (recyclées ou échangées) : ton deck d'attaque te défend tant que tu ne changes pas celui-ci.",
-    "botsTitle": "S'entraîner contre un bot",
-    "botsHelp": "Mêmes règles, avec ton deck d'attaque. Pas d'Elo : des pièces à la place.",
-    "levels": {
-      "easy": "Facile",
-      "normal": "Normal",
-      "hard": "Difficile"
-    },
-    "botName": "un bot ({level})",
-    "botWin": "Victoire :",
-    "botPaidLeft": "{count} combat payant contre les bots aujourd'hui | {count} combats payants contre les bots aujourd'hui",
-    "botUnpaidLeft": "Plus de pièces aujourd'hui : encore {count} combat contre les bots pour le plaisir. | Plus de pièces aujourd'hui : encore {count} combats contre les bots pour le plaisir.",
-    "noBotBattlesLeft": "Plus de combats contre les bots aujourd'hui : reviens demain.",
-    "coinsWon": "Tu gagnes",
-    "noCoins": "Pas de pièces cette fois.",
-    "unpaid": "Pas de pièces : tes combats payants contre les bots sont utilisés pour aujourd'hui."
+      "deck": "Tes decks : 20 Pokémon de ta collection du défi, 2 du même nom au maximum, au moins un Pokémon de base (chaque exemplaire doit être possédé). Deux decks par format : celui avec lequel tu attaques, et celui que le serveur joue quand on t'attaque (ton deck d'attaque te défend tant que tu ne l'as pas créé).",
+      "setup": "Tu commences avec 5 cartes en main, toujours avec un Pokémon de base : poses-en un comme Pokémon Actif et jusqu'à 3 sur ton Banc. Une pièce décide qui commence.",
+      "turn": "À chaque tour : pioche une carte, attache 1 Énergie à l'un de tes Pokémon (pas au premier tour du combat), pose des Pokémon de base sur ton Banc, fais évoluer, bats en retraite une fois, puis attaque, ce qui finit ton tour. Le joueur qui commence ne peut pas attaquer à ce tour-là.",
+      "evolve": "Pour évoluer, pose une carte sur le Pokémon dont elle évolue, pas à son premier tour en jeu ni à ton premier tour. Les Énergies et les dégâts restent.",
+      "retreat": "Retraite : ton Pokémon Actif va sur le Banc et l'un de tes Pokémon de Banc entre en jeu, contre son coût de Retraite en Énergies. Les États Spéciaux disparaissent.",
+      "attack": "Une attaque coûte son nombre d'Énergies (de n'importe quel type). Ses effets sont joués : pièces, dégâts par Énergie ou par marqueur, États Spéciaux, soins, dégâts au Banc... Un texte que les combats ne savent pas jouer est signalé, ses dégâts comptent quand même. La Faiblesse double les dégâts, la Résistance en retire {resistance}.",
+      "conditions": "Un Pokémon Endormi ou Paralysé ne peut ni attaquer ni battre en retraite (une pièce le réveille, la Paralysie dure un tour) ; un Pokémon Confus lance une pièce avant d'attaquer ; le Poison inflige 10 et la Brûlure 20 entre les tours.",
+      "points": "Mettre un Pokémon K.O. rapporte des points : 1 pour la plupart, 2 pour les ex, EX, GX, V et VSTAR, 3 pour les VMAX, TAG TEAM et Méga-ex. {points} points gagnent, laisser l'adversaire sans Pokémon aussi. Après {turns} tours, le plus de points l'emporte.",
+      "hidden": "Contre un joueur, le serveur joue son deck de défense pendant que tu joues : sa main reste cachée, ses Pokémon apparaissent quand il les joue.",
+      "elo": "Contre les joueurs, pas de pièces : tu gagnes ou perds des points Elo, davantage contre un joueur plus fort. Ton adversaire est tiré parmi les joueurs à l'Elo le plus proche du tien.",
+      "limit": "{count} attaques par jour, remise à zéro à {time}. Les défenses sont illimitées.",
+      "bots": "Bots : le même combat avec ton deck d'attaque, contre un deck que le serveur construit dans le format. Pas d'Elo, et ils n'utilisent pas tes attaques. Une victoire rapporte {easy}, {normal} ou {hard} pièces (facile, normal, difficile), un nul la moitié, pour tes {paid} premiers combats contre un bot de la journée ; {count} par jour en tout."
+    }
   },
   "electrodeFlip": {
     "title": "Électrode Shiny Flip",

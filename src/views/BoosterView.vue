@@ -27,6 +27,7 @@ import CardStack from '@/components/CardStack.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
 import HoloCard from '@/components/HoloCard.vue'
 import SetPicker from '@/components/SetPicker.vue'
+import { useCardLocale } from '@/composables/useCardLocale'
 
 // Serves both modes: /boosters (unlimited) and /challenge/boosters, where
 // every pack costs coins and draws into the separate challenge collection.
@@ -37,6 +38,7 @@ const isChallenge = props.mode === 'challenge'
 const routes = modeRoutes(props.mode)
 
 const { t, locale } = useI18n()
+const { cardName, cardImage, cardSrcset, fallback } = useCardLocale()
 const collectionStore = useModeCollectionStore(props.mode)
 // Achievements of this mode (its own collection)
 const achievements = useAchievementsStore()
@@ -315,8 +317,9 @@ function preloadImages(cards) {
   for (const card of cards) {
     const img = new Image()
     img.sizes = '(max-width: 576px) 68vw, 300px'
-    if (card.image_small && card.image_url) img.srcset = `${card.image_small} 245w, ${card.image_url} 734w`
-    img.src = card.image_small || card.image_url
+    const srcset = cardSrcset(card)
+    if (srcset) img.srcset = srcset
+    img.src = cardImage(card)
   }
 }
 
@@ -482,12 +485,13 @@ async function shareBest() {
     const bucket = rarityLabelKey(card)
     const result = await shareCard({
       card,
-      title: card.name,
+      image: cardImage(card, 'large'),
+      title: cardName(card),
       subtitle: [bucket !== 'common' && bucket !== 'uncommon' ? t(`boosters.bucket.${bucket}`) : null, setName(card.set_id)]
         .filter(Boolean)
         .join(' · '),
       brand: t('common.brand'),
-      text: t('collection.shareText', { card: card.name, name: profileStore.displayName }),
+      text: t('collection.shareText', { card: cardName(card), name: profileStore.displayName }),
     })
     if (result === 'downloaded') shareNotice.value = t('collection.shareDownloaded')
   } catch {
@@ -681,7 +685,7 @@ async function shareBest() {
             class="open-card-info"
             :data-tier="rarityTier(currentCard.card)"
           >
-            <p class="open-card-name">{{ currentCard.card.name }}</p>
+            <p class="open-card-name">{{ cardName(currentCard.card) }}</p>
             <div class="open-card-badges">
               <span v-if="rarityChip(currentCard.card)" class="tier-chip" :data-tier="rarityTier(currentCard.card)">
                 {{ rarityChip(currentCard.card) }}
@@ -745,13 +749,14 @@ async function shareBest() {
           <figure v-if="summary.best" class="done-best">
             <figcaption class="done-best-label">{{ t('boosters.bestPull') }}</figcaption>
             <HoloCard
-              :src="summary.best.image_small || summary.best.image_url"
-              :srcset="summary.best.image_small && summary.best.image_url ? `${summary.best.image_small} 245w, ${summary.best.image_url} 734w` : null"
+              :src="cardImage(summary.best)"
+              :srcset="cardSrcset(summary.best)"
+              :fallback="fallback(summary.best)"
               sizes="260px"
-              :alt="summary.best.name"
+              :alt="cardName(summary.best)"
               eager
             />
-            <p class="done-best-name">{{ summary.best.name }}</p>
+            <p class="done-best-name">{{ cardName(summary.best) }}</p>
             <button type="button" class="btn btn-outline-secondary btn-sm" :disabled="sharing" @click="shareBest">
               {{ t('collection.share') }}
             </button>
@@ -761,10 +766,10 @@ async function shareBest() {
           <ul class="done-grid" role="list">
             <li v-for="entry in summary.entries" :key="entry.card.id" class="done-card">
               <div class="done-card-img">
-                <HoloCard :src="entry.card.image_small || entry.card.image_url" :alt="entry.card.name" :max-tilt="10" />
+                <HoloCard :src="cardImage(entry.card)" :fallback="fallback(entry.card)" :alt="cardName(entry.card)" :max-tilt="10" />
                 <span v-if="entry.quantity > 1" class="done-qty">{{ t('collection.quantity', { quantity: entry.quantity }) }}</span>
               </div>
-              <span class="done-card-name">{{ entry.card.name }}</span>
+              <span class="done-card-name">{{ cardName(entry.card) }}</span>
               <span class="done-card-badges">
                 <span v-if="entry.chip" class="tier-chip" :data-tier="entry.tier">{{ entry.chip }}</span>
                 <span v-if="entry.isNew" class="new-chip">{{ t('boosters.newBadge') }}</span>

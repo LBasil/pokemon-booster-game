@@ -14,6 +14,7 @@ import { frenchName } from '@/utils/pokemonNamesFr'
 import { rarityLabelKey, rarityTier } from '@/utils/rarity'
 import { setLogoUrl } from '@/utils/sets'
 import CoinAmount from '@/components/CoinAmount.vue'
+import { useCardLocale } from '@/composables/useCardLocale'
 import CopyStepper from '@/components/CopyStepper.vue'
 import HoloCard from '@/components/HoloCard.vue'
 import PriceChart from '@/components/PriceChart.vue'
@@ -36,6 +37,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'prev', 'next'])
 
 const { t, te, locale } = useI18n()
+const { cardName, cardImage, cardSrcset, fallback, french } = useCardLocale()
 const dialog = ref(null)
 
 watch(
@@ -113,7 +115,7 @@ watch(
 const craft = () =>
   coinAction(async () => {
     await challenge.craft(card.value)
-    return t('challenge.craftedNotice', { card: card.value.name })
+    return t('challenge.craftedNotice', { card: cardName(card.value) })
   })
 
 // Keep a challenge card out of trades (migration 0012)
@@ -177,12 +179,13 @@ async function share() {
   try {
     const result = await shareCard({
       card: card.value,
-      title: card.value.name,
+      image: cardImage(card.value, 'large'),
+      title: cardName(card.value),
       subtitle: [bucket.value !== 'common' && bucket.value !== 'uncommon' ? t(`boosters.bucket.${bucket.value}`) : null, props.set?.name]
         .filter(Boolean)
         .join(' · '),
       brand: t('common.brand'),
-      text: t('collection.shareText', { card: card.value.name, name: profileStore.displayName }),
+      text: t('collection.shareText', { card: cardName(card.value), name: profileStore.displayName }),
     })
     if (result === 'downloaded') shareNotice.value = t('collection.shareDownloaded')
   } catch {
@@ -191,10 +194,15 @@ async function share() {
     sharing.value = false
   }
 }
-// Card names are English only: in French, name the Pokémon as players know
-// it ("Charizard ex" -> Dracaufeu), unless it's the same word (Pikachu)
+// In French: a card with its French name (TCGdex, 0029) also says its
+// English one (trades, the community); one without (never printed in French,
+// or before the import) names the Pokémon as players know it ("Charizard ex"
+// -> Dracaufeu), unless it's the same word (Pikachu)
+const englishName = computed(() =>
+  french.value && card.value?.name_fr && card.value.name_fr !== card.value.name ? card.value.name : null,
+)
 const frName = computed(() => {
-  if (!locale.value.startsWith('fr') || !card.value) return null
+  if (!locale.value.startsWith('fr') || !card.value || englishName.value || card.value.name_fr) return null
   const name = frenchName(card.value.national_pokedex_number)
   return name && !card.value.name.toLowerCase().includes(name.toLowerCase()) ? name : null
 })
@@ -245,7 +253,7 @@ function onPointerUp(event) {
   <dialog
     ref="dialog"
     class="card-detail"
-    :aria-label="card?.name"
+    :aria-label="cardName(card)"
     @close="emit('close')"
     @click.self="dialog.close()"
     @keydown="onKeydown"
@@ -259,10 +267,11 @@ function onPointerUp(event) {
         <span class="detail-glow" aria-hidden="true"></span>
         <HoloCard
           :key="card.id"
-          :src="card.image_small || card.image_url"
-          :srcset="card.image_small && card.image_url ? `${card.image_small} 245w, ${card.image_url} 734w` : null"
+          :src="cardImage(card)"
+          :srcset="cardSrcset(card)"
+          :fallback="fallback(card)"
           sizes="(max-width: 767px) 70vw, 340px"
-          :alt="card.name"
+          :alt="cardName(card)"
           eager
         />
       </div>
@@ -278,8 +287,9 @@ function onPointerUp(event) {
           </span>
         </div>
 
-        <h2 class="detail-name">{{ card.name }}</h2>
-        <p v-if="frName" class="detail-fr-name">{{ t('collection.frenchName', { name: frName }) }}</p>
+        <h2 class="detail-name">{{ cardName(card) }}</h2>
+        <p v-if="englishName" class="detail-fr-name">{{ t('collection.englishName', { name: englishName }) }}</p>
+        <p v-else-if="frName" class="detail-fr-name">{{ t('collection.frenchName', { name: frName }) }}</p>
 
         <div class="detail-chips">
           <span v-if="bucket !== 'common' && bucket !== 'uncommon'" class="tier-chip" :data-tier="tier">
@@ -307,7 +317,7 @@ function onPointerUp(event) {
                 {{ t('challenge.recycleCard', { count: recycleCount }, recycleCount) }}
                 <span class="detail-price"><CoinAmount :amount="recycleGain" signed /></span>
               </button>
-              <CopyStepper v-if="duplicates > 1" v-model="recycleCount" :min="1" :max="duplicates" :name="card.name" />
+              <CopyStepper v-if="duplicates > 1" v-model="recycleCount" :min="1" :max="duplicates" :name="cardName(card)" />
             </div>
             <RouterLink
               v-if="!trades.isLocked(card.id)"
