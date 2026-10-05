@@ -1655,7 +1655,6 @@ begin
     'setup', p_g->>'phase' = 'setup',
     'promote', p_g->>'phase' = 'promote',
     'attach', v_my_turn and v_turn > 1 and not (p_g->'a'->>'attached')::boolean and jsonb_typeof(p_g->'a'->'zone') = 'string',
-    -- hand card index -> { bench: bool, evolve: [positions] }
     'supporter_used', coalesce((p_g->'a'->>'supporter_used')::boolean, false),
     -- hand card index -> { bench, evolve: [positions], play: a Trainer: null = playable, else why not (0032) }
     'hand', coalesce((
@@ -1685,8 +1684,6 @@ begin
 end;
 $$;
 
-set local application_name = 'migration 0030: step 6/6 RPCs';
-
 -- A slot as the client sees it: its card (and the ones under it) + HP left
 create or replace function public.pvp_slot_view(p_g jsonb, p_side text, p_slot jsonb)
 returns jsonb
@@ -1700,8 +1697,6 @@ as $$
     'tool_card', public.pvp_tool(p_g, p_side, p_slot),
     'hp_max', (public.pvp_top(p_g, p_side, p_slot)->>'hp')::int + public.pvp_tool_n(p_g, p_side, p_slot, 'tool_hp')) end
 $$;
-
--- Events with the names the log shows: the card (`c`) and the attack (`i`),
 
 -- A battle as its attacker sees it: my hand and field, their field, their
 -- hand and deck as counts, both discard piles, what I can do now
