@@ -48,6 +48,12 @@ WebAssembly, sans serveur) :
   fois** (elles doivent pouvoir être relancées) ;
 - `helpers(db).as(userId)` change de rôle pour tester la RLS « en tant que »
   joueur ; `asAdmin()` pour lire les lignes des autres.
+- PGlite n'a pas l'extension **pg-safeupdate** de Supabase, qui refuse via
+  l'API tout `UPDATE` / `DELETE` sans `WHERE` (« UPDATE requires a WHERE
+  clause », erreur 21000), même sur une table temporaire dans une fonction :
+  `unsafeFunctions(db)` (et `unsafeWrites(sql)`) relit le corps de toutes
+  les fonctions de `public` et liste ces requêtes ; la suite 0034 l'exige
+  vide (le bug des combats contre les bots, vert en local, cassé en ligne).
 
 Chaque migration depuis 0010 a sa suite (`supabase/tests/000N_*.test.mjs`)
 qui vérifie la RLS, les droits et les RPC.

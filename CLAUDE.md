@@ -502,7 +502,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   = usable — `?? 'unknown'` once turned every usable attack into "Not
   now"), so the rules are never duplicated in JS; `src/utils/pvp.js`
   only mirrors constants, deck validation (`addBlock`, `deckCheck`) and
-  `autoDeck` (lines like `pvp_bot_deck`). **Attack effects**:
+  `autoDeck` (below). **Attack effects**:
   `src/utils/attackEffects.js` turns the English text into ops at import
   (`populate.mjs`: `attacks[].base/fx/coins/partial`), `pvp_attack`
   interprets them; 59% of 22,557 attacks fully read, 26% have no text,
@@ -557,6 +557,25 @@ docs/technique/             technical doc (French, user choice): overview, front
   / 4 (defense) Trainers, bots 2 / 4 / 6; bot strength = Pokémon only.
   Add a Trainer op = parser + test + SQL case in `pvp_trainer` + AI +
   `trainerSteps` if it asks a choice + the doc list.
+  **Auto deck like Pocket** (user, 2026-10-05: "elle me semble nulle et
+  pas opti, il faut s'inspirer de pocket"; the old one always took a
+  Stage 2 line first, Squirtle -> Blastoise over Pikachu ex, and spread 14
+  single copies): `cardValue` = the best payable attack's share of the
+  HP of the pool's Pokémon (`autoReference`: a knock out counts whole +
+  0.3, the bots and players are of the same eras) slowed by its energies
+  (`attackTurns`: 2 types make typed symbols ~6 turns), + hits it takes,
+  + playable ability, − heavy retreat; `autoPokemon` ranks whole lines
+  by their top card's value (absolute, NOT per slot: a 2-2-2 line lost to
+  average Basics) and takes every copy at once (2 printings of a name
+  count), 1 Stage 2 + 2 Stage 1 lines max; `autoEnergy` = the type (or
+  pair) whose core scores best (decay 0.6 per line, shrunk below 10
+  payable Pokémon). Weights in `AUTO` / `AUTO_SPEED`, set by simulation
+  (scratch PGlite + real cards from the REST API, hard AI both sides, 11
+  collections x 300 games; ±8% on 40 games, so never tune on fewer):
+  against the same 6 bot decks (built against both decks: `hard` aims at
+  the weakness of the deck it's built against) +11 points of win rate vs
+  the 0026 builder, 57% head-to-head. What didn't help: per-slot ranking,
+  penalizing 2-3-point cards (EX are the best cards of XY), 8 Trainers.
   **Abilities** (0033, user 2026-10-05: "ajoute les talents stp"):
   `src/utils/abilityEffects.js` (`parseAbility(ability, cardName)`, old
   texts name the Pokémon) reuses the Trainers' sentences
@@ -788,12 +807,13 @@ docs/technique/             technical doc (French, user choice): overview, front
   2026-10-04) · 0026 PvP attack / defense decks + attacks without a
   cost dropped (written 2026-10-04, **to apply**, then check a full
   card sync went through) · 0027 PvP against bots for coins (written
-  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, applied: `pvp_rules().engine` = 3 the same day) · 0032 Trainer cards in PvP (written 2026-10-05, applied the same day) · 0033 Pokémon abilities in PvP (written 2026-10-05, **to apply** after 0032, then a card sync). Every one was
+  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, applied: `pvp_rules().engine` = 3 the same day) · 0032 Trainer cards in PvP (written 2026-10-05, applied the same day) · 0033 Pokémon abilities in PvP (written 2026-10-05, applied: `pvp_team_has` answers on 2026-10-05) · 0034 bot battles start again (`pvp_bot_deck` had an UPDATE without a WHERE, error 21000 live; written 2026-10-05, **to apply** after 0033). Every one was
   verified locally with PGlite before being handed over; 0010-0025 have
-  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0033 too) —
+  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0034 too) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 270 unit tests, `npm run test:db` 710 database
-  checks, `npm run test:e2e` 316 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 275 unit tests, `npm run test:db` 717 database
+  checks (0031's "a bot against a Base deck" fails about 1 run in 2: a
+  random bot deck on a tiny pool, seen 2026-10-05, not fixed yet), `npm run test:e2e` 316 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.
@@ -881,6 +901,15 @@ docs/technique/             technical doc (French, user choice): overview, front
   runs 0001..000N (the last one twice); `helpers(db).as(userId)` switches
   roles. Querying as a player applies RLS — read other players' rows with
   `asAdmin()`.
+- **pg-safeupdate**: Supabase's API refuses any UPDATE / DELETE without a
+  WHERE ("UPDATE requires a WHERE clause", code 21000, shown as
+  `challenge.errors.21000`), even on a temp table inside a SECURITY
+  DEFINER function; PGlite doesn't, so a suite can be green and the RPC
+  broken live (0034: every bot battle). Write `where true`-style
+  conditions; the 0034 suite runs `unsafeFunctions(db)` (harness) over
+  every function. The service role key can call internal functions
+  through REST (`/rest/v1/rpc/pvp_bot_deck`) to reproduce such errors
+  without a user.
 - To check what's applied on the real project: REST calls with the
   service role key from `scripts/.env.local` (a missing table answers 404,
   an existing RPC called without a user answers `not_authenticated`).

@@ -197,58 +197,201 @@ export function deckCheck(ids, cardsById, size = DECK_SIZE, energy = null) {
   return { ready: cards.length === size && basics > 0 && energyOk, missing: Math.max(0, size - cards.length), basics, orphans, unpaid }
 }
 
-// Auto deck: each card scores damage per energy (one energy a turn), its best
-// hit and its HP per point given (relative to the best here); the role
-// weighs them (attack: I play it; defense: the server's AI does, so bulk).
-const AUTO_WEIGHTS = {
-  attack: { perEnergy: 1, burst: 0.5, bulk: 0.7 },
-  defense: { perEnergy: 0.7, burst: 0.4, bulk: 1 },
-}
+// ---------- Auto deck ----------
+//
+// Built like a Pokémon TCG Pocket deck (user, 2026-10-05: "s'inspirer de
+// pocket"): one energy type, a core of the strongest lines with every copy I
+// own (2-2-2 Stage 2, 2-2 Stage 1, 2 Basics), then the best support, then the
+// Trainers. Tuned by simulation (a scratch PGlite script with the real cards,
+// the hard AI on both sides): against the same opponents it wins ~11 points
+// more often than the 0026 builder, which always took a Stage 2 line first
+// (Squirtle -> Blastoise over Pikachu ex) and spread single copies of 14
+// names.
 
-function scoreCards(cards, role) {
-  const weights = AUTO_WEIGHTS[role] ?? AUTO_WEIGHTS.attack
-  const stats = cards.map((card) => {
-    const usable = (card.attacks ?? []).filter((a) => a.usable !== false)
-    return {
-      card,
-      perEnergy: Math.max(0, ...usable.map((a) => (a.base ?? 0) / Math.max(a.cost ?? 0, 1))),
-      burst: Math.max(0, ...usable.map((a) => a.base ?? 0)),
-      bulk: (card.hp ?? 0) / Math.max(card.prizes ?? 1, 1),
-    }
-  })
-  const top = (key) => Math.max(1, ...stats.map((s) => s[key]))
-  const max = { perEnergy: top('perEnergy'), burst: top('burst'), bulk: top('bulk') }
-  return new Map(stats.map((s) => [s.card.id, Object.entries(weights).reduce((sum, [key, w]) => sum + (w * s[key]) / max[key], 0)]))
+// What waiting costs: index = energies to attach before the attack
+const AUTO_SPEED = [1, 1, 0.95, 0.9, 0.85, 0.8, 0.7, 0.6]
+export const AUTO = {
+  bulk: { attack: 0.9, defense: 1.26 }, // defense: the server's AI plays it, it must last
+  ko: 0.3, // a hit that knocks out counts whole, plus this
+  chip: 0.8, // a hit that doesn't: its share of the HP, times this
+  ability: 0.08, // a playable ability (0033)
+  retreat: 0.03, // per energy of retreat cost past 1
+  lowerStages: 0.1, // a line's lower stages still fight a little
+  single: 0.85, // per stage of a line I own a single copy of
+  decay: 0.6, // energy pick: each core line weighs this much less than the one before
+  twoTypes: 3, // with 2 types, each typed symbol takes ~2 x this turns (half the zones bring it)
+  depth: 10, // energy pick: Pokémon it must pay to fill a deck (fewer: its score shrinks)
 }
 
 /**
- * The energy that suits my cards best: for each type, and each pair of
- * types (a bit less: the zone then brings the one I need half the time),
- * the scores of the best 20 cards it can pay; the highest wins.
+ * The damage an attack does per use on average, what its effects are worth
+ * on top, and what using it again costs (`reuse` < 1 when it discards its
+ * energy or can't attack next turn). Same reading as pvp_ai_attack_value(),
+ * without a board.
+ */
+export function attackPower(attack) {
+  const coins = typeof attack.coins === 'number' ? attack.coins : attack.coins === 'until' ? 1 : 0
+  const cost = attack.cost ?? 1
+  let damage = attack.base ?? 0
+  let bonus = 0
+  let reuse = 1
+  for (const op of attack.fx ?? []) {
+    const n = typeof op.n === 'number' ? op.n : 0
+    const odds = op.if ? 0.5 : 1
+    if (op.op === 'times' || op.op === 'plus_heads') damage += (n * coins) / 2
+    else if (op.op === 'plus') damage += n * odds * 0.7
+    else if (op.op === 'nothing') damage /= 2
+    else if (op.op === 'per_energy_self') damage += n * cost
+    else if (['if_damaged_self', 'if_damaged_opp', 'if_status_opp'].includes(op.op)) damage += n * 0.4
+    else if (['per_counter_opp', 'per_bench_opp', 'per_bench_self'].includes(op.op)) damage += n * 1.5
+    else if (op.op === 'status') bonus += op.target === 'self' ? -10 : (op.status === 'paralyzed' || op.status === 'asleep' ? 25 : 12) * odds
+    else if (op.op === 'lock_opp') bonus += 25 * odds
+    else if (op.op === 'heal_self' || op.op === 'drain') bonus += Math.min(n || damage, 60) * 0.3
+    else if (op.op === 'self_damage') bonus -= n / 2
+    else if (op.op === 'discard_self') reuse = Math.min(reuse, cost / (cost + (op.n === 'all' ? cost : n)))
+    else if (op.op === 'lock_self') reuse = Math.min(reuse, 0.5)
+    else if (op.op === 'bench_one' || op.op === 'snipe') bonus += n * 0.6
+    else if (op.op === 'bench_each' || op.op === 'spread') bonus += n * 1.2
+    else if (op.op === 'draw' || op.op === 'call_basic') bonus += 5 * Math.max(n, 1)
+    else if (op.op === 'once') reuse = Math.min(reuse, 0.4)
+  }
+  return { damage: Math.max(damage, 0), bonus, reuse }
+}
+
+/** Energies to attach before an attack with a deck's energy types (a 2-type zone brings each one half the time). */
+export function attackTurns(attack, energy) {
+  const symbols = attack.energy?.length ? attack.energy : Array(attack.cost ?? 0).fill('Colorless')
+  const cost = Math.max(attack.cost ?? 0, symbols.length)
+  if (energy.length < 2) return cost
+  const typed = new Map()
+  for (const type of symbols) if (type !== 'Colorless') typed.set(type, (typed.get(type) ?? 0) + 1)
+  return Math.max(cost, ...[...typed.values()].map((n) => 2 * n * AUTO.twoTypes))
+}
+
+const fights = (card) => (card.stage === 'basic' || card.stage === 'evolution') && (card.attacks ?? []).some((a) => a.usable !== false)
+
+/** Values as [value, share] pairs, one per distinct value (HP go by tens: a few dozen at most). */
+function shares(values) {
+  const counts = new Map()
+  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1)
+  return [...counts].map(([value, n]) => [value, n / values.length])
+}
+
+/**
+ * What cards are measured against: the HP of the Pokémon here (bots and
+ * players come from the same eras) and their usual hit (best attack of 3
+ * energies at most), as [value, share] pairs.
+ */
+export function autoReference(cards) {
+  const foes = cards.filter(fights)
+  const hits = foes
+    .map((card) => Math.max(0, ...(card.attacks ?? []).filter((a) => a.usable !== false && (a.cost ?? 0) <= 3).map((a) => attackPower(a).damage)))
+    .filter((hit) => hit > 0)
+  return { hp: shares(foes.length ? foes.map((card) => card.hp ?? 60) : [60]), hits: shares(hits.length ? hits : [50]) }
+}
+
+/**
+ * A Pokémon's worth with these energy types, against the reference: its
+ * best attack's share of a foe's HP per hit (a knock out counts whole),
+ * slowed by the energies it needs; plus how many usual hits it takes (4 at
+ * most); plus a playable ability, minus a heavy retreat. 0 when it can't
+ * attack with them.
+ */
+export function cardValue(card, energy, role = 'attack', ref = autoReference([card])) {
+  let offense = 0
+  for (const attack of card.attacks ?? []) {
+    if (attack.usable === false || !fitsEnergy({ attacks: [attack] }, energy)) continue
+    const { damage, bonus, reuse } = attackPower(attack)
+    const hit = damage * (0.5 + 0.5 * reuse) + bonus
+    if (hit <= 0) continue
+    const share = ref.hp.reduce((sum, [hp, w]) => sum + w * (hit >= hp ? 1 + AUTO.ko : (AUTO.chip * hit) / hp), 0)
+    offense = Math.max(offense, share * AUTO_SPEED[Math.min(attackTurns(attack, energy), AUTO_SPEED.length - 1)])
+  }
+  if (!offense) return 0
+  const lasts = ref.hits.reduce((sum, [hit, w]) => sum + w * Math.min(Math.ceil((card.hp ?? 0) / hit), 4), 0) / 4
+  const ability = (card.abilities ?? []).some((a) => a.playable && a.kind !== 'on_evolve') ? AUTO.ability : 0
+  return offense + (AUTO.bulk[role] ?? AUTO.bulk.attack) * lasts + ability - AUTO.retreat * Math.max((card.retreat ?? 1) - 1, 0)
+}
+
+/**
+ * The Pokémon of an auto deck with these energy types: every line I can
+ * build (Basic, Basic -> Stage 1, Basic -> Stage 1 -> Stage 2) valued by its
+ * top card (+ a little for its lower stages, less when I own a single
+ * copy), the strongest first with every copy at once (2 at most; two
+ * printings of a name can make them), 1 Stage 2 line and 2 Stage 1 lines at
+ * most. Returns the ids and a score: the lines taken, each weighing less
+ * than the one before (the core decides the energy), shrunk when they
+ * can't fill a deck.
+ */
+function autoPokemon(cards, role, size, energy, ref) {
+  const pool = cards.filter(fights)
+  const value = new Map(pool.map((card) => [card.id, cardValue(card, energy, role, ref)]))
+  const printings = new Map() // name -> its printings, best first
+  for (const card of pool) printings.set(card.name, [...(printings.get(card.name) ?? []), card])
+  for (const list of printings.values()) list.sort((a, b) => value.get(b.id) - value.get(a.id) || a.id.localeCompare(b.id))
+  const owned = (name) => printings.get(name).reduce((sum, card) => sum + (card.owned ?? MAX_COPIES), 0)
+
+  const lines = []
+  for (const [name, [top]] of printings) {
+    const line = [top]
+    for (let card = top; card.stage === 'evolution' && line.length < 3; ) {
+      card = printings.get(card.evolves_from)?.[0]
+      if (!card) break
+      line.unshift(card)
+    }
+    if (line[0].stage !== 'basic' || value.get(top.id) <= 0) continue
+    const copies = Math.min(MAX_COPIES, ...line.map((card) => owned(card.name)))
+    const reach = copies < MAX_COPIES ? AUTO.single ** (line.length - 1) : 1
+    const lower = line.slice(0, -1).reduce((sum, card) => sum + value.get(card.id) * AUTO.lowerStages, 0)
+    lines.push({ name, line, copies, worth: value.get(top.id) * reach + lower })
+  }
+  lines.sort((a, b) => b.worth - a.worth || a.name.localeCompare(b.name))
+
+  const byId = new Map(pool.map((card) => [card.id, card]))
+  const count = (ids, name) => ids.filter((id) => byId.get(id).name === name).length
+  const taken = { 2: 0, 3: 0 }
+  let ids = []
+  let score = 0
+  let rank = 0
+  for (const { line, copies: most, worth } of lines) {
+    if (ids.length >= size) break
+    // a stage above its Basic already in: another line holds it
+    if (line.slice(1).some((card) => count(ids, card.name) > 0)) continue
+    if (line.length > 1 && taken[line.length] >= (line.length === 3 ? 1 : 2)) continue
+    const need = (copies) => line.reduce((sum, card) => sum + Math.max(copies - count(ids, card.name), 0), 0)
+    let copies = most
+    while (copies > 0 && ids.length + need(copies) > size) copies--
+    if (!copies) continue
+    for (const card of line) {
+      while (count(ids, card.name) < copies) {
+        const printing = printings.get(card.name).find((p) => !addBlock(ids, p, byId, size))
+        if (!printing) break
+        ids = [...ids, printing.id]
+      }
+    }
+    if (line.length > 1) taken[line.length]++
+    score += worth * (copies < MAX_COPIES ? AUTO.single : 1) * AUTO.decay ** rank++
+  }
+  return { ids, score: score * Math.min(1, ids.length / Math.min(size, AUTO.depth)) }
+}
+
+/**
+ * The energy that suits my cards best: each type and each pair of types
+ * (their typed attacks take longer, attackTurns), scored by the core of
+ * the auto deck it would get; the highest wins.
  * @param {object[]} cards - eligible cards
  * @param {'attack' | 'defense'} [role]
  * @returns {string[]} 1 or 2 types
  */
 export function autoEnergy(cards, role = 'attack', size = DECK_SIZE) {
-  const playable = cards.filter((card) => card.stage !== 'none' && (card.attacks ?? []).some((a) => a.usable !== false))
-  const score = scoreCards(playable, role)
-  const value = (energy) => {
-    const best = new Map() // the best printing of each name it pays
-    for (const card of playable) {
-      if (!fitsEnergy(card, energy)) continue
-      if (!best.has(card.name) || score.get(card.id) > best.get(card.name)) best.set(card.name, score.get(card.id))
-    }
-    // 2 copies of each name at most
-    return [...best.values()].sort((a, b) => b - a).slice(0, Math.ceil(size / MAX_COPIES)).reduce((sum, s) => sum + s, 0)
-  }
+  const ref = autoReference(cards)
+  const room = size - (AUTO_TRAINERS[role] ?? AUTO_TRAINERS.attack)
   let pick = [ENERGY_TYPES[0]]
   let top = -1
   for (const [i, first] of ENERGY_TYPES.entries()) {
-    const single = value([first])
-    if (single > top) [pick, top] = [[first], single]
-    for (const second of ENERGY_TYPES.slice(i + 1)) {
-      const pair = value([first, second]) * 0.85
-      if (pair > top) [pick, top] = [[first, second], pair]
+    for (const energy of [[first], ...ENERGY_TYPES.slice(i + 1).map((second) => [first, second])]) {
+      const { score } = autoPokemon(cards, role, room, energy, ref)
+      if (score > top) [pick, top] = [energy, score]
     }
   }
   return pick
@@ -256,25 +399,33 @@ export function autoEnergy(cards, role = 'attack', size = DECK_SIZE) {
 
 /**
  * A deck from my eligible cards (`pvp_eligible`: stage, evolves_from,
- * owned copies, attacks), built like the bots' (pvp_bot_deck): a Stage 2
- * line, up to two Stage 1 lines, then Basics, 2 copies of each when I own
- * them, the best scores first; the best single copies fill what's left.
- * With `energy`, only cards it can pay (others only if they're too few).
- * Since 0032 it keeps room for its Trainers (AUTO_TRAINERS) first.
+ * owned copies, attacks): its Trainers (AUTO_TRAINERS), the Pokémon of
+ * autoPokemon() for that energy (autoEnergy() when none is given), then
+ * the best Basics and Trainers left while there's room.
  * @param {object[]} cards
  * @param {'attack' | 'defense'} [role]
  * @param {string[] | null} [energy]
  * @returns {string[]} card ids (with repeats), up to `size`
  */
 export function autoDeck(cards, role = 'attack', size = DECK_SIZE, energy = null) {
+  const types = energy?.length ? energy : autoEnergy(cards, role, size)
+  const ref = autoReference(cards)
   const trainers = autoTrainers(cards, role)
-  const pokemon = autoPokemon(cards, role, size - trainers.length, energy)
-  const ids = [...pokemon, ...trainers.slice(0, size - pokemon.length)]
-  // Rare Candy without a Stage 2 is dead weight: again without it
+  const { ids: pokemon } = autoPokemon(cards, role, size - trainers.length, types, ref)
+  let ids = [...pokemon, ...trainers]
   const byId = new Map(cards.map((card) => [card.id, card]))
+  // Room left (few lines, few Trainers): the best Basics, then any useful Trainer
+  const rest = cards
+    .filter((card) => card.stage === 'basic' || (card.stage === 'trainer' && trainerScore(card)))
+    .map((card) => [card, card.stage === 'basic' ? cardValue(card, types, role, ref) : -1])
+    .sort((a, b) => b[1] - a[1] || a[0].id.localeCompare(b[0].id))
+  for (const [card] of rest) {
+    while (ids.length < size && !addBlock(ids, card, byId, size)) ids = [...ids, card.id]
+  }
+  // Rare Candy without a Stage 2 is dead weight: again without it
   const candy = ids.some((id) => byId.get(id)?.fx?.some((op) => op.op === 'rare_candy'))
   if (candy && !ids.some((id) => byId.get(id)?.base_name)) {
-    return autoDeck(cards.filter((card) => !card.fx?.some((op) => op.op === 'rare_candy')), role, size, energy)
+    return autoDeck(cards.filter((card) => !card.fx?.some((op) => op.op === 'rare_candy')), role, size, types)
   }
   return ids
 }
@@ -308,59 +459,6 @@ function autoTrainers(cards, role) {
   for (const card of ranked) {
     for (let i = 0; i < MAX_COPIES && ids.length < budget; i++) ids = addCard(ids, card, byId, budget)
     if (ids.length >= budget) break
-  }
-  return ids
-}
-
-function autoPokemon(cards, role, size, energy) {
-  const all = cards.filter((card) => card.stage !== 'none' && card.stage !== 'trainer' && (card.attacks ?? []).some((a) => a.usable !== false))
-  const fits = (card) => !energy || fitsEnergy(card, energy)
-  const playable = all.filter(fits)
-  const score = scoreCards(all, role)
-  const byIdAll = new Map(all.map((card) => [card.id, card]))
-  const byId = new Map(playable.map((card) => [card.id, card]))
-  // The best printing of each name, at each stage
-  const best = new Map()
-  for (const card of playable) {
-    const kept = best.get(card.name)
-    if (!kept || score.get(card.id) > score.get(kept.id)) best.set(card.name, card)
-  }
-  const named = [...best.values()]
-  const basicNamed = (name) => named.find((card) => card.name === name && card.stage === 'basic')
-  const evolutionNamed = (name) => named.find((card) => card.name === name && card.stage === 'evolution')
-  const lines = []
-  for (const top of named.filter((card) => card.stage === 'evolution')) {
-    const stage1 = evolutionNamed(top.evolves_from)
-    const basic = stage1 ? basicNamed(stage1.evolves_from) : basicNamed(top.evolves_from)
-    if (stage1 && basic) lines.push([basic, stage1, top])
-    else if (!stage1 && basic) lines.push([basic, top])
-  }
-  for (const basic of named.filter((card) => card.stage === 'basic')) lines.push([basic])
-  const lineScore = (line) => line.reduce((sum, card) => sum + score.get(card.id), 0) / line.length
-  lines.sort((a, b) => b.length - a.length || lineScore(b) - lineScore(a) || a[0].id.localeCompare(b[0].id))
-
-  let ids = []
-  let stage2 = 0
-  let stage1 = 0
-  for (const line of lines) {
-    if (line.some((card) => ids.some((id) => byId.get(id).name === card.name))) continue
-    if (line.length === 3 && stage2 >= 1) continue
-    if (line.length === 2 && stage1 >= 2) continue
-    const copies = Math.min(MAX_COPIES, ...line.map((card) => card.owned ?? MAX_COPIES))
-    if (ids.length + copies * line.length > size) continue
-    for (const card of line) for (let i = 0; i < copies; i++) ids = addCard(ids, card, byId, size)
-    stage2 += line.length === 3
-    stage1 += line.length === 2
-    if (ids.length >= size) break
-  }
-  // Fill: the best cards left (the ones the energy pays, Basics first: they can always be played)
-  const rest = [...all].sort(
-    (a, b) => fits(b) - fits(a) || (b.stage === 'basic') - (a.stage === 'basic') || score.get(b.id) - score.get(a.id),
-  )
-  for (const card of rest) {
-    if (ids.length >= size) break
-    if (card.stage === 'evolution' && !ids.some((id) => byIdAll.get(id).name === card.evolves_from)) continue
-    while (!addBlock(ids, card, byIdAll, size)) ids = [...ids, card.id]
   }
   return ids
 }

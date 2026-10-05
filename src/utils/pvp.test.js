@@ -4,10 +4,14 @@ import {
   addCard,
   attackChoices,
   attackName,
+  attackPower,
   attackText,
+  attackTurns,
   autoDeck,
   autoEnergy,
+  autoReference,
   botCoins,
+  cardValue,
   damageLabel,
   deckCheck,
   deckCounts,
@@ -145,6 +149,54 @@ describe('autoDeck', () => {
     const few = [card('a', 'A', { owned: 1 }), card('b', 'B', { owned: 3 })]
     expect(autoDeck(few).sort()).toEqual(['a', 'b', 'b'])
   })
+
+  it('builds around the strongest line, not the first Stage 2 (like Pocket)', () => {
+    // the 0026 builder took Squirtle -> Blastoise first, whatever its stats
+    const weak = [
+      card('squirtle', 'Squirtle', { hp: 40, attacks: [attack(10, 1)] }),
+      card('wartortle', 'Wartortle', { stage: 'evolution', from: 'Squirtle', hp: 70, attacks: [attack(30, 2)] }),
+      card('blastoise', 'Blastoise', { stage: 'evolution', from: 'Wartortle', hp: 100, attacks: [attack(40, 3)] }),
+    ]
+    const ex = card('pikaex', 'Pikachu ex', { hp: 190, prizes: 2, attacks: [attack(200, 3)] })
+    const pool = [...weak, ex, ...Array.from({ length: 8 }, (_, i) => card(`b${i}`, `Basic ${i}`, { hp: 70, attacks: [attack(30 + i * 5, 2)] }))]
+    const ids = autoDeck(pool)
+    expect(ids.slice(0, 2)).toEqual(['pikaex', 'pikaex'])
+    expect(ids.indexOf('squirtle')).toBeGreaterThan(ids.indexOf('b7')) // the best Basic comes before it
+  })
+
+  it('makes 2 copies from two printings of a name', () => {
+    const pool = [
+      card('zap1', 'Zapdos', { owned: 1, hp: 120, attacks: [attack(100, 2)] }),
+      card('zap2', 'Zapdos', { owned: 1, hp: 90, attacks: [attack(60, 2)] }),
+      ...Array.from({ length: 6 }, (_, i) => card(`b${i}`, `Basic ${i}`)),
+    ]
+    expect(autoDeck(pool).slice(0, 2)).toEqual(['zap1', 'zap2'])
+  })
+})
+
+describe('auto deck values', () => {
+  const ref = autoReference([card('foe1', 'Foe', { hp: 60 }), card('foe2', 'Foe', { hp: 120 })])
+
+  it('reads an attack like the AI does', () => {
+    expect(attackPower(attack(20, 2, { coins: 2, fx: [{ op: 'times', n: 20 }] })).damage).toBe(40) // 2 coins, 1 heads on average
+    expect(attackPower(attack(100, 2, { fx: [{ op: 'discard_self', n: 2 }] })).reuse).toBe(0.5)
+    expect(attackPower(attack(30, 1, { fx: [{ op: 'status', status: 'paralyzed', target: 'opp', if: 'heads' }] })).bonus).toBe(12.5)
+  })
+
+  it('counts typed energy slower with two types', () => {
+    const hit = attack(60, 2, { energy: ['Fire', 'Colorless'] })
+    expect(attackTurns(hit, ['Fire'])).toBe(2)
+    expect(attackTurns(hit, ['Fire', 'Water'])).toBeGreaterThan(2)
+    expect(attackTurns(attack(60, 2, { energy: ['Colorless', 'Colorless'] }), ['Fire', 'Water'])).toBe(2)
+  })
+
+  it('values a knock out over chip damage, and nothing it cannot pay', () => {
+    const ko = card('a', 'A', { attacks: [attack(120, 2)] })
+    const half = card('b', 'B', { attacks: [attack(60, 2)] })
+    expect(cardValue(ko, ['Fire'], 'attack', ref)).toBeGreaterThan(cardValue(half, ['Fire'], 'attack', ref) + 0.3)
+    const water = card('w', 'W', { attacks: [attack(120, 1, { energy: ['Water'] })] })
+    expect(cardValue(water, ['Fire'], 'attack', ref)).toBe(0)
+  })
 })
 
 describe('typed energy', () => {
@@ -187,7 +239,7 @@ describe('typed energy', () => {
   it('picks the energy and the cards that go together', () => {
     const pool = [
       ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => card(`f${i}`, `Fire ${i}`, { attacks: [typed(['Fire'], 40)] })),
-      ...[1, 2, 3].map((i) => card(`w${i}`, `Water ${i}`, { attacks: [typed(['Water'], 60)] })),
+      ...[1, 2, 3].map((i) => card(`w${i}`, `Water ${i}`, { attacks: [typed(['Water'], 50)] })),
     ]
     const energy = autoEnergy(pool)
     expect(energy).toEqual(['Fire'])

@@ -950,16 +950,31 @@ sequenceDiagram
   dans le constructeur (préchoisis pour un nouveau deck : `autoEnergy`).
   `pvp_decks.energy` ; `null` (decks d'avant 0031) = déduite des coûts de
   ses cartes (`pvp_deck_energy` / `deckEnergy`, **miroirs**).
-- **Deck auto** (`autoDeck` dans `src/utils/pvp.js`, construit comme les
-  decks des bots) : une lignée à 3 stades, jusqu'à deux lignées à 2
-  stades, puis des Pokémon de base, 2 exemplaires de chacun quand ils sont
-  possédés, les meilleurs scores d'abord (dégâts par énergie, plus grosse
-  attaque, PV par point ; pondérés selon le rôle) ; le reste en
-  exemplaires simples. Depuis 0031 il choisit d'abord l'Énergie
-  (`autoEnergy` : pour chaque type et chaque paire, les 10 meilleurs noms
-  qu'elle paie ; une paire compte ×0,85 car la zone n'apporte le bon type
-  qu'une fois sur deux) puis ne prend que les cartes qu'elle paie (les
-  autres seulement s'il en manque).
+- **Deck auto** (`autoDeck` dans `src/utils/pvp.js`, refait façon Pocket
+  le 2026-10-05 : « elle me semble nulle et pas opti, il faut s'inspirer
+  de pocket ») : un type d'Énergie, un noyau des lignées les plus fortes
+  avec tous leurs exemplaires (2-2-2, 2-2, 2 Pokémon de base), puis le
+  meilleur soutien, puis les Dresseurs (6 en attaque, 4 en défense).
+  - Valeur d'une carte (`cardValue`) : la part des PV des Pokémon de la
+    collection (`autoReference` : les adversaires sont des mêmes ères) que
+    sa meilleure attaque payable retire par coup (un K.O. compte entier,
+    plus un bonus), ralentie par les énergies à attacher (`attackTurns` :
+    avec 2 types, chaque symbole typé compte bien plus cher, la zone
+    n'apporte le bon type qu'une fois sur deux), plus les coups qu'elle
+    encaisse, un talent jouable, moins une grosse retraite.
+  - Lignées (`autoPokemon`) : classées par la valeur de leur dernier stade
+    (en valeur absolue, pas par emplacement : sinon un Dracaufeu 2-2-2
+    perdait contre des Pokémon de base moyens), prises avec tous leurs
+    exemplaires d'un coup (deux impressions d'un même nom comptent), une
+    lignée à 3 stades et deux à 2 stades au plus.
+  - Énergie (`autoEnergy`) : le type ou la paire dont le noyau vaut le
+    plus (chaque lignée pèse 0,6 fois la précédente), réduit s'il ne paie
+    pas au moins 10 Pokémon.
+  - Réglé par simulation (combats IA contre IA sur les vraies cartes,
+    11 collections × 300 combats) : contre les mêmes adversaires, +11
+    points de victoires par rapport à l'ancien (qui prenait toujours une
+    lignée à 3 stades d'abord, Carapuce → Tortank plutôt que Pikachu-ex,
+    et éparpillait 14 cartes uniques), 57 % en face à face.
 - **Mise en place** : 5 cartes en main, toujours avec un Pokémon de base ;
   je touche mon Actif puis jusqu'à 3 Pokémon de Banc, « Commencer le
   combat ». L'adversaire est placé par le serveur ; une pièce décide qui

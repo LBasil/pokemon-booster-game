@@ -52,9 +52,10 @@ How it works inside (every table, RPC and flow, in French):
   seconds; intruders from other lines slip in as the streak grows, and
   "Stop" ends a run keeping its coins. The simplest game, so it pays the least: 3 coins per
   right line (60 per run, 180 a day at most) — and **PvP battles** like Pokémon TCG Pocket (testers only for now,
-  migrations 0028, 0030 to 0033): two decks of 20 challenge cards per format
+  migrations 0028, 0030 to 0034): two decks of 20 challenge cards per format
   (every card, one era of the TCG, or one set; 2 with the same name at
-  most; "Auto deck" builds evolution lines for you), one to attack with
+  most; "Auto deck" builds one like a Pocket deck: one energy type, your
+  strongest lines with both copies, then support and Trainers), one to attack with
   and one the server plays when you're attacked. A battle: 5 cards in
   hand, an Active Pokémon and up to 3 on the Bench; each turn draw,
   play Trainers like in Pocket (Items as many as you like, 1 Supporter a
@@ -409,6 +410,9 @@ its **SQL editor** and run, in order:
    or evolves; read from each text by `src/utils/abilityEffects.js`). Run
    it after 0032, then a card sync; until then abilities are shown as
    "not played yet".
+34. `supabase/migrations/0034_pvp_bot_start_fix.sql` — bot battles start
+   again (they all failed with "challenge.errors.21000": Supabase refuses
+   an UPDATE without a WHERE). Run it after 0033.
 
 Then in **Authentication**:
 

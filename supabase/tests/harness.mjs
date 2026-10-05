@@ -76,3 +76,28 @@ export async function addUsers(db, ...names) {
   }
   return ids
 }
+
+/**
+ * The UPDATE / DELETE statements without a WHERE in a piece of SQL (a
+ * function body): Supabase's API runs with pg-safeupdate, which refuses them
+ * ("UPDATE requires a WHERE clause", error 21000), and PGlite doesn't have
+ * it (0034: every bot battle failed live, green here). INSERT ... ON
+ * CONFLICT DO UPDATE is fine.
+ */
+export function unsafeWrites(sql) {
+  const code = sql.replace(/--[^\n]*/g, '').replace(/'(?:[^']|'')*'/g, "''")
+  return code
+    .split(';')
+    .map((statement) => statement.replace(/\s+/g, ' ').trim())
+    .filter((statement) => {
+      const write = /(?<!\bdo )\b(update\s+(?:only\s+)?[\w.]+(?:\s+(?:as\s+)?\w+)?\s+set\b|delete\s+from\b)/i.exec(statement)
+      return write && !/\bwhere\b/i.test(statement.slice(write.index))
+    })
+}
+
+/** The functions of the public schema that `unsafeWrites` flags: [{ name, statements }]. */
+export async function unsafeFunctions(db) {
+  const { rows } = await db.query(`select p.proname as name, p.prosrc as src from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public'`)
+  return rows.map((row) => ({ name: row.name, statements: unsafeWrites(row.src) })).filter((row) => row.statements.length)
+}
