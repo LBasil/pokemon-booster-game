@@ -157,7 +157,8 @@ export function deckCounts(ids) {
 
 /**
  * Why a card can't go in the deck now, null if it can: 'full' (20),
- * 'copies' (2 of that name already), 'owned' (every copy I own is in).
+ * 'copies' (2 of that name already), 'owned' (every copy I own is in),
+ * 'ace_spec' (a deck holds 1 ACE SPEC Trainer, 0032).
  * @param {string[]} ids - the deck
  * @param {{ id: string, name: string, owned?: number }} card
  * @param {Map<string, object>} cardsById - eligible cards, for the names in the deck
@@ -166,6 +167,7 @@ export function addBlock(ids, card, cardsById, size = DECK_SIZE) {
   if (ids.length >= size) return 'full'
   if (ids.filter((id) => cardsById.get(id)?.name === card.name).length >= MAX_COPIES) return 'copies'
   if (ids.filter((id) => id === card.id).length >= (card.owned ?? MAX_COPIES)) return 'owned'
+  if (card.ace_spec && ids.some((id) => cardsById.get(id)?.ace_spec)) return 'ace_spec'
   return null
 }
 
@@ -190,7 +192,7 @@ export function deckCheck(ids, cardsById, size = DECK_SIZE, energy = null) {
   const names = new Set(cards.map((card) => card.name))
   const basics = cards.filter((card) => card.stage === 'basic').length
   const orphans = [...new Set(cards.filter((card) => card.stage === 'evolution' && !names.has(card.evolves_from)).map((card) => card.name))]
-  const unpaid = energy ? [...new Set(cards.filter((card) => !fitsEnergy(card, energy)).map((card) => card.name))] : []
+  const unpaid = energy ? [...new Set(cards.filter((card) => card.stage !== 'trainer' && !fitsEnergy(card, energy)).map((card) => card.name))] : []
   const energyOk = energy === null || validEnergy(energy)
   return { ready: cards.length === size && basics > 0 && energyOk, missing: Math.max(0, size - cards.length), basics, orphans, unpaid }
 }
@@ -258,13 +260,60 @@ export function autoEnergy(cards, role = 'attack', size = DECK_SIZE) {
  * line, up to two Stage 1 lines, then Basics, 2 copies of each when I own
  * them, the best scores first; the best single copies fill what's left.
  * With `energy`, only cards it can pay (others only if they're too few).
+ * Since 0032 it keeps room for its Trainers (AUTO_TRAINERS) first.
  * @param {object[]} cards
  * @param {'attack' | 'defense'} [role]
  * @param {string[] | null} [energy]
  * @returns {string[]} card ids (with repeats), up to `size`
  */
 export function autoDeck(cards, role = 'attack', size = DECK_SIZE, energy = null) {
-  const all = cards.filter((card) => card.stage !== 'none' && (card.attacks ?? []).some((a) => a.usable !== false))
+  const trainers = autoTrainers(cards, role)
+  const pokemon = autoPokemon(cards, role, size - trainers.length, energy)
+  const ids = [...pokemon, ...trainers.slice(0, size - pokemon.length)]
+  // Rare Candy without a Stage 2 is dead weight: again without it
+  const byId = new Map(cards.map((card) => [card.id, card]))
+  const candy = ids.some((id) => byId.get(id)?.fx?.some((op) => op.op === 'rare_candy'))
+  if (candy && !ids.some((id) => byId.get(id)?.base_name)) {
+    return autoDeck(cards.filter((card) => !card.fx?.some((op) => op.op === 'rare_candy')), role, size, energy)
+  }
+  return ids
+}
+
+// Trainers in an auto deck (0032): 6 to attack, 4 to defend (the server's
+// AI plays it), the most useful first, 2 of each (1 ACE SPEC). Mirrors the
+// scores of pvp_bot_deck().
+export const AUTO_TRAINERS = { attack: 6, defense: 4 }
+const TRAINER_SCORES = {
+  search: 3, draw: 3, discard_hand_draw: 3, shuffle_hand_draw: 3, draw_until: 3, gust: 3, rare_candy: 4,
+  heal: 2, switch_self: 2, boost: 2, tool_hp: 2, tool_reduce: 2, tool_boost: 2, tool_retaliate: 2,
+}
+
+/** How much an auto deck wants a Trainer (0 = never: it ends my turn or costs cards). */
+export function trainerScore(card) {
+  const ops = (card.fx ?? []).map((op) => op.op)
+  if (ops.includes('end_turn') || ops.includes('discard_cost')) return 0
+  return Math.max(0, ...ops.map((op) => TRAINER_SCORES[op] ?? 1))
+}
+
+function autoTrainers(cards, role) {
+  const budget = AUTO_TRAINERS[role] ?? AUTO_TRAINERS.attack
+  const best = new Map() // one printing per name
+  for (const card of cards) {
+    if (card.stage !== 'trainer' || !trainerScore(card)) continue
+    if (!best.has(card.name) || (card.owned ?? 2) > (best.get(card.name).owned ?? 2)) best.set(card.name, card)
+  }
+  const ranked = [...best.values()].sort((a, b) => trainerScore(b) - trainerScore(a) || a.name.localeCompare(b.name))
+  const byId = new Map(ranked.map((card) => [card.id, card]))
+  let ids = []
+  for (const card of ranked) {
+    for (let i = 0; i < MAX_COPIES && ids.length < budget; i++) ids = addCard(ids, card, byId, budget)
+    if (ids.length >= budget) break
+  }
+  return ids
+}
+
+function autoPokemon(cards, role, size, energy) {
+  const all = cards.filter((card) => card.stage !== 'none' && card.stage !== 'trainer' && (card.attacks ?? []).some((a) => a.usable !== false))
   const fits = (card) => !energy || fitsEnergy(card, energy)
   const playable = all.filter(fits)
   const score = scoreCards(all, role)
@@ -317,6 +366,61 @@ export function autoDeck(cards, role = 'attack', size = DECK_SIZE, energy = null
 }
 
 // ---------- Battle ----------
+
+/**
+ * Whether a card snapshot matches a Trainer's search filter (mirrors
+ * pvp_matches(): what, type, max_hp, no_rule_box).
+ */
+export function matchesFilter(card, op) {
+  if (!card) return false
+  const stageOk = {
+    card: true,
+    basic: card.stage === 'basic',
+    evolution: card.stage === 'evolution',
+    pokemon: card.stage === 'basic' || card.stage === 'evolution',
+    trainer: card.stage === 'trainer',
+  }[op.what ?? 'card'] ?? (card.stage === 'trainer' && card.kind === op.what)
+  return (
+    stageOk &&
+    (!op.type || (card.types ?? []).includes(op.type)) &&
+    (op.max_hp == null || (card.stage !== 'trainer' && card.hp <= op.max_hp)) &&
+    (!op.no_rule_box || (card.stage !== 'trainer' && card.prizes === 1))
+  )
+}
+
+/**
+ * The choices playing a Trainer asks of me, in order (each one a param of
+ * the 'trainer' move): 'discard' (a cost, cards of my hand), 'tool' / 'heal' /
+ * 'candy' / 'scoop' / 'move_from' (pos: one of my Pokémon), 'evolve' (the
+ * Stage 2 for Rare Candy), 'switch' / 'move_to' / 'scoop_to' (to: one of
+ * my Pokémon), 'gust' / 'energy' (target: one of theirs), 'pick' (cards of
+ * my deck or discard pile). The view skips the ones with nothing to choose.
+ */
+export function trainerSteps(card) {
+  if (card?.kind === 'tool') return ['tool']
+  const steps = []
+  const ops = card?.fx ?? []
+  const add = (...keys) => keys.forEach((key) => steps.includes(key) || steps.push(key))
+  for (const op of ops) {
+    if (op.op === 'discard_cost') add('discard')
+    else if (op.op === 'heal' && op.who === 'one') add('heal')
+    else if (op.op === 'rare_candy') add('candy', 'evolve')
+    else if (op.op === 'scoop') add('scoop', 'scoop_to')
+    else if (op.op === 'move_energy_own') add('move_from', 'move_to')
+    else if (op.op === 'switch_self') add('switch')
+    else if (op.op === 'gust') add('gust')
+    else if (op.op === 'discard_opp_energy' && op.who === 'one') add('energy')
+    else if (op.op === 'search' || op.op === 'recover') add('pick')
+  }
+  // the cost first
+  return steps.sort((a, b) => (b === 'discard') - (a === 'discard'))
+}
+
+/** The move's param each choice fills. */
+export const STEP_PARAM = {
+  discard: 'discard', tool: 'pos', heal: 'pos', candy: 'pos', scoop: 'pos', move_from: 'pos', evolve: 'evolve',
+  switch: 'to', move_to: 'to', scoop_to: 'to', gust: 'target', energy: 'target', pick: 'pick',
+}
 
 /** HP left as a share of the card's HP (0-100), for the bars. */
 export const hpPercent = (hpLeft, hp) => (hp ? Math.max(0, Math.min(100, (100 * hpLeft) / hp)) : 0)

@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { createClient } from '@supabase/supabase-js'
 import { parseAttack } from '../src/utils/attackEffects.js'
+import { trainerData } from '../src/utils/trainerEffects.js'
 import { cardPriceEur, DEFAULT_USD_TO_EUR } from '../src/utils/cardPrice.js'
 import { matchSet, normalizeNumber, numberOfId } from '../src/utils/tcgdex.js'
 
@@ -154,7 +155,7 @@ async function recordPrices(cards) {
 // Columns that came with later migrations: cards.weaknesses ("Super
 // effective!", 0015), cards.evolves_from ("Evolution chain", 0018),
 // cards.attacks / resistances and sets.series (PvP, 0024), retreat costs
-// and abilities (Pocket-style PvP, 0029). Until one is applied, rows are
+// and abilities (Pocket-style PvP, 0029), Trainers' effects (0032). Until one is applied, rows are
 // saved without it rather than not at all
 const OPTIONAL_COLUMNS = {
   cards: {
@@ -164,6 +165,7 @@ const OPTIONAL_COLUMNS = {
     resistances: '0024',
     retreat_cost: '0029',
     abilities: '0029',
+    trainer: '0032',
   },
   sets: { series: '0024' },
 }
@@ -224,6 +226,8 @@ async function populateCards(startPage = 1) {
       retreat_cost: card.convertedRetreatCost ?? card.retreatCost?.length ?? 0,
       abilities: card.abilities?.map((ability) => ({ name: ability.name, text: ability.text ?? '', type: ability.type ?? '' })) ?? null,
       resistances: card.resistances?.map((resistance) => resistance.type) ?? null,
+      // PvP Trainers (0032): what src/utils/trainerEffects.js reads in the text
+      trainer: card.supertype === 'Trainer' ? trainerData(card) : null,
       set_id: card.set.id,
     }))
 
@@ -307,7 +311,10 @@ async function populateFr({ rematch = false } = {}) {
     console.warn('Skipping French cards (run migration 0029 first?):', err.message)
     return
   }
-  const cards = await selectAll('cards', 'id, name, set_id, supertype, attacks_fr')
+  // effect_fr (Trainers' French text) since 0032
+  const cards = await selectAll('cards', 'id, name, set_id, supertype, attacks_fr, effect_fr').catch(() =>
+    selectAll('cards', 'id, name, set_id, supertype, attacks_fr'),
+  )
   const bySet = Map.groupBy(cards, (card) => card.set_id)
 
   // 1. Sets: match the new ones ('' = checked, no TCGdex set)
@@ -334,7 +341,7 @@ async function populateFr({ rematch = false } = {}) {
   // 2. French names and images, one request per set
   const frSets = new Map(((await fetchJson(`${TCGDEX}/fr/sets`)) ?? []).map((set) => [set.id, set]))
   const rows = []
-  const details = [] // Pokémon whose French attacks aren't stored yet: [our id, TCGdex id]
+  const details = [] // Pokémon whose French attacks / Trainers whose French text aren't stored yet: [our id, TCGdex id, supertype]
   for (const set of sets.filter((s) => s.tcgdex_id && frSets.has(s.tcgdex_id))) {
     const fr = await fetchJson(`${TCGDEX}/fr/sets/${encodeURIComponent(set.tcgdex_id)}`)
     if (!fr) continue
@@ -345,23 +352,25 @@ async function populateFr({ rematch = false } = {}) {
       const theirs = byNumber.get(normalizeNumber(numberOfId(card.id)))
       if (!theirs) continue
       rows.push({ id: card.id, name_fr: theirs.name ?? null, image_fr: theirs.image ?? null })
-      if (card.supertype === 'Pokémon' && card.attacks_fr === null) details.push([card.id, theirs.id])
+      if (card.supertype === 'Pokémon' && card.attacks_fr === null) details.push([card.id, theirs.id, card.supertype])
+      if (card.supertype === 'Trainer' && card.effect_fr === null) details.push([card.id, theirs.id, card.supertype])
     }
   }
   await writeCardsFr(rows)
   console.log(`French names and images: ${rows.length} cards`)
 
-  // 3. French attack and ability texts, one request per new Pokémon
+  // 3. French attack and ability texts (Trainers: their effect), one request per new card
   let done = 0
   for (let i = 0; i < details.length; i += 200) {
-    const batch = await pool(details.slice(i, i + 200), 6, async ([id, tcgdexId]) => {
+    const batch = await pool(details.slice(i, i + 200), 6, async ([id, tcgdexId, supertype]) => {
       const card = await fetchJson(`${TCGDEX}/fr/cards/${encodeURIComponent(tcgdexId)}`)
-      return card && { id, attacks_fr: frTexts(card.attacks), abilities_fr: frTexts(card.abilities) }
+      if (!card) return null
+      return supertype === 'Trainer' ? { id, effect_fr: card.effect ?? '' } : { id, attacks_fr: frTexts(card.attacks), abilities_fr: frTexts(card.abilities) }
     })
     const found = batch.filter(Boolean)
     await writeCardsFr(found)
     done += found.length
-    console.log(`French attacks: ${done} / ${details.length}`)
+    console.log(`French attacks and Trainer texts: ${done} / ${details.length}`)
   }
 }
 

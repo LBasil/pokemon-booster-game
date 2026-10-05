@@ -2,14 +2,15 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCardLocale } from '@/composables/useCardLocale'
-import { attackName, damageLabel, hpPercent } from '@/utils/pvp'
+import { attackName, attackText, damageLabel, hpPercent } from '@/utils/pvp'
 import EnergyIcons from '@/components/EnergyIcons.vue'
 
 // One card in a PvP battle or deck (a pvp_card() snapshot, migration 0030),
 // in the player's language. In play (`slot`: damage, energy, special
 // conditions, hp_left) it shows its HP bar, energies (typed since 0031) and conditions;
 // otherwise its printed HP and stage. `compact` (the board) leaves the
-// attacks to the detail sheet (PvpCardSheet).
+// attacks to the detail sheet (PvpCardSheet). A Trainer (0032) shows its
+// kind and text; a Pokémon in play its Tool, and its HP with it (`hp_max`).
 const props = defineProps({
   card: { type: Object, required: true },
   slot: { type: Object, default: null },
@@ -19,8 +20,10 @@ const props = defineProps({
 const { t, te } = useI18n()
 const { french, cardName, cardImage, fallback } = useCardLocale()
 const typeLabel = (type) => (te(`collection.types.${type}`) ? t(`collection.types.${type}`) : type)
+const trainer = computed(() => props.card.stage === 'trainer')
+const hpMax = computed(() => props.slot?.hp_max ?? props.card.hp)
 const hpLeft = computed(() => props.slot?.hp_left ?? props.card.hp)
-const percent = computed(() => hpPercent(hpLeft.value, props.card.hp))
+const percent = computed(() => hpPercent(hpLeft.value, hpMax.value))
 const conditions = computed(() =>
   props.slot ? [props.slot.status, props.slot.poisoned && 'poisoned', props.slot.burned && 'burned'].filter(Boolean) : [],
 )
@@ -36,25 +39,30 @@ const conditions = computed(() =>
       </span>
     </span>
     <span class="pvp-name">{{ cardName(card) }}</span>
-    <span v-if="slot" class="pvp-hp" role="meter" :aria-label="t('pvp.hpLabel')" aria-valuemin="0" :aria-valuemax="card.hp" :aria-valuenow="hpLeft">
-      <span class="pvp-hp-bar" :class="{ low: percent <= 30 }"><span :style="{ width: `${percent}%` }"></span></span>
-      <span class="pvp-hp-text">{{ t('pvp.hp', { left: hpLeft, hp: card.hp }) }}</span>
+    <span v-if="trainer" class="pvp-hp-text pvp-kind">
+      {{ t(`pvp.trainerKinds.${card.kind}`) }}<template v-if="card.ace_spec"> · {{ t('pvp.aceSpec') }}</template>
     </span>
-    <span v-else class="pvp-hp-text">
+    <span v-if="slot?.tool_card" class="pvp-tool">{{ t('pvp.toolOn', { name: cardName(slot.tool_card) }) }}</span>
+    <span v-if="slot && !trainer" class="pvp-hp" role="meter" :aria-label="t('pvp.hpLabel')" aria-valuemin="0" :aria-valuemax="hpMax" :aria-valuenow="hpLeft">
+      <span class="pvp-hp-bar" :class="{ low: percent <= 30 }"><span :style="{ width: `${percent}%` }"></span></span>
+      <span class="pvp-hp-text">{{ t('pvp.hp', { left: hpLeft, hp: hpMax }) }}</span>
+    </span>
+    <span v-else-if="!trainer" class="pvp-hp-text">
       {{ t('pvp.hpPrinted', { hp: card.hp }) }} ·
       {{ card.stage === 'evolution' ? t('pvp.stage.evolution', { name: card.evolves_from }) : t(`pvp.stage.${card.stage}`) }}
     </span>
     <span v-if="conditions.length" class="pvp-conditions">
       <span v-for="status in conditions" :key="status" class="pvp-condition" :class="`is-${status}`">{{ t(`pvp.statuses.${status}`) }}</span>
     </span>
-    <ul v-if="!compact" class="pvp-attacks" :aria-label="t('pvp.attacks')">
+    <p v-if="trainer && !compact" class="pvp-trainer-text">{{ attackText(card, french) }}</p>
+    <ul v-if="!compact && !trainer" class="pvp-attacks" :aria-label="t('pvp.attacks')">
       <li v-for="(attack, i) in card.attacks" :key="i" :class="{ unusable: !attack.usable }">
         <EnergyIcons class="pvp-cost" :types="attack.energy ?? []" :count="attack.cost" free />
         <span class="pvp-attack-name">{{ attackName(attack, french) }}</span>
         <strong>{{ damageLabel(attack) }}</strong>
       </li>
     </ul>
-    <span v-if="!compact" class="pvp-types">
+    <span v-if="!compact && !trainer" class="pvp-types">
       <span v-for="type in card.types" :key="type" class="pvp-dot" :style="{ '--dot': `var(--pb-type-${type.toLowerCase()}, var(--pb-type-colorless))` }" :title="typeLabel(type)"></span>
       <span v-if="card.weaknesses?.length" class="pvp-weak">{{ t('pvp.weakTo', { types: card.weaknesses.map(typeLabel).join(', ') }) }}</span>
     </span>
@@ -225,5 +233,26 @@ const conditions = computed(() =>
 
 .pvp-weak {
   font-size: 0.7rem;
+}
+
+.pvp-kind {
+  font-weight: 700;
+}
+
+.pvp-tool {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--pb-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.pvp-trainer-text {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  font-size: 0.7rem;
+  color: var(--pb-text-muted);
 }
 </style>

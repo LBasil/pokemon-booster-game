@@ -87,6 +87,8 @@ Lecture : tout le monde. Écriture client : aucune.
 | `abilities` | jsonb | Talents imprimés `[{ name, text, type }]` (0029 ; montrés en combat, pas encore joués) |
 | `name_fr`, `image_fr` | text | Nom et image français (TCGdex, 0029) : `image_fr` est l'URL de base, le client ajoute `/low.webp` ou `/high.webp`. `null` pour une carte jamais sortie en français (Set de Base 2, Gym…) : le site l'affiche en anglais |
 | `attacks_fr`, `abilities_fr` | jsonb | Noms et textes français des attaques et talents `[{ name, effect }]`, dans le même ordre que `attacks` / `abilities` (TCGdex, 0029) |
+| `trainer` | jsonb | Dresseurs (0032) : `{ kind (item / supporter / tool / stadium / other), fx, coins, playable, text, ace_spec }`, lu par `trainerEffects.js` à l'import |
+| `effect_fr` | text | Texte français d'un Dresseur (TCGdex, 0032) |
 | `resistances` | text[] | Types de résistance imprimés (`{Fighting}`), depuis 0024 ; −30 en combat PvP |
 | `set_id` | text → `sets.id` | Set de la carte |
 
@@ -292,7 +294,7 @@ premier), `cards` (les cartes montrées, lignée + intrus, mélangées),
 `game_day`. Une seule partie `playing` par joueur (index unique).
 **Aucun accès client** : l'ordre ne doit pas fuiter.
 
-### `pvp_decks`, `pvp_ratings`, `pvp_battles` (0024 à 0031)
+### `pvp_decks`, `pvp_ratings`, `pvp_battles` (0024 à 0032)
 
 - `pvp_decks` : `(user_id, format, role)` → `card_ids` (20 ids depuis
   0030, un par exemplaire ; 5 avant, devenus invalides). Deux
@@ -325,7 +327,9 @@ premier), `cards` (les cartes montrées, lignée + intrus, mélangées),
   son Banc (`{ c, under, damage, energy, etypes, status, poisoned, burned,
   turn_in, lock_attack, no_retreat, reduce, prevent, smoke, weaken }`),
   ses points, et depuis 0031 (`engine` = 3) `energy_types`, `zone`
-  (l'Énergie de ce tour) et `next`) ; `log` garde les 300 derniers événements ; `a_hp` / `d_hp`
+  (l'Énergie de ce tour) et `next`, depuis 0032 `supporter_used`,
+  `no_trainers`, `boost` / `shield` / `retreat_less` (`{ n, turn }`), et
+  pour chaque Pokémon son Outil `tool` (index de carte)) ; `log` garde les 300 derniers événements ; `a_hp` / `d_hp`
   / énergies / récompenses de l'ancien moteur ne servent plus. Les
   combats de l'ancien moteur en cours au passage de 0030 finissent en
   nul, sans Elo ni pièces ; ceux du moteur 2 en cours au passage de 0031
@@ -376,6 +380,7 @@ elles servent de briques aux RPC décrites dans la
 | `pvp_rules`, `pvp_prizes`, `pvp_card`, `pvp_fits`, `pvp_valid_format`, `pvp_deck_cards`, `pvp_rating`, `pvp_elo_change`, `pvp_finish`, `pvp_battle_view`, `pvp_open_to` | Combats PvP : règles, points selon les sous-types, instantané d'une carte (`null` si ce n'est pas un Pokémon), appartenance à un format, deck valide, Elo (lignes verrouillées par id : deux joueurs qui s'attaquent en même temps ne s'interbloquent pas), vue de l'attaquant, testeurs (0028) |
 | `pvp_game_new`, `pvp_new_side`, `pvp_do`, `pvp_attack`, `pvp_attack_block`, `pvp_checkup`, `pvp_ko`, `pvp_run`, `pvp_hints`, `pvp_switch`, `pvp_promote`, `pvp_draw`, `pvp_hurt`, `pvp_heal`, `pvp_condition`, `pvp_named_events`, `pvp_public_events` et petits outils (`pvp_slot`, `pvp_set`, `pvp_ev`…) | Le moteur façon Pocket (0030) : une partie en jsonb, un coup validé, une attaque et ses effets, entre deux tours (Poison, Brûlure, Sommeil, Paralysie), K.O. et points, déroulé des tours jusqu'au coup du joueur, ce qu'il peut faire, événements nommés (pioches adverses cachées) |
 | `pvp_missing`, `pvp_can_pay`, `pvp_valid_energy`, `pvp_deck_energy`, `pvp_energy_of`, `pvp_my_energy`, `pvp_add_energy`, `pvp_drop_energy`, `pvp_random_energy`, `pvp_fits_energy` | Énergie typée (0031) : Énergies qui manquent pour un coût (**miroir** `energyMissing`), 1 ou 2 types valides, Énergie déduite d'un deck (**miroir** `deckEnergy`), celle d'un deck enregistré, ajout / retrait typé sur un Pokémon (garde celles dont ses attaques ont besoin), type tiré pour la zone, une carte payable avec ces types |
+| `pvp_trainer_card`, `pvp_trainer`, `pvp_trainer_block`, `pvp_matches`, `pvp_pick`, `pvp_opt_pos`, `pvp_without`, `pvp_shuffle`, `pvp_tool`, `pvp_tool_n`, `pvp_retreat_cost`, `pvp_ai_keep`, `pvp_ai_wants`, `pvp_ai_trainers` | Dresseurs (0032) : instantané d'un Dresseur jouable, un Dresseur joué (coût, pièces, effets), pourquoi il n'est pas jouable (`first_turn`, `supporter`, `no_more`, `hand`, `no_target`, `bench_full`), filtre de recherche (**miroir** `matchesFilter`), choix d'une carte (celle du joueur sinon la meilleure pour l'IA), Outils et coût de retraite du moment, ce que l'IA garde en main et quand elle joue un Dresseur |
 | `pvp_ai_setup`, `pvp_ai_turn`, `pvp_ai_attack_value`, `pvp_ai_bench_pick`, `pvp_ai_weakest`, `pvp_bot_deck`, `pvp_card_value` | L'IA qui joue l'autre camp (facile / normal / difficile) et le deck de 20 d'un bot (depuis 0031 `pvp_bot_deck(format, niveau, mon deck)` → `{ cards, energy }` : mes ères, 1 ou 2 types, force calée sur la mienne via `pvp_card_value`) |
 | `set_cards_fr` | Écriture en lot des colonnes françaises des cartes par l'import (0029, service role) |
 | `electrode_flip_rules`, `electrode_flip_layout`, `electrode_flip_deal`, `electrode_flip_view`, `electrode_flip_today`, `electrode_flip_end` | Règles, distribution et fin des plateaux d'« Électrode Shiny Flip » (`view` = ce que voit le client) |
@@ -421,7 +426,8 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0028 | `pvp_testers_only` | PvP réservé à ses testeurs (Bazouk) pendant qu'on retravaille les règles : `pvp_open_to(user)` (l'interrupteur, miroir de `PVP_TESTERS`), `pvp_state` / `pvp_save_deck` / `pvp_start` / `pvp_bot_start` renommées en `*_impl` et enveloppées par une vérification (écrite le 2026-10-05, **à appliquer** après 0027) |
 | 0029 | `cards_fr_battle_data` | Cartes en français (`cards.name_fr`, `image_fr`, `attacks_fr`, `abilities_fr`, `sets.tcgdex_id`, `name_fr`, `set_cards_fr()`) et données des combats façon Pocket (`cards.retreat_cost`, `abilities` ; textes et effets dans `attacks`) (écrite le 2026-10-05, **à appliquer** après 0028, puis une synchro complète) |
 | 0030 | `pvp_pocket` | Combats PvP façon Pokémon JCC Pocket : decks de 20, Banc, Énergie, évolutions, retraite, effets d'attaque, États Spéciaux, points ; `pvp_act`, moteur et IA en SQL, `pvp_battles.game` / `engine` ; supprime `pvp_play` et les enveloppes de 0028 (écrite le 2026-10-05, appliquée : un combat moteur 2 joué le jour même) |
-| 0031 | `pvp_typed_energy` | Énergie typée : `pvp_decks.energy` (1 ou 2 types), zone d'Énergie (`zone` / `next`), coûts typés (`attacks[].energy`, synchro nécessaire), `pvp_save_deck(…, p_energy)` ; bots des ères de mon deck, typés, de force calée sur la mienne ; `engine` 3, combats en cours finis en nul (écrite le 2026-10-05, **à appliquer** après 0030, puis une synchro des cartes) |
+| 0031 | `pvp_typed_energy` | Énergie typée : `pvp_decks.energy` (1 ou 2 types), zone d'Énergie (`zone` / `next`), coûts typés (`attacks[].energy`, synchro nécessaire), `pvp_save_deck(…, p_energy)` ; bots des ères de mon deck, typés, de force calée sur la mienne ; `engine` 3, combats en cours finis en nul (écrite le 2026-10-05, appliquée : `pvp_rules().engine` = 3 le jour même) |
+| 0032 | `pvp_trainers` | Dresseurs en PvP façon Pocket : `cards.trainer` / `effect_fr`, `pvp_card()` les renvoie (`stage` `trainer`, et `base_name` des niveaux 2), decks avec Dresseurs (1 ACE SPEC), `pvp_trainer()` + coup `trainer`, Outils (PV, dégâts, Faiblesse, retraite, soins), bonus et boucliers du tour, IA et bots avec Dresseurs, `deck_ids` / `discard_ids` dans la vue (écrite le 2026-10-05, **à appliquer** après 0031, puis une synchro) |
 
 Les migrations 0001 à 0025 sont appliquées sur le projet réel (vérifié le
 2026-10-04 : `pvp_rules()` renvoie les règles de 0025).

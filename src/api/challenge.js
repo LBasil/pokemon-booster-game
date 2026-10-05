@@ -63,6 +63,7 @@ export const CHALLENGE_ERRORS = [
   'pvp_no_energy',
   'pvp_cannot_retreat',
   'pvp_cannot_attack',
+  'pvp_cannot_play',
 ]
 
 // PostgREST's answer for an RPC that doesn't exist yet
@@ -71,7 +72,7 @@ const MISSING_FUNCTION = 'PGRST202'
 async function call(name, args) {
   const { data, error } = await supabase.rpc(name, args)
   if (error) {
-    // "pvp_cannot_attack: energy": the code, then why
+    // "pvp_cannot_attack: energy" / "pvp_cannot_play: supporter": the code, then why
     const code = CHALLENGE_ERRORS.find((known) => error.message === known || error.message?.startsWith(`${known}: `))
     if (code) throw Object.assign(new Error(error.message), { code })
     throw error

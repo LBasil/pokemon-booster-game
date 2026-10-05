@@ -52,12 +52,15 @@ How it works inside (every table, RPC and flow, in French):
   seconds; intruders from other lines slip in as the streak grows, and
   "Stop" ends a run keeping its coins. The simplest game, so it pays the least: 3 coins per
   right line (60 per run, 180 a day at most) — and **PvP battles** like Pokémon TCG Pocket (testers only for now,
-  migrations 0028, 0030 and 0031): two decks of 20 challenge Pokémon per format
+  migrations 0028, 0030, 0031 and 0032): two decks of 20 challenge cards per format
   (every card, one era of the TCG, or one set; 2 with the same name at
   most; "Auto deck" builds evolution lines for you), one to attack with
   and one the server plays when you're attacked. A battle: 5 cards in
   hand, an Active Pokémon and up to 3 on the Bench; each turn draw,
-  attach the energy your zone brings (each deck plays 1 or 2 energy
+  play Trainers like in Pocket (Items as many as you like, 1 Supporter a
+  turn, Pokémon Tools; every Trainer whose text the battles can read, 578
+  of them: Professor's Research, Poké Ball, Potion, Boss's Orders, Rare
+  Candy...), attach the energy your zone brings (each deck plays 1 or 2 energy
   types, one of them at random each turn, the next one shown; attacks
   cost their printed energy) to any Pokémon, bench Basics, evolve, retreat, then
   attack. Attack texts are played (coins, special conditions, healing,
@@ -394,6 +397,11 @@ its **SQL editor** and run, in order:
    deck (its eras, its strength). Run it after 0030, then a card sync
    (`npm run populate:sync`) so attacks get their typed cost; PvP says
    "Coming soon" until then.
+32. `supabase/migrations/0032_pvp_trainers.sql` — Trainer cards in PvP
+   (Items, Supporters, Pokémon Tools, read from each card's text by
+   `src/utils/trainerEffects.js`). Run it after 0031, then a card sync
+   (`npm run populate:sync`) so Trainers get their effects and French
+   texts; until then decks simply have no Trainers.
 
 Then in **Authentication**:
 

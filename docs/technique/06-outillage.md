@@ -92,7 +92,7 @@ le workflow de synchro (minuit et midi). Il lit `scripts/.env.local` (non versio
 | --- | --- |
 | `sets` | Pages de 250 sets → `upsert` dans `sets` (dont `logo_url`, `symbol_url` fournis par l'API) |
 | `cards [page]` | Pages de 250 cartes → `upsert` dans `cards` (`value` = `cardPriceEur()` de `src/utils/cardPrice.js` : moyenne de vente Cardmarket, sinon prix TCGplayer × `USD_TO_EUR`, 0,86 par défaut — les sets récents comme Évolutions Prismatiques ou Méga-Évolution n'ont que TCGplayer) + un relevé du jour dans `card_price_history` ; puis `link_subsets()` |
-| `fr [--rematch]` | Cartes françaises depuis TCGdex (0029, sans clé) : 1. les sets pas encore reliés (`sets.tcgdex_id` null) sont comparés aux sets TCGdex (numéros + noms anglais, `matchSet` de `src/utils/tcgdex.js`, 60 % au moins) ; `''` = aucun (enregistré seulement si TCGdex a répondu pour tous les sets), `--rematch` les recherche à nouveau. 2. une requête par set relié : `sets.name_fr`, puis `name_fr` et `image_fr` de chaque carte (par numéro) via `set_cards_fr()`. 3. une requête par Pokémon dont `attacks_fr` est vide : noms et textes français des attaques et talents (6 à la fois). Mesuré le 2026-10-05 : 172 sets sur 176 reliés, 19 245 cartes sur 20 670 avec un nom et une image français ; la première passe fait ~17 000 requêtes (quelques minutes), les suivantes seulement les nouvelles cartes |
+| `fr [--rematch]` | Cartes françaises depuis TCGdex (0029, sans clé ; textes des Dresseurs depuis 0032) : 1. les sets pas encore reliés (`sets.tcgdex_id` null) sont comparés aux sets TCGdex (numéros + noms anglais, `matchSet` de `src/utils/tcgdex.js`, 60 % au moins) ; `''` = aucun (enregistré seulement si TCGdex a répondu pour tous les sets), `--rematch` les recherche à nouveau. 2. une requête par set relié : `sets.name_fr`, puis `name_fr` et `image_fr` de chaque carte (par numéro) via `set_cards_fr()`. 3. une requête par Pokémon dont `attacks_fr` est vide : noms et textes français des attaques et talents (6 à la fois). Mesuré le 2026-10-05 : 172 sets sur 176 reliés, 19 245 cartes sur 20 670 avec un nom et une image français ; la première passe fait ~17 000 requêtes (quelques minutes), les suivantes seulement les nouvelles cartes |
 | `sync [page]` | `sets` puis `cards` puis `link_subsets()` puis `fr` |
 
 Depuis 0029, `cards` stocke aussi le texte de chaque attaque et ce que les
@@ -103,6 +103,16 @@ plus le coût de Retraite et les talents. Une colonne absente (migration
 pas encore appliquée) est sautée (`OPTIONAL_COLUMNS`) ; l'étape `fr`
 s'arrête avec un avertissement sans 0029. Sur cette machine, Node a
 besoin de `NODE_USE_SYSTEM_CA=1` pour joindre TCGdex (réseau filtré).
+
+Depuis 0031, chaque attaque garde aussi son coût typé (`energy` :
+`['Fire', 'Colorless']`). Depuis 0032, chaque Dresseur a sa colonne
+`trainer` (`trainerData()` de `src/utils/trainerEffects.js` : type, effets
+`fx` lus dans le texte, pièce, `playable` = tout le texte est compris,
+texte anglais, ACE SPEC), et l'étape `fr` va chercher le texte français des
+Dresseurs (`effect_fr`, une requête par carte, une seule fois). Mesuré le
+2026-10-05 : 578 Objets / Supporters / Outils sur 2 506 jouables (146 noms),
+les classiques compris ; les textes qui parlent de cartes Énergie, de
+Récompenses ou de Stades restent injouables.
 
 L'API pokemontcg.io est capricieuse : chaque page est retentée 6 fois avec
 un délai croissant, et une pause de 300 ms sépare les pages. Le nombre de

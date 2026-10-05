@@ -552,7 +552,7 @@ complète : l'import n'est pas repassé). RPC absente (`PGRST202`) ou
 
 ---
 
-## Combats PvP (Défi, migrations 0024 à 0031)
+## Combats PvP (Défi, migrations 0024 à 0032)
 
 Depuis 0030, des combats façon Pokémon JCC Pocket (decks de 20, Banc,
 Énergie à attacher, évolutions, effets d'attaque) ; depuis 0031,
@@ -587,9 +587,21 @@ Coups (`p_action`) ; `card` = index de la carte dans mes 20 (`my_cards`),
 { "type": "attach", "pos": 1 }
 { "type": "retreat", "pos": 2 }
 { "type": "attack", "attack": 0, "target": 1, "switch_to": 2, "energy_to": 1 }
+{ "type": "trainer", "card": 14, "pos": 0, "to": 2, "target": 1, "evolve": 6, "discard": [3, 9], "pick": [11] }
 { "type": "end" }
 { "type": "promote", "pos": 1 }
 ```
+
+`trainer` (0032) : un Dresseur de ma main ; ses choix sont tous
+facultatifs (le serveur choisit ce qui manque) : `pos` (un de mes Pokémon :
+soin, Outil, Pokémon de base du Super Bonbon, ramassage, Énergie déplacée
+depuis), `to` (un de mes Pokémon : échange, Énergie déplacée vers, nouvel
+Actif après un ramassage), `target` (un des leurs : Ordres du Boss,
+défausse d'Énergie), `evolve` (le niveau 2 du Super Bonbon), `discard`
+(cartes de ma main pour un coût), `pick` (cartes de mon deck ou de ma
+défausse ; si `pick` est donné, rien d'autre n'est pris). Erreur
+`pvp_cannot_play: <raison>` (`first_turn`, `supporter`, `no_more`, `hand`,
+`no_target`, `bench_full`), comme `hints.hand[i].play`.
 
 `target` (une cible adverse pour `bench_one` / `snipe`), `switch_to` et
 `energy_to` (un de mes Pokémon de Banc) sont facultatifs : le serveur
@@ -608,7 +620,10 @@ Carte (instantané `pvp_card()`) :
   "abilities": [] }
 ```
 
-`stage` : `basic`, `evolution` ou `none` (injouable : moitiés LEGEND…) ;
+`stage` : `basic`, `evolution`, `trainer` (0032 : `kind` item / supporter /
+tool, `fx`, `coins`, `text`, `text_fr`, `ace_spec`) ou `none` (injouable :
+moitiés LEGEND…) ; un niveau 2 a `base_name` (le Pokémon de base de sa
+lignée) ;
 `energy` (0031) = le coût typé (vide pour une carte pas encore
 resynchronisée : tout Incolore) ; `fx` = les effets lus dans le texte (liste des `op` en tête de
 `src/utils/attackEffects.js`), `coins` = 1, N ou `"until"` ; `partial` =
@@ -642,7 +657,13 @@ K.O. : je choisis le remplaçant), `over`. `zone` = l'Énergie à attacher
 ce tour (`null` : pas encore, déjà attachée, ou pas mon tour ; une
 Énergie non attachée est perdue), `next` = celle du prochain tour,
 `etypes` = les types des Énergies d'un Pokémon (`energy` = leur nombre) ;
-`hints.attach` demande une `zone`. `hints.attacks[i]` : `null` si
+`hints.attach` demande une `zone`. Depuis 0032 : `me.deck_ids` (ce que
+contient mon deck, trié : pas son ordre) et `me.discard_ids`,
+`supporter_used`, `boost`, `shield` par camp, `tool_card` et `hp_max`
+(PV avec l'Outil) par Pokémon, `hints.hand[i].play` (Dresseur : `null` =
+jouable, sinon pourquoi), `hints.retreat_cost`, `hints.supporter_used`.
+Événements en plus : `trainer` (`flips`), `search` / `recover` (`cards`,
+`to`), `scoop`, `move_energy`. `hints.attacks[i]` : `null` si
 l'attaque est jouable, sinon pourquoi (`first_turn`, `energy`, `asleep`,
 `paralyzed`, `locked`, `once`, `unusable`, `not_your_turn`).
 `them.cards` (le deck adverse) n'arrive qu'à la fin ; sa main et son deck
@@ -655,7 +676,7 @@ ne sont que des nombres, ses pioches arrivent sans les cartes. Événements
 
 Erreurs : `pvp_closed`, `pvp_invalid_format`, `pvp_invalid_deck`,
 `pvp_no_deck`, `pvp_no_opponent`, `pvp_no_battles_left`,
-`pvp_invalid_energy`, `pvp_not_your_turn`, `pvp_invalid_action`, `pvp_bench_full`,
+`pvp_invalid_energy`, `pvp_cannot_play: <raison>`, `pvp_not_your_turn`, `pvp_invalid_action`, `pvp_bench_full`,
 `pvp_cannot_evolve_yet`, `pvp_no_energy`, `pvp_cannot_retreat`,
 `pvp_cannot_attack: <raison>` (le client lit le code avant « : »),
 `no_game`. RPC absente (`PGRST202`), `ready: false` ou `engine` < 2 →

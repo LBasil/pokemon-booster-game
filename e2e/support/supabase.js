@@ -103,8 +103,17 @@ const FIRE_ATTACKS = [
     text_fr: 'Défaussez une Énergie de ce Pokémon.', fx: [{ op: 'discard_self', n: 1 }], coins: null, partial: false, usable: true,
   },
 ]
+// The one Trainer of the mock (0032): Giovanni's Charisma, played as a
+// Supporter that draws 2
+const PVP_TRAINERS = {
+  'sv3pt5-190': { kind: 'supporter', fx: [{ op: 'draw', n: 2 }], coins: null, text: 'Draw 2 cards.', text_fr: 'Piochez 2 cartes.', ace_spec: false },
+}
 const pvpCard = (id) => {
   const card = byId[id]
+  if (PVP_TRAINERS[id]) {
+    return { id, name: card.name, name_fr: null, image_small: card.image_small, image_fr: null, stage: 'trainer', hp: 0, prizes: 0, types: [], weaknesses: [],
+      resistances: [], attacks: [], abilities: [], retreat: 0, evolves_from: null, ...PVP_TRAINERS[id] }
+  }
   if (!card?.national_pokedex_number) return null
   const from = EVOLVES_FROM[card.name] ?? null
   const ex = card.name.endsWith(' ex')
@@ -501,6 +510,9 @@ export async function mockSupabase(page, options = {}) {
         const active = b.me.active
         const handHint = (i) => {
           const card = b.cards[i]
+          if (card.stage === 'trainer') {
+            return { bench: false, evolve: [], play: !myTurn ? 'not_your_turn' : b.turn === 1 ? 'first_turn' : b.me.supporterUsed ? 'supporter' : null }
+          }
           const positions = [b.me.active, ...b.me.bench].map((slot, pos) => ({ slot, pos })).filter(({ slot }) => slot)
           return {
             bench: myTurn && card.stage === 'basic' && b.me.bench.length < 3,
@@ -515,7 +527,8 @@ export async function mockSupabase(page, options = {}) {
           me: {
             points: b.me.points, deck: b.me.deck.length, hand_count: b.me.hand.length, discard: [], attached: b.me.attached, retreated: b.me.retreated,
             active: mySlot(active), bench: b.me.bench.map(mySlot), hand: b.me.hand.map((index) => ({ index, card: b.cards[index] })),
-            energy_types: ['Fire'], zone: b.me.zone, next: 'Fire',
+            energy_types: ['Fire'], zone: b.me.zone, next: 'Fire', supporter_used: !!b.me.supporterUsed,
+            deck_ids: [...b.me.deck].sort((x, y) => x - y), discard_ids: b.me.discard ?? [],
           },
           them: {
             points: b.them.points, deck: 10, hand_count: 4, discard: [], active: theirSlot(b.them.active), bench: b.them.bench.map(theirSlot),
@@ -633,6 +646,7 @@ export async function mockSupabase(page, options = {}) {
         b.me.attached = false
         b.me.retreated = false
         b.me.zone = b.turn > 1 ? 'Fire' : null
+        b.me.supporterUsed = false
         ev(b, { k: 'turn', s: 'a' })
         draw(b)
       }
@@ -713,6 +727,17 @@ export async function mockSupabase(page, options = {}) {
           b.me.attached = true
           ev(b, { k: 'attach', s: 'a', c: posSlot(a.pos).c, name: b.cards[posSlot(a.pos).c].name, type: b.me.zone })
           b.me.zone = null
+        } else if (a.type === 'trainer') {
+          const card = b.cards[a.card]
+          if (!inHand(a.card) || card?.stage !== 'trainer') return raise('pvp_invalid_action')
+          if (b.turn === 1) return raise('pvp_cannot_play: first_turn')
+          if (b.me.supporterUsed) return raise('pvp_cannot_play: supporter')
+          take(a.card)
+          b.me.supporterUsed = true
+          ev(b, { k: 'trainer', s: 'a', c: a.card, name: card.name, flips: [] })
+          draw(b)
+          draw(b)
+          b.me.discard = [...(b.me.discard ?? []), a.card]
         } else if (a.type === 'bench') {
           if (!inHand(a.card) || b.cards[a.card].stage !== 'basic') return raise('pvp_invalid_action')
           if (b.me.bench.length >= 3) return raise('pvp_bench_full')

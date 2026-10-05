@@ -492,7 +492,8 @@
       "pvp_no_energy": "Pas d'Énergie à attacher ce tour-ci.",
       "pvp_cannot_retreat": "Ton Pokémon Actif ne peut pas battre en retraite maintenant.",
       "pvp_cannot_attack": "Cette attaque ne peut pas être utilisée maintenant.",
-      "pvp_invalid_energy": "Choisis 1 ou 2 types d'Énergie pour ce deck."
+      "pvp_invalid_energy": "Choisis 1 ou 2 types d'Énergie pour ce deck.",
+      "pvp_cannot_play": "Ce Dresseur ne peut pas être joué maintenant."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -753,7 +754,7 @@
       },
       "pvp": {
         "title": "Combats PvP",
-        "desc": "Comme Pokémon JCC Pocket : decks de 20 cartes, un Banc, des Énergies et des évolutions, contre les decks des joueurs ou des bots pour des pièces."
+        "desc": "Comme Pokémon JCC Pocket : decks de 20 cartes avec des Dresseurs, un Banc, des Énergies et des évolutions, contre les decks des joueurs ou des bots pour des pièces."
       },
       "boss-raid": {
         "title": "Raid de boss",
@@ -846,7 +847,7 @@
   },
   "pvp": {
     "title": "Combats PvP",
-    "subtitle": "Des combats comme dans Pokémon JCC Pocket : un deck de 20 cartes du défi, un Pokémon Actif et un Banc, une Énergie par tour, des évolutions. Marque 3 points pour gagner de l'Elo contre les decks des autres joueurs (joués par le serveur), ou des pièces contre des bots.",
+    "subtitle": "Des combats comme dans Pokémon JCC Pocket : un deck de 20 cartes du défi (Pokémon et Dresseurs), un Pokémon Actif et un Banc, une Énergie par tour, des évolutions. Marque 3 points pour gagner de l'Elo contre les decks des autres joueurs (joués par le serveur), ou des pièces contre des bots.",
     "unavailable": "Les combats PvP arrivent bientôt.",
     "loadError": "Impossible de charger les combats PvP. Réessaie dans un instant.",
     "hpLabel": "PV restants",
@@ -891,14 +892,15 @@
       "defense": "Deck de défense ({format})"
     },
     "buildHelp": {
-      "attack": "Tu joues ce deck quand tu attaques : des Pokémon de base pour démarrer, leurs évolutions pour frapper fort, 2 exemplaires de ceux qui comptent.",
+      "attack": "Tu joues ce deck quand tu attaques : des Pokémon de base pour démarrer, leurs évolutions pour frapper fort, quelques Dresseurs (pioche, recherche, échange), 2 exemplaires de ceux qui comptent.",
       "defense": "Le serveur joue ce deck quand on t'attaque : des Pokémon solides et des lignées d'évolution simples marchent le mieux."
     },
     "search": "Chercher une carte",
     "filter": {
       "all": "Toutes",
       "basic": "De base",
-      "evolution": "Évolutions"
+      "evolution": "Évolutions",
+      "trainer": "Dresseurs"
     },
     "inDeck": "{count} dans le deck",
     "ownedCopies": "{count} possédée(s)",
@@ -911,7 +913,8 @@
     "blocked": {
       "copies": "2 cartes du même nom au maximum",
       "owned": "Tu n'as pas d'autre exemplaire",
-      "full": "Le deck est complet (20)"
+      "full": "Le deck est complet (20)",
+      "ace_spec": "1 seule carte ACE SPEC par deck"
     },
     "notEnough": "Il faut {deck} cartes pour un deck dans ce format, tu n'en as aucune. | Il faut {deck} cartes pour un deck dans ce format, tu en as 1. | Il faut {deck} cartes pour un deck dans ce format, tu en as {count}.",
     "openBoosters": "Ouvrir des boosters du défi",
@@ -1027,7 +1030,8 @@
       "paralyzed": "Paralysé",
       "confused": "Confus",
       "poisoned": "Empoisonné",
-      "burned": "Brûlé"
+      "burned": "Brûlé",
+      "all": "sous un État Spécial"
     },
     "stage": {
       "basic": "De base",
@@ -1130,10 +1134,37 @@
       "attachType": {
         "a": "Tu attaches une Énergie {type} à {card}.",
         "d": "{name} attache une Énergie {type} à {card}."
+      },
+      "trainer": {
+        "a": "Tu joues {card}.",
+        "d": "{name} joue {card}."
+      },
+      "search": {
+        "a": "Tu prends {cards}.",
+        "d": "{name} prend {count} carte de son deck. | {name} prend {count} carte de son deck. | {name} prend {count} cartes de son deck."
+      },
+      "searchBench": {
+        "a": "Tu poses {cards} sur ton Banc."
+      },
+      "searchNone": {
+        "a": "Tu ne trouves rien.",
+        "d": "{name} ne trouve rien."
+      },
+      "recover": {
+        "a": "Tu récupères {cards}.",
+        "d": "{name} récupère {count} carte. | {name} récupère {count} carte. | {name} récupère {count} cartes."
+      },
+      "scoop": {
+        "a": "Ton {card} revient dans ta main.",
+        "d": "Son {card} revient dans la main de {name}."
+      },
+      "move_energy": {
+        "a": "Une Énergie passe sur ton {card}.",
+        "d": "Une Énergie passe sur son {card}."
       }
     },
     "rules": {
-      "deck": "Tes decks : 20 Pokémon de ta collection du défi, 2 du même nom au maximum, au moins un Pokémon de base (chaque exemplaire doit être possédé). Deux decks par format : celui avec lequel tu attaques, et celui que le serveur joue quand on t'attaque (ton deck d'attaque te défend tant que tu ne l'as pas créé).",
+      "deck": "Tes decks : 20 cartes de ta collection du défi, 2 du même nom au maximum, au moins un Pokémon de base (chaque exemplaire doit être possédé). Deux decks par format : celui avec lequel tu attaques, et celui que le serveur joue quand on t'attaque (ton deck d'attaque te défend tant que tu ne l'as pas créé).",
       "setup": "Tu commences avec 5 cartes en main, toujours avec un Pokémon de base : poses-en un comme Pokémon Actif et jusqu'à 3 sur ton Banc. Une pièce décide qui commence.",
       "turn": "À chaque tour : pioche une carte, attache l'Énergie de ta zone d'Énergie à l'un de tes Pokémon (aucune au premier tour du combat ; si tu ne l'attaches pas, elle est perdue), pose des Pokémon de base sur ton Banc, fais évoluer, bats en retraite une fois, puis attaque, ce qui finit ton tour. Le joueur qui commence ne peut pas attaquer à ce tour-là.",
       "evolve": "Pour évoluer, pose une carte sur le Pokémon dont elle évolue, pas à son premier tour en jeu ni à ton premier tour. Les Énergies et les dégâts restent.",
@@ -1144,7 +1175,8 @@
       "hidden": "Contre un joueur, le serveur joue son deck de défense pendant que tu joues : sa main reste cachée, ses Pokémon apparaissent quand il les joue.",
       "elo": "Contre les joueurs, pas de pièces : tu gagnes ou perds des points Elo, davantage contre un joueur plus fort. Ton adversaire est tiré parmi les joueurs à l'Elo le plus proche du tien.",
       "limit": "{count} attaques par jour, remise à zéro à {time}. Les défenses sont illimitées.",
-      "bots": "Bots : le même combat avec ton deck d'attaque, contre un deck que le serveur construit dans le format. Pas d'Elo, et ils n'utilisent pas tes attaques. Une victoire rapporte {easy}, {normal} ou {hard} pièces (facile, normal, difficile), un nul la moitié, pour tes {paid} premiers combats contre un bot de la journée ; {count} par jour en tout."
+      "bots": "Bots : le même combat avec ton deck d'attaque, contre un deck que le serveur construit dans le format. Pas d'Elo, et ils n'utilisent pas tes attaques. Une victoire rapporte {easy}, {normal} ou {hard} pièces (facile, normal, difficile), un nul la moitié, pour tes {paid} premiers combats contre un bot de la journée ; {count} par jour en tout.",
+      "trainers": "Les Dresseurs, comme dans Pocket : autant d'Objets que tu veux, 1 Supporter par tour (pas au premier tour du combat), les Outils Pokémon attachés à un Pokémon jusqu'à son K.O., 1 ACE SPEC par deck. Seuls les Dresseurs dont les combats savent jouer tout le texte comptent : les Stades et ceux qui parlent de cartes Énergie ou Récompense ne sont pas encore joués. Tu choisis ce que tu défausses, ce que tu prends dans ton deck et sur quel Pokémon ; quand tu regardes le dessus de ton deck, le serveur prend la meilleure carte pour toi."
     },
     "energyReadyType": "Une Énergie {type} à attacher ce tour-ci",
     "attachType": "Attacher l'Énergie {type}",
@@ -1154,7 +1186,51 @@
     "energyHelp": "Choisis 1 ou {max} types. À chaque tour, ta zone d'Énergie en apporte un au hasard (tu vois le suivant). Une attaque coûte les Énergies imprimées : un symbole de type demande ce type, Incolore accepte n'importe laquelle.",
     "energyNone": "Choisis au moins un type d'Énergie.",
     "notPaid": "Ton Énergie ne paie pas ses attaques",
-    "energyAuto": "d'après ses cartes"
+    "energyAuto": "d'après ses cartes",
+    "trainerKinds": {
+      "item": "Objet",
+      "supporter": "Supporter",
+      "tool": "Outil Pokémon"
+    },
+    "aceSpec": "ACE SPEC",
+    "play": "Jouer",
+    "confirm": "Valider",
+    "toolOn": "Outil : {name}",
+    "playBlocks": {
+      "first_turn": "Pas de Supporter au premier tour",
+      "supporter": "1 Supporter par tour, déjà joué",
+      "no_more": "Plus de Dresseur ce tour-ci",
+      "hand": "Pas assez d'autres cartes en main à défausser",
+      "no_target": "Rien sur quoi la jouer",
+      "bench_full": "Ton Banc est plein",
+      "not_your_turn": "Pas ton tour",
+      "unknown": "Pas maintenant"
+    },
+    "steps": {
+      "discard": "Défausse {count} carte de ta main | Défausse {count} carte de ta main | Défausse {count} cartes de ta main",
+      "tool": "Quel Pokémon reçoit l'Outil ?",
+      "heal": "Soigner quel Pokémon ?",
+      "candy": "Quel Pokémon de base évolue ?",
+      "evolve": "En quel Pokémon de niveau 2 ?",
+      "scoop": "Quel Pokémon revient dans ta main ?",
+      "scoop_to": "Quel Pokémon devient ton Pokémon Actif ?",
+      "move_from": "Déplacer une Énergie depuis quel Pokémon ?",
+      "move_to": "Vers quel Pokémon ?",
+      "switch": "Quel Pokémon entre en jeu ?",
+      "gust": "Quel Pokémon adverse entre en jeu ?",
+      "energy": "Défausser une Énergie de quel Pokémon adverse ?",
+      "pick": "Prends jusqu'à {count} carte | Prends jusqu'à {count} carte | Prends jusqu'à {count} cartes"
+    },
+    "pickFrom": {
+      "deck": "deck",
+      "discard": "défausse"
+    },
+    "pickNone": "Rien à prendre : la carte est jouée quand même.",
+    "trainerHow": {
+      "item": "Objets : joue-en autant que tu veux pendant ton tour.",
+      "supporter": "Supporters : 1 par tour, pas au premier tour du combat.",
+      "tool": "Outils Pokémon : attache-le à l'un de tes Pokémon sans Outil ; il reste jusqu'à ce que ce Pokémon soit mis K.O."
+    }
   },
   "electrodeFlip": {
     "title": "Électrode Shiny Flip",

@@ -40,6 +40,7 @@ import CoinAmount from '@/components/CoinAmount.vue'
 import EnergyIcons from '@/components/EnergyIcons.vue'
 import PvpCard from '@/components/PvpCard.vue'
 import PvpCardSheet from '@/components/PvpCardSheet.vue'
+import PvpTrainerPicker from '@/components/PvpTrainerPicker.vue'
 
 // PvP battles like Pokémon TCG Pocket (challenge mode, migration 0030),
 // asynchronous. Per format (every card, one TCG era, one set) I keep two
@@ -54,7 +55,8 @@ import PvpCardSheet from '@/components/PvpCardSheet.vue'
 // The format is remembered on this device (`pb-pvp-format`).
 const FORMAT_KEY = 'pb-pvp-format'
 const KINDS = ['all', 'era', 'set']
-const FILTERS = ['all', 'basic', 'evolution']
+const FILTERS = ['all', 'basic', 'evolution', 'trainer']
+const STAGE_ORDER = { basic: 0, evolution: 1, trainer: 2 }
 
 const { t, te, locale } = useI18n()
 const { french, cardName } = useCardLocale()
@@ -163,12 +165,12 @@ async function loadEligible({ force = false } = {}) {
   }
 }
 
-/** A deck's cards grouped: [{ card, count }], Basics first, by name. */
+/** A deck's cards grouped: [{ card, count }], Basics, evolutions, then Trainers, by name. */
 function grouped(ids) {
   return [...deckCounts(ids)]
     .map(([id, count]) => ({ id, count, card: eligibleById.value.get(id) }))
     .filter((entry) => entry.card)
-    .sort((a, b) => (a.card.stage === 'basic' ? 0 : 1) - (b.card.stage === 'basic' ? 0 : 1) || cardName(a.card).localeCompare(cardName(b.card)))
+    .sort((a, b) => (STAGE_ORDER[a.card.stage] ?? 1) - (STAGE_ORDER[b.card.stage] ?? 1) || cardName(a.card).localeCompare(cardName(b.card)))
 }
 
 // Builder: the role being built (null = not building) and its 20 ids
@@ -268,10 +270,12 @@ const benchSize = 3
 // What I tapped: { kind: 'hand', index } | { kind: 'mine' | 'theirs', pos }
 const selection = ref(null)
 const pending = ref(null) // an attack waiting for its target / Benched Pokémon
+const trainerPick = ref(null) // a Trainer of my hand being played (PvpTrainerPicker asks its choices)
 const sheet = ref(null) // { card, slot } read in full
 
 function select(next) {
   pending.value = null
+  trainerPick.value = null
   const same = selection.value && next && selection.value.kind === next.kind && selection.value.index === next.index && selection.value.pos === next.pos
   selection.value = same ? null : next
 }
@@ -343,6 +347,7 @@ async function act(action) {
     const result = await pvp.act(action)
     recent.value = result.events
     pending.value = null
+    trainerPick.value = null
     // Keep my Pokémon picked while it's still there; a played card leaves the hand
     if (selection.value?.kind !== 'mine' || action.type === 'attack' || action.type === 'end' || action.type === 'retreat') selection.value = null
     playSounds(result.events)
@@ -406,6 +411,14 @@ function chooseStep(value) {
 
 const chooseTarget = (pos) => chooseStep(pos)
 
+/** A Trainer card's stage line: its kind. */
+const stageLabel = (card) =>
+  card.stage === 'trainer'
+    ? t(`pvp.trainerKinds.${card.kind}`)
+    : card.stage === 'evolution'
+      ? t('pvp.stage.evolution', { name: card.evolves_from })
+      : t(`pvp.stage.${card.stage}`)
+
 async function forfeit() {
   if (busy.value) return
   if (!confirmForfeit.value) {
@@ -465,6 +478,9 @@ async function fight(level = null) {
 
 const resultTitle = computed(() => (finished.value ? t(`pvp.result.${finished.value.status}`) : ''))
 const signed = (n) => (n > 0 ? `+${n}` : String(n ?? 0))
+// What retreating costs now (Tools, Trainers: 0032), the printed cost before
+const retreatCost = computed(() => hints.value.retreat_cost ?? mySlot(0)?.card.retreat ?? 0)
+
 // The energy zone (0031): this turn's energy and the next one; null before 0031
 const myZone = computed(() => battle.value?.me.zone ?? null)
 const energyLine = computed(() => {
@@ -517,6 +533,23 @@ function describe(e, previous) {
     case 'heal':
     case 'discard_energy':
       return t(`pvp.ev.${e.k}.${side}`, { card, n: e.n })
+    case 'trainer': {
+      let text = t(`pvp.ev.trainer.${side}`, { name, card })
+      if (e.flips?.length) text += ` ${t('pvp.ev.flips', { flips: e.flips.map((up) => t(up ? 'pvp.heads' : 'pvp.tails')).join(', ') })}`
+      return text
+    }
+    case 'search':
+    case 'recover': {
+      const found = e.cards ?? []
+      if (!found.length) return e.k === 'search' ? t(`pvp.ev.searchNone.${side}`, { name }) : ''
+      // their cards: only how many (their deck isn't mine to name)
+      if (side === 'd') return t(`pvp.ev.${e.k}.d`, { name, count: found.length }, found.length)
+      const cards = found.map((i) => cardName(myCard(i))).join(', ')
+      return t(e.k === 'search' && e.to === 'bench' ? 'pvp.ev.searchBench.a' : `pvp.ev.${e.k}.a`, { cards })
+    }
+    case 'scoop':
+    case 'move_energy':
+      return t(`pvp.ev.${e.k}.${side}`, { name, card })
     case 'status':
     case 'cured':
       return t(`pvp.ev.${e.k}.${side}`, { card, status: t(`pvp.statuses.${e.status}`).toLowerCase() })
@@ -716,7 +749,11 @@ onMounted(async () => {
                   class="pvp-slot"
                   :class="{
                     'is-selected': (selection?.kind === 'hand' && selection.index === entry.index) || setupActive === entry.index || setupBench.includes(entry.index),
-                    'is-playable': hints.setup ? entry.card.stage === 'basic' : hints.hand?.[entry.index]?.bench || hints.hand?.[entry.index]?.evolve?.length,
+                    'is-playable': hints.setup
+                      ? entry.card.stage === 'basic'
+                      : hints.hand?.[entry.index]?.bench ||
+                        hints.hand?.[entry.index]?.evolve?.length ||
+                        (entry.card.stage === 'trainer' && hints.hand?.[entry.index]?.play === null),
                   }"
                   :aria-label="cardName(entry.card)"
                   :aria-pressed="setupActive === entry.index || setupBench.includes(entry.index)"
@@ -754,6 +791,10 @@ onMounted(async () => {
               <p class="pvp-note">{{ t('pvp.promoteHelp') }}</p>
             </template>
 
+            <template v-else-if="trainerPick !== null">
+              <PvpTrainerPicker :battle="battle" :index="trainerPick" @play="act" @cancel="trainerPick = null" />
+            </template>
+
             <template v-else-if="pending?.need">
               <p class="pvp-panel-title">{{ t(pending.need === 'target' ? 'pvp.pickTarget' : pending.need === 'switch_to' ? 'pvp.pickSwitch' : 'pvp.pickEnergyTo') }}</p>
               <div class="pvp-choice-buttons">
@@ -774,7 +815,13 @@ onMounted(async () => {
                 <button type="button" class="btn btn-outline-secondary btn-sm" @click="openSheet(selectedCard, selectedSlot)">{{ t('pvp.details') }}</button>
               </div>
               <!-- A card in my hand -->
-              <div v-if="selection.kind === 'hand'" class="pvp-choice-buttons">
+              <div v-if="selection.kind === 'hand' && selectedCard.stage === 'trainer'" class="pvp-choice-buttons">
+                <button v-if="handHints?.play === null" type="button" class="pvp-choice" :disabled="busy" @click="trainerPick = selection.index">
+                  {{ t('pvp.play') }}
+                </button>
+                <p v-else class="pvp-note">{{ t(`pvp.playBlocks.${handHints?.play ?? 'unknown'}`) }}</p>
+              </div>
+              <div v-else-if="selection.kind === 'hand'" class="pvp-choice-buttons">
                 <button v-if="handHints?.bench" type="button" class="pvp-choice" :disabled="busy" @click="act({ type: 'bench', card: selection.index })">
                   {{ t('pvp.toBench') }}
                 </button>
@@ -805,7 +852,7 @@ onMounted(async () => {
                   {{
                     t('pvp.retreatHere', {
                       name: cardName(mySlot(0).card),
-                      cost: mySlot(0).card.retreat ? t('pvp.energyCount', { count: mySlot(0).card.retreat }, mySlot(0).card.retreat) : t('pvp.free'),
+                      cost: retreatCost ? t('pvp.energyCount', { count: retreatCost }, retreatCost) : t('pvp.free'),
                     })
                   }}
                 </button>
@@ -932,9 +979,7 @@ onMounted(async () => {
                   <button type="button" class="pvp-line-button" :aria-label="t('pvp.remove', { name: cardName(entry.card) })" @click="removePick(entry.id)">−</button>
                   <span class="pvp-line-count">{{ entry.count }}×</span>
                   <span class="pvp-line-name">{{ cardName(entry.card) }}</span>
-                  <span class="pvp-muted pvp-line-stage">
-                    {{ entry.card.stage === 'evolution' ? t('pvp.stage.evolution', { name: entry.card.evolves_from }) : t(`pvp.stage.${entry.card.stage}`) }}
-                  </span>
+                  <span class="pvp-muted pvp-line-stage">{{ stageLabel(entry.card) }}</span>
                 </li>
               </ul>
               <p v-if="check.missing" class="pvp-note">{{ t('pvp.missing', { count: check.missing }, check.missing) }}</p>
@@ -967,7 +1012,7 @@ onMounted(async () => {
             </p>
             <ul v-if="!eligibleLoading && shown.length" class="pvp-grid">
               <li v-for="card in shown" :key="card.id">
-                <div class="pvp-pick" :class="{ 'is-picked': counts.get(card.id), 'is-off': energy.length && !fitsEnergy(card, energy) }">
+                <div class="pvp-pick" :class="{ 'is-picked': counts.get(card.id), 'is-off': card.stage !== 'trainer' && energy.length && !fitsEnergy(card, energy) }">
                   <button type="button" class="pvp-pick-card" :aria-label="t('pvp.details')" @click="openSheet(card)">
                     <PvpCard :card="card" />
                   </button>
@@ -993,7 +1038,7 @@ onMounted(async () => {
                       +
                     </button>
                   </div>
-                  <span v-if="energy.length && !fitsEnergy(card, energy)" class="pvp-muted pvp-off-note">{{ t('pvp.notPaid') }}</span>
+                  <span v-if="card.stage !== 'trainer' && energy.length && !fitsEnergy(card, energy)" class="pvp-muted pvp-off-note">{{ t('pvp.notPaid') }}</span>
                 </div>
               </li>
             </ul>
@@ -1113,6 +1158,7 @@ onMounted(async () => {
             <li>{{ t('pvp.rules.evolve') }}</li>
             <li>{{ t('pvp.rules.retreat') }}</li>
             <li>{{ t('pvp.rules.attack', { resistance: rules.resistance }) }}</li>
+            <li>{{ t('pvp.rules.trainers') }}</li>
             <li>{{ t('pvp.rules.conditions') }}</li>
             <li>{{ t('pvp.rules.points', { points: rules.points, turns: rules.turns }) }}</li>
             <li>{{ t('pvp.rules.hidden') }}</li>

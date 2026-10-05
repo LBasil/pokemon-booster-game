@@ -9,6 +9,7 @@ import PvpCard from '@/components/PvpCard.vue'
 // A PvP card read in full (migration 0030): its attacks with their cost,
 // damage and text (French when imported, 0029), what the battles don't play
 // of it, its abilities (not played yet), weakness, resistance and retreat.
+// A Trainer (0032): its kind, its text and how that kind is played.
 // `card` null = closed.
 const props = defineProps({
   card: { type: Object, default: null },
@@ -41,7 +42,12 @@ watch(
       <div class="pvp-sheet-card"><PvpCard :card="card" :slot="slot" compact /></div>
       <div class="pvp-sheet-text">
         <h2 class="pvp-sheet-name">{{ cardName(card) }}</h2>
-        <dl class="pvp-sheet-facts">
+        <template v-if="card.stage === 'trainer'">
+          <p class="pvp-sheet-kind">{{ t(`pvp.trainerKinds.${card.kind}`) }}<template v-if="card.ace_spec"> · {{ t('pvp.aceSpec') }}</template></p>
+          <p class="pvp-sheet-effect pvp-sheet-trainer">{{ attackText(card, french) }}</p>
+          <p class="pvp-sheet-note">{{ t(`pvp.trainerHow.${card.kind}`) }}</p>
+        </template>
+        <dl v-else class="pvp-sheet-facts">
           <div>
             <dt>{{ t('pvp.weakness') }}</dt>
             <dd>{{ card.weaknesses?.length ? card.weaknesses.map(typeLabel).join(', ') : '-' }}</dd>
@@ -56,8 +62,8 @@ watch(
           </div>
         </dl>
 
-        <h3 class="pvp-sheet-title">{{ t('pvp.attacks') }}</h3>
-        <ul class="pvp-sheet-attacks">
+        <h3 v-if="card.stage !== 'trainer'" class="pvp-sheet-title">{{ t('pvp.attacks') }}</h3>
+        <ul v-if="card.stage !== 'trainer'" class="pvp-sheet-attacks">
           <li v-for="(attack, i) in card.attacks" :key="i">
             <p class="pvp-sheet-attack">
               <EnergyIcons class="pvp-sheet-cost" :types="attack.energy ?? []" :count="attack.cost" free />
@@ -86,6 +92,15 @@ watch(
 </template>
 
 <style scoped>
+.pvp-sheet-kind {
+  margin: 0;
+  font-weight: 800;
+}
+
+.pvp-sheet-trainer {
+  white-space: pre-line;
+}
+
 .pvp-sheet {
   width: min(720px, calc(100% - 2rem));
   max-width: none;

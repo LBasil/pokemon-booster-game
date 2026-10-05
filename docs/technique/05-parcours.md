@@ -893,9 +893,9 @@ sequenceDiagram
   DB->>DB: pvp_finish : Elo des deux joueurs, ou pièces contre un bot
 ```
 
-- **Deck** : 20 Pokémon de la collection du Défi, 2 du même nom au
+- **Deck** : 20 cartes de la collection du Défi (Pokémon et, depuis 0032, Dresseurs), 2 du même nom au
   maximum, au moins un Pokémon de base, chaque exemplaire possédé
-  (`collections.quantity`). Pas encore de cartes Dresseur. Deux decks par
+  (`collections.quantity`), 1 ACE SPEC au plus. Deux decks par
   format (attaque, défense) comme depuis 0026 ; les decks à 5 cartes
   d'avant 0030 sont invalides (« modifie-le »). Constructeur : recherche
   (noms EN et FR), filtres De base / Évolutions, − / + par carte (bloqué à
@@ -903,6 +903,29 @@ sequenceDiagram
   avertissements (cartes manquantes, aucun Pokémon de base, évolution
   dont le Pokémon de départ manque, cartes que l'Énergie du deck ne
   paie pas : grisées dans la grille).
+- **Dresseurs** (0032, « fais comme Pocket mais avec nos cartes bien
+  sûr ») : Objets à volonté, 1 Supporter par tour (pas au tout premier
+  tour, sauf si la carte le permet), Outils Pokémon attachés à un Pokémon
+  sans Outil jusqu'à son K.O. ; ni Stades, ni Machines Techniques, ni
+  fossiles. Jouable = `trainerEffects.js` comprend tout le texte : 578 sur
+  2 506 le 2026-10-05 (Recherches Professorales, Poké Ball, Potion,
+  Échange, Ordres du Boss, Super Bonbon, Ultra Ball, Casque Brut, Pierre
+  Plume…) ; ceux qui parlent de cartes Énergie ou Récompense ne le sont
+  pas (l'Énergie vient de la zone, les points remplacent les
+  Récompenses). En combat : toucher un Dresseur de ma main → « Jouer »
+  (ou pourquoi pas : `hints.hand[i].play`), puis `PvpTrainerPicker` pose
+  ses questions (je choisis ce que je défausse, ce que je prends dans mon
+  deck ou ma défausse, sur quel Pokémon) ; regarder le dessus du deck :
+  le serveur prend la meilleure carte. Le constructeur a un filtre
+  Dresseurs ; « Deck auto » en met 6 en attaque, 4 en défense (les plus
+  utiles : recherche, pioche, Ordres du Boss…, Super Bonbon seulement
+  avec un niveau 2). L'IA joue les siens (pioche quand sa main est
+  petite, soins, recherches, échange si son Actif ne peut pas frapper,
+  Ordres du Boss sur un K.O. possible ; Outils après son Banc, bonus et
+  boucliers juste avant d'attaquer ; facile : la moitié du temps) ; les
+  bots en ont 2 / 4 / 6. Simulé (IA difficile contre bots, 1 500 vraies
+  cartes, 113 Dresseurs jouables) : 18/20 contre facile, 8/20 contre
+  normal, 6/20 contre difficile.
 - **Énergie du deck** (0031) : 1 ou 2 types parmi les 9 qui ont une carte
   Énergie de base (Plante, Feu, Eau, Électrique, Psy, Combat, Obscurité,
   Métal, Fée ; les Pokémon Dragon paient avec d'autres types), choisis

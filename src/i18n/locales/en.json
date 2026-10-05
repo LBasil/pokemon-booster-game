@@ -492,7 +492,8 @@
       "pvp_no_energy": "No energy to attach this turn.",
       "pvp_cannot_retreat": "Your Active Pokémon can't retreat now.",
       "pvp_cannot_attack": "This attack can't be used now.",
-      "pvp_invalid_energy": "Pick 1 or 2 energy types for this deck."
+      "pvp_invalid_energy": "Pick 1 or 2 energy types for this deck.",
+      "pvp_cannot_play": "This Trainer can't be played now."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -753,7 +754,7 @@
       },
       "pvp": {
         "title": "PvP battles",
-        "desc": "Like Pokémon TCG Pocket: 20-card decks, a Bench, energy and evolutions, against players' decks or bots for coins."
+        "desc": "Like Pokémon TCG Pocket: 20-card decks with Trainers, a Bench, energy and evolutions, against players' decks or bots for coins."
       },
       "boss-raid": {
         "title": "Boss raid",
@@ -846,7 +847,7 @@
   },
   "pvp": {
     "title": "PvP battles",
-    "subtitle": "Battles like Pokémon TCG Pocket: a deck of 20 challenge cards, an Active Pokémon and a Bench, one energy a turn, evolutions. Take 3 points to win Elo against other players' decks (the server plays them), or coins against bots.",
+    "subtitle": "Battles like Pokémon TCG Pocket: a deck of 20 challenge cards (Pokémon and Trainers), an Active Pokémon and a Bench, one energy a turn, evolutions. Take 3 points to win Elo against other players' decks (the server plays them), or coins against bots.",
     "unavailable": "PvP battles are coming soon.",
     "loadError": "Couldn’t load PvP battles. Try again in a moment.",
     "hpLabel": "HP left",
@@ -891,14 +892,15 @@
       "defense": "Defense deck ({format})"
     },
     "buildHelp": {
-      "attack": "You play this deck when you attack: Basic Pokémon to start, their evolutions to hit hard, 2 copies of the ones that matter.",
+      "attack": "You play this deck when you attack: Basic Pokémon to start, their evolutions to hit hard, a few Trainers (draw, search, switch), 2 copies of the ones that matter.",
       "defense": "The server plays this deck when someone attacks you: sturdy Pokémon and simple evolution lines work best."
     },
     "search": "Search a card",
     "filter": {
       "all": "All",
       "basic": "Basic",
-      "evolution": "Evolutions"
+      "evolution": "Evolutions",
+      "trainer": "Trainers"
     },
     "inDeck": "{count} in the deck",
     "ownedCopies": "{count} owned",
@@ -911,7 +913,8 @@
     "blocked": {
       "copies": "2 cards with the same name at most",
       "owned": "You don't own another copy",
-      "full": "The deck is full (20)"
+      "full": "The deck is full (20)",
+      "ace_spec": "Only 1 ACE SPEC card in a deck"
     },
     "notEnough": "You need {deck} cards for a deck in this format, you have none. | You need {deck} cards for a deck in this format, you have 1. | You need {deck} cards for a deck in this format, you have {count}.",
     "openBoosters": "Open challenge boosters",
@@ -1027,7 +1030,8 @@
       "paralyzed": "Paralyzed",
       "confused": "Confused",
       "poisoned": "Poisoned",
-      "burned": "Burned"
+      "burned": "Burned",
+      "all": "affected by special conditions"
     },
     "stage": {
       "basic": "Basic",
@@ -1130,10 +1134,37 @@
       "attachType": {
         "a": "You attach a {type} energy to {card}.",
         "d": "{name} attaches a {type} energy to {card}."
+      },
+      "trainer": {
+        "a": "You play {card}.",
+        "d": "{name} plays {card}."
+      },
+      "search": {
+        "a": "You take {cards}.",
+        "d": "{name} takes {count} card from their deck. | {name} takes {count} card from their deck. | {name} takes {count} cards from their deck."
+      },
+      "searchBench": {
+        "a": "You put {cards} on your Bench."
+      },
+      "searchNone": {
+        "a": "You find nothing.",
+        "d": "{name} finds nothing."
+      },
+      "recover": {
+        "a": "You get back {cards}.",
+        "d": "{name} gets back {count} card. | {name} gets back {count} card. | {name} gets back {count} cards."
+      },
+      "scoop": {
+        "a": "Your {card} goes back to your hand.",
+        "d": "Their {card} goes back to {name}'s hand."
+      },
+      "move_energy": {
+        "a": "An energy moves to your {card}.",
+        "d": "An energy moves to their {card}."
       }
     },
     "rules": {
-      "deck": "Your decks: 20 Pokémon from your challenge collection, 2 with the same name at most, at least one Basic (each copy must be owned). Two decks per format: one you attack with, one the server plays when you are attacked (your attack deck defends until you build it).",
+      "deck": "Your decks: 20 cards from your challenge collection, 2 with the same name at most, at least one Basic Pokémon (each copy must be owned). Two decks per format: one you attack with, one the server plays when you are attacked (your attack deck defends until you build it).",
       "setup": "You start with 5 cards in hand, always with a Basic Pokémon: put one as your Active Pokémon and up to 3 on your Bench. A coin decides who goes first.",
       "turn": "Each turn: draw a card, attach your energy zone's energy to any of your Pokémon (none on the first turn of the battle; one not attached is lost), put Basic Pokémon on your Bench, evolve, retreat once, then attack, which ends your turn. The player going first can't attack on that turn.",
       "evolve": "Evolve by putting a card on the Pokémon it evolves from, not on its first turn in play nor on your first turn. The energy and damage stay.",
@@ -1144,7 +1175,8 @@
       "hidden": "Against players, the server plays their defense deck while you play: their hand stays hidden, their Pokémon show up as they're played.",
       "elo": "Against players, no coins: you win or lose Elo points, more against a stronger player. Your opponent is drawn among the players closest to your Elo.",
       "limit": "{count} attacks a day, reset at {time}. Defenses are unlimited.",
-      "bots": "Bots: the same battle with your attack deck, against a deck the server builds from the format. No Elo, and they don't use your attacks. A win pays {easy}, {normal} or {hard} coins (easy, normal, hard), a draw half, for your first {paid} bot battles of the day; {count} a day in all."
+      "bots": "Bots: the same battle with your attack deck, against a deck the server builds from the format. No Elo, and they don't use your attacks. A win pays {easy}, {normal} or {hard} coins (easy, normal, hard), a draw half, for your first {paid} bot battles of the day; {count} a day in all.",
+      "trainers": "Trainers, like in Pocket: Items as many as you like, 1 Supporter a turn (not on the first turn of the battle), Pokémon Tools attached to a Pokémon until it's knocked out, 1 ACE SPEC per deck. Only the Trainers whose whole text the battles can play: Stadiums and the ones about Energy or Prize cards aren't played yet. You pick what you discard, what you take from your deck and which Pokémon; looking at the top of your deck, the server takes the best card for you."
     },
     "energyReadyType": "A {type} energy to attach this turn",
     "attachType": "Attach the {type} energy",
@@ -1154,7 +1186,51 @@
     "energyHelp": "Pick 1 or {max} types. Each turn your energy zone brings one of them at random (you see the next one). An attack costs its printed energy: a type symbol needs that type, Colorless takes any.",
     "energyNone": "Pick at least one energy type.",
     "notPaid": "Your energy can't pay its attacks",
-    "energyAuto": "from its cards"
+    "energyAuto": "from its cards",
+    "trainerKinds": {
+      "item": "Item",
+      "supporter": "Supporter",
+      "tool": "Pokémon Tool"
+    },
+    "aceSpec": "ACE SPEC",
+    "play": "Play",
+    "confirm": "Confirm",
+    "toolOn": "Tool: {name}",
+    "playBlocks": {
+      "first_turn": "No Supporter on the first turn",
+      "supporter": "1 Supporter a turn, already played",
+      "no_more": "No more Trainers this turn",
+      "hand": "Not enough other cards in your hand to discard",
+      "no_target": "Nothing to play it on",
+      "bench_full": "Your Bench is full",
+      "not_your_turn": "Not your turn",
+      "unknown": "Not now"
+    },
+    "steps": {
+      "discard": "Discard {count} card from your hand | Discard {count} card from your hand | Discard {count} cards from your hand",
+      "tool": "Which Pokémon gets the Tool?",
+      "heal": "Heal which Pokémon?",
+      "candy": "Which Basic Pokémon evolves?",
+      "evolve": "Into which Stage 2?",
+      "scoop": "Which Pokémon goes back to your hand?",
+      "scoop_to": "Which Pokémon becomes your Active Pokémon?",
+      "move_from": "Move an energy from which Pokémon?",
+      "move_to": "To which Pokémon?",
+      "switch": "Which Pokémon comes in?",
+      "gust": "Which of their Pokémon comes in?",
+      "energy": "Discard an energy from which of their Pokémon?",
+      "pick": "Take up to {count} card | Take up to {count} card | Take up to {count} cards"
+    },
+    "pickFrom": {
+      "deck": "deck",
+      "discard": "discard pile"
+    },
+    "pickNone": "Nothing to take there: the card is played anyway.",
+    "trainerHow": {
+      "item": "Items: play as many as you like on your turn.",
+      "supporter": "Supporters: 1 a turn, not on the first turn of the battle.",
+      "tool": "Pokémon Tools: attach it to one of your Pokémon without a Tool; it stays until that Pokémon is knocked out."
+    }
   },
   "electrodeFlip": {
     "title": "Shiny Electrode Flip",

@@ -483,8 +483,8 @@ docs/technique/             technical doc (French, user choice): overview, front
   History: 0024 asynchronous 5-card battles, 0025 energy + prizes, 0026
   attack / defense decks + `autoDeck`, 0027 bots for coins, all replaced
   by 0030's engine (formats, Elo, bots, coins and limits kept).
-  Rules: 20 challenge Pokémon per deck, 2 of a name, each copy owned, 1
-  Basic at least, no Trainers yet; 5-card hand with a Basic, Active + 3
+  Rules: 20 challenge cards per deck, 2 of a name, each copy owned, 1
+  Basic at least, Trainers since 0032; 5-card hand with a Basic, Active + 3
   Bench, a coin for who starts; a turn = draw, attach 1 colorless energy
   (not on turn 1), bench Basics, evolve (not on a player's first turn nor
   a Pokémon played this turn), retreat once, attack (ends the turn; not
@@ -537,10 +537,26 @@ docs/technique/             technical doc (French, user choice): overview, front
   types, strength = my cards' percentile in the pool (easy x0.6, normal
   -0.05, hard +0.1; simulated: a strong deck played by the hard AI wins
   20/20, 14/20, 5/20). `engine` 3; the client still plays engine 2.
-  `EnergyIcons.vue` = the dots. **Next asked** (user 2026-10-05, "pourquoi
-  pas tous ? pourquoi pas juste faire comme pocket ?"): Trainer cards,
-  Pocket rules (Items, 1 Supporter a turn), every Trainer whose text the
-  parser fully reads (like attacks), then abilities.
+  `EnergyIcons.vue` = the dots.
+  **Trainers** (0032, user 2026-10-05: "fais comme Pocket mais avec nos
+  cartes bien sûr"): Pocket rules (Items any number, 1 Supporter a turn
+  and not on turn 1 unless the card says so, Tools stay on a Pokémon
+  until its KO, 1 ACE SPEC a deck; no Stadiums / TMs / fossils).
+  `src/utils/trainerEffects.js` reads the text at import
+  (`cards.trainer` = `trainerData()`; FR text `effect_fr` from TCGdex in
+  the `fr` step); playable only when every sentence is understood
+  (unlike attacks: half a Trainer would lie): 578 / 2,506 on 2026-10-05,
+  the long tail is Energy cards / prizes / Stadiums. Engine:
+  `pvp_trainer(g, side, card, opts)` (opts pos/to/target/evolve/discard/
+  pick, server picks the rest; top-of-deck looks take the best match),
+  `pvp_trainer_block` (= `hints.hand[i].play`), Tools via `pvp_tool_n`
+  in HP (`pvp_hp_left`), damage, Weakness, retreat (`pvp_retreat_cost`),
+  end-of-turn heal. Client: `PvpTrainerPicker.vue` asks `trainerSteps()`
+  one at a time; view has `me.deck_ids` (sorted) / `discard_ids`. AI:
+  `pvp_ai_wants` per moment (main / tools / attack). Auto deck 6 (attack)
+  / 4 (defense) Trainers, bots 2 / 4 / 6; bot strength = Pokémon only.
+  Add a Trainer op = parser + test + SQL case in `pvp_trainer` + AI +
+  `trainerSteps` if it asks a choice + the doc list. Next: abilities.
 - **Cards in French** (0029, user 2026-10-05: "qu'un joueur FR puisse
   avoir ses cartes en FR"): pokemontcg.io is English only; TCGdex (free,
   no key) has French names, images and texts. `populate.mjs fr` (in
@@ -757,12 +773,12 @@ docs/technique/             technical doc (French, user choice): overview, front
   2026-10-04) · 0026 PvP attack / defense decks + attacks without a
   cost dropped (written 2026-10-04, **to apply**, then check a full
   card sync went through) · 0027 PvP against bots for coins (written
-  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, **to apply** after 0030, then a card sync). Every one was
+  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, applied: `pvp_rules().engine` = 3 the same day) · 0032 Trainer cards in PvP (written 2026-10-05, **to apply** after 0031, then a card sync). Every one was
   verified locally with PGlite before being handed over; 0010-0025 have
-  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0031 too) —
+  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0032 too) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 250 unit tests, `npm run test:db` 653 database
-  checks, `npm run test:e2e` 312 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 264 unit tests, `npm run test:db` 687 database
+  checks, `npm run test:e2e` 314 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

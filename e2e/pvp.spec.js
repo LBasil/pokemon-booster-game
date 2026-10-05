@@ -49,7 +49,8 @@ test('PvP is listed with the mini-games, with its rules', async ({ page }) => {
   await expect(page).toHaveURL(/\/challenge\/games\/pvp$/)
   await expect(page.getByRole('heading', { level: 1, name: 'PvP battles' })).toBeVisible()
   await expect(page.locator('a[href="/challenge/games"]:visible').first()).toHaveClass(/active|router-link-active/)
-  await expect(page.locator('.pvp-rules')).toContainText('20 Pokémon from your challenge collection')
+  await expect(page.locator('.pvp-rules')).toContainText('20 cards from your challenge collection')
+  await expect(page.locator('.pvp-rules')).toContainText('1 Supporter a turn')
   await expect(page.locator('.pvp-rules')).toContainText('Asleep and Paralyzed')
 })
 
@@ -136,6 +137,26 @@ test('a bot battle: set up, the server plays, attach, attack, knock out, win coi
   expect(acts).toEqual(['setup', 'end', 'attach', 'attack', 'attach', 'attack'])
   await page.getByRole('button', { name: 'Back to battles' }).click()
   await expect(page.locator('.pvp-history')).toContainText('You fought a bot (Easy)')
+})
+
+test('a Trainer: a Supporter, not on the first turn, once a turn (0032)', async ({ page }) => {
+  // Giovanni's Charisma (the mock's Supporter: draw 2) is dealt second
+  const deck = ['sv3pt5-4', 'sv3pt5-190', ...DECK.slice(1, 19)]
+  await mockSupabase(page, { challengeCollection: [...challengeCollection, collectionEntry('sv3pt5-190', 2)], pvp: { decks: { all: { attack: deck } } } })
+  await page.goto('/challenge/games/pvp')
+  await expect(page.getByRole('group', { name: 'Attack deck' })).toContainText("Giovanni's Charisma")
+  await page.getByRole('button', { name: /^Easy/ }).click()
+  await hand(page).getByRole('button', { name: 'Charmander' }).first().click()
+  await page.getByRole('button', { name: 'Start the battle' }).click()
+  await hand(page).getByRole('button', { name: "Giovanni's Charisma" }).click()
+  await expect(page.locator('.pvp-panel-actions')).toContainText('No Supporter on the first turn')
+  await page.getByRole('button', { name: 'End my turn' }).click()
+  await expect(page.locator('.pvp-log')).toContainText('Your turn.')
+  const before = await hand(page).getByRole('button').count()
+  await hand(page).getByRole('button', { name: "Giovanni's Charisma" }).click()
+  await page.getByRole('button', { name: 'Play', exact: true }).click()
+  await expect(page.locator('.pvp-log')).toContainText("You play Giovanni's Charisma.")
+  await expect(hand(page).getByRole('button')).toHaveCount(before + 1)
 })
 
 test('evolve, bench and retreat, with the card details', async ({ page }) => {

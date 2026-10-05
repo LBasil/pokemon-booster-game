@@ -16,6 +16,9 @@ import {
   eloChange,
   energyMissing,
   fitsEnergy,
+  matchesFilter,
+  trainerScore,
+  trainerSteps,
   hpPercent,
   parseFormat,
   prizesFor,
@@ -202,6 +205,66 @@ describe('typed energy', () => {
     expect(deckCheck(['f', 'w'], byId, 2, ['Fire']).unpaid).toEqual(['Squirtle'])
     expect(deckCheck(['f', 'w'], byId, 2, ['Fire']).ready).toBe(true)
     expect(deckCheck(['f', 'w'], byId, 2, []).ready).toBe(false)
+  })
+})
+
+describe('Trainers (0032)', () => {
+  const trainer = (id, name, fx, extra = {}) => ({ id, name, stage: 'trainer', kind: 'item', fx, owned: 2, attacks: [], ...extra })
+  const potion = trainer('potion', 'Potion', [{ op: 'heal', n: 30, who: 'one' }])
+  const boss = trainer('boss', "Boss's Orders", [{ op: 'gust' }], { kind: 'supporter' })
+  const ultra = trainer('ultra', 'Ultra Ball', [{ op: 'discard_cost', n: 2 }, { op: 'search', what: 'pokemon', n: 1, to: 'hand' }])
+  const candy = trainer('candy', 'Rare Candy', [{ op: 'rare_candy' }])
+
+  it('scores what an auto deck wants', () => {
+    expect(trainerScore(boss)).toBe(3)
+    expect(trainerScore(potion)).toBe(2)
+    expect(trainerScore(ultra)).toBe(0) // costs cards
+  })
+
+  it('puts Trainers in an auto deck, never a Rare Candy without a Stage 2', () => {
+    const pool = [
+      ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => card(`p${i}`, `Pokémon ${i}`)),
+      potion,
+      boss,
+      candy,
+      trainer('cape', "Hero's Cape", [{ op: 'tool_hp', n: 100 }], { kind: 'tool', ace_spec: true }),
+    ]
+    const ids = autoDeck(pool)
+    expect(ids).toHaveLength(20)
+    expect(ids.filter((id) => id === 'boss')).toHaveLength(2)
+    expect(ids.filter((id) => id === 'cape')).toHaveLength(1)
+    expect(ids).not.toContain('candy')
+    expect(ids.filter((id) => /^p\d/.test(id))).toHaveLength(15) // 5 Trainers left once Rare Candy is out
+  })
+
+  it('allows 1 ACE SPEC', () => {
+    const a = trainer('a', 'Master Ball', [], { ace_spec: true })
+    const b = trainer('b', "Hero's Cape", [], { ace_spec: true })
+    const byId = new Map([a, b].map((c) => [c.id, c]))
+    expect(addBlock(['a'], b, byId)).toBe('ace_spec')
+  })
+
+  it('never warns that a Trainer has no energy', () => {
+    const byId = new Map([potion].map((c) => [c.id, c]))
+    expect(deckCheck(['potion'], byId, 1, ['Fire']).unpaid).toEqual([])
+  })
+
+  it('matches search filters (mirrors pvp_matches)', () => {
+    const squirtle = { stage: 'basic', types: ['Water'], hp: 60, prizes: 1 }
+    const ex = { stage: 'basic', types: ['Water'], hp: 220, prizes: 2 }
+    expect(matchesFilter(squirtle, { what: 'basic', type: 'Water', max_hp: 70 })).toBe(true)
+    expect(matchesFilter(ex, { what: 'pokemon', no_rule_box: true })).toBe(false)
+    expect(matchesFilter(boss, { what: 'supporter' })).toBe(true)
+    expect(matchesFilter(boss, { what: 'pokemon' })).toBe(false)
+    expect(matchesFilter(potion, { what: 'card' })).toBe(true)
+  })
+
+  it('lists the choices a Trainer asks for, the cost first', () => {
+    expect(trainerSteps(potion)).toEqual(['heal'])
+    expect(trainerSteps(ultra)).toEqual(['discard', 'pick'])
+    expect(trainerSteps(candy)).toEqual(['candy', 'evolve'])
+    expect(trainerSteps({ kind: 'tool', fx: [] })).toEqual(['tool'])
+    expect(trainerSteps(boss)).toEqual(['gust'])
   })
 })
 
