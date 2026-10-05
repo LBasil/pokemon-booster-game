@@ -491,7 +491,8 @@
       "pvp_cannot_evolve_yet": "Il ne peut pas évoluer ce tour-ci.",
       "pvp_no_energy": "Pas d'Énergie à attacher ce tour-ci.",
       "pvp_cannot_retreat": "Ton Pokémon Actif ne peut pas battre en retraite maintenant.",
-      "pvp_cannot_attack": "Cette attaque ne peut pas être utilisée maintenant."
+      "pvp_cannot_attack": "Cette attaque ne peut pas être utilisée maintenant.",
+      "pvp_invalid_energy": "Choisis 1 ou 2 types d'Énergie pour ce deck."
     },
     "rewardNotice": "+{count} pièces !",
     "recycledNotice": "{cards} doublon recyclé : +{coins} pièces | {cards} doublons recyclés : +{coins} pièces",
@@ -944,7 +945,7 @@
     "noBotBattlesLeft": "Plus de combats contre les bots aujourd'hui : reviens demain.",
     "coinsWon": "Tu gagnes",
     "noCoins": "Pas de pièces cette fois.",
-    "unpaid": "Pas de pièces : tes combats payants contre les bots sont épuisés pour aujourd'hui.",
+    "unpaid": "Avec l'Énergie {types}, ces cartes ne peuvent pas attaquer : {names}.",
     "eloChange": "Elo {change}",
     "result": {
       "won": "Tu gagnes !",
@@ -1125,22 +1126,35 @@
         "d": "{name} gagne.",
         "draw": "Match nul."
       },
-      "overTurns": "Dernier tour : le plus de points l'emporte."
+      "overTurns": "Dernier tour : le plus de points l'emporte.",
+      "attachType": {
+        "a": "Tu attaches une Énergie {type} à {card}.",
+        "d": "{name} attache une Énergie {type} à {card}."
+      }
     },
     "rules": {
       "deck": "Tes decks : 20 Pokémon de ta collection du défi, 2 du même nom au maximum, au moins un Pokémon de base (chaque exemplaire doit être possédé). Deux decks par format : celui avec lequel tu attaques, et celui que le serveur joue quand on t'attaque (ton deck d'attaque te défend tant que tu ne l'as pas créé).",
       "setup": "Tu commences avec 5 cartes en main, toujours avec un Pokémon de base : poses-en un comme Pokémon Actif et jusqu'à 3 sur ton Banc. Une pièce décide qui commence.",
-      "turn": "À chaque tour : pioche une carte, attache 1 Énergie à l'un de tes Pokémon (pas au premier tour du combat), pose des Pokémon de base sur ton Banc, fais évoluer, bats en retraite une fois, puis attaque, ce qui finit ton tour. Le joueur qui commence ne peut pas attaquer à ce tour-là.",
+      "turn": "À chaque tour : pioche une carte, attache l'Énergie de ta zone d'Énergie à l'un de tes Pokémon (aucune au premier tour du combat ; si tu ne l'attaches pas, elle est perdue), pose des Pokémon de base sur ton Banc, fais évoluer, bats en retraite une fois, puis attaque, ce qui finit ton tour. Le joueur qui commence ne peut pas attaquer à ce tour-là.",
       "evolve": "Pour évoluer, pose une carte sur le Pokémon dont elle évolue, pas à son premier tour en jeu ni à ton premier tour. Les Énergies et les dégâts restent.",
       "retreat": "Retraite : ton Pokémon Actif va sur le Banc et l'un de tes Pokémon de Banc entre en jeu, contre son coût de Retraite en Énergies. Les États Spéciaux disparaissent.",
-      "attack": "Une attaque coûte son nombre d'Énergies (de n'importe quel type). Ses effets sont joués : pièces, dégâts par Énergie ou par marqueur, États Spéciaux, soins, dégâts au Banc... Un texte que les combats ne savent pas jouer est signalé, ses dégâts comptent quand même. La Faiblesse double les dégâts, la Résistance en retire {resistance}.",
+      "attack": "Une attaque coûte les Énergies imprimées : chaque symbole de type demande une Énergie de ce type, Incolore n'importe laquelle. Ton deck a 1 ou 2 types d'Énergie, et la zone en apporte un à chaque tour. Ses effets sont joués : pièces, dégâts par Énergie ou par marqueur, États Spéciaux, soins, dégâts au Banc... Un texte que les combats ne savent pas jouer est signalé, ses dégâts comptent quand même. La Faiblesse double les dégâts, la Résistance en retire {resistance}.",
       "conditions": "Un Pokémon Endormi ou Paralysé ne peut ni attaquer ni battre en retraite (une pièce le réveille, la Paralysie dure un tour) ; un Pokémon Confus lance une pièce avant d'attaquer ; le Poison inflige 10 et la Brûlure 20 entre les tours.",
       "points": "Mettre un Pokémon K.O. rapporte des points : 1 pour la plupart, 2 pour les ex, EX, GX, V et VSTAR, 3 pour les VMAX, TAG TEAM et Méga-ex. {points} points gagnent, laisser l'adversaire sans Pokémon aussi. Après {turns} tours, le plus de points l'emporte.",
       "hidden": "Contre un joueur, le serveur joue son deck de défense pendant que tu joues : sa main reste cachée, ses Pokémon apparaissent quand il les joue.",
       "elo": "Contre les joueurs, pas de pièces : tu gagnes ou perds des points Elo, davantage contre un joueur plus fort. Ton adversaire est tiré parmi les joueurs à l'Elo le plus proche du tien.",
       "limit": "{count} attaques par jour, remise à zéro à {time}. Les défenses sont illimitées.",
       "bots": "Bots : le même combat avec ton deck d'attaque, contre un deck que le serveur construit dans le format. Pas d'Elo, et ils n'utilisent pas tes attaques. Une victoire rapporte {easy}, {normal} ou {hard} pièces (facile, normal, difficile), un nul la moitié, pour tes {paid} premiers combats contre un bot de la journée ; {count} par jour en tout."
-    }
+    },
+    "energyReadyType": "Une Énergie {type} à attacher ce tour-ci",
+    "attachType": "Attacher l'Énergie {type}",
+    "nextEnergy": "ensuite",
+    "energyShort": "Énergie",
+    "energyTitle": "Énergie du deck",
+    "energyHelp": "Choisis 1 ou {max} types. À chaque tour, ta zone d'Énergie en apporte un au hasard (tu vois le suivant). Une attaque coûte les Énergies imprimées : un symbole de type demande ce type, Incolore accepte n'importe laquelle.",
+    "energyNone": "Choisis au moins un type d'Énergie.",
+    "notPaid": "Ton Énergie ne paie pas ses attaques",
+    "energyAuto": "d'après ses cartes"
   },
   "electrodeFlip": {
     "title": "Électrode Shiny Flip",

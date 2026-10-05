@@ -3,10 +3,11 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCardLocale } from '@/composables/useCardLocale'
 import { attackName, damageLabel, hpPercent } from '@/utils/pvp'
+import EnergyIcons from '@/components/EnergyIcons.vue'
 
 // One card in a PvP battle or deck (a pvp_card() snapshot, migration 0030),
 // in the player's language. In play (`slot`: damage, energy, special
-// conditions, hp_left) it shows its HP bar, energies and conditions;
+// conditions, hp_left) it shows its HP bar, energies (typed since 0031) and conditions;
 // otherwise its printed HP and stage. `compact` (the board) leaves the
 // attacks to the detail sheet (PvpCardSheet).
 const props = defineProps({
@@ -30,9 +31,8 @@ const conditions = computed(() =>
     <span class="pvp-img-wrap">
       <img class="pvp-img" :src="cardImage(card)" :data-fallback="fallback(card)" alt="" width="245" height="342" loading="lazy" draggable="false" />
       <span v-if="card.prizes > 1" class="pvp-points">{{ t('pvp.pointsBadge', { count: card.prizes }) }}</span>
-      <span v-if="slot && slot.energy" class="pvp-energy" :title="t('pvp.energyCount', { count: slot.energy }, slot.energy)">
-        <span aria-hidden="true">⚡</span>{{ slot.energy }}
-        <span class="visually-hidden">{{ t('pvp.energyCount', { count: slot.energy }, slot.energy) }}</span>
+      <span v-if="slot && slot.energy" class="pvp-energy">
+        <EnergyIcons :types="slot.etypes ?? []" :count="slot.energy" />
       </span>
     </span>
     <span class="pvp-name">{{ cardName(card) }}</span>
@@ -49,7 +49,7 @@ const conditions = computed(() =>
     </span>
     <ul v-if="!compact" class="pvp-attacks" :aria-label="t('pvp.attacks')">
       <li v-for="(attack, i) in card.attacks" :key="i" :class="{ unusable: !attack.usable }">
-        <span class="pvp-cost" :aria-label="t('pvp.attackCost', { count: attack.cost }, attack.cost)">{{ attack.cost }}</span>
+        <EnergyIcons class="pvp-cost" :types="attack.energy ?? []" :count="attack.cost" free />
         <span class="pvp-attack-name">{{ attackName(attack, french) }}</span>
         <strong>{{ damageLabel(attack) }}</strong>
       </li>
@@ -106,8 +106,11 @@ const conditions = computed(() =>
 .pvp-energy {
   bottom: 0.25rem;
   left: 0.25rem;
-  background: var(--pb-accent);
-  color: var(--pb-accent-ink);
+  right: 0.25rem;
+  width: fit-content;
+  padding: 0.2rem 0.3rem;
+  background: var(--pb-bg);
+  border: 1px solid var(--pb-border-strong);
 }
 
 .pvp-name {
@@ -191,18 +194,10 @@ const conditions = computed(() =>
   margin-left: auto;
 }
 
-/* Energy cost: a small coin with the number of energies */
+/* Energy cost: one dot per energy (EnergyIcons) */
 .pvp-cost {
   flex: none;
-  display: grid;
-  place-items: center;
-  width: 1.05rem;
-  height: 1.05rem;
-  border-radius: 50%;
-  border: 1px solid var(--pb-border-strong);
-  background: var(--pb-input-bg);
-  font-size: 0.65rem;
-  font-weight: 800;
+  flex-wrap: nowrap;
 }
 
 .pvp-attack-name {

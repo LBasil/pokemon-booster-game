@@ -47,6 +47,7 @@ export const CHALLENGE_ERRORS = [
   'pvp_not_enough_energy',
   // attack and defense decks (migration 0026)
   'pvp_invalid_role',
+  'pvp_invalid_energy',
   'pvp_roles_unavailable',
   // bots (migration 0027)
   'pvp_invalid_level',
@@ -330,7 +331,7 @@ export const stopEvolutionChain = () => call('evolution_chain_stop')
 // ---------- PvP battles (migrations 0024 + 0025: energy, prizes; 0026: attack and defense decks) ----------
 
 /**
- * Rules (`engine` 2 = Pocket-style, migration 0030), whether the card data
+ * Rules (`engine` 2 = Pocket-style, migration 0030; 3 = typed energy, 0031), whether the card data
  * is synced (`ready`), formats with my playable copies, my decks (ids) and
  * ratings per format, battles left today, the battle in progress and my
  * last 10 battles (attacks and defenses). Not a tester: `{ ready: false }`.
@@ -343,9 +344,19 @@ export const fetchPvpEligible = (format) => call('pvp_eligible', { p_format: for
 /**
  * Saves one of my decks (20 card ids, a card repeated per copy) for a
  * format: 'attack' (the one I play) or 'defense' (the one the server plays
- * when I'm attacked); returns the state.
+ * when I'm attacked), with its 1 or 2 energy types (0031); returns the
+ * state. Before 0031 the energy isn't sent.
  */
-export const savePvpDeck = (format, cardIds, role = 'attack') => call('pvp_save_deck', { p_format: format, p_cards: cardIds, p_role: role })
+export async function savePvpDeck(format, cardIds, role = 'attack', energy = null) {
+  const args = { p_format: format, p_cards: cardIds, p_role: role }
+  if (!energy) return call('pvp_save_deck', args)
+  try {
+    return await call('pvp_save_deck', { ...args, p_energy: energy })
+  } catch (err) {
+    if (err?.code === MISSING_FUNCTION) return call('pvp_save_deck', args)
+    throw err
+  }
+}
 
 /** Finds an opponent and starts a battle (or returns the one in progress); returns the state. */
 export const startPvpBattle = (format) => call('pvp_start', { p_format: format })

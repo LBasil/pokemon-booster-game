@@ -521,6 +521,26 @@ docs/technique/             technical doc (French, user choice): overview, front
   wrappers) mirrored by `PVP_TESTERS` / `pvpOpenTo()`; others get
   `pvp_state() = { ready: false }` ("Coming soon") and `pvp_closed`. The
   e2e PvP specs play as Bazouk (mock `username` option).
+  **Typed energy + matched bots** (0031, user 2026-10-05 after a bot
+  battle won by "placer mon pokemon, mettre les énergies": "ça manque de
+  profondeur"; picked "1 à 2 énergies" + bots matched to the deck):
+  each deck has 1-2 of the 9 basic-Energy types (`pvp_decks.energy`,
+  null = `pvp_deck_energy()` from its costs); the side's energy zone
+  brings a random one each turn (`zone`, `next` shown, lost if not
+  attached); attacks cost `attacks[].energy` (typed, from `populate.mjs`;
+  [] before a sync = all Colorless); slots keep `etypes` (`energy` =
+  count), drops keep what its attacks need (`pvp_drop_energy`). Mirrors:
+  `energyMissing`/`pvp_missing`, `deckEnergy`/`pvp_deck_energy`,
+  `fitsEnergy`/`pvp_fits_energy`; `autoEnergy` + `autoDeck(…, energy)`.
+  `pvp_bot_deck(format, level, my cards)` → `{ cards, energy }`: my
+  deck's eras (the "all" format put 2025 ex against 1999 Gastlys), 1-2
+  types, strength = my cards' percentile in the pool (easy x0.6, normal
+  -0.05, hard +0.1; simulated: a strong deck played by the hard AI wins
+  20/20, 14/20, 5/20). `engine` 3; the client still plays engine 2.
+  `EnergyIcons.vue` = the dots. **Next asked** (user 2026-10-05, "pourquoi
+  pas tous ? pourquoi pas juste faire comme pocket ?"): Trainer cards,
+  Pocket rules (Items, 1 Supporter a turn), every Trainer whose text the
+  parser fully reads (like attacks), then abilities.
 - **Cards in French** (0029, user 2026-10-05: "qu'un joueur FR puisse
   avoir ses cartes en FR"): pokemontcg.io is English only; TCGdex (free,
   no key) has French names, images and texts. `populate.mjs fr` (in
@@ -737,12 +757,12 @@ docs/technique/             technical doc (French, user choice): overview, front
   2026-10-04) · 0026 PvP attack / defense decks + attacks without a
   cost dropped (written 2026-10-04, **to apply**, then check a full
   card sync went through) · 0027 PvP against bots for coins (written
-  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, **to apply** after 0029). Every one was
+  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, **to apply** after 0030, then a card sync). Every one was
   verified locally with PGlite before being handed over; 0010-0025 have
-  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0030 too) —
+  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0031 too) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 244 unit tests, `npm run test:db` 620 database
-  checks, `npm run test:e2e` 310 (desktop + Pixel 7, incl. "no page
+- Tests: `npm test` 250 unit tests, `npm run test:db` 653 database
+  checks, `npm run test:e2e` 312 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

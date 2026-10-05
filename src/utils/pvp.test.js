@@ -6,18 +6,23 @@ import {
   attackName,
   attackText,
   autoDeck,
+  autoEnergy,
   botCoins,
   damageLabel,
   deckCheck,
   deckCounts,
+  deckEnergy,
   deckRoles,
   eloChange,
+  energyMissing,
+  fitsEnergy,
   hpPercent,
   parseFormat,
   prizesFor,
   pvpOpenTo,
   record,
   removeCard,
+  validEnergy,
 } from './pvp'
 
 const attack = (base, cost, extra = {}) => ({ name: 'Hit', base, cost, printed: String(base), usable: true, fx: [], ...extra })
@@ -96,7 +101,7 @@ describe('deck builder', () => {
     const evo = card('raichu', 'Raichu', { stage: 'evolution', from: 'Pikachu' })
     const zard = card('zard', 'Charizard', { stage: 'evolution', from: 'Charmeleon' })
     const map = new Map([pika, evo, zard].map((c) => [c.id, c]))
-    expect(deckCheck(['pika1', 'raichu', 'zard'], map)).toEqual({ ready: false, missing: 17, basics: 1, orphans: ['Charizard'] })
+    expect(deckCheck(['pika1', 'raichu', 'zard'], map)).toEqual({ ready: false, missing: 17, basics: 1, orphans: ['Charizard'], unpaid: [] })
     expect(deckCheck(Array(20).fill('raichu'), map)).toMatchObject({ ready: false, basics: 0 })
     expect(deckCheck(Array(20).fill('pika1'), map).ready).toBe(true)
   })
@@ -136,6 +141,67 @@ describe('autoDeck', () => {
   it('respects the copies owned and fills what it can', () => {
     const few = [card('a', 'A', { owned: 1 }), card('b', 'B', { owned: 3 })]
     expect(autoDeck(few).sort()).toEqual(['a', 'b', 'b'])
+  })
+})
+
+describe('typed energy', () => {
+  const typed = (energy, base = 30) => attack(base, energy.length, { energy })
+  it('counts what is missing (mirrors pvp_missing)', () => {
+    expect(energyMissing(['Fire'], typed(['Fire', 'Colorless']))).toBe(1)
+    expect(energyMissing(['Water', 'Water'], typed(['Fire']))).toBe(1)
+    expect(energyMissing(['Fire', 'Water'], typed(['Fire', 'Colorless']))).toBe(0)
+    expect(energyMissing(['Fire', 'Water', 'Water', 'Water'], typed(['Fire', 'Fire']))).toBe(1)
+    // synced before 0031: no types, all Colorless
+    expect(energyMissing(['Water'], attack(10, 1))).toBe(0)
+    expect(energyMissing([], attack(10, 2))).toBe(2)
+  })
+
+  it('knows which cards an energy pays', () => {
+    const zard = card('z', 'Charizard', { attacks: [typed(['Fire', 'Fire']), typed(['Colorless'], 10)] })
+    const blastoise = card('b', 'Blastoise', { attacks: [typed(['Water'])] })
+    expect(fitsEnergy(zard, ['Water'])).toBe(true) // its Colorless attack
+    expect(fitsEnergy(blastoise, ['Fire'])).toBe(false)
+    expect(fitsEnergy(blastoise, ['Fire', 'Water'])).toBe(true)
+  })
+
+  it('validates 1 or 2 known types', () => {
+    expect(validEnergy(['Fire'])).toBe(true)
+    expect(validEnergy(['Fire', 'Water'])).toBe(true)
+    expect(validEnergy(['Fire', 'Water', 'Grass'])).toBe(false)
+    expect(validEnergy(['Dragon'])).toBe(false)
+    expect(validEnergy(['Fire', 'Fire'])).toBe(false)
+    expect(validEnergy([])).toBe(false)
+  })
+
+  it('reads a deck\'s energy from its costs (mirrors pvp_deck_energy)', () => {
+    const fire = card('f', 'Vulpix', { attacks: [typed(['Fire'])] })
+    const water = card('w', 'Squirtle', { attacks: [typed(['Water'])] })
+    expect(deckEnergy([fire, fire, fire, fire, fire, water])).toEqual(['Fire'])
+    expect(deckEnergy([fire, fire, fire, water])).toEqual(['Fire', 'Water'])
+    expect(deckEnergy([{ ...card('c', 'Rattata', { attacks: [typed(['Colorless'])] }), types: ['Colorless'] }])).toEqual(['Grass'])
+  })
+
+  it('picks the energy and the cards that go together', () => {
+    const pool = [
+      ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => card(`f${i}`, `Fire ${i}`, { attacks: [typed(['Fire'], 40)] })),
+      ...[1, 2, 3].map((i) => card(`w${i}`, `Water ${i}`, { attacks: [typed(['Water'], 60)] })),
+    ]
+    const energy = autoEnergy(pool)
+    expect(energy).toEqual(['Fire'])
+    const ids = autoDeck(pool, 'attack', 20, energy)
+    expect(ids).toHaveLength(20)
+    expect(ids.every((id) => id.startsWith('f'))).toBe(true)
+    // too few cards for the energy: the others fill the rest
+    expect(autoDeck(pool, 'attack', 20, ['Water']).filter((id) => id.startsWith('w'))).toHaveLength(6)
+  })
+
+  it('warns about cards the energy never pays', () => {
+    const fire = card('f', 'Vulpix', { attacks: [typed(['Fire'])] })
+    const water = card('w', 'Squirtle', { attacks: [typed(['Water'])] })
+    const byId = new Map([fire, water].map((c) => [c.id, c]))
+    expect(deckCheck(['f', 'w'], byId, 2, ['Fire']).unpaid).toEqual(['Squirtle'])
+    expect(deckCheck(['f', 'w'], byId, 2, ['Fire']).ready).toBe(true)
+    expect(deckCheck(['f', 'w'], byId, 2, []).ready).toBe(false)
   })
 })
 

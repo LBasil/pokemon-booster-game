@@ -552,10 +552,12 @@ complète : l'import n'est pas repassé). RPC absente (`PGRST202`) ou
 
 ---
 
-## Combats PvP (Défi, migrations 0024 à 0030)
+## Combats PvP (Défi, migrations 0024 à 0031)
 
 Depuis 0030, des combats façon Pokémon JCC Pocket (decks de 20, Banc,
-Énergie à attacher, évolutions, effets d'attaque). Réservé aux testeurs
+Énergie à attacher, évolutions, effets d'attaque) ; depuis 0031,
+l'Énergie est typée (1 ou 2 types par deck, une zone qui en apporte un
+par tour) et les bots sont calés sur mon deck. Réservé aux testeurs
 (0028 : `pvp_open_to(user)`, interne, pseudos listés dans la fonction,
 miroir de `PVP_TESTERS` dans `src/utils/pvp.js`) : pour les autres,
 `pvp_state()` renvoie `{ ready: false }` (« Bientôt ») et les autres RPC
@@ -564,11 +566,11 @@ les enveloppes `*_impl` de 0028.
 
 | RPC | JS | Rôle |
 | --- | --- | --- |
-| `pvp_state()` | `fetchPvpState()` | Règles (`engine` 2, `deck_size` 20, `max_copies` 2, `hand_size`, `bench_size`, `points_to_win` 3, `max_turns` 30, `poison`, `burn`, bots…), `ready` (une synchro a stocké les effets d'attaque `attacks[].fx`, et les sets leur ère), combats restants (joueurs, bots, payants), `coins`, formats avec mes exemplaires de Pokémon, mes decks `{ format: { attack, defense } }` chacun `{ ids, valid }` (ids répétés par exemplaire), mes Elo par format, combat en cours (`battle`), mes 10 derniers combats |
+| `pvp_state()` | `fetchPvpState()` | Règles (`engine` 3 depuis 0031, 2 avant, `deck_size` 20, `energy_types` (les 9 types), `max_energy_types` 2, `max_copies` 2, `hand_size`, `bench_size`, `points_to_win` 3, `max_turns` 30, `poison`, `burn`, bots…), `ready` (une synchro a stocké les effets d'attaque `attacks[].fx` et, depuis 0031, les coûts typés `attacks[].energy`, et les sets leur ère), combats restants (joueurs, bots, payants), `coins`, formats avec mes exemplaires de Pokémon, mes decks `{ format: { attack, defense } }` chacun `{ ids, valid, energy, energy_auto }` (ids répétés par exemplaire ; `energy` = ses types, `energy_auto` = pas choisis, déduits de ses cartes), mes Elo par format, combat en cours (`battle`), mes 10 derniers combats |
 | `pvp_eligible(p_format)` | `fetchPvpEligible(format)` | Mes Pokémon du Défi qui peuvent entrer dans un deck de ce format (instantanés + `owned` = exemplaires possédés), Pokémon de base d'abord |
-| `pvp_save_deck(p_format, p_cards, p_role)` | `savePvpDeck(format, ids, role)` | 20 ids (un par exemplaire), 2 du même nom au plus, chaque exemplaire possédé, du format, au moins un Pokémon de base (sinon `pvp_invalid_deck`) ; `role` `attack` ou `defense` (`pvp_invalid_role`). Renvoie l'état |
+| `pvp_save_deck(p_format, p_cards, p_role, p_energy)` | `savePvpDeck(format, ids, role, energy)` | 20 ids (un par exemplaire), 2 du même nom au plus, chaque exemplaire possédé, du format, au moins un Pokémon de base (sinon `pvp_invalid_deck`) ; `role` `attack` ou `defense` (`pvp_invalid_role`) ; `p_energy` (0031) 1 ou 2 types différents parmi `energy_types` (`pvp_invalid_energy`), `null` = déduite des cartes. Sans 0031 le client renvoie l'appel sans `p_energy`. Renvoie l'état |
 | `pvp_start(p_format)` | `startPvpBattle(format)` | Renvoie le combat en cours s'il y en a un ; sinon, avec mon deck d'attaque (`pvp_no_deck`, `pvp_invalid_deck`), un adversaire parmi les 5 Elo les plus proches (`pvp_no_opponent`), 10 par jour (`pvp_no_battles_left`). Le combat commence en phase `setup`. Renvoie l'état |
-| `pvp_bot_start(p_format, p_level)` | `startPvpBotBattle(format, level)` | Pareil contre un bot `easy` / `normal` / `hard` (`pvp_invalid_level`) dont le serveur construit le deck (`pvp_no_bot_deck` si le format ne suffit pas) ; 20 par jour (`pvp_no_bot_battles_left`), les 5 premiers payants |
+| `pvp_bot_start(p_format, p_level)` | `startPvpBotBattle(format, level)` | Pareil contre un bot `easy` / `normal` / `hard` (`pvp_invalid_level`) dont le serveur construit le deck (`pvp_no_bot_deck` si le format ne suffit pas ; depuis 0031 des ères de mon deck, de 1 ou 2 types d'Énergie, de force calée sur la mienne) ; 20 par jour (`pvp_no_bot_battles_left`), les 5 premiers payants |
 | `pvp_act(p_action)` (0030) | `pvpAct(action)` | Un coup (voir ci-dessous), validé ; à la fin de mon tour le serveur joue le sien et rend la main. Renvoie `{ battle, events, state }` |
 | `pvp_forfeit()` | `forfeitPvpBattle()` | Abandon = défaite (Elo ; contre un bot : 0 pièce). Renvoie `{ battle, state }` |
 | `pvp_leaderboard(p_format)` | `fetchPvpLeaderboard(format)` | Top 20 des profils publics ayant combattu, et ma ligne (`me`) |
@@ -601,13 +603,14 @@ Carte (instantané `pvp_card()`) :
   "hp": 330, "types": ["Darkness"], "weaknesses": ["Grass"], "resistances": [],
   "prizes": 2, "stage": "evolution", "evolves_from": "Charmeleon", "retreat": 2,
   "attacks": [{ "name": "Burning Darkness", "name_fr": "Ténèbres Ardentes", "printed": "180+",
-    "base": 180, "cost": 3, "text": "…", "text_fr": "…",
+    "base": 180, "cost": 3, "energy": ["Fire", "Fire", "Colorless"], "text": "…", "text_fr": "…",
     "fx": [{ "op": "per_points_opp", "n": 30 }], "coins": null, "partial": false, "usable": true }],
   "abilities": [] }
 ```
 
 `stage` : `basic`, `evolution` ou `none` (injouable : moitiés LEGEND…) ;
-`fx` = les effets lus dans le texte (liste des `op` en tête de
+`energy` (0031) = le coût typé (vide pour une carte pas encore
+resynchronisée : tout Incolore) ; `fx` = les effets lus dans le texte (liste des `op` en tête de
 `src/utils/attackEffects.js`), `coins` = 1, N ou `"until"` ; `partial` =
 une partie du texte n'est pas jouée ; `usable` = des dégâts ou un effet
 connu.
@@ -616,15 +619,17 @@ Combat (`battle`, vue de l'attaquant) :
 
 ```json
 {
-  "id": 12, "engine": 2, "format": "all", "status": "playing",
+  "id": 12, "engine": 3, "format": "all", "status": "playing",
   "turn": 5, "phase": "play", "current": "a", "first": "d", "winner": null,
   "bot": "normal", "paid": true, "coins": null, "elo_change": null,
   "opponent": { "bot": "normal", "username": null, "elo": null },
   "me": { "points": 1, "deck": 9, "hand_count": 4, "discard": [], "attached": false, "retreated": false, "used_once": false,
-          "active": { "c": 4, "under": [0], "damage": 30, "energy": 2, "status": null, "poisoned": false, "burned": false,
+          "energy_types": ["Fire", "Water"], "zone": "Fire", "next": "Water",
+          "active": { "c": 4, "under": [0], "damage": 30, "energy": 2, "etypes": ["Fire", "Fire"], "status": null, "poisoned": false, "burned": false,
                       "card": { "…carte…": "" }, "hp_left": 60 },
           "bench": [], "hand": [{ "index": 9, "card": { "…carte…": "" } }] },
-  "them": { "points": 0, "deck": 11, "hand_count": 5, "discard": [], "active": { "…": "" }, "bench": [], "cards": null },
+  "them": { "points": 0, "deck": 11, "hand_count": 5, "discard": [], "active": { "…": "" }, "bench": [], "cards": null,
+            "energy_types": ["Grass"], "zone": null, "next": "Grass" },
   "my_cards": ["…mes 20 instantanés…"],
   "hints": { "my_turn": true, "setup": false, "promote": false, "attach": true, "retreat": false,
              "hand": { "9": { "bench": true, "evolve": [] } }, "attacks": [null, "energy"] },
@@ -633,23 +638,27 @@ Combat (`battle`, vue de l'attaquant) :
 ```
 
 `phase` : `setup` (je place mes Pokémon), `play`, `promote` (mon Actif est
-K.O. : je choisis le remplaçant), `over`. `hints.attacks[i]` : `null` si
+K.O. : je choisis le remplaçant), `over`. `zone` = l'Énergie à attacher
+ce tour (`null` : pas encore, déjà attachée, ou pas mon tour ; une
+Énergie non attachée est perdue), `next` = celle du prochain tour,
+`etypes` = les types des Énergies d'un Pokémon (`energy` = leur nombre) ;
+`hints.attach` demande une `zone`. `hints.attacks[i]` : `null` si
 l'attaque est jouable, sinon pourquoi (`first_turn`, `energy`, `asleep`,
 `paralyzed`, `locked`, `once`, `unusable`, `not_your_turn`).
 `them.cards` (le deck adverse) n'arrive qu'à la fin ; sa main et son deck
 ne sont que des nombres, ses pioches arrivent sans les cartes. Événements
-(`events`, `log`) : `k` = `start`, `turn`, `draw`, `attach`, `bench`,
-`evolve`, `switch`, `attack` (`damage`, `flips`, `failed`, `prevented`),
+(`events`, `log`) : `k` = `start`, `turn`, `draw`, `bench`,
+`evolve`, `switch`, `attach` (`type` depuis 0031), `attack` (`damage`, `flips`, `failed`, `prevented`),
 `damage`, `heal`, `status`, `cured`, `discard_energy`, `ko` (`points`),
 `promote`, `end`, `over` (`winner`, `reason`) ; `s` = `a` (moi) ou `d` ;
 `name` / `name_fr` / `attack` / `attack_fr` nomment la carte et l'attaque.
 
 Erreurs : `pvp_closed`, `pvp_invalid_format`, `pvp_invalid_deck`,
 `pvp_no_deck`, `pvp_no_opponent`, `pvp_no_battles_left`,
-`pvp_not_your_turn`, `pvp_invalid_action`, `pvp_bench_full`,
+`pvp_invalid_energy`, `pvp_not_your_turn`, `pvp_invalid_action`, `pvp_bench_full`,
 `pvp_cannot_evolve_yet`, `pvp_no_energy`, `pvp_cannot_retreat`,
 `pvp_cannot_attack: <raison>` (le client lit le code avant « : »),
-`no_game`. RPC absente (`PGRST202`), `ready: false` ou `engine` ≠ 2 →
+`no_game`. RPC absente (`PGRST202`), `ready: false` ou `engine` < 2 →
 store `unavailable`, « Bientôt ».
 
 ---

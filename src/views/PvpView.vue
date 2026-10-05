@@ -16,6 +16,8 @@ import {
   BOT_PAID_PER_DAY,
   DECK_ROLES,
   DECK_SIZE,
+  ENERGY_TYPES,
+  MAX_ENERGY_TYPES,
   MAX_TURNS,
   POINTS_TO_WIN,
   RESISTANCE,
@@ -23,24 +25,29 @@ import {
   attackChoices,
   attackName,
   autoDeck,
+  autoEnergy,
   damageLabel,
   deckCheck,
   deckCounts,
+  deckEnergy,
+  fitsEnergy,
   parseFormat,
   record,
   removeCard,
 } from '@/utils/pvp'
 import AppHeader from '@/components/AppHeader.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
+import EnergyIcons from '@/components/EnergyIcons.vue'
 import PvpCard from '@/components/PvpCard.vue'
 import PvpCardSheet from '@/components/PvpCardSheet.vue'
 
 // PvP battles like Pokémon TCG Pocket (challenge mode, migration 0030),
 // asynchronous. Per format (every card, one TCG era, one set) I keep two
-// decks of 20 challenge Pokémon (2 of a name at most): an attack deck I play
-// and a defense deck the server plays when I'm attacked. A battle: place a
-// Basic Active and up to 3 Benched Pokémon, then each turn attach the energy,
-// bench, evolve, retreat, attack. I send one move at a time; the server
+// decks of 20 challenge Pokémon (2 of a name at most) and 1 or 2 energy types
+// (0031): an attack deck I play and a defense deck the server plays when I'm
+// attacked. A battle: place a Basic Active and up to 3 Benched Pokémon, then
+// each turn attach the zone's energy (a random type of my deck's, the next
+// one shown), bench, evolve, retreat, attack. I send one move at a time; the server
 // validates it, plays the other side (a player's defense deck or a bot) and
 // sends back the board, what happened (`events`) and what I can do now
 // (`hints`), so the rules live in one place. Bots pay coins, players move Elo.
@@ -49,7 +56,7 @@ const FORMAT_KEY = 'pb-pvp-format'
 const KINDS = ['all', 'era', 'set']
 const FILTERS = ['all', 'basic', 'evolution']
 
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
 const { french, cardName } = useCardLocale()
 const pvp = usePvpStore()
 const challenge = useChallengeStore()
@@ -89,6 +96,9 @@ const rules = computed(() => ({
   botPaid: pvp.state?.bot_paid_per_day ?? BOT_PAID_PER_DAY,
   botBattles: pvp.state?.bot_battles_per_day ?? BOT_BATTLES_PER_DAY,
 }))
+
+const typeLabel = (type) => (te(`collection.types.${type}`) ? t(`collection.types.${type}`) : type)
+const typeList = (types) => (types ?? []).map(typeLabel).join(', ')
 
 const errorFor = (err) => t(err?.code ? `challenge.errors.${err.code}` : 'challenge.errors.generic')
 
@@ -164,9 +174,24 @@ function grouped(ids) {
 // Builder: the role being built (null = not building) and its 20 ids
 const building = ref(null)
 const picks = ref([])
+const energy = ref([]) // its 1 or 2 energy types
 const search = ref('')
 const filter = ref('all')
-const check = computed(() => deckCheck(picks.value, eligibleById.value, rules.value.deck))
+const check = computed(() => deckCheck(picks.value, eligibleById.value, rules.value.deck, energy.value))
+const maxEnergy = computed(() => pvp.state?.max_energy_types ?? MAX_ENERGY_TYPES)
+const energyTypes = computed(() => pvp.state?.energy_types ?? ENERGY_TYPES)
+
+/** Picks a type; a third one replaces the older of the two. */
+function toggleEnergy(type) {
+  if (energy.value.includes(type)) energy.value = energy.value.filter((e) => e !== type)
+  else energy.value = [...energy.value, type].slice(-maxEnergy.value)
+}
+
+/** The energy that suits my cards, and the deck that goes with it. */
+function autoBuild(role) {
+  energy.value = autoEnergy(eligible.value, role, rules.value.deck)
+  picks.value = autoDeck(eligible.value, role, rules.value.deck, energy.value)
+}
 const pickedGroups = computed(() => grouped(picks.value))
 const counts = computed(() => deckCounts(picks.value))
 const shown = computed(() => {
@@ -188,16 +213,17 @@ async function editDeck(role, { auto = false } = {}) {
   building.value = role
   errorMessage.value = ''
   await loadEligible({ force: true })
-  if (auto) {
-    picks.value = autoDeck(eligible.value, role, rules.value.deck)
-    return
-  }
+  if (auto) return autoBuild(role)
   let kept = []
   for (const id of decks.value[role]?.ids ?? []) {
     const card = eligibleById.value.get(id)
     if (card && !addBlock(kept, card, eligibleById.value, rules.value.deck)) kept = [...kept, id]
   }
   picks.value = kept
+  // the saved energy (or the one its cards ask for: saved before 0031); a new deck: the one that suits my cards
+  energy.value =
+    decks.value[role]?.energy ??
+    (kept.length ? deckEnergy(kept.map((id) => eligibleById.value.get(id))) : autoEnergy(eligible.value, role, rules.value.deck))
 }
 
 function addPick(card) {
@@ -213,7 +239,7 @@ async function saveDeck() {
   busy.value = true
   errorMessage.value = ''
   try {
-    await pvp.saveDeck(format.value, picks.value, building.value)
+    await pvp.saveDeck(format.value, picks.value, building.value, energy.value)
     building.value = null
   } catch (err) {
     errorMessage.value = errorFor(err)
@@ -439,9 +465,11 @@ async function fight(level = null) {
 
 const resultTitle = computed(() => (finished.value ? t(`pvp.result.${finished.value.status}`) : ''))
 const signed = (n) => (n > 0 ? `+${n}` : String(n ?? 0))
+// The energy zone (0031): this turn's energy and the next one; null before 0031
+const myZone = computed(() => battle.value?.me.zone ?? null)
 const energyLine = computed(() => {
   if (!battle.value || !myTurn.value) return ''
-  if (hints.value.attach) return t('pvp.energyReady')
+  if (hints.value.attach) return myZone.value ? t('pvp.energyReadyType', { type: typeLabel(myZone.value) }) : t('pvp.energyReady')
   return battle.value.turn === 1 ? t('pvp.energyFirst') : t('pvp.energyUsed')
 })
 
@@ -466,6 +494,8 @@ function describe(e, previous) {
       }
       return e.n ? t('pvp.ev.draw.d', { name, count: e.n }, e.n) : ''
     case 'attach':
+      if (e.type) return t(`pvp.ev.attachType.${side}`, { name, card, type: typeLabel(e.type) })
+      return t(`pvp.ev.attach.${side}`, { name, card })
     case 'bench':
     case 'evolve':
     case 'switch':
@@ -590,6 +620,10 @@ onMounted(async () => {
               <span class="pvp-chips">
                 <span class="pvp-chip">{{ t('pvp.handCount', { count: battle.them.hand_count }) }}</span>
                 <span class="pvp-chip">{{ t('pvp.deckLeft', { count: battle.them.deck }) }}</span>
+                <span v-if="battle.them.energy_types?.length" class="pvp-chip pvp-zone-chip">
+                  {{ t('pvp.energyShort') }} <EnergyIcons :types="battle.them.energy_types" />
+                  <template v-if="battle.them.next">· {{ t('pvp.nextEnergy') }} <EnergyIcons :types="[battle.them.next]" /></template>
+                </span>
               </span>
             </div>
             <ul class="pvp-bench" :aria-label="t('pvp.bench')">
@@ -758,7 +792,8 @@ onMounted(async () => {
               <!-- One of my Pokémon -->
               <div v-else-if="selection.kind === 'mine'" class="pvp-choice-buttons">
                 <button v-if="hints.attach" type="button" class="pvp-choice" :disabled="busy" @click="act({ type: 'attach', pos: selection.pos })">
-                  {{ t('pvp.attach') }}
+                  <EnergyIcons v-if="myZone" :types="[myZone]" />
+                  {{ myZone ? t('pvp.attachType', { type: typeLabel(myZone) }) : t('pvp.attach') }}
                 </button>
                 <button
                   v-if="selection.pos > 0 && hints.retreat"
@@ -784,7 +819,7 @@ onMounted(async () => {
                   :disabled="busy || attackBlock(i) !== null"
                   @click="useAttack(i)"
                 >
-                  <span class="pvp-attack-cost">{{ t('pvp.attackCost', { count: attack.cost }, attack.cost) }}</span>
+                  <EnergyIcons class="pvp-attack-cost" :types="attack.energy ?? []" :count="attack.cost" free />
                   <span class="pvp-attack-title">
                     {{ attackName(attack, french) }}
                     <small v-if="attackBlock(i)">{{ t(`pvp.blocks.${attackBlock(i)}`) }}</small>
@@ -797,7 +832,11 @@ onMounted(async () => {
             <p v-else-if="myTurn" class="pvp-note pvp-hint">{{ t('pvp.selectHint') }}</p>
 
             <div v-if="!finished && !hints.setup" class="pvp-turn-bar">
-              <span class="pvp-energy-line">{{ energyLine }}</span>
+              <span class="pvp-energy-line">
+                <EnergyIcons v-if="hints.attach && myZone" :types="[myZone]" />
+                {{ energyLine }}
+                <template v-if="battle.me.next && !battle.winner">· {{ t('pvp.nextEnergy') }} <EnergyIcons :types="[battle.me.next]" /></template>
+              </span>
               <button type="button" class="btn btn-primary" :disabled="busy || !myTurn || !!pending" @click="act({ type: 'end' })">{{ t('pvp.endTurn') }}</button>
             </div>
           </div>
@@ -867,6 +906,25 @@ onMounted(async () => {
             </div>
             <p class="pvp-note">{{ t(`pvp.buildHelp.${building}`) }}</p>
 
+            <fieldset class="pvp-energy-pick">
+              <legend class="pvp-side-title">{{ t('pvp.energyTitle') }}</legend>
+              <p class="pvp-note">{{ t('pvp.energyHelp', { max: maxEnergy }) }}</p>
+              <div class="pvp-energy-types">
+                <button
+                  v-for="type in energyTypes"
+                  :key="type"
+                  type="button"
+                  :aria-pressed="energy.includes(type)"
+                  :class="{ active: energy.includes(type) }"
+                  @click="toggleEnergy(type)"
+                >
+                  <span class="pvp-type-dot" :style="{ '--dot': `var(--pb-type-${type.toLowerCase()})` }" aria-hidden="true"></span>
+                  {{ typeLabel(type) }}
+                </button>
+              </div>
+              <p v-if="!energy.length" class="pvp-warning" role="alert">{{ t('pvp.energyNone') }}</p>
+            </fieldset>
+
             <div class="pvp-deck-list" role="group" :aria-label="t(`pvp.deckTitle.${building}`)">
               <p v-if="!picks.length" class="pvp-note">{{ t('pvp.deckEmpty') }}</p>
               <ul v-else class="pvp-deck-lines">
@@ -882,11 +940,12 @@ onMounted(async () => {
               <p v-if="check.missing" class="pvp-note">{{ t('pvp.missing', { count: check.missing }, check.missing) }}</p>
               <p v-if="picks.length && !check.basics" class="pvp-warning" role="alert">{{ t('pvp.noBasic') }}</p>
               <p v-if="check.orphans.length" class="pvp-note pvp-warn-text">{{ t('pvp.orphans', { names: check.orphans.join(', ') }) }}</p>
+              <p v-if="check.unpaid.length" class="pvp-note pvp-warn-text">{{ t('pvp.unpaid', { names: check.unpaid.join(', '), types: typeList(energy) }) }}</p>
             </div>
 
             <div class="pvp-actions">
               <button type="button" class="btn btn-primary" :disabled="busy || !check.ready" @click="saveDeck">{{ t('pvp.saveDeck') }}</button>
-              <button type="button" class="btn btn-outline-secondary" :disabled="busy || eligibleLoading || !eligible.length" @click="picks = autoDeck(eligible, building, rules.deck)">
+              <button type="button" class="btn btn-outline-secondary" :disabled="busy || eligibleLoading || !eligible.length" @click="autoBuild(building)">
                 {{ t('pvp.autoDeck') }}
               </button>
               <button type="button" class="btn btn-outline-secondary" :disabled="busy || !picks.length" @click="picks = []">{{ t('pvp.clear') }}</button>
@@ -908,7 +967,7 @@ onMounted(async () => {
             </p>
             <ul v-if="!eligibleLoading && shown.length" class="pvp-grid">
               <li v-for="card in shown" :key="card.id">
-                <div class="pvp-pick" :class="{ 'is-picked': counts.get(card.id) }">
+                <div class="pvp-pick" :class="{ 'is-picked': counts.get(card.id), 'is-off': energy.length && !fitsEnergy(card, energy) }">
                   <button type="button" class="pvp-pick-card" :aria-label="t('pvp.details')" @click="openSheet(card)">
                     <PvpCard :card="card" />
                   </button>
@@ -934,6 +993,7 @@ onMounted(async () => {
                       +
                     </button>
                   </div>
+                  <span v-if="energy.length && !fitsEnergy(card, energy)" class="pvp-muted pvp-off-note">{{ t('pvp.notPaid') }}</span>
                 </div>
               </li>
             </ul>
@@ -956,6 +1016,10 @@ onMounted(async () => {
               <template v-if="decks[role]">
                 <p v-if="!decks[role].valid" class="pvp-warning" role="alert">
                   {{ t(role === 'defense' && decks.attack?.valid ? 'pvp.defenseInvalid' : 'pvp.deckInvalid') }}
+                </p>
+                <p v-if="decks[role].energy?.length" class="pvp-note pvp-deck-energy">
+                  {{ t('pvp.energyShort') }} <EnergyIcons :types="decks[role].energy" /> {{ typeList(decks[role].energy) }}
+                  <span v-if="decks[role].energy_auto" class="pvp-muted">({{ t('pvp.energyAuto') }})</span>
                 </p>
                 <ul v-if="grouped(decks[role].ids).length" class="pvp-deck-lines is-summary">
                   <li v-for="entry in grouped(decks[role].ids)" :key="entry.id">
@@ -1442,11 +1506,10 @@ onMounted(async () => {
 
 .pvp-attack-cost {
   flex: none;
-  padding: 0.05rem 0.4rem;
+  flex-wrap: nowrap;
+  padding: 0.15rem 0.4rem;
   border-radius: 999px;
   background: var(--pb-input-bg);
-  font-size: 0.7rem;
-  color: var(--pb-text-muted);
 }
 
 .pvp-attack-title {
@@ -1473,6 +1536,10 @@ onMounted(async () => {
 }
 
 .pvp-energy-line {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--pb-text-muted);
@@ -1700,6 +1767,78 @@ onMounted(async () => {
 
 .pvp-pick.is-picked {
   border-color: var(--pb-accent);
+}
+
+/* A card the deck's energy can't pay: still allowed, dimmed */
+.pvp-pick.is-off .pvp-pick-card {
+  opacity: 0.55;
+}
+
+.pvp-off-note {
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.pvp-energy-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.pvp-energy-pick legend {
+  margin: 0;
+  float: none;
+  width: auto;
+}
+
+.pvp-energy-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.pvp-energy-types button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-input-bg);
+  color: var(--pb-text-muted);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.pvp-energy-types button.active {
+  border-color: var(--pb-ring);
+  background: var(--pb-selected);
+  color: var(--pb-text);
+}
+
+.pvp-type-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--dot);
+  border: 1px solid var(--pb-border-strong);
+}
+
+.pvp-deck-energy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pvp-zone-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .pvp-pick-card {

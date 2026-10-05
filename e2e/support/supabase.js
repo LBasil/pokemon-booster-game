@@ -97,9 +97,9 @@ export const EVOLUTION_QUESTIONS = [
 const SERIES = { sv3pt5: 'Scarlet & Violet', base1: 'Base' }
 const EVOLVES_FROM = { Charmeleon: 'Charmander', Wartortle: 'Squirtle', Ivysaur: 'Bulbasaur', 'Charizard ex': 'Charmeleon' }
 const FIRE_ATTACKS = [
-  { name: 'Ember', name_fr: 'Flammèche', printed: '30', base: 30, cost: 1, text: '', text_fr: null, fx: [], coins: null, partial: false, usable: true },
+  { name: 'Ember', name_fr: 'Flammèche', printed: '30', base: 30, cost: 1, energy: ['Fire'], text: '', text_fr: null, fx: [], coins: null, partial: false, usable: true },
   {
-    name: 'Flamethrower', name_fr: 'Lance-Flammes', printed: '90', base: 90, cost: 3, text: 'Discard an Energy from this Pokémon.',
+    name: 'Flamethrower', name_fr: 'Lance-Flammes', printed: '90', base: 90, cost: 3, energy: ['Fire', 'Fire', 'Colorless'], text: 'Discard an Energy from this Pokémon.',
     text_fr: 'Défaussez une Énergie de ce Pokémon.', fx: [{ op: 'discard_self', n: 1 }], coins: null, partial: false, usable: true,
   },
 ]
@@ -117,7 +117,7 @@ const pvpCard = (id) => {
 export const PVP_FOES = ['Oddish', 'Venusaur ex'].map((name, i) => ({
   id: `foe-${i}`, name, name_fr: null, image_small: `https://images.e2e.test/foe-${i}.png`, image_fr: null, hp: 60, types: ['Grass'],
   weaknesses: ['Fire'], resistances: [], prizes: name.endsWith(' ex') ? 2 : 1, stage: 'basic', evolves_from: null, retreat: 1, abilities: [],
-  attacks: [{ name: 'Vine Whip', name_fr: 'Fouet Lianes', printed: '20', base: 20, cost: 1, text: '', fx: [], coins: null, partial: false, usable: true }],
+  attacks: [{ name: 'Vine Whip', name_fr: 'Fouet Lianes', printed: '20', base: 20, cost: 1, energy: ['Grass'], text: '', fx: [], coins: null, partial: false, usable: true }],
 }))
 
 export async function mockSupabase(page, options = {}) {
@@ -184,14 +184,16 @@ export async function mockSupabase(page, options = {}) {
     // (`next` = the first one); noStop: true = before 0019 (no stop RPC)
     evolutionChain:
       options.evolutionChain === 'missing' ? 'missing' : { ready: true, paidUsed: 0, best: 0, todayCoins: 0, run: null, next: 0, ...options.evolutionChain },
-    // PvP battles (migration 0030): 'missing' = not applied; engine 1 = before
-    // 0030 ("Coming soon"); opponent: false = nobody else has a deck; decks =
-    // { format: { attack: [ids], defense: [ids] } }; board = leaderboard rows;
-    // botsToday = bot battles started today; deckSize = the rules' 20
+    // PvP battles (migration 0030, typed energy 0031: my zone always brings
+    // Fire, theirs Grass): 'missing' = not applied; engine 1 = before 0030
+    // ("Coming soon"); opponent: false = nobody else has a deck; decks =
+    // { format: { attack: [ids], defense: [ids] } }; energies = { 'format:role':
+    // [types] }; board = leaderboard rows; botsToday = bot battles started
+    // today; deckSize = the rules' 20
     pvp:
       options.pvp === 'missing'
         ? 'missing'
-        : { engine: 2, ready: true, deckSize: 20, battlesLeft: 10, opponent: true, decks: {}, ratings: {}, battle: null, history: [], board: [], botsToday: 0, ...options.pvp },
+        : { engine: 3, ready: true, deckSize: 20, battlesLeft: 10, opponent: true, decks: {}, energies: {}, ratings: {}, battle: null, history: [], board: [], botsToday: 0, ...options.pvp },
   }
   const challengeState = () => {
     const c = state.challenge
@@ -472,7 +474,24 @@ export async function mockSupabase(page, options = {}) {
         const qty = (id) => state.challengeCollection.find((e) => e.card_id === id)?.quantity ?? 0
         return Object.entries(counts).every(([id, n]) => qty(id) >= n) && Object.values(names).every((n) => n <= 2) && ids.some((id) => pvpCard(id).stage === 'basic')
       }
-      const slotOf = (c, turn = 0) => ({ c, under: [], damage: 0, energy: 0, turn_in: turn, status: null, poisoned: false, burned: false })
+      const slotOf = (c, turn = 0) => ({ c, under: [], damage: 0, energy: 0, etypes: [], turn_in: turn, status: null, poisoned: false, burned: false })
+      const ENERGY_TYPES = ['Grass', 'Fire', 'Water', 'Lightning', 'Psychic', 'Fighting', 'Darkness', 'Metal', 'Fairy']
+      const validEnergy = (e) => Array.isArray(e) && e.length >= 1 && e.length <= 2 && new Set(e).size === e.length && e.every((t) => ENERGY_TYPES.includes(t))
+      // pvp_missing(): typed symbols need their type, Colorless any
+      const missing = (have, attack) => {
+        const need = {}
+        for (const t of attack.energy ?? []) if (t !== 'Colorless') need[t] = (need[t] ?? 0) + 1
+        let miss = 0
+        let used = 0
+        let typed = 0
+        for (const [t, n] of Object.entries(need)) {
+          const got = have.filter((e) => e === t).length
+          miss += Math.max(n - got, 0)
+          used += Math.min(n, got)
+          typed += n
+        }
+        return miss + Math.max(attack.cost - typed - (have.length - used), 0)
+      }
       const ev = (b, e) => b.events.push({ ...e, t: b.turn })
       // The board as pvp_battle_view() sends it
       const view = (b) => {
@@ -496,19 +515,20 @@ export async function mockSupabase(page, options = {}) {
           me: {
             points: b.me.points, deck: b.me.deck.length, hand_count: b.me.hand.length, discard: [], attached: b.me.attached, retreated: b.me.retreated,
             active: mySlot(active), bench: b.me.bench.map(mySlot), hand: b.me.hand.map((index) => ({ index, card: b.cards[index] })),
+            energy_types: ['Fire'], zone: b.me.zone, next: 'Fire',
           },
           them: {
             points: b.them.points, deck: 10, hand_count: 4, discard: [], active: theirSlot(b.them.active), bench: b.them.bench.map(theirSlot),
-            cards: b.status === 'playing' ? null : PVP_FOES,
+            cards: b.status === 'playing' ? null : PVP_FOES, energy_types: ['Grass'], zone: null, next: 'Grass',
           },
           my_cards: b.cards,
           hints: {
             my_turn: myTurn, setup: b.phase === 'setup', promote: b.phase === 'promote',
-            attach: myTurn && b.turn > 1 && !b.me.attached,
+            attach: myTurn && b.turn > 1 && !b.me.attached && !!b.me.zone,
             hand: Object.fromEntries(b.me.hand.map((i) => [i, handHint(i)])),
             retreat: myTurn && !!active && !b.me.retreated && b.me.bench.length > 0 && active.energy >= 1,
             attacks: active
-              ? b.cards[active.c].attacks.map((a) => (!myTurn ? 'not_your_turn' : b.turn === 1 ? 'first_turn' : a.cost > active.energy ? 'energy' : null))
+              ? b.cards[active.c].attacks.map((a) => (!myTurn ? 'not_your_turn' : b.turn === 1 ? 'first_turn' : missing(active.etypes, a) ? 'energy' : null))
               : [],
           },
           log: b.log.slice(-60),
@@ -522,6 +542,7 @@ export async function mockSupabase(page, options = {}) {
           engine: pv.engine, deck_size: DECK, max_copies: 2, hand_size: 5, bench_size: 3, points_to_win: 3, max_turns: 30, battles_per_day: 10,
           start_elo: 1000, k_factor: 32, weakness_multiplier: 2, resistance: 30, poison: 10, burn: 20,
           bot_levels: ['easy', 'normal', 'hard'], bot_coins: { easy: 10, normal: 25, hard: 50 }, bot_paid_per_day: 5, bot_battles_per_day: 20,
+          energy_types: ENERGY_TYPES, max_energy_types: 2,
           ready: pv.ready,
           battles_left: pv.battlesLeft,
           bot_battles_left: Math.max(20 - pv.botsToday, 0),
@@ -535,7 +556,9 @@ export async function mockSupabase(page, options = {}) {
               owned: copies(mine.filter((e) => fits(e.card, `set:${id}`))),
             })),
           },
-          decks: Object.fromEntries(Object.entries(pv.decks).map(([format, roles]) => [format, Object.fromEntries(Object.entries(roles).map(([role, ids]) => [role, { ids, valid: validDeck(ids, format) }]))])),
+          decks: Object.fromEntries(Object.entries(pv.decks).map(([format, roles]) => [format, Object.fromEntries(Object.entries(roles).map(([role, ids]) => [role, {
+            ids, valid: validDeck(ids, format), energy: pv.energies[`${format}:${role}`] ?? ['Fire'], energy_auto: !pv.energies[`${format}:${role}`],
+          }]))])),
           ratings: pv.ratings,
           battle: pv.battle && pv.battle.status === 'playing' ? view(pv.battle) : null,
           history: pv.history,
@@ -597,7 +620,8 @@ export async function mockSupabase(page, options = {}) {
         ev(b, { k: 'draw', s: 'd', n: 1 })
         const them = b.them.active
         them.energy++
-        ev(b, { k: 'attach', s: 'd', c: them.c, name: PVP_FOES[them.c].name })
+        them.etypes.push('Grass')
+        ev(b, { k: 'attach', s: 'd', c: them.c, name: PVP_FOES[them.c].name, type: 'Grass' })
         const target = b.me.active
         target.damage += 20
         ev(b, { k: 'attack', s: 'd', c: them.c, i: 0, name: PVP_FOES[them.c].name, attack: 'Vine Whip', damage: 20, flips: [], prevented: false })
@@ -608,6 +632,7 @@ export async function mockSupabase(page, options = {}) {
         b.turn++
         b.me.attached = false
         b.me.retreated = false
+        b.me.zone = b.turn > 1 ? 'Fire' : null
         ev(b, { k: 'turn', s: 'a' })
         draw(b)
       }
@@ -628,7 +653,9 @@ export async function mockSupabase(page, options = {}) {
         const role = args.p_role ?? 'attack'
         if (!['attack', 'defense'].includes(role)) return raise('pvp_invalid_role')
         if (!validDeck(args.p_cards ?? [], args.p_format)) return raise('pvp_invalid_deck')
+        if (args.p_energy != null && !validEnergy(args.p_energy)) return raise('pvp_invalid_energy')
         pv.decks[args.p_format] = { ...pv.decks[args.p_format], [role]: args.p_cards }
+        if (args.p_energy) pv.energies[`${args.p_format}:${role}`] = args.p_energy
         rating(args.p_format)
         return json(pvState())
       }
@@ -680,10 +707,12 @@ export async function mockSupabase(page, options = {}) {
         } else if (b.phase !== 'play') {
           return raise('pvp_not_your_turn')
         } else if (a.type === 'attach') {
-          if (b.me.attached || b.turn === 1 || !posSlot(a.pos)) return raise('pvp_no_energy')
+          if (b.me.attached || b.turn === 1 || !b.me.zone || !posSlot(a.pos)) return raise('pvp_no_energy')
           posSlot(a.pos).energy++
+          posSlot(a.pos).etypes.push(b.me.zone)
           b.me.attached = true
-          ev(b, { k: 'attach', s: 'a', c: posSlot(a.pos).c, name: b.cards[posSlot(a.pos).c].name })
+          ev(b, { k: 'attach', s: 'a', c: posSlot(a.pos).c, name: b.cards[posSlot(a.pos).c].name, type: b.me.zone })
+          b.me.zone = null
         } else if (a.type === 'bench') {
           if (!inHand(a.card) || b.cards[a.card].stage !== 'basic') return raise('pvp_invalid_action')
           if (b.me.bench.length >= 3) return raise('pvp_bench_full')
@@ -702,6 +731,7 @@ export async function mockSupabase(page, options = {}) {
         } else if (a.type === 'retreat') {
           if (b.me.retreated || !b.me.bench[a.pos - 1] || active.energy < 1) return raise('pvp_cannot_retreat')
           active.energy--
+          active.etypes.pop()
           const incoming = b.me.bench[a.pos - 1]
           b.me.bench[a.pos - 1] = active
           b.me.active = incoming
@@ -711,10 +741,13 @@ export async function mockSupabase(page, options = {}) {
           if (a.type === 'attack') {
             const attack = b.cards[active.c].attacks[a.attack]
             if (b.turn === 1) return raise('pvp_cannot_attack: first_turn')
-            if (!attack || attack.cost > active.energy) return raise('pvp_cannot_attack: energy')
+            if (!attack || missing(active.etypes, attack)) return raise('pvp_cannot_attack: energy')
             const damage = attack.base * 2 // Fire on Grass
             b.them.active.damage += damage
-            if (attack.fx.length) active.energy--
+            if (attack.fx.length) {
+              active.energy--
+              active.etypes.pop()
+            }
             ev(b, { k: 'attack', s: 'a', c: active.c, i: a.attack, name: b.cards[active.c].name, attack: attack.name, damage, flips: [], prevented: false })
             if (checkKo(b)) {
               b.log.push(...b.events)

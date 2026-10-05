@@ -3,6 +3,7 @@ import { nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCardLocale } from '@/composables/useCardLocale'
 import { attackName, attackText, damageLabel } from '@/utils/pvp'
+import EnergyIcons from '@/components/EnergyIcons.vue'
 import PvpCard from '@/components/PvpCard.vue'
 
 // A PvP card read in full (migration 0030): its attacks with their cost,
@@ -59,7 +60,7 @@ watch(
         <ul class="pvp-sheet-attacks">
           <li v-for="(attack, i) in card.attacks" :key="i">
             <p class="pvp-sheet-attack">
-              <span class="pvp-sheet-cost">{{ t('pvp.attackCost', { count: attack.cost }, attack.cost) }}</span>
+              <EnergyIcons class="pvp-sheet-cost" :types="attack.energy ?? []" :count="attack.cost" free />
               <strong>{{ attackName(attack, french) }}</strong>
               <strong class="pvp-sheet-damage">{{ damageLabel(attack) }}</strong>
             </p>

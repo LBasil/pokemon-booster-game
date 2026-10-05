@@ -864,8 +864,11 @@ auto » (0026), des bots qui rapportent des pièces (0027). Le 2026-10-05,
 un combat contre un bot gagné en deux tours en tapant toujours la plus
 grosse attaque (« aucun choix tactique ») a mené à la refonte **façon
 Pokémon JCC Pocket** (0030, « je crois qu'on est obligé de faire comme le
-TCG classique (genre pocket) », decks de 20 avec 2 exemplaires, en
-différé).
+TCG classique (genre pocket) », decks de 20 avec 2 exemplaires, en
+différé). Le jour même, un combat gagné en « plaçant mon Pokémon et en
+mettant les énergies » (« ça manque de profondeur ») a amené l'**Énergie
+typée** et des **bots calés sur mon deck** (0031, « 1 à 2 énergies »).
+Prochaine étape demandée : les cartes Dresseur.
 
 ```mermaid
 sequenceDiagram
@@ -875,7 +878,7 @@ sequenceDiagram
 
   PV->>DB: pvp_state() : formats, decks (ids), Elo, combat en cours
   J->>PV: monte un deck de 20 (ou « Deck auto »)
-  PV->>DB: pvp_eligible(format) puis pvp_save_deck(format, ids, role)
+  PV->>DB: pvp_eligible(format) puis pvp_save_deck(format, ids, role, énergie)
   J->>PV: « Trouver un adversaire » ou un bot
   PV->>DB: pvp_start(format) / pvp_bot_start(format, niveau)
   DB-->>PV: 5 cartes en main, l'adversaire déjà placé
@@ -898,26 +901,47 @@ sequenceDiagram
   (noms EN et FR), filtres De base / Évolutions, − / + par carte (bloqué à
   2 du même nom ou aux exemplaires possédés), liste du deck groupée,
   avertissements (cartes manquantes, aucun Pokémon de base, évolution
-  dont le Pokémon de départ manque).
+  dont le Pokémon de départ manque, cartes que l'Énergie du deck ne
+  paie pas : grisées dans la grille).
+- **Énergie du deck** (0031) : 1 ou 2 types parmi les 9 qui ont une carte
+  Énergie de base (Plante, Feu, Eau, Électrique, Psy, Combat, Obscurité,
+  Métal, Fée ; les Pokémon Dragon paient avec d'autres types), choisis
+  dans le constructeur (préchoisis pour un nouveau deck : `autoEnergy`).
+  `pvp_decks.energy` ; `null` (decks d'avant 0031) = déduite des coûts de
+  ses cartes (`pvp_deck_energy` / `deckEnergy`, **miroirs**).
 - **Deck auto** (`autoDeck` dans `src/utils/pvp.js`, construit comme les
   decks des bots) : une lignée à 3 stades, jusqu'à deux lignées à 2
   stades, puis des Pokémon de base, 2 exemplaires de chacun quand ils sont
   possédés, les meilleurs scores d'abord (dégâts par énergie, plus grosse
   attaque, PV par point ; pondérés selon le rôle) ; le reste en
-  exemplaires simples.
+  exemplaires simples. Depuis 0031 il choisit d'abord l'Énergie
+  (`autoEnergy` : pour chaque type et chaque paire, les 10 meilleurs noms
+  qu'elle paie ; une paire compte ×0,85 car la zone n'apporte le bon type
+  qu'une fois sur deux) puis ne prend que les cartes qu'elle paie (les
+  autres seulement s'il en manque).
 - **Mise en place** : 5 cartes en main, toujours avec un Pokémon de base ;
   je touche mon Actif puis jusqu'à 3 Pokémon de Banc, « Commencer le
   combat ». L'adversaire est placé par le serveur ; une pièce décide qui
   commence.
 - **Un tour** : pioche (rien si le deck est vide), puis dans l'ordre que
-  je veux : attacher **1 Énergie** (n'importe quel Pokémon ; pas au tout
-  premier tour du combat), poser des Pokémon de base (Banc de 3),
+  je veux : attacher **l'Énergie de ma zone** (n'importe quel Pokémon ;
+  pas au tout premier tour du combat ; non attachée, elle est perdue),
+  poser des Pokémon de base (Banc de 3),
   **évoluer** (pas au premier tour du joueur, pas un Pokémon posé ou
   évolué ce tour-ci ; les Énergies et dégâts restent), **retraite** une
   fois (coût de Retraite en Énergies, impossible Endormi / Paralysé),
   puis **attaquer** (finit le tour ; pas au premier tour de celui qui
-  commence) ou « Finir mon tour ». Énergie incolore : une attaque coûte
-  son nombre d'Énergies.
+  commence) ou « Finir mon tour ».
+- **Zone d'Énergie** (0031, comme Pocket) : à chaque tour la zone apporte
+  une Énergie d'un type de mon deck au hasard (`zone`), la suivante est
+  déjà affichée (`next`), pour moi comme pour l'adversaire. Une attaque
+  coûte ses Énergies imprimées (`attacks[].energy`, importé par
+  `populate.mjs`) : chaque symbole de type demande ce type, Incolore
+  n'importe lequel (`pvp_missing` / `energyMissing`, **miroirs**). Une
+  carte pas encore synchronisée n'a pas de types : tout Incolore. Un
+  Pokémon garde le type de ses Énergies (`etypes`) ; la retraite et ses
+  propres défausses jettent d'abord celles dont ses attaques n'ont pas
+  besoin, une attaque adverse d'abord celles dont il a besoin.
 - **Attaques et effets** : `src/utils/attackEffects.js` lit le texte
   anglais de chaque attaque à l'import (`populate.mjs`) et le transforme
   en effets (`cards.attacks[].fx`) : pièces (une, N, jusqu'à pile),
@@ -946,9 +970,9 @@ sequenceDiagram
   qui devient Actif.
 - **Le serveur joue l'autre camp** (`pvp_ai_turn`) : il fait évoluer ce
   qu'il peut, remplit son Banc, bat en retraite quand son Actif ne peut
-  plus frapper ou va tomber (normal / difficile), attache l'Énergie à son
-  Actif jusqu'à payer sa meilleure attaque puis au Pokémon de Banc le plus
-  près de la sienne, et attaque avec le meilleur coup attendu (un K.O.
+  plus frapper ou va tomber (normal / difficile), attache l'Énergie de sa
+  zone là où elle rapproche une attaque (son Actif d'abord, puis le Pokémon
+  de Banc le plus près de sa meilleure attaque ; sinon l'Actif), et attaque avec le meilleur coup attendu (un K.O.
   avant tout). Facile : énergie en partie au hasard, attaque au hasard,
   jamais de retraite. Les decks de défense des joueurs sont joués en
   « difficile ».
@@ -964,22 +988,36 @@ sequenceDiagram
   français si importés, Faiblesse, Résistance, Retraite, talents marqués
   « pas encore joués »).
 - **Simulé le 2026-10-05** (IA contre IA, 4 000 vraies cartes, decks de
-  bots) : difficile bat normal 9 fois sur 10, normal bat facile 10 sur 10,
-  15 tours en moyenne (11 entre bons decks).
+  bots) : difficile bat normal 9 fois sur 10, normal bat facile 10 sur 10,
+  15 tours en moyenne (11 entre bons decks). Après 0031 (1 500 vraies
+  cartes de Base à Écarlate et Violet, un deck fort joué en difficile
+  contre le bot calé dessus, 20 combats par niveau) : il gagne 20/20
+  contre facile, 14/20 contre normal, 5/20 contre difficile ; 13 à 15
+  tours au lieu de 10 à 12 en Énergie incolore, deux fois plus d'Énergies
+  posées sur le Banc.
 - **Formats, Elo, adversaire, bots, limites** : inchangés depuis
   0024-0027 (toutes les cartes / une ère / un set, retenu sur l'appareil
   `pb-pvp-format` ; K = 32, les deux joueurs bougent, abandon = défaite,
   10 attaques par jour, défenses illimitées ; adversaire parmi les 5 Elo
   les plus proches ; bots Facile / Normal / Difficile : pas d'Elo,
   10 / 25 / 50 pièces pour les 5 premiers combats du jour, 20 par jour en
-  tout). Le deck d'un bot (`pvp_bot_deck`) : 1 500 cartes jouables du
-  format au hasard, classées comme `autoDeck`, puis une lignée à 3
-  stades, deux à 2 stades et des Pokémon de base, 2 exemplaires chacun,
-  au plus près du niveau (facile : bas du classement, difficile : haut).
+  tout). Le deck d'un bot (`pvp_bot_deck(format, niveau, mon deck)`,
+  0031) : 2 000 cartes jouables du format au hasard, **des mêmes ères que
+  mon deck** (le format « toutes les cartes » ne met plus un ex de 2025
+  face à un Fantominus de 1999 ; tout le format si l'ère a moins de 60
+  cartes), 1 ou 2 types d'Énergie (tirés selon les cartes du lot ;
+  difficile essaie d'abord la Faiblesse la plus courante de mon deck) et
+  seulement les cartes qu'ils paient, classées comme `autoDeck`, puis une
+  lignée à 3 stades, deux à 2 stades et des Pokémon de base, 2
+  exemplaires chacun, **au plus près de la force de mon deck** (le
+  percentile moyen de mes cartes dans le même lot : facile 60 % de ma
+  force, normal 5 points dessous, difficile 10 au-dessus).
 - **Avant la synchro** : tant qu'aucune carte n'a ses effets d'attaque
-  (`attacks[].fx`, synchro après 0029), `pvp_state()` renvoie
-  `ready: false` (« Bientôt ») ; un serveur sans 0030 aussi (`engine`
-  absent).
+  (`attacks[].fx`, synchro après 0029) et, depuis 0031, ses coûts typés
+  (`attacks[].energy`), `pvp_state()` renvoie `ready: false` (« Bientôt ») ;
+  un serveur sans 0030 aussi (`engine` absent). Les combats en cours au
+  passage de 0031 finissent en nul (sans Elo ni pièces) ; le client joue
+  aussi un serveur resté en moteur 2 (sans zone).
 
 ## 9. Communauté : fil et classements
 

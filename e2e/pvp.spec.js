@@ -2,11 +2,12 @@ import { expect, test } from '@playwright/test'
 import { collectionEntry } from './support/data.js'
 import { mockSupabase as mockBackend, signIn } from './support/supabase.js'
 
-// PvP battles like Pokémon TCG Pocket (migration 0030). In the mock every
-// challenge Pokémon is Fire, weak to Water: Ember (30, 1 energy) and
-// Flamethrower (90, 3 energies). The opponent: Oddish (Active) and Venusaur ex
-// (Bench, 2 points), Grass, weak to Fire, 60 HP: Ember knocks either out
-// (3 points = a win). The server's turn: draw, attach, Vine Whip (20).
+// PvP battles like Pokémon TCG Pocket (migration 0030, typed energy 0031). In
+// the mock every challenge Pokémon is Fire, weak to Water: Ember (30, Fire)
+// and Flamethrower (90, Fire Fire Colorless); my energy zone always brings
+// Fire. The opponent: Oddish (Active) and Venusaur ex (Bench, 2 points),
+// Grass, weak to Fire, 60 HP: Ember knocks either out (3 points = a win). The
+// server's turn: draw, attach a Grass energy, Vine Whip (20).
 test.beforeEach(async ({ page }) => {
   await signIn(page)
 })
@@ -35,8 +36,8 @@ async function setUp(page) {
 
 // My Active is the second "Active:" button (theirs comes first); a second tap unselects it
 async function attachToActive(page) {
-  if (!(await page.getByRole('button', { name: 'Attach the energy' }).isVisible())) await board(page).getByRole('button', { name: /^Active: / }).nth(1).click()
-  await page.getByRole('button', { name: 'Attach the energy' }).click()
+  if (!(await page.getByRole('button', { name: /Attach the Fire energy/ }).isVisible())) await board(page).getByRole('button', { name: /^Active: / }).nth(1).click()
+  await page.getByRole('button', { name: /Attach the Fire energy/ }).click()
 }
 
 test('PvP is listed with the mini-games, with its rules', async ({ page }) => {
@@ -66,6 +67,9 @@ test('auto deck: 20 cards in lines, 2 of a name, saved', async ({ page }) => {
   const saved = JSON.parse(backend.calls.find((call) => call.path === '/rest/v1/rpc/pvp_save_deck').body)
   expect(saved.p_cards).toHaveLength(20)
   expect(saved.p_role).toBe('attack')
+  // every card is Fire: the auto deck runs on Fire energy
+  expect(saved.p_energy).toEqual(['Fire'])
+  await expect(attackDeck.locator('.pvp-deck-energy')).toContainText('Fire')
 })
 
 test('the builder: 2 copies at most, a Basic needed, lone evolutions flagged', async ({ page }) => {
@@ -73,7 +77,7 @@ test('the builder: 2 copies at most, a Basic needed, lone evolutions flagged', a
   await page.goto('/challenge/games/pvp')
   await page.getByRole('group', { name: 'Attack deck' }).getByRole('button', { name: 'Build my deck' }).click()
   await page.getByRole('button', { name: 'Add Charmeleon' }).click()
-  await expect(page.getByRole('alert')).toContainText('Put in at least one Basic Pokémon')
+  await expect(page.locator('.pvp-deck-list').getByRole('alert')).toContainText('Put in at least one Basic Pokémon')
   await expect(page.locator('.pvp-deck-list')).toContainText("Charmeleon can't evolve here")
   await page.getByRole('button', { name: 'Add Charmeleon' }).click()
   await expect(page.getByRole('button', { name: 'Add Charmeleon' })).toBeDisabled()
@@ -81,6 +85,15 @@ test('the builder: 2 copies at most, a Basic needed, lone evolutions flagged', a
   await expect(page.locator('.pvp-deck-list')).not.toContainText("can't evolve")
   await expect(page.locator('.pvp-deck-list')).toContainText('17 cards to go')
   await expect(page.getByRole('button', { name: 'Save the deck' })).toBeDisabled()
+  // The deck's energy: picked for my cards (Fire); on Water alone the Fire cards can't attack
+  const energy = page.getByRole('group', { name: 'Deck energy' })
+  await expect(energy.getByRole('button', { name: 'Fire' })).toHaveAttribute('aria-pressed', 'true')
+  await energy.getByRole('button', { name: 'Water' }).click()
+  await energy.getByRole('button', { name: 'Fire' }).click()
+  await expect(page.locator('.pvp-deck-list')).toContainText("With Water energy, these can't attack: Charmeleon, Charmander")
+  await expect(page.locator('.pvp-pick.is-off').first()).toContainText("Your energy can't pay its attacks")
+  await energy.getByRole('button', { name: 'Water' }).click()
+  await expect(energy.getByRole('alert')).toContainText('Pick at least one energy type')
   // Search and filters
   await page.getByPlaceholder('Search a card').fill('squir')
   await expect(page.locator('.pvp-grid > li')).toHaveCount(1)
@@ -103,8 +116,11 @@ test('a bot battle: set up, the server plays, attach, attack, knock out, win coi
   await expect(page.locator('.pvp-log')).toContainText('Their Oddish uses Vine Whip: 20 damage.')
   await expect(page.locator('.pvp-log')).toContainText('Your turn.')
 
-  // Turn 3: energy on Charmander, Ember knocks Oddish out
+  // Turn 3: the zone's Fire energy on Charmander, Ember knocks Oddish out
+  await expect(page.locator('.pvp-turn-bar')).toContainText('A Fire energy to attach this turn')
+  await expect(page.locator('.pvp-chip').filter({ hasText: 'Energy' })).toBeVisible()
   await attachToActive(page)
+  await expect(page.locator('.pvp-log')).toContainText('You attach a Fire energy to Charmander.')
   await expect(page.locator('.pvp-turn-bar')).toContainText('Energy attached this turn')
   await page.getByRole('button', { name: /Ember/ }).click()
   await expect(page.locator('.pvp-log')).toContainText('Your Charmander uses Ember: 60 damage.')

@@ -1,7 +1,9 @@
 // PvP battles like Pokémon TCG Pocket (migration 0030). Mirrors pvp_rules(),
 // pvp_prizes(), pvp_deck_cards() and pvp_bot_deck() in
-// supabase/migrations/0030_pvp_pocket.sql, and the bot coins of
-// 0027_pvp_bots.sql — change both together. The server stays the authority:
+// supabase/migrations/0030_pvp_pocket.sql, the typed energy of
+// 0031_pvp_typed_energy.sql (pvp_missing(), pvp_deck_energy(),
+// pvp_fits_energy()) and the bot coins of 0027_pvp_bots.sql — change both
+// together. The server stays the authority:
 // it plays every move and sends what I can do now (`battle.hints`); these
 // drive the deck builder, labels and previews.
 
@@ -18,6 +20,12 @@ export const WEAKNESS_MULTIPLIER = 2
 export const RESISTANCE = 30
 export const POISON = 10
 export const BURN = 20
+
+// Typed energy (0031): a deck picks 1 or 2 of the types with a basic Energy
+// card; each turn its zone brings one of them at random
+export const ENERGY_TYPES = ['Grass', 'Fire', 'Water', 'Lightning', 'Psychic', 'Fighting', 'Darkness', 'Metal', 'Fairy']
+export const MAX_ENERGY_TYPES = 2
+export const ENGINE = 3
 
 // Who can play while PvP is being reworked (0028, user 2026-10-05: "bloque le
 // PvP uniquement pour le joueur Bazouk"): lowercased usernames, mirrors
@@ -86,6 +94,58 @@ export function deckRoles(entry) {
   return { attack: entry?.attack ?? null, defense: entry?.defense ?? null }
 }
 
+// ---------- Energy ----------
+
+/**
+ * Energies still missing to pay an attack (pvp_missing): each typed symbol
+ * needs its type, Colorless takes whatever is left. An attack without
+ * `energy` (a card synced before 0031) costs `cost` Colorless.
+ * @param {string[]} have - a slot's energies (`etypes`)
+ * @param {{ cost?: number, energy?: string[] }} attack
+ */
+export function energyMissing(have = [], attack = {}) {
+  const symbols = attack.energy ?? []
+  const need = new Map()
+  for (const type of symbols) if (type !== 'Colorless') need.set(type, (need.get(type) ?? 0) + 1)
+  let missing = 0
+  let used = 0
+  let typed = 0
+  for (const [type, n] of need) {
+    const owned = have.filter((e) => e === type).length
+    missing += Math.max(n - owned, 0)
+    used += Math.min(n, owned)
+    typed += n
+  }
+  const total = Math.max(attack.cost ?? 0, symbols.length, typed)
+  return missing + Math.max(total - typed - (have.length - used), 0)
+}
+
+/** Whether a card can pay one of its usable attacks with these energy types (pvp_fits_energy). */
+export const fitsEnergy = (card, energy = []) =>
+  (card?.attacks ?? []).some((a) => a.usable !== false && (a.energy ?? []).every((type) => type === 'Colorless' || energy.includes(type)))
+
+/** Whether a pick of energy types is valid: 1 or 2 different known types. */
+export const validEnergy = (energy) =>
+  Array.isArray(energy) && energy.length >= 1 && energy.length <= MAX_ENERGY_TYPES && new Set(energy).size === energy.length && energy.every((t) => ENERGY_TYPES.includes(t))
+
+/**
+ * The energy a deck asks for (pvp_deck_energy): the types its usable
+ * attacks need most, a second one if it's needed at least a quarter as
+ * much; else its Pokémon's most common type; else Grass.
+ * @param {object[]} cards - the deck's cards (one per copy)
+ */
+export function deckEnergy(cards) {
+  const count = (types) => {
+    const counts = new Map()
+    for (const type of types) if (ENERGY_TYPES.includes(type)) counts.set(type, (counts.get(type) ?? 0) + 1)
+    return [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  }
+  const symbols = count(cards.flatMap((card) => (card.attacks ?? []).filter((a) => a.usable !== false).flatMap((a) => a.energy ?? [])))
+  if (symbols.length) return symbols.filter(([, n], i) => i === 0 || (i === 1 && n * 4 >= symbols[0][1])).map(([type]) => type)
+  const own = count(cards.flatMap((card) => card.types ?? []))
+  return own.length ? [own[0][0]] : ['Grass']
+}
+
 // ---------- Deck builder ----------
 
 /** How many copies of each card id a deck holds. */
@@ -120,15 +180,19 @@ export function removeCard(ids, id) {
 
 /**
  * What a deck still needs before it can be saved, and its warnings.
- * @returns {{ ready: boolean, missing: number, basics: number, orphans: string[] }}
+ * @param {string[] | null} [energy] - its energy types (null: not checked)
+ * @returns {{ ready: boolean, missing: number, basics: number, orphans: string[], unpaid: string[] }}
  *   orphans: evolutions whose "evolves from" Pokémon isn't in the deck (legal, but stuck in hand)
+ *   unpaid: cards whose attacks the deck's energy can't pay (legal, but they'll never attack)
  */
-export function deckCheck(ids, cardsById, size = DECK_SIZE) {
+export function deckCheck(ids, cardsById, size = DECK_SIZE, energy = null) {
   const cards = ids.map((id) => cardsById.get(id)).filter(Boolean)
   const names = new Set(cards.map((card) => card.name))
   const basics = cards.filter((card) => card.stage === 'basic').length
   const orphans = [...new Set(cards.filter((card) => card.stage === 'evolution' && !names.has(card.evolves_from)).map((card) => card.name))]
-  return { ready: cards.length === size && basics > 0, missing: Math.max(0, size - cards.length), basics, orphans }
+  const unpaid = energy ? [...new Set(cards.filter((card) => !fitsEnergy(card, energy)).map((card) => card.name))] : []
+  const energyOk = energy === null || validEnergy(energy)
+  return { ready: cards.length === size && basics > 0 && energyOk, missing: Math.max(0, size - cards.length), basics, orphans, unpaid }
 }
 
 // Auto deck: each card scores damage per energy (one energy a turn), its best
@@ -156,17 +220,55 @@ function scoreCards(cards, role) {
 }
 
 /**
+ * The energy that suits my cards best: for each type, and each pair of
+ * types (a bit less: the zone then brings the one I need half the time),
+ * the scores of the best 20 cards it can pay; the highest wins.
+ * @param {object[]} cards - eligible cards
+ * @param {'attack' | 'defense'} [role]
+ * @returns {string[]} 1 or 2 types
+ */
+export function autoEnergy(cards, role = 'attack', size = DECK_SIZE) {
+  const playable = cards.filter((card) => card.stage !== 'none' && (card.attacks ?? []).some((a) => a.usable !== false))
+  const score = scoreCards(playable, role)
+  const value = (energy) => {
+    const best = new Map() // the best printing of each name it pays
+    for (const card of playable) {
+      if (!fitsEnergy(card, energy)) continue
+      if (!best.has(card.name) || score.get(card.id) > best.get(card.name)) best.set(card.name, score.get(card.id))
+    }
+    // 2 copies of each name at most
+    return [...best.values()].sort((a, b) => b - a).slice(0, Math.ceil(size / MAX_COPIES)).reduce((sum, s) => sum + s, 0)
+  }
+  let pick = [ENERGY_TYPES[0]]
+  let top = -1
+  for (const [i, first] of ENERGY_TYPES.entries()) {
+    const single = value([first])
+    if (single > top) [pick, top] = [[first], single]
+    for (const second of ENERGY_TYPES.slice(i + 1)) {
+      const pair = value([first, second]) * 0.85
+      if (pair > top) [pick, top] = [[first, second], pair]
+    }
+  }
+  return pick
+}
+
+/**
  * A deck from my eligible cards (`pvp_eligible`: stage, evolves_from,
  * owned copies, attacks), built like the bots' (pvp_bot_deck): a Stage 2
  * line, up to two Stage 1 lines, then Basics, 2 copies of each when I own
  * them, the best scores first; the best single copies fill what's left.
+ * With `energy`, only cards it can pay (others only if they're too few).
  * @param {object[]} cards
  * @param {'attack' | 'defense'} [role]
+ * @param {string[] | null} [energy]
  * @returns {string[]} card ids (with repeats), up to `size`
  */
-export function autoDeck(cards, role = 'attack', size = DECK_SIZE) {
-  const playable = cards.filter((card) => card.stage !== 'none' && (card.attacks ?? []).some((a) => a.usable !== false))
-  const score = scoreCards(playable, role)
+export function autoDeck(cards, role = 'attack', size = DECK_SIZE, energy = null) {
+  const all = cards.filter((card) => card.stage !== 'none' && (card.attacks ?? []).some((a) => a.usable !== false))
+  const fits = (card) => !energy || fitsEnergy(card, energy)
+  const playable = all.filter(fits)
+  const score = scoreCards(all, role)
+  const byIdAll = new Map(all.map((card) => [card.id, card]))
   const byId = new Map(playable.map((card) => [card.id, card]))
   // The best printing of each name, at each stage
   const best = new Map()
@@ -202,12 +304,14 @@ export function autoDeck(cards, role = 'attack', size = DECK_SIZE) {
     stage1 += line.length === 2
     if (ids.length >= size) break
   }
-  // Fill: the best cards left (Basics first, they can always be played)
-  const rest = [...playable].sort((a, b) => (b.stage === 'basic') - (a.stage === 'basic') || score.get(b.id) - score.get(a.id))
+  // Fill: the best cards left (the ones the energy pays, Basics first: they can always be played)
+  const rest = [...all].sort(
+    (a, b) => fits(b) - fits(a) || (b.stage === 'basic') - (a.stage === 'basic') || score.get(b.id) - score.get(a.id),
+  )
   for (const card of rest) {
     if (ids.length >= size) break
-    if (card.stage === 'evolution' && !ids.some((id) => byId.get(id).name === card.evolves_from)) continue
-    while (!addBlock(ids, card, byId, size)) ids = [...ids, card.id]
+    if (card.stage === 'evolution' && !ids.some((id) => byIdAll.get(id).name === card.evolves_from)) continue
+    while (!addBlock(ids, card, byIdAll, size)) ids = [...ids, card.id]
   }
   return ids
 }

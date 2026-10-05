@@ -14,8 +14,9 @@ import { useChallengeStore } from '@/stores/challenge'
 import { useProfileStore } from '@/stores/profile'
 import { deckRoles, pvpOpenTo } from '@/utils/pvp'
 
-// PvP battles like Pokémon TCG Pocket (challenge mode, migration 0030): my
-// attack and defense decks (20 cards) and Elo per format, battles left
+// PvP battles like Pokémon TCG Pocket (challenge mode, migration 0030; typed
+// energy since 0031): my attack and defense decks (20 cards, 1-2 energy
+// types) and Elo per format, battles left
 // today, the battle in progress and my history. The server deals, plays the
 // opponent's side (a player's defense deck or a bot) and sends what I can do
 // (`battle.hints`); I send one move at a time (`act`). Bots: no Elo, coins
@@ -69,7 +70,8 @@ export const usePvpStore = defineStore('pvp', {
           return
         }
         this.state = await fetchPvpState()
-        this.unavailable = this.state?.ready === false || this.state?.engine !== 2
+        // engine 2 (0030) still plays, with colorless energy, until 0031 is applied
+        this.unavailable = this.state?.ready === false || !(this.state?.engine >= 2)
         this.loaded = true
       } catch (err) {
         if (isMissingRpc(err)) this.unavailable = true
@@ -86,9 +88,12 @@ export const usePvpStore = defineStore('pvp', {
       return cards
     },
 
-    /** @param {'attack' | 'defense'} role */
-    async saveDeck(format, cardIds, role = 'attack') {
-      this.state = await savePvpDeck(format, cardIds, role)
+    /**
+     * @param {'attack' | 'defense'} role
+     * @param {string[] | null} [energy] - 1 or 2 types (0031)
+     */
+    async saveDeck(format, cardIds, role = 'attack', energy = null) {
+      this.state = await savePvpDeck(format, cardIds, role, energy)
     },
 
     async start(format) {

@@ -52,19 +52,22 @@ How it works inside (every table, RPC and flow, in French):
   seconds; intruders from other lines slip in as the streak grows, and
   "Stop" ends a run keeping its coins. The simplest game, so it pays the least: 3 coins per
   right line (60 per run, 180 a day at most) — and **PvP battles** like Pokémon TCG Pocket (testers only for now,
-  migrations 0028 + 0030): two decks of 20 challenge Pokémon per format
+  migrations 0028, 0030 and 0031): two decks of 20 challenge Pokémon per format
   (every card, one era of the TCG, or one set; 2 with the same name at
   most; "Auto deck" builds evolution lines for you), one to attack with
   and one the server plays when you're attacked. A battle: 5 cards in
   hand, an Active Pokémon and up to 3 on the Bench; each turn draw,
-  attach one energy to any Pokémon, bench Basics, evolve, retreat, then
+  attach the energy your zone brings (each deck plays 1 or 2 energy
+  types, one of them at random each turn, the next one shown; attacks
+  cost their printed energy) to any Pokémon, bench Basics, evolve, retreat, then
   attack. Attack texts are played (coins, special conditions, healing,
   Bench damage, energy discards, damage per energy...; what isn't played
   is marked), weakness and resistance too; knocked out Pokémon give
   points (2 for ex, V, GX..., 3 for VMAX), 3 points win. The server plays
   the other side (another player's defense deck, or a bot) and the board
   shows what just happened and what you can do. Elo per format, 10
-  attacks a day; **bots** (easy, normal, hard): no Elo, but a win pays
+  attacks a day; **bots** (easy, normal, hard; their deck comes from
+  your deck's eras, about as strong as yours): no Elo, but a win pays
   10 / 25 / 50 coins (a draw half) for the first 5 bot battles of the
   day, 20 a day in all. One more is teased as
   "Coming soon" (**Boss raid**). Packs
@@ -385,6 +388,12 @@ its **SQL editor** and run, in order:
    TCG Pocket (20-card decks, Bench, energy, evolutions, effects, points;
    `pvp_act`). Run it after 0029; PvP says "Coming soon" until a sync has
    stored the attack effects.
+31. `supabase/migrations/0031_pvp_typed_energy.sql` — PvP typed energy
+   like Pocket (each deck picks 1 or 2 energy types, an energy zone brings
+   one a turn, attacks cost their printed energy) and bots matched to your
+   deck (its eras, its strength). Run it after 0030, then a card sync
+   (`npm run populate:sync`) so attacks get their typed cost; PvP says
+   "Coming soon" until then.
 
 Then in **Authentication**:
 

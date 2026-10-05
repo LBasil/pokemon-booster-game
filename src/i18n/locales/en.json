@@ -491,7 +491,8 @@
       "pvp_cannot_evolve_yet": "It can't evolve this turn.",
       "pvp_no_energy": "No energy to attach this turn.",
       "pvp_cannot_retreat": "Your Active Pokémon can't retreat now.",
-      "pvp_cannot_attack": "This attack can't be used now."
+      "pvp_cannot_attack": "This attack can't be used now.",
+      "pvp_invalid_energy": "Pick 1 or 2 energy types for this deck."
     },
     "rewardNotice": "+{count} coins!",
     "recycledNotice": "{cards} duplicate recycled: +{coins} coins | {cards} duplicates recycled: +{coins} coins",
@@ -944,7 +945,7 @@
     "noBotBattlesLeft": "No bot battles left today: come back tomorrow.",
     "coinsWon": "You earn",
     "noCoins": "No coins this time.",
-    "unpaid": "No coins: your paying bot battles are used for today.",
+    "unpaid": "With {types} energy, these can't attack: {names}.",
     "eloChange": "Elo {change}",
     "result": {
       "won": "You win!",
@@ -1125,22 +1126,35 @@
         "d": "{name} wins.",
         "draw": "A draw."
       },
-      "overTurns": "Last turn: the most points win."
+      "overTurns": "Last turn: the most points win.",
+      "attachType": {
+        "a": "You attach a {type} energy to {card}.",
+        "d": "{name} attaches a {type} energy to {card}."
+      }
     },
     "rules": {
       "deck": "Your decks: 20 Pokémon from your challenge collection, 2 with the same name at most, at least one Basic (each copy must be owned). Two decks per format: one you attack with, one the server plays when you are attacked (your attack deck defends until you build it).",
       "setup": "You start with 5 cards in hand, always with a Basic Pokémon: put one as your Active Pokémon and up to 3 on your Bench. A coin decides who goes first.",
-      "turn": "Each turn: draw a card, attach 1 energy to any of your Pokémon (not on the first turn of the battle), put Basic Pokémon on your Bench, evolve, retreat once, then attack, which ends your turn. The player going first can't attack on that turn.",
+      "turn": "Each turn: draw a card, attach your energy zone's energy to any of your Pokémon (none on the first turn of the battle; one not attached is lost), put Basic Pokémon on your Bench, evolve, retreat once, then attack, which ends your turn. The player going first can't attack on that turn.",
       "evolve": "Evolve by putting a card on the Pokémon it evolves from, not on its first turn in play nor on your first turn. The energy and damage stay.",
       "retreat": "Retreat: your Active Pokémon goes to the Bench and one of your Benched Pokémon comes in, for its retreat cost in energy. Special conditions go away.",
-      "attack": "An attack costs its number of energies (any type). Its effects are played: coins, damage per energy or counter, special conditions, healing, damage to the Bench... A text the battles can't play is marked, its damage still counts. Weakness doubles the damage, resistance takes {resistance} off.",
+      "attack": "An attack costs its printed energy: each type symbol needs an energy of that type, Colorless any type. Your deck has 1 or 2 energy types, and the zone brings one of them each turn. Its effects are played: coins, damage per energy or counter, special conditions, healing, damage to the Bench... A text the battles can't play is marked, its damage still counts. Weakness doubles the damage, resistance takes {resistance} off.",
       "conditions": "Asleep and Paralyzed Pokémon can't attack or retreat (a coin wakes them, Paralysis ends after a turn); Confused ones flip before attacking; Poison deals 10 and Burn 20 between turns.",
       "points": "Knocking out a Pokémon gives points: 1 for most, 2 for ex, EX, GX, V and VSTAR, 3 for VMAX, TAG TEAM and Mega ex. {points} points win, so does leaving the other side with no Pokémon. After {turns} turns, the most points win.",
       "hidden": "Against players, the server plays their defense deck while you play: their hand stays hidden, their Pokémon show up as they're played.",
       "elo": "Against players, no coins: you win or lose Elo points, more against a stronger player. Your opponent is drawn among the players closest to your Elo.",
       "limit": "{count} attacks a day, reset at {time}. Defenses are unlimited.",
       "bots": "Bots: the same battle with your attack deck, against a deck the server builds from the format. No Elo, and they don't use your attacks. A win pays {easy}, {normal} or {hard} coins (easy, normal, hard), a draw half, for your first {paid} bot battles of the day; {count} a day in all."
-    }
+    },
+    "energyReadyType": "A {type} energy to attach this turn",
+    "attachType": "Attach the {type} energy",
+    "nextEnergy": "next",
+    "energyShort": "Energy",
+    "energyTitle": "Deck energy",
+    "energyHelp": "Pick 1 or {max} types. Each turn your energy zone brings one of them at random (you see the next one). An attack costs its printed energy: a type symbol needs that type, Colorless takes any.",
+    "energyNone": "Pick at least one energy type.",
+    "notPaid": "Your energy can't pay its attacks",
+    "energyAuto": "from its cards"
   },
   "electrodeFlip": {
     "title": "Shiny Electrode Flip",

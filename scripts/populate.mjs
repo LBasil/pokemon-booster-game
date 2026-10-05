@@ -204,7 +204,8 @@ async function populateCards(startPage = 1) {
       // PvP (0024): name, damage as printed ("30", "30+", "20×", "" = effect
       // only); cost (number of energies) since 0025; since 0029 the printed
       // text and what the battles apply of it (src/utils/attackEffects.js:
-      // base damage, effects, coins, partial = some text isn't applied)
+      // base damage, effects, coins, partial = some text isn't applied);
+      // since 0031 the typed cost (energy: ['Fire', 'Colorless'])
       attacks:
         card.attacks?.map((attack) => {
           const { damage: base, fx, coins, partial } = parseAttack(attack)
@@ -213,6 +214,7 @@ async function populateCards(startPage = 1) {
             damage: attack.damage ?? '',
             base,
             cost: attack.convertedEnergyCost ?? attack.cost?.length ?? 0,
+            energy: (attack.cost ?? []).filter((type) => type !== 'Free'),
             text: attack.text ?? '',
             fx,
             coins,
