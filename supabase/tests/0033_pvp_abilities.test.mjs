@@ -139,8 +139,11 @@ export default async function (check) {
   for (let moves = 0; battle.status === 'playing' && moves < 400; moves++) {
     let action
     const usable = Object.entries(battle.hints.abilities ?? {}).flatMap(([pos, list]) => list.map((b, i) => (b === null ? { at: Number(pos), ability: i } : null))).filter(Boolean)
+    const benchable = Object.entries(battle.hints.hand ?? {}).filter(([, h]) => h.bench).map(([i]) => Number(i))
     if (battle.phase === 'promote') action = { type: 'promote', pos: 1 }
     else if (usable.length && used < 20) action = { type: 'ability', ...usable[0] }
+    // Bench every Basic: an opening hand without the ability holders left them in hand all game
+    else if (benchable.length) action = { type: 'bench', card: benchable[0] }
     else if (battle.hints.attach) action = { type: 'attach', pos: 0 }
     else if (battle.hints.attacks.some((b) => b === null)) action = { type: 'attack', attack: battle.hints.attacks.indexOf(null) }
     else action = { type: 'end' }

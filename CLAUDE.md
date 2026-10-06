@@ -877,8 +877,11 @@ docs/technique/             technical doc (French, user choice): overview, front
   their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0036 too) —
   the earlier checks lived in scratch scripts and are gone.
 - Tests: `npm test` 276 unit tests, `npm run test:db` 740 database
-  checks (0031's "a bot against a Base deck" fails about 1 run in 2: a
-  random bot deck on a tiny pool, seen 2026-10-05 and 2026-10-06, not fixed yet), `npm run test:e2e` 320 (desktop + Pixel 7, incl. "no page
+  checks (2026-10-06: CI was red 5 pushes in a row on two random tests,
+  fixed: 0031's Base fixture had 57 Pokémon, under `pvp_bot_deck`'s 60, so
+  the bot fell back to the whole format and took ex; 0033's scripted
+  player never benched, so an opening hand without ability holders used
+  none), `npm run test:e2e` 320 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.
@@ -906,7 +909,10 @@ docs/technique/             technical doc (French, user choice): overview, front
   (`forEachPage`) knows the page count from `totalCount`: a page that
   keeps failing is skipped, retried at the end, and fails the run (exit
   1) instead of silently ending the import as if it were the last page
-  (a "green" run that took under 2 minutes was a partial import). Check runs on the Actions tab (public repo:
+  (a "green" run that took under 2 minutes was a partial import).
+  Since 2026-10-06 a page gets 15 attempts (`API_ATTEMPTS`) and the end
+  retries 3 rounds (`RETRY_ROUNDS`): pokemontcg.io answered ~60% instant
+  500 / 502 that day, and 6 attempts lost a page in nearly every run. Check runs on the Actions tab (public repo:
   `api.github.com/repos/LBasil/pokemon-booster-game/actions/workflows/
   sync-cards.yml/runs`, no auth).
   Confirmed 2026-09-27: the GitHub secrets work (manual run succeeded) and

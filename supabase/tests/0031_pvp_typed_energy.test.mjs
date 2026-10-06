@@ -124,7 +124,9 @@ export default async function (check) {
   await asAdmin()
   for (let i = 1; i <= 8; i++) await card(`psy${i}`, `Abra ${i}`, { type: 'Psychic', weak: 'Psychic', attacks: [attack('Psy', 20, ['Psychic'])] })
   for (let i = 1; i <= 8; i++) await card(`spark${i}`, `Pikachu ${i}`, { type: 'Lightning', weak: 'Fighting', attacks: [attack('Spark', 20, ['Lightning'])] })
-  for (let i = 1; i <= 12; i++) await card(`meowth${i}`, `Meowth ${i}`, { type: 'Colorless', weak: 'Fighting', attacks: [attack('Scratch', 10, ['Colorless'])] })
+  // 16 Meowths: the Base pool must reach the 60 cards pvp_bot_deck wants before
+  // it falls back to the whole format (with 12 it had 57, and a bot took ex 1 run in 2)
+  for (let i = 1; i <= 16; i++) await card(`meowth${i}`, `Meowth ${i}`, { type: 'Colorless', weak: 'Fighting', attacks: [attack('Scratch', 10, ['Colorless'])] })
   const fitsAll = (deck) => one(`select bool_and(pvp_fits_energy(c, $2)) from jsonb_array_elements($1) c`, [JSON.stringify(deck.cards), JSON.stringify(deck.energy)])
   let sameEra = true
   let typedOk = true

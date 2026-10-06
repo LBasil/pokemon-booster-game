@@ -134,10 +134,15 @@ Récompenses ou de Stades restent injouables. Depuis 0033, chaque talent
 est stocké avec ce que les combats en jouent (`abilityData()` de
 `src/utils/abilityEffects.js` : sorte, effets, jouable) : 489 sur 4 106.
 
-L'API pokemontcg.io est capricieuse : chaque page est retentée 6 fois avec
-un délai croissant, et une pause de 300 ms sépare les pages. Le nombre de
+L'API pokemontcg.io est capricieuse : chaque page est retentée 15 fois
+(`API_ATTEMPTS`) avec un délai croissant (plafonné à 15 s, un peu de
+hasard en plus), et une pause de 300 ms sépare les pages. Le 2026-10-06,
+~60 % de ses réponses étaient des 500 / 502 instantanés : avec 6 essais,
+une page sur 20 échouait à tous, donc presque chaque import en perdait
+une. Le nombre de
 pages vient du `totalCount` de l'API (`forEachPage`) : une page qui échoue
-encore est sautée, retentée une fois à la fin, et si elle échoue toujours
+encore est sautée, retentée à la fin (`RETRY_ROUNDS` = 3 tours, 30 s
+entre deux pages), et si elle échoue toujours
 le script se termine en erreur (le workflow passe au rouge). Avant le
 2026-10-04, une page en échec était prise pour la dernière : l'import
 s'arrêtait là et le workflow restait vert (la synchro de minuit ce

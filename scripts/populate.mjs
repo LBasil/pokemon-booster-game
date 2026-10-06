@@ -42,34 +42,41 @@ const BASE_URL = 'https://api.pokemontcg.io/v2'
 const headers = { 'X-Api-Key': POKEMONTCG_API_KEY }
 const PAGE_SIZE = 250
 const MAX_ATTEMPTS = 6
+// pokemontcg.io: on 2026-10-06 ~60% of its answers were an instant 500 / 502,
+// whatever the page; with 6 attempts a page failed them all 1 time in 20, so
+// a run of 83 pages nearly always lost one (and its single retry at the end
+// failed as often). The errors come back in ~0.2 s: attempts are cheap.
+const API_ATTEMPTS = 15
+const RETRY_ROUNDS = 3
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // Fetches one page: `{ data, totalCount }`, or null if it still fails after
-// MAX_ATTEMPTS. pokemontcg.io's free tier is flaky under load (transient
-// 5xx, non-JSON bodies, dropped connections), hence the retries with backoff.
+// API_ATTEMPTS. pokemontcg.io's free tier is flaky under load (transient
+// 5xx, non-JSON bodies, dropped connections), hence the retries with backoff
+// (capped at 15 s, with jitter so retries don't line up with its bad patches).
 async function fetchPage(endpoint, page) {
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+  for (let attempt = 1; attempt <= API_ATTEMPTS; attempt++) {
     const response = await fetch(`${endpoint}?page=${page}&pageSize=${PAGE_SIZE}`, { headers }).catch((err) => err)
 
     if (response instanceof Error) {
-      console.warn(`Page ${page}: ${response.message} (attempt ${attempt}/${MAX_ATTEMPTS}).`)
+      console.warn(`Page ${page}: ${response.message} (attempt ${attempt}/${API_ATTEMPTS}).`)
     } else if (response.ok) {
       try {
         const { data, totalCount } = await response.json()
         if (Array.isArray(data)) return { data, totalCount }
-        console.warn(`Page ${page}: no data in the response (attempt ${attempt}/${MAX_ATTEMPTS}).`)
+        console.warn(`Page ${page}: no data in the response (attempt ${attempt}/${API_ATTEMPTS}).`)
       } catch {
-        console.warn(`Page ${page}: could not parse response as JSON (attempt ${attempt}/${MAX_ATTEMPTS}).`)
+        console.warn(`Page ${page}: could not parse response as JSON (attempt ${attempt}/${API_ATTEMPTS}).`)
       }
     } else {
-      console.warn(`Page ${page}: request failed with status ${response.status} (attempt ${attempt}/${MAX_ATTEMPTS}).`)
+      console.warn(`Page ${page}: request failed with status ${response.status} (attempt ${attempt}/${API_ATTEMPTS}).`)
     }
 
-    if (attempt < MAX_ATTEMPTS) await sleep(attempt * 2000)
+    if (attempt < API_ATTEMPTS) await sleep(Math.min(attempt * 2000, 15000) + Math.random() * 1000)
   }
 
-  console.warn(`Page ${page}: giving up after ${MAX_ATTEMPTS} attempts.`)
+  console.warn(`Page ${page}: giving up after ${API_ATTEMPTS} attempts.`)
   return null
 }
 
@@ -78,8 +85,8 @@ async function fetchPage(endpoint, page) {
 // end the import right there, as if it were the last, and the run still
 // "succeeded": on 2026-10-04 ~7,400 cards were left with their attacks
 // imported before 0025, without a cost (free attacks in PvP). Now that page
-// is skipped, retried once at the end, and if it still fails the script
-// exits with an error (the GitHub Action shows red).
+// is skipped, retried at the end (RETRY_ROUNDS rounds, 30 s apart), and if
+// it still fails the script exits with an error (the GitHub Action shows red).
 async function forEachPage(endpoint, startPage, save) {
   const failed = []
   let lastPage = Infinity
@@ -103,10 +110,15 @@ async function forEachPage(endpoint, startPage, save) {
     await sleep(300)
   }
 
-  const stillFailed = []
-  for (const page of failed) {
-    await sleep(10000)
-    if (!(await run(page))) stillFailed.push(page)
+  let stillFailed = failed
+  for (let round = 1; round <= RETRY_ROUNDS && stillFailed.length; round++) {
+    console.warn(`${endpoint}: retrying page(s) ${stillFailed.join(', ')} (round ${round}/${RETRY_ROUNDS}).`)
+    const pages = stillFailed
+    stillFailed = []
+    for (const page of pages) {
+      await sleep(30000)
+      if (!(await run(page))) stillFailed.push(page)
+    }
   }
   if (stillFailed.length) {
     console.error(`${endpoint}: page(s) ${stillFailed.join(', ')} could not be imported.`)
