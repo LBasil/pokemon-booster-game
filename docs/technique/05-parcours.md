@@ -917,9 +917,9 @@ sequenceDiagram
   ses questions (je choisis ce que je défausse, ce que je prends dans mon
   deck ou ma défausse, sur quel Pokémon) ; regarder le dessus du deck :
   le serveur prend la meilleure carte. Le constructeur a un filtre
-  Dresseurs ; « Deck auto » en met 6 en attaque, 4 en défense (les plus
-  utiles : recherche, pioche, Ordres du Boss…, Super Bonbon seulement
-  avec un niveau 2). L'IA joue les siens (pioche quand sa main est
+  Dresseurs ; « Deck auto » en met 6 en attaque, 4 en défense, jusqu'à
+  10 / 8 s'il reste de la place (les plus utiles : recherche, pioche,
+  Ordres du Boss…, Super Bonbon seulement avec un niveau 2). L'IA joue les siens (pioche quand sa main est
   petite, soins, recherches, échange si son Actif ne peut pas frapper,
   Ordres du Boss sur un K.O. possible ; Outils après son Banc, bonus et
   boucliers juste avant d'attaquer ; facile : la moitié du temps) ; les
@@ -953,8 +953,13 @@ sequenceDiagram
 - **Deck auto** (`autoDeck` dans `src/utils/pvp.js`, refait façon Pocket
   le 2026-10-05 : « elle me semble nulle et pas opti, il faut s'inspirer
   de pocket ») : un type d'Énergie, un noyau des lignées les plus fortes
-  avec tous leurs exemplaires (2-2-2, 2-2, 2 Pokémon de base), puis le
-  meilleur soutien, puis les Dresseurs (6 en attaque, 4 en défense).
+  avec tous leurs exemplaires (2-2-2, 2-2, 2 Pokémon de base), **4 lignées
+  au plus** (2026-10-06 : « un deck Pocket ça tourne à max 4 ou 5 Pokémon
+  différents », l'ancien bouchait la place avec des Pokémon de base
+  uniques, 13 noms dans un deck), puis les Dresseurs (6 en attaque, 4 en
+  défense, puis jusqu'à 10 / 8 tant qu'il reste de la place), puis
+  seulement d'autres lignées et Pokémon de base si le deck n'est pas plein
+  (une collection en exemplaires uniques en a toujours besoin).
   - Valeur d'une carte (`cardValue`) : la part des PV des Pokémon de la
     collection (`autoReference` : les adversaires sont des mêmes ères) que
     sa meilleure attaque payable retire par coup (un K.O. compte entier,
@@ -1029,8 +1034,14 @@ sequenceDiagram
   plus frapper ou va tomber (normal / difficile), attache l'Énergie de sa
   zone là où elle rapproche une attaque (son Actif d'abord, puis le Pokémon
   de Banc le plus près de sa meilleure attaque ; sinon l'Actif), et attaque avec le meilleur coup attendu (un K.O.
-  avant tout). Facile : énergie en partie au hasard, attaque au hasard,
-  jamais de retraite. Les decks de défense des joueurs sont joués en
+  avant tout). Facile : énergie au hasard une fois sur 4, beaucoup
+  d'hésitation entre ses attaques (un hasard jusqu'à 40 sur la valeur,
+  15 en normal, 2 en difficile) mais presque jamais une attaque à 0 dégât
+  plutôt que son coup (0035, 2026-10-06 : « le bot facile ne m'a jamais
+  infligé de dégâts » ; il en avait fait 70 et 90 en deux combats),
+  jamais de retraite. Simulé (mêmes decks des deux côtés, contre
+  l'IA normale, 60 combats) : il gagne 19 fois au lieu de 2, et fait
+  210 dégâts par combat au lieu de 99. Les decks de défense des joueurs sont joués en
   « difficile ».
 - **Ce que l'écran montre** : en haut le côté adverse (Banc, Actif, main
   et deck en nombres), un journal de ce qui vient de se passer
@@ -1043,6 +1054,24 @@ sequenceDiagram
   SQL. « Détails de la carte » ouvre `PvpCardSheet` (attaques, textes en
   français si importés, Faiblesse, Résistance, Retraite, talents marqués
   « pas encore joués »).
+- **Ce qu'il y a à faire** (2026-10-06, sur téléphone : « je ne savais
+  jamais quand jouer, ou taper, que faire ») : sans carte touchée, à mon
+  tour, le panneau dit l'étape (`nextStep` : attacher l'Énergie, puis
+  attaquer, sinon jouer de la main, sinon finir le tour), propose
+  « Attacher l'Énergie … à <mon Actif> » et montre les attaques de mon
+  Actif : attacher puis attaquer = deux touchers, sans rien sélectionner.
+  « Finir mon tour » ne s'allume qu'une fois qu'il n'y a plus d'attaque
+  possible ; mon Actif et les cartes jouables de ma main sont cerclés.
+- **Sur téléphone et tablette** (< 992 px, la largeur de la barre
+  d'onglets) : le combat prenait 3 écrans et les actions s'ouvraient tout
+  en bas. Chaque camp tient sur une ligne (Actif, puis les 3 places de
+  Banc), cartes recadrées sur leur haut (nom, PV, illustration), journal
+  sur 2 lignes, main réduite à l'illustration et au nom, et la main + le
+  panneau d'actions forment un bloc (`.pvp-dock`) collé au-dessus de la
+  barre d'onglets quand l'écran fait au moins 740 px de haut (Pixel 7 :
+  tout tient sur un écran ; plus bas, 375 × 667, le bloc recouvrait tout
+  le plateau, il reste donc à sa place). `pvp.spec.js` > « a phone plays
+  a turn on one screen » le vérifie.
 - **Simulé le 2026-10-05** (IA contre IA, 4 000 vraies cartes, decks de
   bots) : difficile bat normal 9 fois sur 10, normal bat facile 10 sur 10,
   15 tours en moyenne (11 entre bons decks). Après 0031 (1 500 vraies
@@ -1066,8 +1095,9 @@ sequenceDiagram
   seulement les cartes qu'ils paient, classées comme `autoDeck`, puis une
   lignée à 3 stades, deux à 2 stades et des Pokémon de base, 2
   exemplaires chacun, **au plus près de la force de mon deck** (le
-  percentile moyen de mes cartes dans le même lot : facile 60 % de ma
-  force, normal 5 points dessous, difficile 10 au-dessus).
+  percentile moyen de mes cartes dans le même lot : facile 85 % de ma
+  force depuis 0035 (60 % avant), normal 5 points dessous, difficile 10
+  au-dessus).
 - **Avant la synchro** : tant qu'aucune carte n'a ses effets d'attaque
   (`attacks[].fx`, synchro après 0029) et, depuis 0031, ses coûts typés
   (`attacks[].energy`), `pvp_state()` renvoie `ready: false` (« Bientôt ») ;

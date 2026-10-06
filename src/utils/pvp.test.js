@@ -289,6 +289,20 @@ describe('Trainers (0032)', () => {
     expect(ids.filter((id) => /^p\d/.test(id))).toHaveLength(15) // 5 Trainers left once Rare Candy is out
   })
 
+  it('runs 4 lines and fills the room with Trainers, like Pocket', () => {
+    // the 0032 builder filled it with single Basics: 13 names in a deck
+    const pool = [
+      ...Array.from({ length: 10 }, (_, i) => card(`p${i}`, `Pokémon ${i}`, { attacks: [attack(30 + i * 5, 1)] })),
+      ...Array.from({ length: 6 }, (_, i) => trainer(`t${i}`, `Trainer ${i}`, [{ op: 'draw', n: 2 }])),
+    ]
+    const ids = autoDeck(pool)
+    expect(ids).toHaveLength(20)
+    expect(new Set(ids.filter((id) => id.startsWith('p')))).toEqual(new Set(['p9', 'p8', 'p7', 'p6', 'p5']))
+    expect(ids.filter((id) => id.startsWith('t'))).toHaveLength(10)
+    // defending: 8 Trainers, the server's AI needs Pokémon to last
+    expect(autoDeck(pool, 'defense').filter((id) => id.startsWith('t'))).toHaveLength(8)
+  })
+
   it('allows 1 ACE SPEC', () => {
     const a = trainer('a', 'Master Ball', [], { ace_spec: true })
     const b = trainer('b', "Hero's Cape", [], { ace_spec: true })

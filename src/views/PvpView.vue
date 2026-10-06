@@ -295,6 +295,32 @@ const selectedSlot = computed(() => {
 })
 const handHints = computed(() => (selection.value?.kind === 'hand' ? hints.value.hand?.[selection.value.index] : null))
 
+/** Whether a card of my hand can be played now (the server's hints). */
+const handPlayable = (entry) => {
+  const h = hints.value.hand?.[entry.index]
+  return !!(h?.bench || h?.evolve?.length || (entry.card.stage === 'trainer' && h?.play === null))
+}
+
+// What to do now on my turn (user, 2026-10-06, on phones: "je ne savais
+// jamais quand jouer, ou taper, que faire"): attach, then attack, else play
+// from the hand, else end the turn (the button lights up then)
+const nextStep = computed(() => {
+  if (!myTurn.value || hints.value.setup || hints.value.promote) return null
+  if (hints.value.attach) return 'attach'
+  if ((hints.value.attacks ?? []).some((block) => block === null)) return 'attack'
+  if ((battle.value?.me.hand ?? []).some(handPlayable)) return 'play'
+  return 'end'
+})
+
+// My Active's attacks show when it's picked, and on my turn when nothing is
+// (one tap to attack, like Pocket)
+const showAttacks = computed(() => {
+  if (finished.value || hints.value.setup || hints.value.promote || trainerPick.value !== null || abilityPick.value || pending.value?.need) return false
+  if (!mySlot(0)) return false
+  const s = selection.value
+  return s ? s.kind === 'mine' && s.pos === 0 : myTurn.value
+})
+
 function openSheet(card, slot = null) {
   sheet.value = card ? { card, slot } : null
 }
@@ -350,7 +376,7 @@ async function act(action) {
     recent.value = result.events
     pending.value = null
     trainerPick.value = null
-  abilityPick.value = null
+    abilityPick.value = null
     // Keep my Pokémon picked while it's still there; a played card leaves the hand
     if (selection.value?.kind !== 'mine' || action.type === 'attack' || action.type === 'end' || action.type === 'retreat') selection.value = null
     playSounds(result.events)
@@ -721,7 +747,7 @@ onMounted(async () => {
                 v-if="mySlot(0)"
                 type="button"
                 class="pvp-slot is-active"
-                :class="{ 'is-selected': selection?.kind === 'mine' && selection.pos === 0 }"
+                :class="{ 'is-selected': selection?.kind === 'mine' && selection.pos === 0, 'is-playable': nextStep === 'attach' || nextStep === 'attack' }"
                 :aria-label="`${t('pvp.active')}: ${cardName(mySlot(0).card)}, ${t('pvp.hp', { left: mySlot(0).hp_left, hp: mySlot(0).card.hp })}`"
                 :disabled="!!finished || hints.promote"
                 @click="tapMine(0)"
@@ -757,150 +783,161 @@ onMounted(async () => {
             </ul>
           </div>
 
-          <!-- My hand -->
-          <div class="pvp-hand-wrap">
-            <p class="pvp-side-title">{{ t('pvp.myHand', { count: battle.me.hand.length }) }}</p>
-            <ul class="pvp-hand" :aria-label="t('pvp.myHand', { count: battle.me.hand.length })">
-              <li v-for="entry in battle.me.hand" :key="entry.index">
-                <button
-                  type="button"
-                  class="pvp-slot"
-                  :class="{
-                    'is-selected': (selection?.kind === 'hand' && selection.index === entry.index) || setupActive === entry.index || setupBench.includes(entry.index),
-                    'is-playable': hints.setup
-                      ? entry.card.stage === 'basic'
-                      : hints.hand?.[entry.index]?.bench ||
-                        hints.hand?.[entry.index]?.evolve?.length ||
-                        (entry.card.stage === 'trainer' && hints.hand?.[entry.index]?.play === null),
-                  }"
-                  :aria-label="cardName(entry.card)"
-                  :aria-pressed="setupActive === entry.index || setupBench.includes(entry.index)"
-                  :disabled="!!finished"
-                  @click="tapHand(entry)"
-                >
-                  <PvpCard :card="entry.card" compact />
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          <!-- What I can do -->
-          <div class="pvp-panel-actions">
-            <template v-if="finished">
-              <p class="pvp-feedback" role="status">
-                <strong :class="finished.status === 'won' ? 'pvp-good' : finished.status === 'draw' ? '' : 'pvp-bad'">{{ resultTitle }}</strong>
-                <span v-if="!finished.bot">{{ t('pvp.eloChange', { change: signed(finished.elo_change) }) }}</span>
-                <span v-else-if="finished.coins" class="pvp-coins-won">{{ t('pvp.coinsWon') }} <CoinAmount :amount="finished.coins" signed /></span>
-                <span v-else>{{ t(finished.paid ? 'pvp.noCoins' : 'pvp.unpaid') }}</span>
-              </p>
-              <button type="button" class="btn btn-primary glow-button" @click="backToLobby">{{ t('pvp.back') }}</button>
-            </template>
-
-            <template v-else-if="hints.setup">
-              <p class="pvp-panel-title">{{ t('pvp.setupTitle') }}</p>
-              <p class="pvp-note">{{ t('pvp.setupHelp') }}</p>
-              <button type="button" class="btn btn-primary glow-button" :disabled="busy || setupActive === null" @click="startBattle">
-                {{ t('pvp.setupStart') }}
-              </button>
-            </template>
-
-            <template v-else-if="hints.promote">
-              <p class="pvp-panel-title">{{ t('pvp.promoteTitle') }}</p>
-              <p class="pvp-note">{{ t('pvp.promoteHelp') }}</p>
-            </template>
-
-            <template v-else-if="trainerPick !== null || abilityPick">
-              <PvpTrainerPicker
-                :battle="battle"
-                :index="trainerPick ?? -1"
-                :ability="abilityPick"
-                @play="act"
-                @cancel="(trainerPick = null), (abilityPick = null)"
-              />
-            </template>
-
-            <template v-else-if="pending?.need">
-              <p class="pvp-panel-title">{{ t(pending.need === 'target' ? 'pvp.pickTarget' : pending.need === 'switch_to' ? 'pvp.pickSwitch' : 'pvp.pickEnergyTo') }}</p>
-              <div class="pvp-choice-buttons">
-                <template v-if="pending.need === 'target'">
-                  <button v-if="pending.anyTarget && theirSlot(0)" type="button" class="pvp-choice" @click="chooseStep(0)">{{ cardName(theirSlot(0).card) }}</button>
-                  <button v-for="n in battle.them.bench.length" :key="n" type="button" class="pvp-choice" @click="chooseStep(n)">{{ cardName(theirSlot(n).card) }}</button>
-                </template>
-                <template v-else>
-                  <button v-for="n in battle.me.bench.length" :key="n" type="button" class="pvp-choice" @click="chooseStep(n)">{{ cardName(mySlot(n).card) }}</button>
-                </template>
-                <button type="button" class="btn btn-outline-secondary btn-sm" @click="pending = null">{{ t('pvp.cancel') }}</button>
-              </div>
-            </template>
-
-            <template v-else-if="selectedCard">
-              <div class="pvp-panel-head">
-                <p class="pvp-panel-title">{{ cardName(selectedCard) }}</p>
-                <button type="button" class="btn btn-outline-secondary btn-sm" @click="openSheet(selectedCard, selectedSlot)">{{ t('pvp.details') }}</button>
-              </div>
-              <!-- A card in my hand -->
-              <div v-if="selection.kind === 'hand' && selectedCard.stage === 'trainer'" class="pvp-choice-buttons">
-                <button v-if="handHints?.play === null" type="button" class="pvp-choice" :disabled="busy" @click="trainerPick = selection.index">
-                  {{ t('pvp.play') }}
-                </button>
-                <p v-else class="pvp-note">{{ t(`pvp.playBlocks.${handHints?.play ?? 'unknown'}`) }}</p>
-              </div>
-              <div v-else-if="selection.kind === 'hand'" class="pvp-choice-buttons">
-                <button v-if="handHints?.bench" type="button" class="pvp-choice" :disabled="busy" @click="act({ type: 'bench', card: selection.index })">
-                  {{ t('pvp.toBench') }}
-                </button>
-                <button
-                  v-for="pos in handHints?.evolve ?? []"
-                  :key="pos"
-                  type="button"
-                  class="pvp-choice"
-                  :disabled="busy"
-                  @click="act({ type: 'evolve', card: selection.index, pos })"
-                >
-                  {{ t('pvp.evolveOnto', { name: cardName(mySlot(pos).card) }) }}
-                </button>
-              </div>
-              <!-- One of my Pokémon -->
-              <div v-else-if="selection.kind === 'mine'" class="pvp-choice-buttons">
-                <button v-if="hints.attach" type="button" class="pvp-choice" :disabled="busy" @click="act({ type: 'attach', pos: selection.pos })">
-                  <EnergyIcons v-if="myZone" :types="[myZone]" />
-                  {{ myZone ? t('pvp.attachType', { type: typeLabel(myZone) }) : t('pvp.attach') }}
-                </button>
-                <button
-                  v-if="selection.pos > 0 && hints.retreat"
-                  type="button"
-                  class="pvp-choice"
-                  :disabled="busy"
-                  @click="act({ type: 'retreat', pos: selection.pos })"
-                >
-                  {{
-                    t('pvp.retreatHere', {
-                      name: cardName(mySlot(0).card),
-                      cost: retreatCost ? t('pvp.energyCount', { count: retreatCost }, retreatCost) : t('pvp.free'),
-                    })
-                  }}
-                </button>
-              </div>
-              <!-- Its abilities (0033) -->
-              <ul v-if="selection.kind === 'mine' && selectedCard.abilities?.length" class="pvp-abilities" :aria-label="t('pvp.ability')">
-                <li v-for="(ability, i) in selectedCard.abilities" :key="i">
+          <!-- My hand and what I can do: one block, stuck above the tab bar on phones -->
+          <div class="pvp-dock">
+            <div class="pvp-hand-wrap">
+              <p class="pvp-side-title">{{ t('pvp.myHand', { count: battle.me.hand.length }) }}</p>
+              <ul class="pvp-hand" :aria-label="t('pvp.myHand', { count: battle.me.hand.length })">
+                <li v-for="entry in battle.me.hand" :key="entry.index">
                   <button
-                    v-if="abilityBlock(selection.pos, i) === null"
+                    type="button"
+                    class="pvp-slot"
+                    :class="{
+                      'is-selected': (selection?.kind === 'hand' && selection.index === entry.index) || setupActive === entry.index || setupBench.includes(entry.index),
+                      'is-playable': hints.setup ? entry.card.stage === 'basic' : handPlayable(entry),
+                    }"
+                    :aria-label="cardName(entry.card)"
+                    :aria-pressed="setupActive === entry.index || setupBench.includes(entry.index)"
+                    :disabled="!!finished"
+                    @click="tapHand(entry)"
+                  >
+                    <PvpCard :card="entry.card" compact />
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <!-- What I can do -->
+            <div class="pvp-panel-actions">
+              <template v-if="finished">
+                <p class="pvp-feedback" role="status">
+                  <strong :class="finished.status === 'won' ? 'pvp-good' : finished.status === 'draw' ? '' : 'pvp-bad'">{{ resultTitle }}</strong>
+                  <span v-if="!finished.bot">{{ t('pvp.eloChange', { change: signed(finished.elo_change) }) }}</span>
+                  <span v-else-if="finished.coins" class="pvp-coins-won">{{ t('pvp.coinsWon') }} <CoinAmount :amount="finished.coins" signed /></span>
+                  <span v-else>{{ t(finished.paid ? 'pvp.noCoins' : 'pvp.unpaid') }}</span>
+                </p>
+                <button type="button" class="btn btn-primary glow-button" @click="backToLobby">{{ t('pvp.back') }}</button>
+              </template>
+
+              <template v-else-if="hints.setup">
+                <p class="pvp-panel-title">{{ t('pvp.setupTitle') }}</p>
+                <p class="pvp-note">{{ t('pvp.setupHelp') }}</p>
+                <button type="button" class="btn btn-primary glow-button" :disabled="busy || setupActive === null" @click="startBattle">
+                  {{ t('pvp.setupStart') }}
+                </button>
+              </template>
+
+              <template v-else-if="hints.promote">
+                <p class="pvp-panel-title">{{ t('pvp.promoteTitle') }}</p>
+                <p class="pvp-note">{{ t('pvp.promoteHelp') }}</p>
+              </template>
+
+              <template v-else-if="trainerPick !== null || abilityPick">
+                <PvpTrainerPicker
+                  :battle="battle"
+                  :index="trainerPick ?? -1"
+                  :ability="abilityPick"
+                  @play="act"
+                  @cancel="(trainerPick = null), (abilityPick = null)"
+                />
+              </template>
+
+              <template v-else-if="pending?.need">
+                <p class="pvp-panel-title">{{ t(pending.need === 'target' ? 'pvp.pickTarget' : pending.need === 'switch_to' ? 'pvp.pickSwitch' : 'pvp.pickEnergyTo') }}</p>
+                <div class="pvp-choice-buttons">
+                  <template v-if="pending.need === 'target'">
+                    <button v-if="pending.anyTarget && theirSlot(0)" type="button" class="pvp-choice" @click="chooseStep(0)">{{ cardName(theirSlot(0).card) }}</button>
+                    <button v-for="n in battle.them.bench.length" :key="n" type="button" class="pvp-choice" @click="chooseStep(n)">{{ cardName(theirSlot(n).card) }}</button>
+                  </template>
+                  <template v-else>
+                    <button v-for="n in battle.me.bench.length" :key="n" type="button" class="pvp-choice" @click="chooseStep(n)">{{ cardName(mySlot(n).card) }}</button>
+                  </template>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" @click="pending = null">{{ t('pvp.cancel') }}</button>
+                </div>
+              </template>
+
+              <template v-else-if="selectedCard">
+                <div class="pvp-panel-head">
+                  <p class="pvp-panel-title">{{ cardName(selectedCard) }}</p>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" @click="openSheet(selectedCard, selectedSlot)">{{ t('pvp.details') }}</button>
+                </div>
+                <!-- A card in my hand -->
+                <div v-if="selection.kind === 'hand' && selectedCard.stage === 'trainer'" class="pvp-choice-buttons">
+                  <button v-if="handHints?.play === null" type="button" class="pvp-choice" :disabled="busy" @click="trainerPick = selection.index">
+                    {{ t('pvp.play') }}
+                  </button>
+                  <p v-else class="pvp-note">{{ t(`pvp.playBlocks.${handHints?.play ?? 'unknown'}`) }}</p>
+                </div>
+                <div v-else-if="selection.kind === 'hand'" class="pvp-choice-buttons">
+                  <button v-if="handHints?.bench" type="button" class="pvp-choice" :disabled="busy" @click="act({ type: 'bench', card: selection.index })">
+                    {{ t('pvp.toBench') }}
+                  </button>
+                  <button
+                    v-for="pos in handHints?.evolve ?? []"
+                    :key="pos"
                     type="button"
                     class="pvp-choice"
                     :disabled="busy"
-                    @click="abilityPick = { at: selection.pos, i }"
+                    @click="act({ type: 'evolve', card: selection.index, pos })"
                   >
-                    {{ t('pvp.useAbility', { name: abilityName(ability) }) }}
+                    {{ t('pvp.evolveOnto', { name: cardName(mySlot(pos).card) }) }}
                   </button>
-                  <p v-else class="pvp-note">
-                    <strong>{{ abilityName(ability) }}</strong> · {{ t(`pvp.abilityBlocks.${abilityBlock(selection.pos, i)}`) }}
-                  </p>
-                </li>
-              </ul>
-              <div v-if="selection.kind === 'mine' && selection.pos === 0" class="pvp-attack-buttons" role="group" :aria-label="t('pvp.attacks')">
+                </div>
+                <!-- One of my Pokémon -->
+                <div v-else-if="selection.kind === 'mine'" class="pvp-choice-buttons">
+                  <button v-if="hints.attach" type="button" class="pvp-choice" :disabled="busy" @click="act({ type: 'attach', pos: selection.pos })">
+                    <EnergyIcons v-if="myZone" :types="[myZone]" />
+                    {{ myZone ? t('pvp.attachType', { type: typeLabel(myZone) }) : t('pvp.attach') }}
+                  </button>
+                  <button
+                    v-if="selection.pos > 0 && hints.retreat"
+                    type="button"
+                    class="pvp-choice"
+                    :disabled="busy"
+                    @click="act({ type: 'retreat', pos: selection.pos })"
+                  >
+                    {{
+                      t('pvp.retreatHere', {
+                        name: cardName(mySlot(0).card),
+                        cost: retreatCost ? t('pvp.energyCount', { count: retreatCost }, retreatCost) : t('pvp.free'),
+                      })
+                    }}
+                  </button>
+                </div>
+                <!-- Its abilities (0033) -->
+                <ul v-if="selection.kind === 'mine' && selectedCard.abilities?.length" class="pvp-abilities" :aria-label="t('pvp.ability')">
+                  <li v-for="(ability, i) in selectedCard.abilities" :key="i">
+                    <button
+                      v-if="abilityBlock(selection.pos, i) === null"
+                      type="button"
+                      class="pvp-choice"
+                      :disabled="busy"
+                      @click="abilityPick = { at: selection.pos, i }"
+                    >
+                      {{ t('pvp.useAbility', { name: abilityName(ability) }) }}
+                    </button>
+                    <p v-else class="pvp-note">
+                      <strong>{{ abilityName(ability) }}</strong> · {{ t(`pvp.abilityBlocks.${abilityBlock(selection.pos, i)}`) }}
+                    </p>
+                  </li>
+                </ul>
+              </template>
+
+              <!-- Nothing picked on my turn: what to do now, and the shortest way (Pocket-like: attach, attack) -->
+              <template v-else-if="myTurn">
+                <p class="pvp-panel-title pvp-next" role="status">{{ t(`pvp.next.${nextStep}`) }}</p>
+                <div v-if="hints.attach && mySlot(0)" class="pvp-choice-buttons">
+                  <button type="button" class="pvp-choice" :disabled="busy" @click="act({ type: 'attach', pos: 0 })">
+                    <EnergyIcons v-if="myZone" :types="[myZone]" />
+                    {{ myZone ? t('pvp.attachTypeTo', { type: typeLabel(myZone), name: cardName(mySlot(0).card) }) : t('pvp.attach') }}
+                  </button>
+                </div>
+              </template>
+
+              <!-- My Active's attacks: picked, or nothing picked on my turn -->
+              <div v-if="showAttacks" class="pvp-attack-buttons" role="group" :aria-label="t('pvp.attacks')">
                 <button
-                  v-for="(attack, i) in selectedCard.attacks"
+                  v-for="(attack, i) in mySlot(0).card.attacks"
                   :key="i"
                   type="button"
                   class="pvp-attack-button"
@@ -915,17 +952,24 @@ onMounted(async () => {
                   <strong>{{ damageLabel(attack) }}</strong>
                 </button>
               </div>
-            </template>
+              <p v-if="myTurn && !selection && !pending?.need && trainerPick === null && !abilityPick" class="pvp-note pvp-hint">{{ t('pvp.selectHint') }}</p>
 
-            <p v-else-if="myTurn" class="pvp-note pvp-hint">{{ t('pvp.selectHint') }}</p>
-
-            <div v-if="!finished && !hints.setup" class="pvp-turn-bar">
-              <span class="pvp-energy-line">
-                <EnergyIcons v-if="hints.attach && myZone" :types="[myZone]" />
-                {{ energyLine }}
-                <template v-if="battle.me.next && !battle.winner">· {{ t('pvp.nextEnergy') }} <EnergyIcons :types="[battle.me.next]" /></template>
-              </span>
-              <button type="button" class="btn btn-primary" :disabled="busy || !myTurn || !!pending" @click="act({ type: 'end' })">{{ t('pvp.endTurn') }}</button>
+              <div v-if="!finished && !hints.setup" class="pvp-turn-bar">
+                <span class="pvp-energy-line">
+                  <EnergyIcons v-if="hints.attach && myZone" :types="[myZone]" />
+                  <span class="pvp-energy-text">{{ energyLine }}</span>
+                  <span v-if="battle.me.next && !battle.winner" class="pvp-energy-next">· {{ t('pvp.nextEnergy') }} <EnergyIcons :types="[battle.me.next]" /></span>
+                </span>
+                <button
+                  type="button"
+                  class="btn"
+                  :class="nextStep === 'end' || nextStep === 'play' ? 'btn-primary glow-button' : 'btn-outline-secondary'"
+                  :disabled="busy || !myTurn || !!pending"
+                  @click="act({ type: 'end' })"
+                >
+                  {{ t('pvp.endTurn') }}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1660,6 +1704,236 @@ onMounted(async () => {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem;
+}
+
+.pvp-next {
+  font-size: 0.85rem;
+}
+
+.pvp-dock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+/* Phones and tablets (the tab bar's widths): one screen, like Pocket (user,
+   2026-10-06: the board took 3 screens, the actions showed far below the
+   card just tapped). Each side is one row (Active, then the Bench), the
+   cards cropped to their top (name, HP, art), and my hand + the actions
+   stick above the tab bar as one block. */
+@media (max-width: 991.98px) {
+  .pvp-battle {
+    gap: 0.4rem;
+    padding: 0.5rem;
+  }
+
+  .pvp-vs {
+    font-size: 1rem;
+  }
+
+  .pvp-score > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0 0.35rem;
+    padding: 0.1rem 0.4rem;
+  }
+
+  .pvp-score dt {
+    font-size: 0.7rem;
+  }
+
+  .pvp-score dd {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .pvp-side {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 3fr);
+    align-items: end;
+    gap: 0.4rem;
+    padding: 0.4rem;
+  }
+
+  .pvp-side-head {
+    grid-column: 1 / -1;
+  }
+
+  /* The battle's title already names them; the chips stay */
+  .pvp-side-head > .pvp-side-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .pvp-side-head .pvp-chip {
+    font-size: 0.68rem;
+  }
+
+  .pvp-side > .pvp-active-row {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .pvp-side > .pvp-bench {
+    grid-column: 2;
+    grid-row: 2;
+    max-width: none;
+    gap: 0.3rem;
+  }
+
+  .pvp-active-row > .pvp-slot,
+  .pvp-active-row > .pvp-empty {
+    width: 100%;
+  }
+
+  .pvp-slot {
+    padding: 0.15rem;
+  }
+
+  .pvp-battle :deep(.pvp-img),
+  .pvp-battle .pvp-empty {
+    aspect-ratio: 245 / 150;
+    object-position: top center;
+  }
+
+  .pvp-log {
+    max-height: 2.6rem;
+    min-height: 0;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.78rem;
+  }
+
+  .pvp-dock {
+    gap: 0.4rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: var(--pb-radius-md);
+    border: 1px solid var(--pb-border-strong);
+    background: var(--pb-bg-elevated);
+  }
+
+  .pvp-dock > .pvp-panel-actions {
+    gap: 0.45rem;
+    padding: 0;
+    border: none;
+  }
+
+  .pvp-hand-wrap {
+    gap: 0.2rem;
+  }
+
+  /* The list is named for screen readers; the cards speak for themselves */
+  .pvp-hand-wrap > .pvp-side-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .pvp-hand {
+    padding-bottom: 0.25rem;
+  }
+
+  .pvp-hand > li {
+    width: 4.25rem;
+  }
+
+  /* In hand: the art and the name (the details are a tap away) */
+  .pvp-hand :deep(.pvp-hp-text) {
+    display: none;
+  }
+
+  .pvp-hand :deep(.pvp-name) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* One line per attack: why it's blocked sits beside its name */
+  .pvp-attack-buttons {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.3rem;
+  }
+
+  .pvp-attack-button {
+    gap: 0.4rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .pvp-attack-title {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.4rem;
+    white-space: nowrap;
+  }
+
+  .pvp-attack-title small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.72rem;
+  }
+
+  .pvp-next {
+    font-size: 0.8rem;
+  }
+
+  /* The guidance line says it already */
+  .pvp-panel-actions .pvp-hint {
+    display: none;
+  }
+
+  .pvp-turn-bar {
+    flex-wrap: nowrap;
+    padding-top: 0.4rem;
+  }
+
+  .pvp-energy-line {
+    flex-wrap: nowrap;
+    min-width: 0;
+    font-size: 0.75rem;
+  }
+
+  .pvp-energy-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pvp-energy-next {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .pvp-turn-bar .btn {
+    flex: none;
+    padding: 0.35rem 0.8rem;
+  }
+}
+
+/* Tall enough for the whole board and the dock: the dock sticks above the
+   tab bar. On short screens (375x667) it covered the whole board: it stays
+   in place there, a short scroll away. */
+@media (max-width: 991.98px) and (min-height: 740px) {
+  .pvp-dock {
+    position: sticky;
+    bottom: calc(92px + env(safe-area-inset-bottom));
+    z-index: 5;
+    max-height: 60vh;
+    overflow-y: auto;
+    box-shadow: var(--pb-shadow-lg);
+  }
 }
 
 /* ----- Lobby ----- */

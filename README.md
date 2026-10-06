@@ -52,10 +52,11 @@ How it works inside (every table, RPC and flow, in French):
   seconds; intruders from other lines slip in as the streak grows, and
   "Stop" ends a run keeping its coins. The simplest game, so it pays the least: 3 coins per
   right line (60 per run, 180 a day at most) — and **PvP battles** like Pokémon TCG Pocket (testers only for now,
-  migrations 0028, 0030 to 0034): two decks of 20 challenge cards per format
+  migrations 0028, 0030 to 0035): two decks of 20 challenge cards per format
   (every card, one era of the TCG, or one set; 2 with the same name at
   most; "Auto deck" builds one like a Pocket deck: one energy type, your
-  strongest lines with both copies, then support and Trainers), one to attack with
+  4 strongest lines with both copies, then Trainers, then more Pokémon only
+  if there's room left), one to attack with
   and one the server plays when you're attacked. A battle: 5 cards in
   hand, an Active Pokémon and up to 3 on the Bench; each turn draw,
   play Trainers like in Pocket (Items as many as you like, 1 Supporter a
@@ -71,7 +72,10 @@ How it works inside (every table, RPC and flow, in French):
   is marked), weakness and resistance too; knocked out Pokémon give
   points (2 for ex, V, GX..., 3 for VMAX), 3 points win. The server plays
   the other side (another player's defense deck, or a bot) and the board
-  shows what just happened and what you can do. Elo per format, 10
+  shows what just happened and what to do next (attach, attack, play or
+  end the turn: attaching and attacking are two taps). On phones the
+  whole board fits one screen, with your hand and the actions stuck above
+  the tab bar. Elo per format, 10
   attacks a day; **bots** (easy, normal, hard; their deck comes from
   your deck's eras, about as strong as yours): no Elo, but a win pays
   10 / 25 / 50 coins (a draw half) for the first 5 bot battles of the
@@ -413,6 +417,9 @@ its **SQL editor** and run, in order:
 34. `supabase/migrations/0034_pvp_bot_start_fix.sql` — bot battles start
    again (they all failed with "challenge.errors.21000": Supabase refuses
    an UPDATE without a WHERE). Run it after 0033.
+35. `supabase/migrations/0035_pvp_easy_bot.sql` — an easy bot that fights
+   back (a deck closer to yours, its best attack most of the time instead
+   of a random one). Run it after 0034.
 
 Then in **Authentication**:
 

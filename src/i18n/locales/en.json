@@ -1261,7 +1261,14 @@
       "on_evolve": "When you evolve into it from your hand",
       "unknown": "Not played in battles yet"
     },
-    "abilityLine": "Ability: {name}"
+    "abilityLine": "Ability: {name}",
+    "attachTypeTo": "Attach the {type} energy to {name}",
+    "next": {
+      "attach": "Attach this turn's energy (the button, or tap a Pokémon).",
+      "attack": "Attack with your Active Pokémon (it ends your turn), or play cards from your hand first.",
+      "play": "No attack ready. Play cards from your hand, or end your turn.",
+      "end": "Nothing left to play: end your turn."
+    }
   },
   "electrodeFlip": {
     "title": "Shiny Electrode Flip",

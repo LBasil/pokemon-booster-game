@@ -534,7 +534,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   `fitsEnergy`/`pvp_fits_energy`; `autoEnergy` + `autoDeck(…, energy)`.
   `pvp_bot_deck(format, level, my cards)` → `{ cards, energy }`: my
   deck's eras (the "all" format put 2025 ex against 1999 Gastlys), 1-2
-  types, strength = my cards' percentile in the pool (easy x0.6, normal
+  types, strength = my cards' percentile in the pool (easy x0.85 since 0035, x0.6 before, normal
   -0.05, hard +0.1; simulated: a strong deck played by the hard AI wins
   20/20, 14/20, 5/20). `engine` 3; the client still plays engine 2.
   `EnergyIcons.vue` = the dots.
@@ -576,6 +576,32 @@ docs/technique/             technical doc (French, user choice): overview, front
   the weakness of the deck it's built against) +11 points of win rate vs
   the 0026 builder, 57% head-to-head. What didn't help: per-slot ranking,
   penalizing 2-3-point cards (EX are the best cards of XY), 8 Trainers.
+  **4 lines, then Trainers** (user, 2026-10-06: "un deck Pocket ça tourne
+  à max 4 ou 5 poké différents"; their deck had 13 names, single Basics
+  filling the room): `AUTO.lines` = 4 core lines, then Trainers up to
+  `AUTO_TRAINERS_MAX` (10 attack / 8 defense), then more lines and Basics
+  only if the deck isn't full (single-copy collections always need them).
+  A feel choice, not re-simulated.
+  **Easy bot** (0035, user 2026-10-06: "le bot facile ne m'a jamais
+  infligé de dégâts"; the logs said 70 and 90 in two battles): its deck
+  aims at 85% of my strength (was 60%), it values attacks like the others
+  with random up to 40 on top (normal 15, hard 2) instead of picking at
+  random, attaches anywhere 1 time in 4. Same decks vs the normal AI, 60
+  games: wins 19 (was 2), 210 damage a game (was 99).
+  **Phone battle screen** (user, 2026-10-06: "sur mobile les contrôles
+  étaient infâmes, je ne savais jamais quand jouer, ou taper, que faire";
+  it took 3 screens and the actions opened far below the tapped card):
+  < 992px each side is one grid row (Active + Bench), cards cropped to
+  their top (`aspect-ratio` on `:deep(.pvp-img)`), 2-line log, hand =
+  art + name, and `.pvp-dock` (hand + `.pvp-panel-actions`) sticks above
+  the tab bar from 740px of height (below, 375x667, it covered the whole
+  board: stays in flow). With nothing picked on my turn the panel shows
+  `nextStep` (attach -> attack -> play -> end), "Attach the X energy to
+  <Active>" and the Active's attacks (`showAttacks`): attach + attack =
+  two taps; "End my turn" lights up only for play / end. Every pixel
+  counts on a Pixel 7 (839px): `pvp.spec.js` > "a phone plays a turn on
+  one screen" checks the score, the attach button and my Active's bottom
+  are visible and uncovered; re-screenshot after any change there.
   **Abilities** (0033, user 2026-10-05: "ajoute les talents stp"):
   `src/utils/abilityEffects.js` (`parseAbility(ability, cardName)`, old
   texts name the Pokémon) reuses the Trainers' sentences
@@ -807,13 +833,13 @@ docs/technique/             technical doc (French, user choice): overview, front
   2026-10-04) · 0026 PvP attack / defense decks + attacks without a
   cost dropped (written 2026-10-04, **to apply**, then check a full
   card sync went through) · 0027 PvP against bots for coins (written
-  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, applied: `pvp_rules().engine` = 3 the same day) · 0032 Trainer cards in PvP (written 2026-10-05, applied the same day) · 0033 Pokémon abilities in PvP (written 2026-10-05, applied: `pvp_team_has` answers on 2026-10-05) · 0034 bot battles start again (`pvp_bot_deck` had an UPDATE without a WHERE, error 21000 live; written 2026-10-05, **to apply** after 0033). Every one was
+  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, applied: `pvp_rules().engine` = 3 the same day) · 0032 Trainer cards in PvP (written 2026-10-05, applied the same day) · 0033 Pokémon abilities in PvP (written 2026-10-05, applied: `pvp_team_has` answers on 2026-10-05) · 0034 bot battles start again (`pvp_bot_deck` had an UPDATE without a WHERE, error 21000 live; written 2026-10-05, applied: easy bot battles with Trainers were played that day) · 0035 an easy bot that fights back (deck at 85% of mine, its best attack most of the time; written 2026-10-06, **to apply** after 0034). Every one was
   verified locally with PGlite before being handed over; 0010-0025 have
-  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0034 too) —
+  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0035 too) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 275 unit tests, `npm run test:db` 717 database
+- Tests: `npm test` 276 unit tests, `npm run test:db` 723 database
   checks (0031's "a bot against a Base deck" fails about 1 run in 2: a
-  random bot deck on a tiny pool, seen 2026-10-05, not fixed yet), `npm run test:e2e` 316 (desktop + Pixel 7, incl. "no page
+  random bot deck on a tiny pool, seen 2026-10-05 and 2026-10-06, not fixed yet), `npm run test:e2e` 317 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

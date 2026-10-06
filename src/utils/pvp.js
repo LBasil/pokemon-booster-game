@@ -221,6 +221,7 @@ export const AUTO = {
   decay: 0.6, // energy pick: each core line weighs this much less than the one before
   twoTypes: 3, // with 2 types, each typed symbol takes ~2 x this turns (half the zones bring it)
   depth: 10, // energy pick: Pokémon it must pay to fill a deck (fewer: its score shrinks)
+  lines: 4, // core lines before the Trainers fill the room (a Pocket deck runs 4-5 Pokémon)
 }
 
 /**
@@ -319,11 +320,11 @@ export function cardValue(card, energy, role = 'attack', ref = autoReference([ca
  * top card (+ a little for its lower stages, less when I own a single
  * copy), the strongest first with every copy at once (2 at most; two
  * printings of a name can make them), 1 Stage 2 line and 2 Stage 1 lines at
- * most. Returns the ids and a score: the lines taken, each weighing less
- * than the one before (the core decides the energy), shrunk when they
- * can't fill a deck.
+ * most, `lines` lines at most, on top of the `start` ids. Returns the ids
+ * and a score: the lines taken, each weighing less than the one before (the
+ * core decides the energy), shrunk when they can't fill a deck.
  */
-function autoPokemon(cards, role, size, energy, ref) {
+function autoPokemon(cards, role, size, energy, ref, { lines: maxLines = Infinity, start = [] } = {}) {
   const pool = cards.filter(fights)
   const value = new Map(pool.map((card) => [card.id, cardValue(card, energy, role, ref)]))
   const printings = new Map() // name -> its printings, best first
@@ -350,11 +351,11 @@ function autoPokemon(cards, role, size, energy, ref) {
   const byId = new Map(pool.map((card) => [card.id, card]))
   const count = (ids, name) => ids.filter((id) => byId.get(id).name === name).length
   const taken = { 2: 0, 3: 0 }
-  let ids = []
+  let ids = [...start]
   let score = 0
   let rank = 0
   for (const { line, copies: most, worth } of lines) {
-    if (ids.length >= size) break
+    if (ids.length >= size || rank >= maxLines) break
     // a stage above its Basic already in: another line holds it
     if (line.slice(1).some((card) => count(ids, card.name) > 0)) continue
     if (line.length > 1 && taken[line.length] >= (line.length === 3 ? 1 : 2)) continue
@@ -386,11 +387,12 @@ function autoPokemon(cards, role, size, energy, ref) {
 export function autoEnergy(cards, role = 'attack', size = DECK_SIZE) {
   const ref = autoReference(cards)
   const room = size - (AUTO_TRAINERS[role] ?? AUTO_TRAINERS.attack)
+  const lines = AUTO.lines
   let pick = [ENERGY_TYPES[0]]
   let top = -1
   for (const [i, first] of ENERGY_TYPES.entries()) {
     for (const energy of [[first], ...ENERGY_TYPES.slice(i + 1).map((second) => [first, second])]) {
-      const { score } = autoPokemon(cards, role, room, energy, ref)
+      const { score } = autoPokemon(cards, role, room, energy, ref, { lines })
       if (score > top) [pick, top] = [energy, score]
     }
   }
@@ -399,9 +401,12 @@ export function autoEnergy(cards, role = 'attack', size = DECK_SIZE) {
 
 /**
  * A deck from my eligible cards (`pvp_eligible`: stage, evolves_from,
- * owned copies, attacks): its Trainers (AUTO_TRAINERS), the Pokémon of
- * autoPokemon() for that energy (autoEnergy() when none is given), then
- * the best Basics and Trainers left while there's room.
+ * owned copies, attacks), like Pocket's 4-5 Pokémon and lots of support
+ * (user, 2026-10-06: the 0032 builder filled the room with single Basics,
+ * 13 names in a deck): the core of autoPokemon() for that energy
+ * (autoEnergy() when none is given, AUTO.lines lines), Trainers up to
+ * AUTO_TRAINERS_MAX, then more lines, then the best Basics and Trainers
+ * left while there's room.
  * @param {object[]} cards
  * @param {'attack' | 'defense'} [role]
  * @param {string[] | null} [energy]
@@ -410,8 +415,10 @@ export function autoEnergy(cards, role = 'attack', size = DECK_SIZE) {
 export function autoDeck(cards, role = 'attack', size = DECK_SIZE, energy = null) {
   const types = energy?.length ? energy : autoEnergy(cards, role, size)
   const ref = autoReference(cards)
-  const trainers = autoTrainers(cards, role)
-  const { ids: pokemon } = autoPokemon(cards, role, size - trainers.length, types, ref)
+  const { ids: core } = autoPokemon(cards, role, size - autoTrainers(cards, role).length, types, ref, { lines: AUTO.lines })
+  const most = AUTO_TRAINERS_MAX[role] ?? AUTO_TRAINERS_MAX.attack
+  const trainers = autoTrainers(cards, role, Math.min(most, size - core.length))
+  const { ids: pokemon } = autoPokemon(cards, role, size - trainers.length, types, ref, { start: core })
   let ids = [...pokemon, ...trainers]
   const byId = new Map(cards.map((card) => [card.id, card]))
   // Room left (few lines, few Trainers): the best Basics, then any useful Trainer
@@ -431,9 +438,11 @@ export function autoDeck(cards, role = 'attack', size = DECK_SIZE, energy = null
 }
 
 // Trainers in an auto deck (0032): 6 to attack, 4 to defend (the server's
-// AI plays it), the most useful first, 2 of each (1 ACE SPEC). Mirrors the
+// AI plays it) next to the core lines, up to 10 / 8 before another line
+// comes in, the most useful first, 2 of each (1 ACE SPEC). Mirrors the
 // scores of pvp_bot_deck().
 export const AUTO_TRAINERS = { attack: 6, defense: 4 }
+export const AUTO_TRAINERS_MAX = { attack: 10, defense: 8 }
 const TRAINER_SCORES = {
   search: 3, draw: 3, discard_hand_draw: 3, shuffle_hand_draw: 3, draw_until: 3, gust: 3, rare_candy: 4,
   heal: 2, switch_self: 2, boost: 2, tool_hp: 2, tool_reduce: 2, tool_boost: 2, tool_retaliate: 2,
@@ -446,8 +455,7 @@ export function trainerScore(card) {
   return Math.max(0, ...ops.map((op) => TRAINER_SCORES[op] ?? 1))
 }
 
-function autoTrainers(cards, role) {
-  const budget = AUTO_TRAINERS[role] ?? AUTO_TRAINERS.attack
+function autoTrainers(cards, role, budget = AUTO_TRAINERS[role] ?? AUTO_TRAINERS.attack) {
   const best = new Map() // one printing per name
   for (const card of cards) {
     if (card.stage !== 'trainer' || !trainerScore(card)) continue

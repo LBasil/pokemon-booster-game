@@ -1261,7 +1261,14 @@
       "on_evolve": "Quand tu fais évoluer en lui depuis ta main",
       "unknown": "Pas encore joué en combat"
     },
-    "abilityLine": "Talent : {name}"
+    "abilityLine": "Talent : {name}",
+    "attachTypeTo": "Attacher l'Énergie {type} à {name}",
+    "next": {
+      "attach": "Attache l'Énergie du tour (le bouton, ou touche un Pokémon).",
+      "attack": "Attaque avec ton Pokémon Actif (ça finit ton tour), ou joue d'abord des cartes de ta main.",
+      "play": "Pas d'attaque prête. Joue des cartes de ta main, ou finis ton tour.",
+      "end": "Plus rien à jouer : finis ton tour."
+    }
   },
   "electrodeFlip": {
     "title": "Électrode Shiny Flip",

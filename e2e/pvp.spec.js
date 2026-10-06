@@ -295,3 +295,28 @@ test('the board and the builder never scroll sideways on the narrowest phone', a
   await board(page).getByRole('button', { name: /^Active: Charmander/ }).click()
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
 })
+
+test('a phone plays a turn on one screen: what to do, attach and attack without picking anything', async ({ page }, testInfo) => {
+  // user, 2026-10-06: on phones the actions showed far below the card just tapped
+  test.skip(testInfo.project.name !== 'mobile', 'the phone layout')
+  await mockSupabase(page, { challengeCollection, pvp: withDeck })
+  await page.goto('/challenge/games/pvp')
+  await page.getByRole('button', { name: /^Easy/ }).click()
+  await setUp(page)
+  await page.getByRole('button', { name: 'End my turn' }).click()
+  await expect(page.locator('.pvp-log')).toContainText('Your turn.')
+  await expect(page.locator('.pvp-next')).toContainText("Attach this turn's energy")
+  // the board's top and the actions on the same screen, my Active not hidden behind them
+  await page.evaluate(() => document.querySelector('.pvp-battle').scrollIntoView({ block: 'start' }))
+  const attach = page.getByRole('button', { name: 'Attach the Fire energy to Charmander' })
+  await expect(attach).toBeInViewport()
+  await expect(page.locator('.pvp-score')).toBeInViewport()
+  const active = board(page).getByRole('button', { name: /^Active: Charmander/ })
+  const box = await active.boundingBox()
+  const onTop = await page.evaluate(([x, y]) => !!document.elementFromPoint(x, y)?.closest('.pvp-side.is-mine'), [box.x + box.width / 2, box.y + box.height - 4])
+  expect(onTop).toBe(true)
+  await attach.click()
+  await expect(page.locator('.pvp-next')).toContainText('Attack with your Active Pokémon')
+  await page.getByRole('button', { name: /Ember/ }).click()
+  await expect(page.locator('.pvp-log')).toContainText('Your Charmander uses Ember: 60 damage.')
+})
