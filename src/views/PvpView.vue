@@ -854,6 +854,7 @@ onMounted(async () => {
                 </span>
               </span>
             </div>
+            <span class="pvp-zone-label" aria-hidden="true">{{ t('pvp.bench') }}</span>
             <ul class="pvp-bench" :aria-label="t('pvp.bench')">
               <li v-for="n in benchSize" :key="n">
                 <button
@@ -920,6 +921,7 @@ onMounted(async () => {
               </span>
               <span v-else class="pvp-empty is-active">{{ hints.setup ? t('pvp.setupActive') : t('pvp.emptySlot') }}</span>
             </div>
+            <span class="pvp-zone-label" aria-hidden="true">{{ t('pvp.bench') }}</span>
             <ul class="pvp-bench" :aria-label="t('pvp.bench')">
               <li v-for="n in benchSize" :key="n">
                 <button
@@ -1637,6 +1639,16 @@ onMounted(async () => {
   min-width: 0;
 }
 
+/* Shown on PC beside each Bench tray */
+.pvp-zone-label {
+  display: none;
+  color: var(--pb-text-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .pvp-active-row {
   display: flex;
   justify-content: center;
@@ -2237,24 +2249,26 @@ onMounted(async () => {
 }
 
 /* PC (user, 2026-10-06: "sur PC ça manque de lisibilité, je scroll en
-   boucle"; the battle was 1,860px tall at 1440x900, each Bench above or
-   below its Active, the log between the sides, the actions under the hand).
-   Two columns: the board on the left (each side one row, Active then
-   Bench, cards cropped like on phones but less), the score, the log beside
-   their side and the actions beside mine on the right. */
+   boucle"; the battle was 1,860px tall at 1440x900). Two columns: the mat
+   and my hand on the left, the title, score, log and actions on the right.
+   The mat is laid out like Pokémon TCG Pocket (same day: "je ne comprends
+   plus qui est le banc", each Active sat beside its Bench at the same
+   size): mirrored, their Bench on top, both Actives face to face in the
+   middle and bigger, my Bench at the bottom, each Bench a labeled tray. */
 @media (min-width: 992px) {
   .pvp-battle {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 23rem);
     grid-template-areas:
-      'head score'
+      'them head'
+      'them score'
       'them log'
       'mine actions'
       'hand actions'
       'forfeit actions';
-    grid-template-rows: auto auto auto auto 1fr;
+    grid-template-rows: auto auto 1fr auto auto 1fr;
     align-items: start;
-    gap: 0.75rem 1rem;
+    gap: 0.5rem 1rem;
     padding: 1rem;
   }
 
@@ -2277,53 +2291,113 @@ onMounted(async () => {
 
   .pvp-side.is-theirs {
     grid-area: them;
+    border-bottom: 2px solid var(--pb-border-strong);
+    border-radius: var(--pb-radius-lg) var(--pb-radius-lg) var(--pb-radius-sm) var(--pb-radius-sm);
   }
 
   .pvp-side.is-mine {
     grid-area: mine;
+    border-top: 2px solid var(--pb-border-strong);
+    border-radius: var(--pb-radius-sm) var(--pb-radius-sm) var(--pb-radius-lg) var(--pb-radius-lg);
   }
 
+  /* Bench tray in the middle column, the side's chips beside theirs */
   .pvp-side {
     display: grid;
-    grid-template-columns: 8.5rem minmax(0, 22rem);
-    justify-content: center;
-    align-items: end;
-    gap: 0.4rem 0.75rem;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.35rem 0.75rem;
+    padding: 0.4rem 0.75rem;
   }
 
   .pvp-side-head {
-    grid-column: 1 / -1;
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: start;
   }
 
+  .pvp-side-head .pvp-chips {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pvp-side > .pvp-zone-label {
+    display: block;
+    grid-column: 3;
+    justify-self: start;
+  }
+
+  .pvp-side > .pvp-bench,
   .pvp-side > .pvp-active-row {
-    grid-column: 1;
+    grid-column: 2;
+  }
+
+  .is-theirs > .pvp-zone-label,
+  .is-theirs > .pvp-bench,
+  .is-mine > .pvp-active-row {
+    grid-row: 1;
+  }
+
+  .is-theirs > .pvp-active-row,
+  .is-mine > .pvp-zone-label,
+  .is-mine > .pvp-bench {
     grid-row: 2;
   }
 
   .pvp-side > .pvp-bench {
-    grid-column: 2;
-    grid-row: 2;
+    grid-template-columns: repeat(3, 5.25rem);
+    gap: 0.4rem;
+    width: auto;
     max-width: none;
+    padding: 0.35rem;
+    border-radius: var(--pb-radius-md);
+    border: 1px dashed var(--pb-border-strong);
+    background: var(--pb-input-bg);
   }
 
   .pvp-active-row > .pvp-slot,
   .pvp-active-row > .pvp-empty {
-    width: 100%;
+    width: 8rem;
+  }
+
+  /* The Active spot: bigger, ringed, the two facing each other across the line */
+  .pvp-active-row > .pvp-slot.is-active:not(.is-selected):not(.is-target):not(.is-playable) {
+    border-color: var(--pb-text-muted);
+  }
+
+  .pvp-slot {
+    padding: 0.2rem;
   }
 
   /* name, HP and art: the attacks are in the panel */
   .pvp-battle :deep(.pvp-img),
   .pvp-battle .pvp-empty {
-    aspect-ratio: 245 / 175;
+    aspect-ratio: 245 / 150;
     object-fit: cover;
     object-position: top center;
   }
 
-  /* As tall as their side, scrolling inside it */
+  .pvp-bench :deep(.pvp-img),
+  .pvp-bench .pvp-empty {
+    aspect-ratio: 245 / 115;
+  }
+
+  .pvp-bench :deep(.pvp-name),
+  .pvp-hand :deep(.pvp-name),
+  .pvp-hand :deep(.pvp-hp-text) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* As tall as what's left beside their side, scrolling inside it */
   .pvp-log {
     grid-area: log;
     align-self: stretch;
     contain: size;
+    min-height: 4rem;
     max-height: none;
   }
 
@@ -2337,7 +2411,11 @@ onMounted(async () => {
   }
 
   .pvp-hand > li {
-    width: 6.25rem;
+    width: 5.75rem;
+  }
+
+  .pvp-hand :deep(.pvp-img) {
+    aspect-ratio: 245 / 120;
   }
 
   .pvp-panel-actions {

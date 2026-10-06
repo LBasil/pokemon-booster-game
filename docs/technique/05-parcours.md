@@ -1081,9 +1081,12 @@ sequenceDiagram
   a turn on one screen » le vérifie.
 - **Sur PC** (≥ 992 px, 2026-10-06 : « sur PC ça manque de lisibilité,
   je scroll en boucle » ; le combat faisait 1 860 px de haut en
-  1440 × 900) : deux colonnes. À gauche le plateau, chaque camp sur une
-  ligne (Actif puis Banc, cartes recadrées un peu moins que sur
-  téléphone), puis ma main ; à droite le score, le journal à côté du camp
+  1440 × 900) : deux colonnes. À gauche le plateau, en miroir comme
+  dans Pocket (même jour : « je ne comprends plus qui est le banc »,
+  l'Actif et le Banc étaient côte à côte à la même taille) : le Banc
+  adverse en haut, les deux Actifs face à face au milieu et plus grands,
+  mon Banc en bas, chaque Banc dans un bac en pointillés marqué « Banc » ;
+  puis ma main. À droite le titre, le score, le journal à côté du camp
   adverse (même hauteur, `contain: size`, il défile dedans) et le panneau
   d'actions à côté de mon camp, collé en haut de l'écran quand on défile
   (`.pvp-dock` en `display: contents` : la main et les actions sont deux

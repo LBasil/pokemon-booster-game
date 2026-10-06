@@ -613,9 +613,14 @@ docs/technique/             technical doc (French, user choice): overview, front
   are visible and uncovered; re-screenshot after any change there.
   **PC battle screen** (>= 992px, user, 2026-10-06: "sur PC ça manque
   de lisibilité, je scroll en boucle"; 1,860px tall at 1440x900): a
-  2-column grid (`grid-template-areas`), board left (each side one row
-  like phones, cards cropped to 245/175), score + log (beside their side,
-  `contain: size`) + sticky `.pvp-panel-actions` (beside mine) right;
+  2-column grid (`grid-template-areas`), mat + hand left, title, score,
+  log (beside their side, `contain: size`) + sticky `.pvp-panel-actions`
+  (beside mine) right. The mat is **mirrored like Pocket** (same day: "je
+  ne comprends plus qui est le banc", Active and Bench sat side by side at
+  one size): their Bench on top, both Actives face to face in the middle
+  (8rem), my Bench at the bottom, each Bench a dashed tray (5.25rem cards)
+  with a "Bench" label (`.pvp-zone-label`, PC only), their chips beside
+  their tray;
   `.pvp-dock` is `display: contents` there. `pvp.spec.js` > "a laptop
   sees the whole battle on one screen" checks 1280x720.
   **Drag and drop** (user, 2026-10-06: "pas fluide et compliqué de devoir
