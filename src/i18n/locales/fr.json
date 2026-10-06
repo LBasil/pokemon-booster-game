@@ -1009,7 +1009,7 @@
     "attackCost": "gratuite | 1 Énergie | {count} Énergies",
     "details": "Détails de la carte",
     "close": "Fermer",
-    "selectHint": "Touche une carte de ta main ou l'un de tes Pokémon pour voir ce qu'il peut faire.",
+    "selectHint": "Glisse une carte de ta main sur le plateau, ou touche une carte pour voir ce qu'elle peut faire.",
     "waitHint": "Le serveur joue...",
     "blocks": {
       "first_turn": "Pas au premier tour",
@@ -1264,11 +1264,15 @@
     "abilityLine": "Talent : {name}",
     "attachTypeTo": "Attacher l'Énergie {type} à {name}",
     "next": {
-      "attach": "Attache l'Énergie du tour (le bouton, ou touche un Pokémon).",
+      "attach": "Attache l'Énergie du tour : glisse-la sur un Pokémon (ou le bouton).",
       "attack": "Attaque avec ton Pokémon Actif (ça finit ton tour), ou joue d'abord des cartes de ta main.",
-      "play": "Pas d'attaque prête. Joue des cartes de ta main, ou finis ton tour.",
+      "play": "Pas d'attaque prête. Glisse des cartes de ta main sur le plateau, ou finis ton tour.",
       "end": "Plus rien à jouer : finis ton tour."
-    }
+    },
+    "change": "Changer",
+    "showPool": "Ajouter ou changer des cartes ({count} disponible) | Ajouter ou changer des cartes ({count} disponibles)",
+    "hidePool": "Masquer mes cartes",
+    "energyToken": "L'Énergie {type} du tour : glisse-la sur un Pokémon, ou touche-la puis un Pokémon"
   },
   "electrodeFlip": {
     "title": "Électrode Shiny Flip",

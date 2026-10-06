@@ -602,6 +602,24 @@ docs/technique/             technical doc (French, user choice): overview, front
   counts on a Pixel 7 (839px): `pvp.spec.js` > "a phone plays a turn on
   one screen" checks the score, the attach button and my Active's bottom
   are visible and uncovered; re-screenshot after any change there.
+  **Drag and drop** (user, 2026-10-06: "pas fluide et compliqué de devoir
+  tap partout"): pointer events on window (`startDrag` / `moveDrag` /
+  `endDrag`, 10px threshold), targets = `data-drop` (slot position,
+  `bench-n`, `side`, `board`), `dropAction()` turns a drop into a move
+  from the hints (bench, evolve, attach, or 'trainer' -> picker); hand
+  cards are `touch-action: pan-x` (sideways = scroll the hand), the energy
+  token `touch-action: none`; tapping the token arms it (`energyArmed`)
+  then a Pokémon attaches; `.pvp-battle.is-dragging .pvp-dock` fades with
+  `pointer-events: none` so drops reach the slots it covers; edge
+  auto-scroll (`edgeScroll`). `justDragged` swallows the click after a
+  release. On a laptop the token sits below the board (not both on
+  screen): the e2e drags it on the phone project, taps on desktop.
+  Damage numbers: `showHits(events)` from `damage` events (`s`, `pos`;
+  the e2e mock emits them since then), skipped on a knocked out slot.
+  **Builder** (same day: "infâme" after Auto deck, every eligible card
+  showed): `.pvp-deck-cards` thumbnails, `showEnergy` / `showPool` fold
+  the energy picker and the pool once the deck is full (`autoBuild`,
+  `editDeck` of a ready deck); a new deck opens on the pool.
   **Abilities** (0033, user 2026-10-05: "ajoute les talents stp"):
   `src/utils/abilityEffects.js` (`parseAbility(ability, cardName)`, old
   texts name the Pokémon) reuses the Trainers' sentences
@@ -839,7 +857,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   the earlier checks lived in scratch scripts and are gone.
 - Tests: `npm test` 276 unit tests, `npm run test:db` 723 database
   checks (0031's "a bot against a Base deck" fails about 1 run in 2: a
-  random bot deck on a tiny pool, seen 2026-10-05 and 2026-10-06, not fixed yet), `npm run test:e2e` 317 (desktop + Pixel 7, incl. "no page
+  random bot deck on a tiny pool, seen 2026-10-05 and 2026-10-06, not fixed yet), `npm run test:e2e` 319 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.

@@ -60,8 +60,13 @@ test('auto deck: 20 cards in lines, 2 of a name, saved', async ({ page }) => {
   const attackDeck = page.getByRole('group', { name: 'Attack deck' })
   await attackDeck.getByRole('button', { name: 'Auto deck' }).click()
   await expect(page.locator('.pvp-count')).toHaveText('20 / 20')
-  await expect(page.locator('.pvp-deck-lines li')).toHaveCount(10)
-  await expect(page.locator('.pvp-deck-lines')).toContainText('2×Charmeleon')
+  await expect(page.locator('.pvp-deck-cards > li')).toHaveCount(10)
+  await expect(page.locator('.pvp-deck-cards > li').filter({ hasText: 'Charmeleon' })).toContainText('2×')
+  // a full deck: the pool and the energy picker stay folded (user, 2026-10-06: every card showed)
+  await expect(page.locator('.pvp-grid')).toHaveCount(0)
+  await expect(page.locator('.pvp-energy-summary')).toContainText('Fire')
+  await page.getByRole('button', { name: /Add or swap cards/ }).click()
+  await expect(page.locator('.pvp-grid > li').first()).toBeVisible()
   await page.getByRole('button', { name: 'Save the deck' }).click()
   await expect(page.locator('.pvp-builder')).toHaveCount(0)
   await expect(attackDeck.locator('.pvp-deck-lines li')).toHaveCount(10)
@@ -319,4 +324,49 @@ test('a phone plays a turn on one screen: what to do, attach and attack without 
   await expect(page.locator('.pvp-next')).toContainText('Attack with your Active Pokémon')
   await page.getByRole('button', { name: /Ember/ }).click()
   await expect(page.locator('.pvp-log')).toContainText('Your Charmander uses Ember: 60 damage.')
+})
+
+// Drags with the mouse: down, a few moves, up (user, 2026-10-06: "compliqué de devoir tap partout")
+async function dragOnto(page, from, to) {
+  const a = await from.boundingBox()
+  const b = await to.boundingBox()
+  await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2 - 30, { steps: 4 })
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 8 })
+  await page.mouse.up()
+}
+
+test('drag and drop like Pocket: a Basic onto the Bench, the energy onto a Pokémon, or the energy tapped then a Pokémon', async ({ page }, testInfo) => {
+  const backend = await mockSupabase(page, { challengeCollection, pvp: withDeck })
+  await page.goto('/challenge/games/pvp')
+  await page.getByRole('button', { name: /^Easy/ }).click()
+  await setUp(page)
+  // turn 1: Bulbasaur from my hand onto an empty Bench spot
+  const myBench = board(page).getByRole('list', { name: 'Bench' }).nth(1)
+  await dragOnto(page, hand(page).getByRole('button', { name: 'Bulbasaur' }), myBench.locator('.pvp-empty').first())
+  await expect(myBench).toContainText('Bulbasaur')
+  await expect(page.locator('.pvp-panel-actions')).not.toContainText('Put on the Bench') // nothing got picked
+  await page.getByRole('button', { name: 'End my turn' }).click()
+  await expect(page.locator('.pvp-log')).toContainText('Your turn.')
+  // turn 3: the zone's energy dragged onto my Active (on a phone both are on screen; on a
+  // laptop the energy sits below the board: tap it, then the Pokémon)
+  const active = board(page).getByRole('button', { name: /^Active: Charmander/ })
+  if (testInfo.project.name === 'mobile') await dragOnto(page, page.locator('.pvp-energy-token'), active)
+  else {
+    await page.locator('.pvp-energy-token').click()
+    await active.click()
+  }
+  await expect(page.locator('.pvp-log')).toContainText('You attach a Fire energy to Charmander.')
+  // Ember knocks Oddish out (no number on the Pokémon that takes its place), Vine Whip hits back: 20 on Charmander
+  await page.getByRole('button', { name: /Ember/ }).click()
+  await expect(board(page).getByRole('button', { name: /^Active: Charmander/ }).locator('.pvp-hit')).toHaveText('−20')
+  await expect(board(page).getByRole('button', { name: /^Active: Venusaur/ }).locator('.pvp-hit')).toHaveCount(0)
+  // turn 5: tap the energy, then Bulbasaur
+  await page.locator('.pvp-energy-token').click()
+  await myBench.getByRole('button', { name: /^Bulbasaur/ }).click()
+  await expect(page.locator('.pvp-log')).toContainText('You attach a Fire energy to Bulbasaur.')
+  const acts = backend.calls.filter((call) => call.path === '/rest/v1/rpc/pvp_act').map((call) => JSON.parse(call.body).p_action)
+  expect(acts.map((a) => a.type)).toEqual(expect.arrayContaining(['bench', 'attach']))
+  expect(acts.find((a) => a.type === 'attach')).toMatchObject({ pos: 0 })
 })

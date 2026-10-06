@@ -1072,6 +1072,23 @@ sequenceDiagram
   tout tient sur un écran ; plus bas, 375 × 667, le bloc recouvrait tout
   le plateau, il reste donc à sa place). `pvp.spec.js` > « a phone plays
   a turn on one screen » le vérifie.
+- **Glisser-déposer façon Pocket** (2026-10-06 : « pas fluide et
+  compliqué de devoir tap partout ») : une carte de ma main glissée sur le
+  plateau se joue (Pokémon de base sur le Banc, évolution sur son Pokémon,
+  Dresseur n'importe où : `PvpTrainerPicker` pose la suite), le jeton
+  d'Énergie de la zone glissé sur un Pokémon s'attache ; toucher le jeton
+  puis un Pokémon aussi. Les cibles possibles sont en pointillés (d'après
+  les `hints`, `dropAction`), le bloc du bas s'efface pendant le geste
+  (on dépose à travers), la page défile près des bords de l'écran. La
+  main défile de côté (`touch-action: pan-x`) : sur téléphone, un glisser
+  part vers le haut. Toucher une carte ouvre toujours ses détails.
+  Les dégâts s'affichent un instant sur le Pokémon touché (`showHits`,
+  pas sur un Pokémon mis K.O. : un autre prend sa place).
+- **Constructeur après « Deck auto »** (2026-10-06 : « c'est infâme, ça
+  affiche toutes les cartes ») : le deck en vignettes (image, « 2× »,
+  « − »), l'Énergie sur une ligne avec « Changer », et la grille des
+  cartes éligibles repliée derrière « Ajouter ou changer des cartes »
+  tant que le deck est complet (dépliée pour un nouveau deck à monter).
 - **Simulé le 2026-10-05** (IA contre IA, 4 000 vraies cartes, decks de
   bots) : difficile bat normal 9 fois sur 10, normal bat facile 10 sur 10,
   15 tours en moyenne (11 entre bons decks). Après 0031 (1 500 vraies

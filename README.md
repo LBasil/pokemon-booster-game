@@ -73,7 +73,9 @@ How it works inside (every table, RPC and flow, in French):
   points (2 for ex, V, GX..., 3 for VMAX), 3 points win. The server plays
   the other side (another player's defense deck, or a bot) and the board
   shows what just happened and what to do next (attach, attack, play or
-  end the turn: attaching and attacking are two taps). On phones the
+  end the turn: attaching and attacking are two taps); like Pocket, drag a
+  card from your hand onto the board to play it and the energy onto a
+  Pokémon to attach it, and damage shows on the Pokémon it hits. On phones the
   whole board fits one screen, with your hand and the actions stuck above
   the tab bar. Elo per format, 10
   attacks a day; **bots** (easy, normal, hard; their deck comes from

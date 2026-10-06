@@ -1009,7 +1009,7 @@
     "attackCost": "free | 1 energy | {count} energies",
     "details": "Card details",
     "close": "Close",
-    "selectHint": "Tap a card in your hand or one of your Pokémon to see what it can do.",
+    "selectHint": "Drag a card from your hand onto the board, or tap a card to see what it can do.",
     "waitHint": "The server is playing...",
     "blocks": {
       "first_turn": "Not on the first turn",
@@ -1264,11 +1264,15 @@
     "abilityLine": "Ability: {name}",
     "attachTypeTo": "Attach the {type} energy to {name}",
     "next": {
-      "attach": "Attach this turn's energy (the button, or tap a Pokémon).",
+      "attach": "Attach this turn's energy: drag it onto a Pokémon (or the button).",
       "attack": "Attack with your Active Pokémon (it ends your turn), or play cards from your hand first.",
-      "play": "No attack ready. Play cards from your hand, or end your turn.",
+      "play": "No attack ready. Drag cards from your hand onto the board, or end your turn.",
       "end": "Nothing left to play: end your turn."
-    }
+    },
+    "change": "Change",
+    "showPool": "Add or swap cards ({count} available) | Add or swap cards ({count} available)",
+    "hidePool": "Hide my cards",
+    "energyToken": "This turn's {type} energy: drag it onto a Pokémon, or tap it then a Pokémon"
   },
   "electrodeFlip": {
     "title": "Shiny Electrode Flip",

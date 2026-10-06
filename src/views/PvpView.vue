@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import * as sfx from '@/lib/sfx'
 import { useCardLocale } from '@/composables/useCardLocale'
@@ -59,7 +59,7 @@ const FILTERS = ['all', 'basic', 'evolution', 'trainer']
 const STAGE_ORDER = { basic: 0, evolution: 1, trainer: 2 }
 
 const { t, te, locale } = useI18n()
-const { french, cardName } = useCardLocale()
+const { french, cardName, cardImage, fallback } = useCardLocale()
 const pvp = usePvpStore()
 const challenge = useChallengeStore()
 const settings = useSettingsStore()
@@ -177,6 +177,11 @@ function grouped(ids) {
 const building = ref(null)
 const picks = ref([])
 const energy = ref([]) // its 1 or 2 energy types
+// User, 2026-10-06: after "Auto deck" every eligible card showed under the
+// deck ("infâme"): the pool and the energy picker fold away once the deck
+// is made, a tap opens them
+const showPool = ref(true)
+const showEnergy = ref(true)
 const search = ref('')
 const filter = ref('all')
 const check = computed(() => deckCheck(picks.value, eligibleById.value, rules.value.deck, energy.value))
@@ -193,6 +198,8 @@ function toggleEnergy(type) {
 function autoBuild(role) {
   energy.value = autoEnergy(eligible.value, role, rules.value.deck)
   picks.value = autoDeck(eligible.value, role, rules.value.deck, energy.value)
+  showPool.value = !deckCheck(picks.value, eligibleById.value, rules.value.deck, energy.value).ready
+  showEnergy.value = !energy.value.length
 }
 const pickedGroups = computed(() => grouped(picks.value))
 const counts = computed(() => deckCounts(picks.value))
@@ -215,6 +222,7 @@ async function editDeck(role, { auto = false } = {}) {
   building.value = role
   errorMessage.value = ''
   await loadEligible({ force: true })
+  showEnergy.value = true
   if (auto) return autoBuild(role)
   let kept = []
   for (const id of decks.value[role]?.ids ?? []) {
@@ -226,6 +234,8 @@ async function editDeck(role, { auto = false } = {}) {
   energy.value =
     decks.value[role]?.energy ??
     (kept.length ? deckEnergy(kept.map((id) => eligibleById.value.get(id))) : autoEnergy(eligible.value, role, rules.value.deck))
+  // a full saved deck opens on its cards; a new one on the pool to pick from
+  showPool.value = !deckCheck(kept, eligibleById.value, rules.value.deck, energy.value).ready
 }
 
 function addPick(card) {
@@ -321,6 +331,140 @@ const showAttacks = computed(() => {
   return s ? s.kind === 'mine' && s.pos === 0 : myTurn.value
 })
 
+// ---------- Drag and drop, like Pocket ----------
+// User, 2026-10-06: "pas fluide et compliqué de devoir tap partout". A card
+// of my hand dragged onto the board plays it (a Basic onto the Bench, an
+// evolution onto its Pokémon, a Trainer anywhere: the picker asks the
+// rest); the zone's energy dragged onto a Pokémon attaches it, and so does
+// tapping the energy then the Pokémon. A tap still opens the panel. The
+// hand scrolls sideways (touch-action: pan-x), so a drag starts upward on
+// phones. Drop targets carry data-drop: a position, 'bench-n' (an empty
+// spot), 'side', 'board'.
+const drag = ref(null) // { kind: 'hand', index } | { kind: 'energy' }, plus x, y, over once moving
+const energyArmed = ref(false)
+const DRAG_START = 10 // px before a press becomes a drag
+let pressed = null
+let justDragged = false
+
+function startDrag(event, source) {
+  if (busy.value || finished.value || !myTurn.value || hints.value.setup || hints.value.promote || pending.value?.need) return
+  if (event.pointerType === 'mouse' && event.button !== 0) return
+  pressed = { source, x: event.clientX, y: event.clientY, id: event.pointerId }
+  window.addEventListener('pointermove', moveDrag, { passive: false })
+  window.addEventListener('pointerup', endDrag)
+  window.addEventListener('pointercancel', stopDrag)
+}
+
+function moveDrag(event) {
+  if (!pressed || event.pointerId !== pressed.id) return
+  if (!drag.value) {
+    if (Math.hypot(event.clientX - pressed.x, event.clientY - pressed.y) < DRAG_START) return
+    drag.value = { ...pressed.source }
+    selection.value = null
+    energyArmed.value = false
+  }
+  event.preventDefault()
+  drag.value = { ...drag.value, x: event.clientX, y: event.clientY, over: dropAt(event.clientX, event.clientY) }
+  if (!edgeFrame) edgeFrame = requestAnimationFrame(edgeScroll)
+}
+
+// Near the top or bottom of the screen the page scrolls on its own (on a
+// laptop the energy and my Active aren't always on screen together)
+const EDGE = 64
+let edgeFrame = 0
+
+function edgeScroll() {
+  edgeFrame = 0
+  const d = drag.value
+  if (!d) return
+  const speed = d.y < EDGE ? -(EDGE - d.y) / 4 : d.y > innerHeight - EDGE ? (d.y - innerHeight + EDGE) / 4 : 0
+  if (!speed) return
+  scrollBy(0, speed)
+  drag.value = { ...d, over: dropAt(d.x, d.y) }
+  edgeFrame = requestAnimationFrame(edgeScroll)
+}
+
+function endDrag(event) {
+  const dragged = drag.value
+  stopDrag()
+  if (!dragged) return // a tap: its click handler does the rest
+  // the click that follows the release must not select anything
+  justDragged = true
+  setTimeout(() => (justDragged = false), 0)
+  const action = dropAction(dragged, dropAt(event.clientX, event.clientY))
+  if (action === 'trainer') trainerPick.value = dragged.index
+  else if (action) act(action)
+}
+
+function stopDrag() {
+  pressed = null
+  drag.value = null
+  cancelAnimationFrame(edgeFrame)
+  edgeFrame = 0
+  window.removeEventListener('pointermove', moveDrag)
+  window.removeEventListener('pointerup', endDrag)
+  window.removeEventListener('pointercancel', stopDrag)
+}
+
+onBeforeUnmount(stopDrag)
+
+/** The drop target under a point (its data-drop), null if none. */
+function dropAt(x, y) {
+  return document.elementFromPoint(x, y)?.closest('[data-drop]')?.dataset.drop ?? null
+}
+
+/**
+ * What dropping this on that target does, from the server's hints: a move
+ * for pvp_act, 'trainer' (PvpTrainerPicker asks the rest) or null.
+ */
+function dropAction(dragged, target) {
+  if (!dragged || target === null) return null
+  const pos = /^\d$/.test(target) ? Number(target) : null
+  if (dragged.kind === 'energy') return hints.value.attach && pos !== null && mySlot(pos) ? { type: 'attach', pos } : null
+  const card = myCard(dragged.index)
+  const hand = hints.value.hand?.[dragged.index]
+  if (!card || !hand) return null
+  if (card.stage === 'trainer') return hand.play === null ? 'trainer' : null
+  if (pos !== null && hand.evolve?.includes(pos)) return { type: 'evolve', card: dragged.index, pos }
+  if (hand.bench && target !== 'board') return { type: 'bench', card: dragged.index }
+  return null
+}
+
+const isDrop = (target) => !!drag.value && !!dropAction(drag.value, target)
+
+function tapEnergy() {
+  if (justDragged || busy.value) return
+  selection.value = null
+  energyArmed.value = !energyArmed.value
+}
+
+watch(
+  () => hints.value.attach,
+  (attach) => {
+    if (!attach) energyArmed.value = false
+  },
+)
+
+// Damage shown on the Pokémon it hit, for a moment ('mine-0' -> 30); not on
+// a knocked out one (another Pokémon takes its place)
+const hits = ref({})
+let hitsTimer = null
+
+function showHits(events) {
+  const next = {}
+  const out = new Set(events.filter((e) => e.k === 'ko').map((e) => `${e.s === 'a' ? 'mine' : 'theirs'}-${e.pos}`))
+  for (const e of events) {
+    if (e.k !== 'damage' || !(e.n > 0)) continue
+    const key = `${e.s === 'a' ? 'mine' : 'theirs'}-${e.pos}`
+    if (!out.has(key)) next[key] = (next[key] ?? 0) + e.n
+  }
+  hits.value = next
+  clearTimeout(hitsTimer)
+  hitsTimer = setTimeout(() => (hits.value = {}), 1600)
+}
+
+const hitAt = (side, pos) => hits.value[`${side}-${pos}`] ?? 0
+
 function openSheet(card, slot = null) {
   sheet.value = card ? { card, slot } : null
 }
@@ -330,7 +474,7 @@ const setupActive = ref(null)
 const setupBench = ref([])
 
 function tapHand(entry) {
-  if (busy.value || finished.value) return
+  if (busy.value || finished.value || justDragged) return
   if (hints.value.setup) {
     if (entry.card.stage !== 'basic') return openSheet(entry.card)
     if (setupActive.value === entry.index) setupActive.value = null
@@ -343,9 +487,15 @@ function tapHand(entry) {
 }
 
 function tapMine(pos) {
-  if (busy.value || finished.value) return
+  if (busy.value || finished.value || justDragged) return
   if (hints.value.promote) {
     if (pos > 0) act({ type: 'promote', pos })
+    return
+  }
+  // the energy picked up (tapped), now its Pokémon
+  if (energyArmed.value) {
+    energyArmed.value = false
+    if (hints.value.attach) act({ type: 'attach', pos })
     return
   }
   select({ kind: 'mine', pos })
@@ -374,6 +524,7 @@ async function act(action) {
   try {
     const result = await pvp.act(action)
     recent.value = result.events
+    showHits(result.events)
     pending.value = null
     trainerPick.value = null
     abilityPick.value = null
@@ -666,7 +817,7 @@ onMounted(async () => {
         <div v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
 
         <!-- ============ A battle ============ -->
-        <section v-if="battle" ref="battleEl" class="pvp-battle" aria-labelledby="pvp-battle-title">
+        <section v-if="battle" ref="battleEl" class="pvp-battle" :class="{ 'is-dragging': drag?.x !== undefined }" aria-labelledby="pvp-battle-title">
           <div class="pvp-battle-head">
             <h2 id="pvp-battle-title" class="pvp-vs">
               {{ t('pvp.vs', { name: opponentName }) }}
@@ -691,7 +842,7 @@ onMounted(async () => {
           </dl>
 
           <!-- Their side -->
-          <div class="pvp-side is-theirs" role="group" :aria-label="t('pvp.theirSide', { name: opponentName })">
+          <div class="pvp-side is-theirs" role="group" data-drop="board" :aria-label="t('pvp.theirSide', { name: opponentName })">
             <div class="pvp-side-head">
               <span class="pvp-side-title">{{ t('pvp.theirSide', { name: opponentName }) }}</span>
               <span class="pvp-chips">
@@ -714,6 +865,7 @@ onMounted(async () => {
                   @click="tapTheirs(n)"
                 >
                   <PvpCard :card="theirSlot(n).card" :slot="theirSlot(n)" compact />
+                  <span v-if="hitAt('theirs', n)" class="pvp-hit" aria-hidden="true">−{{ hitAt('theirs', n) }}</span>
                 </button>
                 <span v-else class="pvp-empty">{{ t('pvp.emptySlot') }}</span>
               </li>
@@ -729,6 +881,7 @@ onMounted(async () => {
                 @click="tapTheirs(0)"
               >
                 <PvpCard :card="theirSlot(0).card" :slot="theirSlot(0)" compact />
+                <span v-if="hitAt('theirs', 0)" class="pvp-hit" aria-hidden="true">−{{ hitAt('theirs', 0) }}</span>
               </button>
               <span v-else class="pvp-empty is-active">{{ t('pvp.emptySlot') }}</span>
             </div>
@@ -741,18 +894,26 @@ onMounted(async () => {
           </div>
 
           <!-- My side -->
-          <div class="pvp-side is-mine" role="group" :aria-label="t('pvp.mySide')">
+          <div class="pvp-side is-mine" role="group" data-drop="side" :aria-label="t('pvp.mySide')">
             <div class="pvp-active-row">
               <button
                 v-if="mySlot(0)"
                 type="button"
                 class="pvp-slot is-active"
-                :class="{ 'is-selected': selection?.kind === 'mine' && selection.pos === 0, 'is-playable': nextStep === 'attach' || nextStep === 'attack' }"
+                :class="{
+                  'is-selected': selection?.kind === 'mine' && selection.pos === 0,
+                  'is-playable': nextStep === 'attach' || nextStep === 'attack',
+                  'is-target': energyArmed,
+                  'is-drop': isDrop('0'),
+                  'is-over': drag?.over === '0' && isDrop('0'),
+                }"
+                data-drop="0"
                 :aria-label="`${t('pvp.active')}: ${cardName(mySlot(0).card)}, ${t('pvp.hp', { left: mySlot(0).hp_left, hp: mySlot(0).card.hp })}`"
                 :disabled="!!finished || hints.promote"
                 @click="tapMine(0)"
               >
                 <PvpCard :card="mySlot(0).card" :slot="mySlot(0)" compact />
+                <span v-if="hitAt('mine', 0)" class="pvp-hit" aria-hidden="true">−{{ hitAt('mine', 0) }}</span>
               </button>
               <span v-else-if="hints.setup && setupActive !== null" class="pvp-slot is-active is-setup">
                 <PvpCard :card="myCard(setupActive)" compact />
@@ -767,18 +928,24 @@ onMounted(async () => {
                   class="pvp-slot"
                   :class="{
                     'is-selected': selection?.kind === 'mine' && selection.pos === n,
-                    'is-target': hints.promote || pending?.need === 'switch_to' || pending?.need === 'energy_to',
+                    'is-target': hints.promote || pending?.need === 'switch_to' || pending?.need === 'energy_to' || energyArmed,
+                    'is-drop': isDrop(String(n)),
+                    'is-over': drag?.over === String(n) && isDrop(String(n)),
                   }"
+                  :data-drop="n"
                   :aria-label="`${cardName(mySlot(n).card)}, ${t('pvp.hp', { left: mySlot(n).hp_left, hp: mySlot(n).card.hp })}`"
                   :disabled="!!finished"
                   @click="pending?.need === 'switch_to' || pending?.need === 'energy_to' ? chooseStep(n) : tapMine(n)"
                 >
                   <PvpCard :card="mySlot(n).card" :slot="mySlot(n)" compact />
+                  <span v-if="hitAt('mine', n)" class="pvp-hit" aria-hidden="true">−{{ hitAt('mine', n) }}</span>
                 </button>
                 <span v-else-if="hints.setup && setupBench[n - 1] !== undefined" class="pvp-slot is-setup">
                   <PvpCard :card="myCard(setupBench[n - 1])" compact />
                 </span>
-                <span v-else class="pvp-empty">{{ t('pvp.emptySlot') }}</span>
+                <span v-else class="pvp-empty" :data-drop="`bench-${n}`" :class="{ 'is-drop': isDrop('bench'), 'is-over': drag?.over === `bench-${n}` && isDrop('bench') }">
+                  {{ t('pvp.emptySlot') }}
+                </span>
               </li>
             </ul>
           </div>
@@ -799,6 +966,7 @@ onMounted(async () => {
                     :aria-label="cardName(entry.card)"
                     :aria-pressed="setupActive === entry.index || setupBench.includes(entry.index)"
                     :disabled="!!finished"
+                    @pointerdown="startDrag($event, { kind: 'hand', index: entry.index })"
                     @click="tapHand(entry)"
                   >
                     <PvpCard :card="entry.card" compact />
@@ -956,7 +1124,19 @@ onMounted(async () => {
 
               <div v-if="!finished && !hints.setup" class="pvp-turn-bar">
                 <span class="pvp-energy-line">
-                  <EnergyIcons v-if="hints.attach && myZone" :types="[myZone]" />
+                  <button
+                    v-if="hints.attach && myZone && myTurn"
+                    type="button"
+                    class="pvp-energy-token"
+                    :class="{ 'is-armed': energyArmed }"
+                    :aria-pressed="energyArmed"
+                    :aria-label="t('pvp.energyToken', { type: typeLabel(myZone) })"
+                    :title="t('pvp.energyToken', { type: typeLabel(myZone) })"
+                    @pointerdown="startDrag($event, { kind: 'energy' })"
+                    @click="tapEnergy"
+                  >
+                    <EnergyIcons :types="[myZone]" />
+                  </button>
                   <span class="pvp-energy-text">{{ energyLine }}</span>
                   <span v-if="battle.me.next && !battle.winner" class="pvp-energy-next">· {{ t('pvp.nextEnergy') }} <EnergyIcons :types="[battle.me.next]" /></span>
                 </span>
@@ -971,6 +1151,12 @@ onMounted(async () => {
                 </button>
               </div>
             </div>
+          </div>
+
+          <!-- What I'm dragging, under my finger -->
+          <div v-if="drag?.x !== undefined" class="pvp-ghost" :class="{ 'is-energy': drag.kind === 'energy' }" :style="{ left: `${drag.x}px`, top: `${drag.y}px` }" aria-hidden="true">
+            <EnergyIcons v-if="drag.kind === 'energy'" :types="[myZone]" />
+            <PvpCard v-else-if="myCard(drag.index)" :card="myCard(drag.index)" compact />
           </div>
 
           <div v-if="!finished" class="pvp-actions">
@@ -1038,7 +1224,11 @@ onMounted(async () => {
             </div>
             <p class="pvp-note">{{ t(`pvp.buildHelp.${building}`) }}</p>
 
-            <fieldset class="pvp-energy-pick">
+            <p v-if="!showEnergy" class="pvp-energy-summary">
+              <span>{{ t('pvp.energyShort') }} <EnergyIcons :types="energy" /> {{ typeList(energy) }}</span>
+              <button type="button" class="btn btn-outline-secondary btn-sm" @click="showEnergy = true">{{ t('pvp.change') }}</button>
+            </p>
+            <fieldset v-else class="pvp-energy-pick">
               <legend class="pvp-side-title">{{ t('pvp.energyTitle') }}</legend>
               <p class="pvp-note">{{ t('pvp.energyHelp', { max: maxEnergy }) }}</p>
               <div class="pvp-energy-types">
@@ -1059,12 +1249,17 @@ onMounted(async () => {
 
             <div class="pvp-deck-list" role="group" :aria-label="t(`pvp.deckTitle.${building}`)">
               <p v-if="!picks.length" class="pvp-note">{{ t('pvp.deckEmpty') }}</p>
-              <ul v-else class="pvp-deck-lines">
+              <!-- Like Pocket's deck view: the cards themselves, 2× on top -->
+              <ul v-else class="pvp-deck-cards">
                 <li v-for="entry in pickedGroups" :key="entry.id">
-                  <button type="button" class="pvp-line-button" :aria-label="t('pvp.remove', { name: cardName(entry.card) })" @click="removePick(entry.id)">−</button>
-                  <span class="pvp-line-count">{{ entry.count }}×</span>
-                  <span class="pvp-line-name">{{ cardName(entry.card) }}</span>
-                  <span class="pvp-muted pvp-line-stage">{{ stageLabel(entry.card) }}</span>
+                  <button type="button" class="pvp-thumb" :aria-label="`${cardName(entry.card)}, ${t('pvp.details')}`" @click="openSheet(entry.card)">
+                    <img :src="cardImage(entry.card)" :data-fallback="fallback(entry.card)" alt="" width="245" height="342" loading="lazy" />
+                    <span class="pvp-thumb-count">{{ entry.count }}×</span>
+                  </button>
+                  <span class="pvp-thumb-name">{{ cardName(entry.card) }}</span>
+                  <button type="button" class="pvp-line-button pvp-thumb-remove" :aria-label="t('pvp.remove', { name: cardName(entry.card) })" @click="removePick(entry.id)">
+                    −
+                  </button>
                 </li>
               </ul>
               <p v-if="check.missing" class="pvp-note">{{ t('pvp.missing', { count: check.missing }, check.missing) }}</p>
@@ -1082,7 +1277,16 @@ onMounted(async () => {
               <button type="button" class="btn btn-outline-secondary" :disabled="busy" @click="building = null">{{ t('pvp.cancel') }}</button>
             </div>
 
-            <div class="pvp-filters">
+            <button
+              v-if="!eligibleLoading && ownedHere >= rules.deck"
+              type="button"
+              class="btn btn-outline-secondary pvp-pool-toggle"
+              :aria-expanded="showPool"
+              @click="showPool = !showPool"
+            >
+              {{ showPool ? t('pvp.hidePool') : t('pvp.showPool', { count: eligible.length }, eligible.length) }}
+            </button>
+            <div v-if="showPool" class="pvp-filters">
               <input v-model="search" type="search" class="form-control" :placeholder="t('pvp.search')" :aria-label="t('pvp.search')" />
               <div class="pvp-kinds" role="group" :aria-label="t('pvp.search')">
                 <button v-for="item in FILTERS" :key="item" type="button" :aria-pressed="filter === item" :class="{ active: filter === item }" @click="filter = item">
@@ -1095,7 +1299,7 @@ onMounted(async () => {
               {{ t('pvp.notEnough', { count: ownedHere, deck: rules.deck }, ownedHere) }}
               <RouterLink :to="{ name: 'challenge-boosters' }">{{ t('pvp.openBoosters') }}</RouterLink>
             </p>
-            <ul v-if="!eligibleLoading && shown.length" class="pvp-grid">
+            <ul v-if="showPool && !eligibleLoading && shown.length" class="pvp-grid">
               <li v-for="card in shown" :key="card.id">
                 <div class="pvp-pick" :class="{ 'is-picked': counts.get(card.id), 'is-off': card.stage !== 'trainer' && energy.length && !fitsEnergy(card, energy) }">
                   <button type="button" class="pvp-pick-card" :aria-label="t('pvp.details')" @click="openSheet(card)">
@@ -1710,6 +1914,116 @@ onMounted(async () => {
   font-size: 0.85rem;
 }
 
+/* Drag and drop: where it can go, where it would go */
+.pvp-slot.is-drop,
+.pvp-empty.is-drop {
+  border-style: dashed;
+  border-color: var(--pb-ring);
+}
+
+.pvp-slot.is-over,
+.pvp-empty.is-over {
+  border-style: solid;
+  border-color: var(--pb-accent);
+  box-shadow: 0 0 0 3px var(--pb-accent);
+}
+
+/* While dragging, the dock fades and lets drops through to the board it covers */
+.pvp-battle.is-dragging .pvp-dock {
+  opacity: 0.3;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+/* The hand scrolls sideways; any other move drags the card */
+.pvp-hand .pvp-slot {
+  touch-action: pan-x;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.pvp-ghost {
+  position: fixed;
+  z-index: 50;
+  width: 4.5rem;
+  pointer-events: none;
+  transform: translate(-50%, -70%) rotate(-4deg);
+  opacity: 0.92;
+  filter: drop-shadow(0 8px 16px rgb(0 0 0 / 0.35));
+}
+
+.pvp-ghost.is-energy {
+  width: auto;
+  transform: translate(-50%, -120%) scale(1.8);
+}
+
+.pvp-energy-token {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.45rem;
+  border-radius: 999px;
+  border: 2px solid var(--pb-accent);
+  background: var(--pb-surface);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pvp-energy-token.is-armed {
+  background: var(--pb-accent);
+  box-shadow: 0 0 0 3px var(--pb-ring);
+}
+
+.pvp-energy-token:focus-visible {
+  outline: 2px solid var(--pb-focus);
+  outline-offset: 2px;
+}
+
+/* Damage, on the Pokémon it hit */
+.pvp-hit {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  z-index: 2;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--pb-danger-text);
+  color: var(--pb-bg);
+  font-family: var(--pb-font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: pvp-hit 1.6s var(--pb-ease-out) forwards;
+}
+
+@keyframes pvp-hit {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0.5rem) scale(0.8);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.15);
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50%, -0.25rem) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -0.75rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pvp-hit {
+    animation: none;
+  }
+}
+
 .pvp-dock {
   display: flex;
   flex-direction: column;
@@ -2034,6 +2348,98 @@ onMounted(async () => {
   gap: 0.4rem;
   min-width: 0;
   font-size: 0.85rem;
+}
+
+.pvp-deck-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
+  gap: 0.6rem 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvp-deck-cards > li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.pvp-thumb {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: none;
+}
+
+.pvp-thumb img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 245 / 342;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.pvp-thumb:focus-visible {
+  outline: 2px solid var(--pb-focus);
+  outline-offset: 2px;
+}
+
+.pvp-thumb-count {
+  position: absolute;
+  left: 0.25rem;
+  bottom: 0.25rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--pb-border-strong);
+  background: var(--pb-bg);
+  color: var(--pb-text);
+  font-family: var(--pb-font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.pvp-thumb-name {
+  min-width: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pvp-thumb-remove {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.4rem;
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.pvp-energy-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.pvp-energy-summary > span {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pvp-pool-toggle {
+  align-self: flex-start;
 }
 
 .pvp-line-count {

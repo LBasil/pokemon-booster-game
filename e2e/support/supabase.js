@@ -644,6 +644,7 @@ export async function mockSupabase(page, options = {}) {
         const target = b.me.active
         target.damage += 20
         ev(b, { k: 'attack', s: 'd', c: them.c, i: 0, name: PVP_FOES[them.c].name, attack: 'Vine Whip', damage: 20, flips: [], prevented: false })
+        ev(b, { k: 'damage', s: 'a', c: target.c, pos: 0, n: 20, name: b.cards[target.c].name })
         if (checkKo(b) || b.phase === 'promote') return
         startMyTurn(b)
       }
@@ -788,6 +789,7 @@ export async function mockSupabase(page, options = {}) {
               active.etypes.pop()
             }
             ev(b, { k: 'attack', s: 'a', c: active.c, i: a.attack, name: b.cards[active.c].name, attack: attack.name, damage, flips: [], prevented: false })
+            ev(b, { k: 'damage', s: 'd', c: b.them.active.c, pos: 0, n: damage, name: PVP_FOES[b.them.active.c].name })
             if (checkKo(b)) {
               b.log.push(...b.events)
               return json({ battle: view(b), events: b.events, state: pvState() })
