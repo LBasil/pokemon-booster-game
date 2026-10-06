@@ -1033,8 +1033,15 @@ sequenceDiagram
   qu'il peut, remplit son Banc, bat en retraite quand son Actif ne peut
   plus frapper ou va tomber (normal / difficile), attache l'Énergie de sa
   zone là où elle rapproche une attaque (son Actif d'abord, puis le Pokémon
-  de Banc le plus près de sa meilleure attaque ; sinon l'Actif), et attaque avec le meilleur coup attendu (un K.O.
-  avant tout). Facile : énergie au hasard une fois sur 4, beaucoup
+  de Banc le plus près d'une attaque ; sinon l'Actif), et attaque avec le meilleur coup attendu (un K.O.
+  avant tout). Depuis 0036 (2026-10-06 : « je suis pas sûr de comment
+  j'ai battu le bot ») toutes ses attaques comptent, d'abord celle que
+  l'Énergie rend jouable tout de suite : il ne regardait que la plus
+  forte, et son Raichu-GX Actif, qui attendait 2 Énergies Électrique pour
+  Tonnerre, envoyait ses Énergies Feu sur le Banc au lieu d'ouvrir
+  Étincelle Puissante (2 Incolore) ; il est resté 4 tours sans attaquer.
+  Facile : énergie au hasard une fois sur 4 (jamais quand elle permet à
+  son Actif d'attaquer ce tour, 0036), beaucoup
   d'hésitation entre ses attaques (un hasard jusqu'à 40 sur la valeur,
   15 en normal, 2 en difficile) mais presque jamais une attaque à 0 dégât
   plutôt que son coup (0035, 2026-10-06 : « le bot facile ne m'a jamais
@@ -1072,6 +1079,16 @@ sequenceDiagram
   tout tient sur un écran ; plus bas, 375 × 667, le bloc recouvrait tout
   le plateau, il reste donc à sa place). `pvp.spec.js` > « a phone plays
   a turn on one screen » le vérifie.
+- **Sur PC** (≥ 992 px, 2026-10-06 : « sur PC ça manque de lisibilité,
+  je scroll en boucle » ; le combat faisait 1 860 px de haut en
+  1440 × 900) : deux colonnes. À gauche le plateau, chaque camp sur une
+  ligne (Actif puis Banc, cartes recadrées un peu moins que sur
+  téléphone), puis ma main ; à droite le score, le journal à côté du camp
+  adverse (même hauteur, `contain: size`, il défile dedans) et le panneau
+  d'actions à côté de mon camp, collé en haut de l'écran quand on défile
+  (`.pvp-dock` en `display: contents` : la main et les actions sont deux
+  cases de la grille). Tout tient en 1280 × 720 ; `pvp.spec.js` > « a
+  laptop sees the whole battle on one screen » le vérifie.
 - **Glisser-déposer façon Pocket** (2026-10-06 : « pas fluide et
   compliqué de devoir tap partout ») : une carte de ma main glissée sur le
   plateau se joue (Pokémon de base sur le Banc, évolution sur son Pokémon,
@@ -1104,7 +1121,8 @@ sequenceDiagram
   les plus proches ; bots Facile / Normal / Difficile : pas d'Elo,
   10 / 25 / 50 pièces pour les 5 premiers combats du jour, 20 par jour en
   tout). Le deck d'un bot (`pvp_bot_deck(format, niveau, mon deck)`,
-  0031) : 2 000 cartes jouables du format au hasard, **des mêmes ères que
+  0031 ; 4,5 s en ligne pour « toutes les cartes » avant 0036, voir
+  06 outillage) : 2 000 cartes jouables du format au hasard, **des mêmes ères que
   mon deck** (le format « toutes les cartes » ne met plus un ex de 2025
   face à un Fantominus de 1999 ; tout le format si l'ère a moins de 60
   cartes), 1 ou 2 types d'Énergie (tirés selon les cartes du lot ;

@@ -2236,6 +2236,122 @@ onMounted(async () => {
   }
 }
 
+/* PC (user, 2026-10-06: "sur PC ça manque de lisibilité, je scroll en
+   boucle"; the battle was 1,860px tall at 1440x900, each Bench above or
+   below its Active, the log between the sides, the actions under the hand).
+   Two columns: the board on the left (each side one row, Active then
+   Bench, cards cropped like on phones but less), the score, the log beside
+   their side and the actions beside mine on the right. */
+@media (min-width: 992px) {
+  .pvp-battle {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 23rem);
+    grid-template-areas:
+      'head score'
+      'them log'
+      'mine actions'
+      'hand actions'
+      'forfeit actions';
+    grid-template-rows: auto auto auto auto 1fr;
+    align-items: start;
+    gap: 0.75rem 1rem;
+    padding: 1rem;
+  }
+
+  .pvp-battle-head {
+    grid-area: head;
+    align-self: center;
+  }
+
+  .pvp-score {
+    grid-area: score;
+  }
+
+  .pvp-score > div {
+    padding: 0.3rem 0.5rem;
+  }
+
+  .pvp-score dd {
+    margin: 0;
+  }
+
+  .pvp-side.is-theirs {
+    grid-area: them;
+  }
+
+  .pvp-side.is-mine {
+    grid-area: mine;
+  }
+
+  .pvp-side {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 22rem);
+    justify-content: center;
+    align-items: end;
+    gap: 0.4rem 0.75rem;
+  }
+
+  .pvp-side-head {
+    grid-column: 1 / -1;
+  }
+
+  .pvp-side > .pvp-active-row {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .pvp-side > .pvp-bench {
+    grid-column: 2;
+    grid-row: 2;
+    max-width: none;
+  }
+
+  .pvp-active-row > .pvp-slot,
+  .pvp-active-row > .pvp-empty {
+    width: 100%;
+  }
+
+  /* name, HP and art: the attacks are in the panel */
+  .pvp-battle :deep(.pvp-img),
+  .pvp-battle .pvp-empty {
+    aspect-ratio: 245 / 175;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  /* As tall as their side, scrolling inside it */
+  .pvp-log {
+    grid-area: log;
+    align-self: stretch;
+    contain: size;
+    max-height: none;
+  }
+
+  /* Hand and actions are grid cells of their own */
+  .pvp-dock {
+    display: contents;
+  }
+
+  .pvp-hand-wrap {
+    grid-area: hand;
+  }
+
+  .pvp-hand > li {
+    width: 6.25rem;
+  }
+
+  .pvp-panel-actions {
+    grid-area: actions;
+    position: sticky;
+    top: 0.75rem;
+  }
+
+  .pvp-battle > .pvp-actions {
+    grid-area: forfeit;
+    justify-content: flex-start;
+  }
+}
+
 /* Tall enough for the whole board and the dock: the dock sticks above the
    tab bar. On short screens (375x667) it covered the whole board: it stays
    in place there, a short scroll away. */

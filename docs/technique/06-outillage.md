@@ -54,6 +54,18 @@ WebAssembly, sans serveur) :
   `unsafeFunctions(db)` (et `unsafeWrites(sql)`) relit le corps de toutes
   les fonctions de `public` et liste ces requêtes ; la suite 0034 l'exige
   vide (le bug des combats contre les bots, vert en local, cassé en ligne).
+- PGlite n'a pas de **JIT** : une requête que Postgres estime chère
+  (fonction de coût 100 × des milliers de lignes) y reste rapide, mais en
+  ligne Supabase la compile d'abord, ce qui peut coûter des secondes.
+  `pvp_bot_deck('all', …)` : 0,4 s dans PGlite avec les vraies cartes,
+  4,5 s en ligne (11 fois plus, contre 3 à 6 fois pour les petits
+  formats). 0036 met `set jit = off` sur la fonction. Pour mesurer en
+  ligne sans joueur : appeler la fonction interne en REST avec la clé
+  service role et lire `time_total` de `curl` ; pour profiler en local
+  sur les vraies cartes : les télécharger en REST (`/rest/v1/cards?select=*`,
+  pages de 1 000) et les insérer dans PGlite avec
+  `jsonb_populate_recordset` (un `EXPLAIN (ANALYZE, VERBOSE)` montre où
+  part le temps).
 
 Chaque migration depuis 0010 a sa suite (`supabase/tests/000N_*.test.mjs`)
 qui vérifie la RLS, les droits et les RPC.

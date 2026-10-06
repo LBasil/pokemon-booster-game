@@ -326,6 +326,28 @@ test('a phone plays a turn on one screen: what to do, attach and attack without 
   await expect(page.locator('.pvp-log')).toContainText('Your Charmander uses Ember: 60 damage.')
 })
 
+test('a laptop sees the whole battle on one screen: both sides, the log, the hand and the actions', async ({ page }, testInfo) => {
+  // user, 2026-10-06: "sur PC ça manque de lisibilité, je scroll en boucle" (the battle was 1,860px tall)
+  test.skip(testInfo.project.name !== 'desktop', 'the PC layout')
+  await page.setViewportSize({ width: 1280, height: 720 })
+  await mockSupabase(page, { challengeCollection, pvp: withDeck })
+  await page.goto('/challenge/games/pvp')
+  await page.getByRole('button', { name: /^Easy/ }).click()
+  await setUp(page)
+  await page.getByRole('button', { name: 'End my turn' }).click()
+  await expect(page.locator('.pvp-log')).toContainText('Your turn.')
+  await page.evaluate(() => document.querySelector('.pvp-battle').scrollIntoView({ block: 'start' }))
+  for (const part of ['.pvp-score', '.pvp-side.is-theirs', '.pvp-log', '.pvp-side.is-mine', '.pvp-hand']) {
+    await expect(page.locator(part)).toBeInViewport({ ratio: 0.95 })
+  }
+  await expect(page.getByRole('button', { name: 'Attach the Fire energy to Charmander' })).toBeInViewport()
+  await expect(page.getByRole('button', { name: 'End my turn' })).toBeInViewport()
+  // the log sits beside their side, the actions beside mine
+  const [log, theirs, actions, mine] = await Promise.all(['.pvp-log', '.pvp-side.is-theirs', '.pvp-panel-actions', '.pvp-side.is-mine'].map((s) => page.locator(s).boundingBox()))
+  expect(log.x).toBeGreaterThan(theirs.x + theirs.width)
+  expect(actions.x).toBeGreaterThan(mine.x + mine.width)
+})
+
 // Drags with the mouse: down, a few moves, up (user, 2026-10-06: "compliqué de devoir tap partout")
 async function dragOnto(page, from, to) {
   const a = await from.boundingBox()

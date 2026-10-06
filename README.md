@@ -52,7 +52,7 @@ How it works inside (every table, RPC and flow, in French):
   seconds; intruders from other lines slip in as the streak grows, and
   "Stop" ends a run keeping its coins. The simplest game, so it pays the least: 3 coins per
   right line (60 per run, 180 a day at most) — and **PvP battles** like Pokémon TCG Pocket (testers only for now,
-  migrations 0028, 0030 to 0035): two decks of 20 challenge cards per format
+  migrations 0028, 0030 to 0036): two decks of 20 challenge cards per format
   (every card, one era of the TCG, or one set; 2 with the same name at
   most; "Auto deck" builds one like a Pocket deck: one energy type, your
   4 strongest lines with both copies, then Trainers, then more Pokémon only
@@ -422,6 +422,9 @@ its **SQL editor** and run, in order:
 35. `supabase/migrations/0035_pvp_easy_bot.sql` — an easy bot that fights
    back (a deck closer to yours, its best attack most of the time instead
    of a random one). Run it after 0034.
+36. `supabase/migrations/0036_pvp_bot_speed_energy.sql` — bot battles
+   start fast (the bot's deck took 4.5 s for "every card") and bots put
+   their energy where it opens an attack. Run it after 0035.
 
 Then in **Authentication**:
 

@@ -588,6 +588,15 @@ docs/technique/             technical doc (French, user choice): overview, front
   with random up to 40 on top (normal 15, hard 2) instead of picking at
   random, attaches anywhere 1 time in 4. Same decks vs the normal AI, 60
   games: wins 19 (was 2), 210 damage a game (was 99).
+  **AI energy** (0036, same day: "pas sûr de comment j'ai battu le bot";
+  the log: its Raichu-GX sat Active 4 turns): the zone's energy goes where
+  it helps **any** usable attack, the one it makes payable now first (it
+  only looked at the hardest-hitting one, so a Fire never went to a
+  Raichu-GX waiting for 2 Lightning though it opened its 2-Colorless
+  attack); easy's random attach skips the energy that lets its Active
+  attack this turn. **Bot deck speed** (0036: "ça prend 4s"): live
+  `pvp_bot_deck('all')` took 4.5 s vs 0.4 s in PGlite on the real cards,
+  see "JIT" in Machine notes; + my cards' strength computed once each.
   **Phone battle screen** (user, 2026-10-06: "sur mobile les contrôles
   étaient infâmes, je ne savais jamais quand jouer, ou taper, que faire";
   it took 3 screens and the actions opened far below the tapped card):
@@ -602,6 +611,13 @@ docs/technique/             technical doc (French, user choice): overview, front
   counts on a Pixel 7 (839px): `pvp.spec.js` > "a phone plays a turn on
   one screen" checks the score, the attach button and my Active's bottom
   are visible and uncovered; re-screenshot after any change there.
+  **PC battle screen** (>= 992px, user, 2026-10-06: "sur PC ça manque
+  de lisibilité, je scroll en boucle"; 1,860px tall at 1440x900): a
+  2-column grid (`grid-template-areas`), board left (each side one row
+  like phones, cards cropped to 245/175), score + log (beside their side,
+  `contain: size`) + sticky `.pvp-panel-actions` (beside mine) right;
+  `.pvp-dock` is `display: contents` there. `pvp.spec.js` > "a laptop
+  sees the whole battle on one screen" checks 1280x720.
   **Drag and drop** (user, 2026-10-06: "pas fluide et compliqué de devoir
   tap partout"): pointer events on window (`startDrag` / `moveDrag` /
   `endDrag`, 10px threshold), targets = `data-drop` (slot position,
@@ -851,13 +867,13 @@ docs/technique/             technical doc (French, user choice): overview, front
   2026-10-04) · 0026 PvP attack / defense decks + attacks without a
   cost dropped (written 2026-10-04, **to apply**, then check a full
   card sync went through) · 0027 PvP against bots for coins (written
-  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, applied: `pvp_rules().engine` = 3 the same day) · 0032 Trainer cards in PvP (written 2026-10-05, applied the same day) · 0033 Pokémon abilities in PvP (written 2026-10-05, applied: `pvp_team_has` answers on 2026-10-05) · 0034 bot battles start again (`pvp_bot_deck` had an UPDATE without a WHERE, error 21000 live; written 2026-10-05, applied: easy bot battles with Trainers were played that day) · 0035 an easy bot that fights back (deck at 85% of mine, its best attack most of the time; written 2026-10-06, **to apply** after 0034). Every one was
+  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, applied: `pvp_rules().engine` = 3 the same day) · 0032 Trainer cards in PvP (written 2026-10-05, applied the same day) · 0033 Pokémon abilities in PvP (written 2026-10-05, applied: `pvp_team_has` answers on 2026-10-05) · 0034 bot battles start again (`pvp_bot_deck` had an UPDATE without a WHERE, error 21000 live; written 2026-10-05, applied: easy bot battles with Trainers were played that day) · 0035 an easy bot that fights back (deck at 85% of mine, its best attack most of the time; written 2026-10-06, **to apply** after 0034) · 0036 bot battles start fast (no JIT in `pvp_bot_deck`) + bots attach energy where it opens an attack (written 2026-10-06, **to apply** after 0035). Every one was
   verified locally with PGlite before being handed over; 0010-0025 have
-  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0035 too) —
+  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0036 too) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 276 unit tests, `npm run test:db` 723 database
+- Tests: `npm test` 276 unit tests, `npm run test:db` 740 database
   checks (0031's "a bot against a Base deck" fails about 1 run in 2: a
-  random bot deck on a tiny pool, seen 2026-10-05 and 2026-10-06, not fixed yet), `npm run test:e2e` 319 (desktop + Pixel 7, incl. "no page
+  random bot deck on a tiny pool, seen 2026-10-05 and 2026-10-06, not fixed yet), `npm run test:e2e` 320 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.
@@ -954,6 +970,14 @@ docs/technique/             technical doc (French, user choice): overview, front
   every function. The service role key can call internal functions
   through REST (`/rest/v1/rpc/pvp_bot_deck`) to reproduce such errors
   without a user.
+- **JIT**: PGlite has none; Supabase JIT-compiles queries estimated
+  expensive (a cost-100 function x thousands of rows), which can take
+  seconds live while the suite is fast (0036: `pvp_bot_deck('all')` 4.5 s
+  live, 0.4 s locally; 11x for big formats vs 3-6x for small ones gave it
+  away). Put `set jit = off` on such functions. To profile on real data:
+  download `cards` + `sets` through REST (service role, pages of 1,000)
+  into PGlite with `jsonb_populate_recordset`, then `EXPLAIN (ANALYZE,
+  VERBOSE)`; to time live, call the internal function through REST.
 - To check what's applied on the real project: REST calls with the
   service role key from `scripts/.env.local` (a missing table answers 404,
   an existing RPC called without a user answers `not_authenticated`).
