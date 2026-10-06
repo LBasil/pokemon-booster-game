@@ -511,11 +511,6 @@ const recent = ref([])
 const logLines = computed(() => describeAll(recent.value.length ? recent.value : (battle.value?.log ?? []).slice(-12)))
 const logEl = ref(null)
 
-watch(logLines, async () => {
-  await nextTick()
-  if (logEl.value) logEl.value.scrollTop = logEl.value.scrollHeight
-})
-
 async function act(action) {
   if (busy.value) return
   busy.value = true
@@ -766,6 +761,14 @@ function describeAll(events) {
     .map((e, i) => ({ text: describe(e, events[i - 1]), turn: e.k === 'turn', key: `${i}-${e.k}-${e.t}` }))
     .filter((line) => line.text)
 }
+
+// Below describeAll: watching logLines evaluates it at once, and with a battle
+// in progress (resumed) describe() would reach eventName before its const
+// was initialized (TDZ, "Cannot access ... before initialization")
+watch(logLines, async () => {
+  await nextTick()
+  if (logEl.value) logEl.value.scrollTop = logEl.value.scrollHeight
+})
 
 // ---------- Leaderboard ----------
 

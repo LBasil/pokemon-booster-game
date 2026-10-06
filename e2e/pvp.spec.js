@@ -234,6 +234,20 @@ test('a battle in progress comes back after a reload', async ({ page }) => {
   await expect(board(page).getByRole('button', { name: /^Active: Charmander/ })).toBeVisible()
 })
 
+// Back through the app (no reload): the store still holds the battle and its
+// log when the view sets up (live, 2026-10-06: "Cannot access ... before
+// initialization", watch(logLines) ran before eventName was declared)
+test('a battle in progress comes back from the mini-games page', async ({ page }) => {
+  await mockSupabase(page, { challengeCollection, pvp: withDeck })
+  await page.goto('/challenge/games/pvp')
+  await page.getByRole('button', { name: /^Hard/ }).click()
+  await setUp(page)
+  await page.locator('a[href="/challenge/games"]:visible').first().click()
+  await page.locator('.game-tile').filter({ hasText: 'PvP battles' }).click()
+  await expect(board(page).getByRole('button', { name: /^Active: Charmander/ })).toBeVisible()
+  await expect(page.locator('.pvp-log')).toContainText('You go first.')
+})
+
 test('formats: one era or one set, and no opponent says why', async ({ page }) => {
   await mockSupabase(page, { challengeCollection, pvp: { opponent: false, decks: { 'era:Scarlet & Violet': { attack: DECK.slice(0, 18).concat(['sv3pt5-6', 'sv3pt5-6']) } } } })
   await page.goto('/challenge/games/pvp')
