@@ -225,6 +225,7 @@ Fonctions pures, chacune testée dans un `*.test.js` voisin.
 | --- | --- |
 | `rarity.js` | `rarityBucket(label)` (**miroir** de `rarity_bucket()` en SQL), `BUCKETS`, `rarityTier` (3 niveaux visuels), `rarityRank`, `sortForReveal`, `bestPull` |
 | `collection.js` | `filterEntries` (la recherche compare aussi le nom français du Pokémon : `cardNameMatches`, `searchNeedle`), `sortEntries`, `setProgress`, `collectionStats` (cartes, uniques, sets, valeur), `binderSlots`, `pokedexSlots`, `cardNumber` |
+| `fetchAll.js` | `fetchAll(query)` : toutes les lignes d'une requête Supabase, par pages de 1 000 (PostgREST n'en renvoie jamais plus d'un coup) ; le tri doit finir sur une clé unique |
 | `profile.js` | `boostersOpened`, `packSummary` (nombre exact de boosters par mode), `RANKS` + `rankFor` (niveau), `rarityBreakdown`, `validateUsername` |
 | `achievements.js` | Les ~1210 définitions (`REGION_FOCUS` : une boucle par catégorie ajoute les succès de chaque fichier de région) (catégorie, `sub` = sous-catégorie, `tags` = régions du filtre), `collectorStats` (tout en une passe), `achievements()`, `nextUp`, `achievementProgress`, filtres, taux, tri des toasts |
 | `pokemonGroups.js` | Listes de numéros du Pokédex des succès « possède-les tous » : lignées, starters, légendaires, fabuleux, Ultra-Chimères, badges d'arène, Conseil 4, Maîtres, rivaux (Kanto ; les lignées sont toutes dans les fichiers de région) |

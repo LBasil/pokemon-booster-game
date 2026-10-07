@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabaseClient'
+import { fetchAll } from '@/utils/fetchAll'
 
 const PROFILE_COLUMNS = 'id, username, is_public, showcase_card_id, created_at, accepts_trades'
 // Before migration 0012 (no accepts_trades): read as accepting trades
@@ -33,10 +34,10 @@ export function fetchPublicProfile(username) {
 }
 
 /** That profile's collection, same shape as fetchCollection() rows. */
-export async function fetchPublicCollection(username) {
-  const { data, error } = await supabase.rpc('public_collection', { p_username: username })
-  if (error) throw error
-  return data
+export function fetchPublicCollection(username) {
+  return fetchAll(() =>
+    supabase.rpc('public_collection', { p_username: username }).order('acquired_at', { ascending: false }).order('card_id'),
+  )
 }
 
 /**

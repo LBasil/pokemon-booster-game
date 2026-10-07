@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabaseClient'
+import { fetchAll } from '@/utils/fetchAll'
 
 // Challenge mode RPCs (migration 0005). The server owns every coin: these
 // calls never send amounts, only what the player wants to do.
@@ -70,14 +71,15 @@ export const CHALLENGE_ERRORS = [
 // PostgREST's answer for an RPC that doesn't exist yet
 const MISSING_FUNCTION = 'PGRST202'
 
+function friendly(error) {
+  // "pvp_cannot_attack: energy" / "pvp_cannot_play: supporter": the code, then why
+  const code = CHALLENGE_ERRORS.find((known) => error.message === known || error.message?.startsWith(`${known}: `))
+  return code ? Object.assign(new Error(error.message), { code }) : error
+}
+
 async function call(name, args) {
   const { data, error } = await supabase.rpc(name, args)
-  if (error) {
-    // "pvp_cannot_attack: energy" / "pvp_cannot_play: supporter": the code, then why
-    const code = CHALLENGE_ERRORS.find((known) => error.message === known || error.message?.startsWith(`${known}: `))
-    if (code) throw Object.assign(new Error(error.message), { code })
-    throw error
-  }
+  if (error) throw friendly(error)
   return data
 }
 
@@ -163,7 +165,13 @@ export async function fetchChallengeBadge() {
 export const fetchTrades = () => call('my_trades')
 
 /** A public player's challenge collection, same shape as fetchCollection() rows. */
-export const fetchChallengeCollectionOf = (username) => call('challenge_collection_of', { p_username: username })
+export function fetchChallengeCollectionOf(username) {
+  return fetchAll(() =>
+    supabase.rpc('challenge_collection_of', { p_username: username }).order('acquired_at', { ascending: false }).order('card_id'),
+  ).catch((error) => {
+    throw friendly(error)
+  })
+}
 
 /**
  * Who could trade me this card (migration 0022): public players who accept

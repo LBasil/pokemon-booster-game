@@ -883,7 +883,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   verified locally with PGlite before being handed over; 0010-0025 have
   their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0037 too) —
   the earlier checks lived in scratch scripts and are gone.
-- Tests: `npm test` 276 unit tests, `npm run test:db` 740 database
+- Tests: `npm test` 279 unit tests, `npm run test:db` 740 database
   checks (2026-10-06: CI was red 5 pushes in a row on two random tests,
   fixed: 0031's Base fixture had 57 Pokémon, under `pvp_bot_deck`'s 60, so
   the bot fell back to the whole format and took ex; 0033's scripted
@@ -962,8 +962,15 @@ docs/technique/             technical doc (French, user choice): overview, front
   (one snapshot per day: the noon run updates midnight's).
 - The pokemontcg.io API key in use is the one exposed in this repo's git
   history — rotate it if the repo is ever made public.
-- The collection is fetched in one query; the grids render progressively.
-  Revisit with server-side paging past tens of thousands of distinct cards.
+- The collection is fetched whole, 1,000 rows per request
+  (`src/utils/fetchAll.js`: PostgREST caps every answer at 1,000 rows, so a
+  1,563-card collection silently lost its oldest cards, Base and Fossil
+  "emptied", 2026-10-07); same for the wishlist and `public_collection` /
+  `challenge_collection_of`. Any list that can pass 1,000 rows goes through
+  `fetchAll` with an order ending on a unique key (a pack's cards share
+  `acquired_at`). e2e `page.route` globs on those URLs need a trailing `*`
+  (query string). The grids render progressively. Revisit with server-side
+  paging past tens of thousands of distinct cards.
   Trade pickers show 60 matches, then "Show more" (60 at a time).
 
 ## Machine notes

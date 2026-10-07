@@ -90,10 +90,10 @@ Authentication > URL Configuration*.
 
 | Fonction JS | Requête | Accès | Réponse |
 | --- | --- | --- | --- |
-| `fetchCollection(mode)` | `collections` : `select card_id, quantity, acquired_at, cards(*)` `mode = …` `order by acquired_at desc` | connecté (RLS : ses lignes) | Entrées de collection, les plus récentes d'abord |
+| `fetchCollection(mode)` | `collections` : `select card_id, quantity, acquired_at, cards(*)` `mode = …` `order by acquired_at desc, card_id`, par pages de 1 000 (`fetchAll`) | connecté (RLS : ses lignes) | Entrées de collection, les plus récentes d'abord |
 | `fetchCollectionStats(mode)` | `count` des lignes de `collections` du mode + `count` de `cards` | connecté | `{ uniqueOwned, totalCards }` |
 | `fetchOpenings({ mode, before, limit, hitsOnly })` | `booster_openings` du mode, `opened_at < before`, `hits > 0` si `hitsOnly`, 20 par page | connecté | `[{ id, set_id, card_ids, best_card_id, hits, secrets, god_pack, opened_at }]` |
-| `fetchWishlist()` | `wishlist` : `select card_id, created_at, cards(*)` | connecté | Cartes recherchées |
+| `fetchWishlist()` | `wishlist` : `select card_id, created_at, cards(*)`, par pages de 1 000 (`fetchAll`) | connecté | Cartes recherchées |
 | `addToWishlist(cardId)` | `insert { card_id }` (`user_id` = `auth.uid()` par défaut) | connecté | — (déjà présente : ignoré) |
 | `removeFromWishlist(cardId)` | `delete where card_id = …` | connecté | — |
 

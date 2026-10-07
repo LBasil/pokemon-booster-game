@@ -1,15 +1,17 @@
 import { supabase } from '@/lib/supabaseClient'
+import { fetchAll } from '@/utils/fetchAll'
 
 /** The player's collection for one game mode ('unlimited' | 'challenge'), newest first. */
-export async function fetchCollection(mode = 'unlimited') {
-  const { data, error } = await supabase
-    .from('collections')
-    .select('card_id, quantity, acquired_at, cards(*)')
-    .eq('mode', mode)
-    .order('acquired_at', { ascending: false })
-
-  if (error) throw error
-  return data
+export function fetchCollection(mode = 'unlimited') {
+  // a pack's 10 cards share acquired_at: card_id keeps the pages stable
+  return fetchAll(() =>
+    supabase
+      .from('collections')
+      .select('card_id, quantity, acquired_at, cards(*)')
+      .eq('mode', mode)
+      .order('acquired_at', { ascending: false })
+      .order('card_id'),
+  )
 }
 
 export async function fetchCollectionStats(mode = 'unlimited') {

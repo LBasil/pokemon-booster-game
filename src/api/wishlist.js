@@ -1,13 +1,11 @@
 import { supabase } from '@/lib/supabaseClient'
+import { fetchAll } from '@/utils/fetchAll'
 
 /** The player's wishlist with card details, newest first. */
-export async function fetchWishlist() {
-  const { data, error } = await supabase
-    .from('wishlist')
-    .select('card_id, created_at, cards(*)')
-    .order('created_at', { ascending: false })
-  if (error) throw error
-  return data
+export function fetchWishlist() {
+  return fetchAll(() =>
+    supabase.from('wishlist').select('card_id, created_at, cards(*)').order('created_at', { ascending: false }).order('card_id'),
+  )
 }
 
 // user_id defaults to auth.uid() in the database

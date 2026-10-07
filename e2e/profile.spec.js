@@ -48,7 +48,7 @@ test("a public profile's numbers follow the game mode, challenge first", async (
     // Mostly played in the challenge: 3 cards there, none in unlimited
     partners: { misty: [{ ...collectionEntry('sv3pt5-199'), quantity: 3 }] },
   })
-  await page.route('**/rest/v1/rpc/public_collection', (route) => route.fulfill({ json: [] }))
+  await page.route('**/rest/v1/rpc/public_collection*', (route) => route.fulfill({ json: [] }))
   await page.goto('/u/misty')
   const stat = (label) => page.locator('.stat').filter({ hasText: label }).locator('dd')
   await expect(page.getByRole('tab', { name: 'Challenge' })).toHaveAttribute('aria-selected', 'true')
