@@ -852,7 +852,8 @@ sequenceDiagram
 ### Combats PvP
 
 Page : [PvpView.vue](../../src/views/PvpView.vue)
-(`/challenge/games/pvp`), composants `PvpCard` et `PvpCardSheet`, store
+(`/challenge/games/pvp`), composants `PvpBattle` (le combat),
+`PvpBoardCard`, `PvpCard` et `PvpCardSheet`, store
 `pvp`, migrations 0024 à 0030. **Réservé à ses testeurs depuis le
 2026-10-05** (0028, `pvp_open_to()` côté serveur et `PVP_TESTERS` côté
 client : « bloque le PvP uniquement pour le joueur Bazouk ») : les autres
@@ -1050,58 +1051,59 @@ sequenceDiagram
   l'IA normale, 60 combats) : il gagne 19 fois au lieu de 2, et fait
   210 dégâts par combat au lieu de 99. Les decks de défense des joueurs sont joués en
   « difficile ».
-- **Ce que l'écran montre** : en haut le côté adverse (Banc, Actif, main
-  et deck en nombres), un journal de ce qui vient de se passer
-  (`events` : pioches, Énergies, attaques et pièces, dégâts, États, K.O.,
-  noms EN/FR), mon côté, ma main (défile dans sa propre boîte). Toucher
-  une carte ouvre ce qu'elle peut faire, d'après les **indications du
-  serveur** (`hints` : Énergie disponible, retraite possible, pour chaque
-  attaque pourquoi elle est bloquée, pour chaque carte de la main poser
-  ou faire évoluer sur quels Pokémon) : les règles ne sont écrites qu'en
-  SQL. « Détails de la carte » ouvre `PvpCardSheet` (attaques, textes en
-  français si importés, Faiblesse, Résistance, Retraite, talents marqués
-  « pas encore joués »).
-- **Ce qu'il y a à faire** (2026-10-06, sur téléphone : « je ne savais
-  jamais quand jouer, ou taper, que faire ») : sans carte touchée, à mon
-  tour, le panneau dit l'étape (`nextStep` : attacher l'Énergie, puis
-  attaquer, sinon jouer de la main, sinon finir le tour), propose
-  « Attacher l'Énergie … à <mon Actif> » et montre les attaques de mon
-  Actif : attacher puis attaquer = deux touchers, sans rien sélectionner.
-  « Finir mon tour » ne s'allume qu'une fois qu'il n'y a plus d'attaque
-  possible ; mon Actif et les cartes jouables de ma main sont cerclés.
-- **Sur téléphone et tablette** (< 992 px, la largeur de la barre
-  d'onglets) : le combat prenait 3 écrans et les actions s'ouvraient tout
-  en bas. Chaque camp tient sur une ligne (Actif, puis les 3 places de
-  Banc), cartes recadrées sur leur haut (nom, PV, illustration), journal
-  sur 2 lignes, main réduite à l'illustration et au nom, et la main + le
-  panneau d'actions forment un bloc (`.pvp-dock`) collé au-dessus de la
-  barre d'onglets quand l'écran fait au moins 740 px de haut (Pixel 7 :
-  tout tient sur un écran ; plus bas, 375 × 667, le bloc recouvrait tout
-  le plateau, il reste donc à sa place). `pvp.spec.js` > « a phone plays
-  a turn on one screen » le vérifie.
-- **Sur PC** (≥ 992 px, 2026-10-06 : « sur PC ça manque de lisibilité,
-  je scroll en boucle » ; le combat faisait 1 860 px de haut en
-  1440 × 900) : deux colonnes. À gauche le plateau, en miroir comme
-  dans Pocket (même jour : « je ne comprends plus qui est le banc »,
-  l'Actif et le Banc étaient côte à côte à la même taille) : le Banc
-  adverse en haut, les deux Actifs face à face au milieu et plus grands,
-  mon Banc en bas, chaque Banc dans un bac en pointillés marqué « Banc » ;
-  puis ma main. À droite le titre, le score, le journal à côté du camp
-  adverse (même hauteur, `contain: size`, il défile dedans) et le panneau
-  d'actions à côté de mon camp, collé en haut de l'écran quand on défile
-  (`.pvp-dock` en `display: contents` : la main et les actions sont deux
-  cases de la grille). Tout tient en 1280 × 720 ; `pvp.spec.js` > « a
-  laptop sees the whole battle on one screen » le vérifie.
+- **L'écran de combat, façon Pocket** (`PvpBattle`, 2026-10-07 : après
+  des captures de Pokémon JCC Pocket, « fais-moi la meilleure version
+  possible de notre PvP »). Le plateau est en miroir : en haut l'adversaire
+  (nom, Elo, ses points en pastilles), son Banc, son Actif ; au milieu une
+  bulle « À toi de jouer » + **une seule phrase** qui dit quoi faire
+  (`prompt` : placer l'Actif, puis le Banc et « Commencer le combat » ;
+  attacher l'Énergie, puis attaquer, sinon jouer de la main, sinon finir le
+  tour, `nextStep` ; choisir une cible ; remplacer un Pokémon K.O.), puis
+  les 2 dernières lignes du journal (« Tout le journal » le déplie) ; en
+  bas mon Actif, mon Banc, mon nom et mes points, ma main en éventail.
+  Les cartes sont entières (`PvpBoardCard`), les PV restants en gros dans
+  leur coin avec une barre fine, les Énergies et États Spéciaux sur
+  l'illustration. **Ce qui se joue brille** (halo cyan `--pb-focus`, d'après
+  les `hints` du serveur) : cartes de la main jouables, mon Actif quand il
+  peut attaquer ; « Finir mon tour » ne s'allume que quand il ne reste
+  rien d'autre. À côté de mon Actif : « Finir mon tour » et le **jeton
+  d'Énergie** du tour (rond, qui pulse ; la suivante en dessous), à
+  glisser sur un Pokémon ou à toucher puis toucher le Pokémon. Toucher une
+  carte l'ouvre en grand dans un **panneau du bas** (comme le zoom de
+  Pocket ; toucher à côté ou Échap le ferme) : pour mon Actif, ses
+  attaques en gros boutons avec coût, texte et dégâts, « Très efficace
+  (×2) » / « Résisté » quand son type est la Faiblesse / Résistance de
+  l'Actif adverse, « Retraite (coût) » puis toucher qui entre ; pour une
+  carte de la main, la poser, la faire évoluer, la jouer, ou pourquoi
+  pas. Après mon tour, le plateau rougit un instant (le tour adverse est
+  passé, sauf mouvement réduit). Les règles restent en SQL : l'écran ne
+  lit que `hints` (Énergie disponible, retraite, pour chaque attaque
+  pourquoi elle est bloquée, pour chaque carte de la main où la poser).
+  « Détails de la carte » ouvre `PvpCardSheet`.
+- **Sur téléphone et tablette** (< 992 px) : le combat prend **tout
+  l'écran** (`position: fixed`, `html.pb-pvp-arena` masque l'en-tête et
+  la barre d'onglets et bloque le défilement de la page) ; une flèche en
+  haut ramène aux mini-jeux (le combat attend), le menu ☰ donne le format
+  et « Abandonner ». Les tailles suivent la hauteur (`dvh`, rangées `fr`) :
+  tout tient sur un Pixel 7 comme en 375 × 667. Il remplace le bloc collé
+  `.pvp-dock` du 2026-10-06 (les actions s'ouvraient sous la main).
+  `pvp.spec.js` > « a phone plays a turn on one screen, like Pocket ».
+- **Sur PC** (≥ 992 px) : le même plateau dans la page, à droite le
+  journal (à côté du camp adverse) et le panneau d'actions (à côté du
+  mien, toujours ouvert : sans carte touchée, « Attacher l'Énergie … à
+  <mon Actif> » et ses attaques, deux clics). Tout tient en 1280 × 720 ;
+  `pvp.spec.js` > « a laptop sees the whole battle on one screen ».
+- **Fin du combat** : le combat terminé est gardé dans le store
+  (`pvp.finished`, posé dans le même tick que `state`) jusqu'à « Retour
+  aux combats » : émis par `PvpBattle` après l'`await`, l'événement se
+  perdait (le composant était déjà démonté par le rendu suivant).
 - **Glisser-déposer façon Pocket** (2026-10-06 : « pas fluide et
   compliqué de devoir tap partout ») : une carte de ma main glissée sur le
   plateau se joue (Pokémon de base sur le Banc, évolution sur son Pokémon,
   Dresseur n'importe où : `PvpTrainerPicker` pose la suite), le jeton
-  d'Énergie de la zone glissé sur un Pokémon s'attache ; toucher le jeton
-  puis un Pokémon aussi. Les cibles possibles sont en pointillés (d'après
-  les `hints`, `dropAction`), le bloc du bas s'efface pendant le geste
-  (on dépose à travers), la page défile près des bords de l'écran. La
-  main défile de côté (`touch-action: pan-x`) : sur téléphone, un glisser
-  part vers le haut. Toucher une carte ouvre toujours ses détails.
+  d'Énergie glissé sur un Pokémon s'attache. Les cibles possibles sont en
+  pointillés (d'après les `hints`, `dropAction`). La main défile de côté
+  (`touch-action: pan-x`) : sur téléphone, un glisser part vers le haut.
   Les dégâts s'affichent un instant sur le Pokémon touché (`showHits`,
   pas sur un Pokémon mis K.O. : un autre prend sa place).
 - **Constructeur après « Deck auto »** (2026-10-06 : « c'est infâme, ça

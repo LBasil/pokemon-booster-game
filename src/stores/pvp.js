@@ -35,6 +35,10 @@ export const usePvpStore = defineStore('pvp', {
     error: null,
     eligible: {}, // format -> my cards that can be in a deck there
     boards: {}, // format -> pvp_leaderboard() payload
+    // The battle just over, kept on screen until "Back" (set here, in the same
+    // tick as `state`: the battle component unmounts on the next render, so an
+    // event it emitted after the await was dropped)
+    finished: null,
   }),
   getters: {
     battle: (s) => s.state?.battle ?? null,
@@ -121,6 +125,7 @@ export const usePvpStore = defineStore('pvp', {
       const result = await pvpAct(action)
       this.state = result.state
       if (result.battle.status !== 'playing') {
+        this.finished = result.battle
         delete this.boards[result.battle.format]
         if (result.battle.coins) this.syncCoins()
       }
@@ -130,6 +135,7 @@ export const usePvpStore = defineStore('pvp', {
     async forfeit() {
       const result = await forfeitPvpBattle()
       this.state = result.state
+      this.finished = result.battle
       delete this.boards[result.battle.format]
       return result
     },

@@ -1009,7 +1009,6 @@
     "attackCost": "free | 1 energy | {count} energies",
     "details": "Card details",
     "close": "Close",
-    "selectHint": "Drag a card from your hand onto the board, or tap a card to see what it can do.",
     "waitHint": "The server is playing...",
     "blocks": {
       "first_turn": "Not on the first turn",
@@ -1264,15 +1263,33 @@
     "abilityLine": "Ability: {name}",
     "attachTypeTo": "Attach the {type} energy to {name}",
     "next": {
-      "attach": "Attach this turn's energy: drag it onto a Pokémon (or the button).",
-      "attack": "Attack with your Active Pokémon (it ends your turn), or play cards from your hand first.",
-      "play": "No attack ready. Drag cards from your hand onto the board, or end your turn.",
+      "attach": "Attach this turn's energy: drag it onto a Pokémon, or tap it then the Pokémon.",
+      "attack": "Tap your Active Pokémon to attack (that ends your turn). You can play cards from your hand first.",
+      "play": "No attack ready yet. Drag cards from your hand onto the mat, or end your turn.",
       "end": "Nothing left to play: end your turn."
     },
     "change": "Change",
     "showPool": "Add or swap cards ({count} available) | Add or swap cards ({count} available)",
     "hidePool": "Hide my cards",
-    "energyToken": "This turn's {type} energy: drag it onto a Pokémon, or tap it then a Pokémon"
+    "energyToken": "This turn's {type} energy: drag it onto a Pokémon, or tap it then a Pokémon",
+    "you": "You",
+    "menu": "Battle menu",
+    "leave": "Leave (the battle waits for you)",
+    "discardCount": "Discard: {count}",
+    "logMore": "Full log",
+    "logLess": "Less",
+    "setupReset": "Start over",
+    "retreat": "Retreat ({cost})",
+    "nothingNow": "Nothing to do with this card right now.",
+    "superEffective": "Super effective (×2)",
+    "resisted": "Resisted (−{n})",
+    "prompt": {
+      "setupActive": "Put a Basic Pokémon in your Active spot: tap it in your hand.",
+      "setupBench": "Up to {max} Basic Pokémon on your Bench, then tap “Start the battle”.",
+      "promote": "Your Active Pokémon is knocked out: tap the Benched Pokémon that takes its place.",
+      "armed": "Now tap the Pokémon that gets the energy.",
+      "retreat": "Retreat: tap the Benched Pokémon that comes in ({cost})."
+    }
   },
   "electrodeFlip": {
     "title": "Shiny Electrode Flip",

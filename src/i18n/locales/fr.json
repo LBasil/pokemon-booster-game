@@ -1009,7 +1009,6 @@
     "attackCost": "gratuite | 1 Énergie | {count} Énergies",
     "details": "Détails de la carte",
     "close": "Fermer",
-    "selectHint": "Glisse une carte de ta main sur le plateau, ou touche une carte pour voir ce qu'elle peut faire.",
     "waitHint": "Le serveur joue...",
     "blocks": {
       "first_turn": "Pas au premier tour",
@@ -1264,15 +1263,33 @@
     "abilityLine": "Talent : {name}",
     "attachTypeTo": "Attacher l'Énergie {type} à {name}",
     "next": {
-      "attach": "Attache l'Énergie du tour : glisse-la sur un Pokémon (ou le bouton).",
-      "attack": "Attaque avec ton Pokémon Actif (ça finit ton tour), ou joue d'abord des cartes de ta main.",
-      "play": "Pas d'attaque prête. Glisse des cartes de ta main sur le plateau, ou finis ton tour.",
+      "attach": "Attache l'Énergie du tour : glisse-la sur un Pokémon, ou touche-la puis le Pokémon.",
+      "attack": "Touche ton Pokémon Actif pour attaquer (ça finit ton tour). Tu peux d'abord jouer des cartes de ta main.",
+      "play": "Pas encore d'attaque prête. Glisse des cartes de ta main sur le terrain, ou finis ton tour.",
       "end": "Plus rien à jouer : finis ton tour."
     },
     "change": "Changer",
     "showPool": "Ajouter ou changer des cartes ({count} disponible) | Ajouter ou changer des cartes ({count} disponibles)",
     "hidePool": "Masquer mes cartes",
-    "energyToken": "L'Énergie {type} du tour : glisse-la sur un Pokémon, ou touche-la puis un Pokémon"
+    "energyToken": "L'Énergie {type} du tour : glisse-la sur un Pokémon, ou touche-la puis un Pokémon",
+    "you": "Toi",
+    "menu": "Menu du combat",
+    "leave": "Quitter (le combat t'attend)",
+    "discardCount": "Défausse : {count}",
+    "logMore": "Tout le journal",
+    "logLess": "Réduire",
+    "setupReset": "Recommencer",
+    "retreat": "Retraite ({cost})",
+    "nothingNow": "Rien à faire avec cette carte pour l'instant.",
+    "superEffective": "Très efficace (×2)",
+    "resisted": "Résisté (−{n})",
+    "prompt": {
+      "setupActive": "Place un Pokémon de base sur ton Poste Actif : touche-le dans ta main.",
+      "setupBench": "Jusqu'à {max} Pokémon de base sur ton Banc, puis touche « Commencer le combat ».",
+      "promote": "Ton Pokémon Actif est K.O. : touche le Pokémon de ton Banc qui prend sa place.",
+      "armed": "Touche maintenant le Pokémon qui reçoit l'Énergie.",
+      "retreat": "Retraite : touche le Pokémon du Banc qui entre en jeu ({cost})."
+    }
   },
   "electrodeFlip": {
     "title": "Électrode Shiny Flip",

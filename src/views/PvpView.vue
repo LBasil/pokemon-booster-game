@@ -1,11 +1,9 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import * as sfx from '@/lib/sfx'
 import { useCardLocale } from '@/composables/useCardLocale'
 import { useChallengeStore } from '@/stores/challenge'
 import { usePvpStore } from '@/stores/pvp'
-import { useSettingsStore } from '@/stores/settings'
 import { resetTimeLabel } from '@/utils/challenge'
 import { searchNeedle } from '@/utils/collection'
 import {
@@ -22,11 +20,8 @@ import {
   POINTS_TO_WIN,
   RESISTANCE,
   addBlock,
-  attackChoices,
-  attackName,
   autoDeck,
   autoEnergy,
-  damageLabel,
   deckCheck,
   deckCounts,
   deckEnergy,
@@ -39,8 +34,8 @@ import AppHeader from '@/components/AppHeader.vue'
 import CoinAmount from '@/components/CoinAmount.vue'
 import EnergyIcons from '@/components/EnergyIcons.vue'
 import PvpCard from '@/components/PvpCard.vue'
+import PvpBattle from '@/components/PvpBattle.vue'
 import PvpCardSheet from '@/components/PvpCardSheet.vue'
-import PvpTrainerPicker from '@/components/PvpTrainerPicker.vue'
 
 // PvP battles like Pokémon TCG Pocket (challenge mode, migration 0030),
 // asynchronous. Per format (every card, one TCG era, one set) I keep two
@@ -62,15 +57,11 @@ const { t, te, locale } = useI18n()
 const { french, cardName, cardImage, fallback } = useCardLocale()
 const pvp = usePvpStore()
 const challenge = useChallengeStore()
-const settings = useSettingsStore()
 const resetTime = computed(() => resetTimeLabel(locale.value))
 
 const format = ref(readFormat())
 const busy = ref(false)
 const errorMessage = ref('')
-const finished = ref(null) // the battle just over, kept on screen until "Back"
-const confirmForfeit = ref(false)
-const battleEl = ref(null)
 
 function readFormat() {
   try {
@@ -261,386 +252,25 @@ async function saveDeck() {
 }
 
 // ---------- Battle ----------
+// The battle itself lives in PvpBattle (a full-screen mat on phones, user
+// 2026-10-07); the view keeps the one just over on screen until "Back".
 
-const battle = computed(() => finished.value ?? pvp.battle)
-const hints = computed(() => battle.value?.hints ?? {})
-const myTurn = computed(() => !finished.value && hints.value.my_turn)
-const opponentName = computed(() => {
-  const opponent = battle.value?.opponent
-  if (opponent?.bot) return botName(opponent.bot)
-  return opponent?.username ?? t('pvp.privateTrainer')
-})
+const battle = computed(() => pvp.finished ?? pvp.battle)
 const botName = (level) => t('pvp.botName', { level: t(`pvp.levels.${level}`) })
-const myCard = (index) => battle.value?.my_cards?.[index] ?? null
-/** My Pokémon in play by position: 0 = Active, 1-3 = Bench. */
-const mySlot = (pos) => (pos === 0 ? battle.value?.me.active : battle.value?.me.bench[pos - 1]) ?? null
-const theirSlot = (pos) => (pos === 0 ? battle.value?.them.active : battle.value?.them.bench[pos - 1]) ?? null
-const benchSize = 3
+const sheet = ref(null) // a deck card read in full
 
-// What I tapped: { kind: 'hand', index } | { kind: 'mine' | 'theirs', pos }
-const selection = ref(null)
-const pending = ref(null) // an attack waiting for its target / Benched Pokémon
-const trainerPick = ref(null) // a Trainer of my hand being played (PvpTrainerPicker asks its choices)
-const abilityPick = ref(null) // { at, i }: an ability of my Pokémon being used (0033, same picker)
-const sheet = ref(null) // { card, slot } read in full
-
-function select(next) {
-  pending.value = null
-  trainerPick.value = null
-  abilityPick.value = null
-  const same = selection.value && next && selection.value.kind === next.kind && selection.value.index === next.index && selection.value.pos === next.pos
-  selection.value = same ? null : next
-}
-
-const selectedCard = computed(() => {
-  const s = selection.value
-  if (!s || !battle.value) return null
-  if (s.kind === 'hand') return myCard(s.index)
-  return (s.kind === 'mine' ? mySlot(s.pos) : theirSlot(s.pos))?.card ?? null
-})
-const selectedSlot = computed(() => {
-  const s = selection.value
-  if (!s || s.kind === 'hand') return null
-  return s.kind === 'mine' ? mySlot(s.pos) : theirSlot(s.pos)
-})
-const handHints = computed(() => (selection.value?.kind === 'hand' ? hints.value.hand?.[selection.value.index] : null))
-
-/** Whether a card of my hand can be played now (the server's hints). */
-const handPlayable = (entry) => {
-  const h = hints.value.hand?.[entry.index]
-  return !!(h?.bench || h?.evolve?.length || (entry.card.stage === 'trainer' && h?.play === null))
-}
-
-// What to do now on my turn (user, 2026-10-06, on phones: "je ne savais
-// jamais quand jouer, ou taper, que faire"): attach, then attack, else play
-// from the hand, else end the turn (the button lights up then)
-const nextStep = computed(() => {
-  if (!myTurn.value || hints.value.setup || hints.value.promote) return null
-  if (hints.value.attach) return 'attach'
-  if ((hints.value.attacks ?? []).some((block) => block === null)) return 'attack'
-  if ((battle.value?.me.hand ?? []).some(handPlayable)) return 'play'
-  return 'end'
-})
-
-// My Active's attacks show when it's picked, and on my turn when nothing is
-// (one tap to attack, like Pocket)
-const showAttacks = computed(() => {
-  if (finished.value || hints.value.setup || hints.value.promote || trainerPick.value !== null || abilityPick.value || pending.value?.need) return false
-  if (!mySlot(0)) return false
-  const s = selection.value
-  return s ? s.kind === 'mine' && s.pos === 0 : myTurn.value
-})
-
-// ---------- Drag and drop, like Pocket ----------
-// User, 2026-10-06: "pas fluide et compliqué de devoir tap partout". A card
-// of my hand dragged onto the board plays it (a Basic onto the Bench, an
-// evolution onto its Pokémon, a Trainer anywhere: the picker asks the
-// rest); the zone's energy dragged onto a Pokémon attaches it, and so does
-// tapping the energy then the Pokémon. A tap still opens the panel. The
-// hand scrolls sideways (touch-action: pan-x), so a drag starts upward on
-// phones. Drop targets carry data-drop: a position, 'bench-n' (an empty
-// spot), 'side', 'board'.
-const drag = ref(null) // { kind: 'hand', index } | { kind: 'energy' }, plus x, y, over once moving
-const energyArmed = ref(false)
-const DRAG_START = 10 // px before a press becomes a drag
-let pressed = null
-let justDragged = false
-
-function startDrag(event, source) {
-  if (busy.value || finished.value || !myTurn.value || hints.value.setup || hints.value.promote || pending.value?.need) return
-  if (event.pointerType === 'mouse' && event.button !== 0) return
-  pressed = { source, x: event.clientX, y: event.clientY, id: event.pointerId }
-  window.addEventListener('pointermove', moveDrag, { passive: false })
-  window.addEventListener('pointerup', endDrag)
-  window.addEventListener('pointercancel', stopDrag)
-}
-
-function moveDrag(event) {
-  if (!pressed || event.pointerId !== pressed.id) return
-  if (!drag.value) {
-    if (Math.hypot(event.clientX - pressed.x, event.clientY - pressed.y) < DRAG_START) return
-    drag.value = { ...pressed.source }
-    selection.value = null
-    energyArmed.value = false
-  }
-  event.preventDefault()
-  drag.value = { ...drag.value, x: event.clientX, y: event.clientY, over: dropAt(event.clientX, event.clientY) }
-  if (!edgeFrame) edgeFrame = requestAnimationFrame(edgeScroll)
-}
-
-// Near the top or bottom of the screen the page scrolls on its own (on a
-// laptop the energy and my Active aren't always on screen together)
-const EDGE = 64
-let edgeFrame = 0
-
-function edgeScroll() {
-  edgeFrame = 0
-  const d = drag.value
-  if (!d) return
-  const speed = d.y < EDGE ? -(EDGE - d.y) / 4 : d.y > innerHeight - EDGE ? (d.y - innerHeight + EDGE) / 4 : 0
-  if (!speed) return
-  scrollBy(0, speed)
-  drag.value = { ...d, over: dropAt(d.x, d.y) }
-  edgeFrame = requestAnimationFrame(edgeScroll)
-}
-
-function endDrag(event) {
-  const dragged = drag.value
-  stopDrag()
-  if (!dragged) return // a tap: its click handler does the rest
-  // the click that follows the release must not select anything
-  justDragged = true
-  setTimeout(() => (justDragged = false), 0)
-  const action = dropAction(dragged, dropAt(event.clientX, event.clientY))
-  if (action === 'trainer') trainerPick.value = dragged.index
-  else if (action) act(action)
-}
-
-function stopDrag() {
-  pressed = null
-  drag.value = null
-  cancelAnimationFrame(edgeFrame)
-  edgeFrame = 0
-  window.removeEventListener('pointermove', moveDrag)
-  window.removeEventListener('pointerup', endDrag)
-  window.removeEventListener('pointercancel', stopDrag)
-}
-
-onBeforeUnmount(stopDrag)
-
-/** The drop target under a point (its data-drop), null if none. */
-function dropAt(x, y) {
-  return document.elementFromPoint(x, y)?.closest('[data-drop]')?.dataset.drop ?? null
-}
-
-/**
- * What dropping this on that target does, from the server's hints: a move
- * for pvp_act, 'trainer' (PvpTrainerPicker asks the rest) or null.
- */
-function dropAction(dragged, target) {
-  if (!dragged || target === null) return null
-  const pos = /^\d$/.test(target) ? Number(target) : null
-  if (dragged.kind === 'energy') return hints.value.attach && pos !== null && mySlot(pos) ? { type: 'attach', pos } : null
-  const card = myCard(dragged.index)
-  const hand = hints.value.hand?.[dragged.index]
-  if (!card || !hand) return null
-  if (card.stage === 'trainer') return hand.play === null ? 'trainer' : null
-  if (pos !== null && hand.evolve?.includes(pos)) return { type: 'evolve', card: dragged.index, pos }
-  if (hand.bench && target !== 'board') return { type: 'bench', card: dragged.index }
-  return null
-}
-
-const isDrop = (target) => !!drag.value && !!dropAction(drag.value, target)
-
-function tapEnergy() {
-  if (justDragged || busy.value) return
-  selection.value = null
-  energyArmed.value = !energyArmed.value
-}
-
-watch(
-  () => hints.value.attach,
-  (attach) => {
-    if (!attach) energyArmed.value = false
-  },
-)
-
-// Damage shown on the Pokémon it hit, for a moment ('mine-0' -> 30); not on
-// a knocked out one (another Pokémon takes its place)
-const hits = ref({})
-let hitsTimer = null
-
-function showHits(events) {
-  const next = {}
-  const out = new Set(events.filter((e) => e.k === 'ko').map((e) => `${e.s === 'a' ? 'mine' : 'theirs'}-${e.pos}`))
-  for (const e of events) {
-    if (e.k !== 'damage' || !(e.n > 0)) continue
-    const key = `${e.s === 'a' ? 'mine' : 'theirs'}-${e.pos}`
-    if (!out.has(key)) next[key] = (next[key] ?? 0) + e.n
-  }
-  hits.value = next
-  clearTimeout(hitsTimer)
-  hitsTimer = setTimeout(() => (hits.value = {}), 1600)
-}
-
-const hitAt = (side, pos) => hits.value[`${side}-${pos}`] ?? 0
-
-function openSheet(card, slot = null) {
-  sheet.value = card ? { card, slot } : null
-}
-
-// Setup: my Active and Benched picks among the Basics in my hand
-const setupActive = ref(null)
-const setupBench = ref([])
-
-function tapHand(entry) {
-  if (busy.value || finished.value || justDragged) return
-  if (hints.value.setup) {
-    if (entry.card.stage !== 'basic') return openSheet(entry.card)
-    if (setupActive.value === entry.index) setupActive.value = null
-    else if (setupBench.value.includes(entry.index)) setupBench.value = setupBench.value.filter((i) => i !== entry.index)
-    else if (setupActive.value === null) setupActive.value = entry.index
-    else if (setupBench.value.length < benchSize) setupBench.value = [...setupBench.value, entry.index]
-    return
-  }
-  select({ kind: 'hand', index: entry.index })
-}
-
-function tapMine(pos) {
-  if (busy.value || finished.value || justDragged) return
-  if (hints.value.promote) {
-    if (pos > 0) act({ type: 'promote', pos })
-    return
-  }
-  // the energy picked up (tapped), now its Pokémon
-  if (energyArmed.value) {
-    energyArmed.value = false
-    if (hints.value.attach) act({ type: 'attach', pos })
-    return
-  }
-  select({ kind: 'mine', pos })
-}
-
-function tapTheirs(pos) {
-  if (pending.value?.need === 'target') return chooseTarget(pos)
-  select({ kind: 'theirs', pos })
-}
-
-/** The events of my last move (and the server's turn), else the battle's last ones. */
-const recent = ref([])
-const logLines = computed(() => describeAll(recent.value.length ? recent.value : (battle.value?.log ?? []).slice(-12)))
-const logEl = ref(null)
-
-async function act(action) {
-  if (busy.value) return
-  busy.value = true
-  errorMessage.value = ''
-  confirmForfeit.value = false
-  try {
-    const result = await pvp.act(action)
-    recent.value = result.events
-    showHits(result.events)
-    pending.value = null
-    trainerPick.value = null
-    abilityPick.value = null
-    // Keep my Pokémon picked while it's still there; a played card leaves the hand
-    if (selection.value?.kind !== 'mine' || action.type === 'attack' || action.type === 'end' || action.type === 'retreat') selection.value = null
-    playSounds(result.events)
-    if (result.battle.status !== 'playing') finished.value = result.battle
-  } catch (err) {
-    errorMessage.value = errorFor(err)
-    // The battle is gone server side: back to the lobby
-    if (err?.code === 'no_game') pvp.load()
-  } finally {
-    busy.value = false
-  }
-}
-
-function playSounds(events) {
-  if (events.some((e) => e.k === 'over')) {
-    const over = events.find((e) => e.k === 'over')
-    if (over.winner === 'a') sfx.hit(settings.sound)
-    else sfx.buzz(settings.vibration)
-    return
-  }
-  if (events.some((e) => e.k === 'ko' && e.s === 'd')) sfx.rare(settings.sound)
-  else if (events.some((e) => e.k === 'ko' && e.s === 'a')) sfx.buzz(settings.vibration)
-  else sfx.flip(settings.sound)
-}
-
-function startBattle() {
-  if (setupActive.value === null) return
-  act({ type: 'setup', active: setupActive.value, bench: setupBench.value })
-}
-
-/** Why an attack of my Active can't be used, null if it can (the server's hints: null = usable). */
-function attackBlock(i) {
-  const blocks = hints.value.attacks ?? []
-  return i < blocks.length ? blocks[i] : 'unknown'
-}
-
-// An attack: some need a target or one of my Benched Pokémon first
-function useAttack(i) {
-  const attack = mySlot(0)?.card.attacks[i]
-  if (!attack) return
-  const choices = attackChoices(attack)
-  const theirBench = battle.value.them.bench.length
-  const myBench = battle.value.me.bench.length
-  const steps = []
-  if (choices.target === 'bench' && theirBench > 1) steps.push('target')
-  if (choices.target === 'any' && theirBench > 0) steps.push('target')
-  if (choices.switchTo && myBench > 1) steps.push('switch_to')
-  if (choices.energyTo && myBench > 1) steps.push('energy_to')
-  pending.value = { attack: i, steps, choices: {}, need: steps[0] ?? null, anyTarget: choices.target === 'any' }
-  if (!steps.length) act({ type: 'attack', attack: i })
-}
-
-function chooseStep(value) {
-  const p = pending.value
-  if (!p?.need) return
-  const choices = { ...p.choices, [p.need]: value }
-  const rest = p.steps.slice(p.steps.indexOf(p.need) + 1)
-  if (rest.length) pending.value = { ...p, choices, need: rest[0] }
-  else act({ type: 'attack', attack: p.attack, ...choices })
-}
-
-const chooseTarget = (pos) => chooseStep(pos)
-
-/**
- * Why ability i of my Pokémon at pos can't be used now, null if it can
- * (0033: hints.abilities). Not `?? 'unknown'`: null means usable.
- */
-function abilityBlock(pos, i) {
-  const list = hints.value.abilities?.[pos] ?? []
-  return i < list.length ? list[i] : 'unknown'
-}
-const abilityName = (ability) => (french.value && ability?.name_fr) || ability?.name || ''
-
-/** A Trainer card's stage line: its kind. */
-const stageLabel = (card) =>
-  card.stage === 'trainer'
-    ? t(`pvp.trainerKinds.${card.kind}`)
-    : card.stage === 'evolution'
-      ? t('pvp.stage.evolution', { name: card.evolves_from })
-      : t(`pvp.stage.${card.stage}`)
-
-async function forfeit() {
-  if (busy.value) return
-  if (!confirmForfeit.value) {
-    confirmForfeit.value = true
-    return
-  }
-  busy.value = true
-  confirmForfeit.value = false
-  try {
-    const result = await pvp.forfeit()
-    finished.value = result.battle
-    sfx.buzz(settings.vibration)
-  } catch (err) {
-    errorMessage.value = errorFor(err)
-    if (err?.code === 'no_game') pvp.load()
-  } finally {
-    busy.value = false
-  }
-}
-
-function resetBattleUi() {
-  selection.value = null
-  pending.value = null
-  recent.value = []
-  setupActive.value = null
-  setupBench.value = []
+function openSheet(card) {
+  sheet.value = card ? { card } : null
 }
 
 function backToLobby() {
-  if (finished.value) format.value = finished.value.format
-  finished.value = null
-  resetBattleUi()
+  if (pvp.finished) format.value = pvp.finished.format
+  pvp.finished = null
   loadEligible()
 }
 
 function scrollToBattle() {
-  nextTick(() => battleEl.value?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }))
+  nextTick(() => document.querySelector('.pvp-battle')?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }))
 }
 
 /** @param {string | null} [level] - a bot level, null = a player */
@@ -648,8 +278,7 @@ async function fight(level = null) {
   if (busy.value || !(level ? canFightBot.value : canFight.value)) return
   busy.value = true
   errorMessage.value = ''
-  finished.value = null
-  resetBattleUi()
+  pvp.finished = null
   try {
     if (level) await pvp.startBot(format.value, level)
     else await pvp.start(format.value)
@@ -661,114 +290,7 @@ async function fight(level = null) {
   }
 }
 
-const resultTitle = computed(() => (finished.value ? t(`pvp.result.${finished.value.status}`) : ''))
 const signed = (n) => (n > 0 ? `+${n}` : String(n ?? 0))
-// What retreating costs now (Tools, Trainers: 0032), the printed cost before
-const retreatCost = computed(() => hints.value.retreat_cost ?? mySlot(0)?.card.retreat ?? 0)
-
-// The energy zone (0031): this turn's energy and the next one; null before 0031
-const myZone = computed(() => battle.value?.me.zone ?? null)
-const energyLine = computed(() => {
-  if (!battle.value || !myTurn.value) return ''
-  if (hints.value.attach) return myZone.value ? t('pvp.energyReadyType', { type: typeLabel(myZone.value) }) : t('pvp.energyReady')
-  return battle.value.turn === 1 ? t('pvp.energyFirst') : t('pvp.energyUsed')
-})
-
-// ---------- The log ----------
-
-const eventName = (e) => (french.value && e.name_fr) || e.name || ''
-const eventAttack = (e) => (french.value && e.attack_fr) || e.attack || ''
-
-function describe(e, previous) {
-  const side = e.s === 'a' ? 'a' : 'd'
-  const card = eventName(e)
-  const name = opponentName.value
-  switch (e.k) {
-    case 'start':
-      return t(`pvp.ev.start.${e.first === 'a' ? 'a' : 'd'}`, { name })
-    case 'turn':
-      return t(`pvp.ev.turn.${side}`, { name })
-    case 'draw':
-      if (side === 'a') {
-        const cards = (e.cards ?? []).map((i) => cardName(myCard(i))).filter(Boolean)
-        return cards.length ? t('pvp.ev.draw.a', { card: cards.join(', ') }) : ''
-      }
-      return e.n ? t('pvp.ev.draw.d', { name, count: e.n }, e.n) : ''
-    case 'attach':
-      if (e.type) return t(`pvp.ev.attachType.${side}`, { name, card, type: typeLabel(e.type) })
-      return t(`pvp.ev.attach.${side}`, { name, card })
-    case 'bench':
-    case 'evolve':
-    case 'switch':
-    case 'promote':
-      return t(`pvp.ev.${e.k}.${side}`, { name, card })
-    case 'attack': {
-      let text
-      if (e.failed) text = t(`pvp.ev.failed.${e.failed}`, { card, attack: eventAttack(e) })
-      else if (e.damage > 0) text = t(`pvp.ev.attack.${side}`, { card, attack: eventAttack(e), damage: e.damage })
-      else text = t(`pvp.ev.attackNoDamage.${side}`, { card, attack: eventAttack(e) })
-      if (e.flips?.length) text += ` ${t('pvp.ev.flips', { flips: e.flips.map((up) => t(up ? 'pvp.heads' : 'pvp.tails')).join(', ') })}`
-      if (e.prevented) text += ` ${t('pvp.ev.prevented')}`
-      return text
-    }
-    case 'damage':
-      // The attack line already says the damage on the Active
-      if (e.pos === 0 && previous?.k === 'attack' && previous.s !== e.s) return ''
-      return t(`pvp.ev.damage.${side}`, { card, n: e.n })
-    case 'heal':
-    case 'discard_energy':
-      return t(`pvp.ev.${e.k}.${side}`, { card, n: e.n })
-    case 'trainer': {
-      let text = t(`pvp.ev.trainer.${side}`, { name, card })
-      if (e.flips?.length) text += ` ${t('pvp.ev.flips', { flips: e.flips.map((up) => t(up ? 'pvp.heads' : 'pvp.tails')).join(', ') })}`
-      return text
-    }
-    case 'search':
-    case 'recover': {
-      const found = e.cards ?? []
-      if (!found.length) return e.k === 'search' ? t(`pvp.ev.searchNone.${side}`, { name }) : ''
-      // their cards: only how many (their deck isn't mine to name)
-      if (side === 'd') return t(`pvp.ev.${e.k}.d`, { name, count: found.length }, found.length)
-      const cards = found.map((i) => cardName(myCard(i))).join(', ')
-      return t(e.k === 'search' && e.to === 'bench' ? 'pvp.ev.searchBench.a' : `pvp.ev.${e.k}.a`, { cards })
-    }
-    case 'ability': {
-      let text = t(`pvp.ev.ability.${side}`, { card, ability: (french.value && e.ability_fr) || e.ability || '' })
-      if (e.flips?.length) text += ` ${t('pvp.ev.flips', { flips: e.flips.map((up) => t(up ? 'pvp.heads' : 'pvp.tails')).join(', ') })}`
-      return text
-    }
-    case 'scoop':
-    case 'move_energy':
-      return t(`pvp.ev.${e.k}.${side}`, { name, card })
-    case 'status':
-    case 'cured':
-      return t(`pvp.ev.${e.k}.${side}`, { card, status: t(`pvp.statuses.${e.status}`).toLowerCase() })
-    case 'ko':
-      return t(`pvp.ev.ko.${side}`, { card, name, points: e.points })
-    case 'end':
-      return t(`pvp.ev.end.${side}`, { name })
-    case 'over': {
-      const text = t(`pvp.ev.over.${e.winner === 'a' ? 'a' : e.winner === 'd' ? 'd' : 'draw'}`, { name })
-      return e.reason === 'turns' ? `${t('pvp.ev.overTurns')} ${text}` : text
-    }
-    default:
-      return ''
-  }
-}
-
-function describeAll(events) {
-  return events
-    .map((e, i) => ({ text: describe(e, events[i - 1]), turn: e.k === 'turn', key: `${i}-${e.k}-${e.t}` }))
-    .filter((line) => line.text)
-}
-
-// Below describeAll: watching logLines evaluates it at once, and with a battle
-// in progress (resumed) describe() would reach eventName before its const
-// was initialized (TDZ, "Cannot access ... before initialization")
-watch(logLines, async () => {
-  await nextTick()
-  if (logEl.value) logEl.value.scrollTop = logEl.value.scrollHeight
-})
 
 // ---------- Leaderboard ----------
 
@@ -820,356 +342,15 @@ onMounted(async () => {
         <div v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
 
         <!-- ============ A battle ============ -->
-        <section v-if="battle" ref="battleEl" class="pvp-battle" :class="{ 'is-dragging': drag?.x !== undefined }" aria-labelledby="pvp-battle-title">
-          <div class="pvp-battle-head">
-            <h2 id="pvp-battle-title" class="pvp-vs">
-              {{ t('pvp.vs', { name: opponentName }) }}
-              <span v-if="battle.opponent.elo" class="pvp-elo">{{ t('pvp.eloShort', { elo: battle.opponent.elo }) }}</span>
-            </h2>
-            <span class="pvp-format-chip">{{ formatLabel(battle.format) }}</span>
-          </div>
-
-          <dl class="pvp-score">
-            <div>
-              <dt>{{ t('pvp.myPoints') }}</dt>
-              <dd>{{ battle.me.points }} / {{ rules.points }}</dd>
-            </div>
-            <div>
-              <dt class="visually-hidden">{{ t('pvp.turn', { turn: battle.turn, max: rules.turns }) }}</dt>
-              <dd aria-hidden="true">{{ t('pvp.turn', { turn: battle.turn, max: rules.turns }) }}</dd>
-            </div>
-            <div>
-              <dt>{{ t('pvp.theirPoints') }}</dt>
-              <dd>{{ battle.them.points }} / {{ rules.points }}</dd>
-            </div>
-          </dl>
-
-          <!-- Their side -->
-          <div class="pvp-side is-theirs" role="group" data-drop="board" :aria-label="t('pvp.theirSide', { name: opponentName })">
-            <div class="pvp-side-head">
-              <span class="pvp-side-title">{{ t('pvp.theirSide', { name: opponentName }) }}</span>
-              <span class="pvp-chips">
-                <span class="pvp-chip">{{ t('pvp.handCount', { count: battle.them.hand_count }) }}</span>
-                <span class="pvp-chip">{{ t('pvp.deckLeft', { count: battle.them.deck }) }}</span>
-                <span v-if="battle.them.energy_types?.length" class="pvp-chip pvp-zone-chip">
-                  {{ t('pvp.energyShort') }} <EnergyIcons :types="battle.them.energy_types" />
-                  <template v-if="battle.them.next">· {{ t('pvp.nextEnergy') }} <EnergyIcons :types="[battle.them.next]" /></template>
-                </span>
-              </span>
-            </div>
-            <span class="pvp-zone-label" aria-hidden="true">{{ t('pvp.bench') }}</span>
-            <ul class="pvp-bench" :aria-label="t('pvp.bench')">
-              <li v-for="n in benchSize" :key="n">
-                <button
-                  v-if="theirSlot(n)"
-                  type="button"
-                  class="pvp-slot"
-                  :class="{ 'is-selected': selection?.kind === 'theirs' && selection.pos === n, 'is-target': pending?.need === 'target' }"
-                  :aria-label="`${cardName(theirSlot(n).card)}, ${t('pvp.hp', { left: theirSlot(n).hp_left, hp: theirSlot(n).card.hp })}`"
-                  @click="tapTheirs(n)"
-                >
-                  <PvpCard :card="theirSlot(n).card" :slot="theirSlot(n)" compact />
-                  <span v-if="hitAt('theirs', n)" class="pvp-hit" aria-hidden="true">−{{ hitAt('theirs', n) }}</span>
-                </button>
-                <span v-else class="pvp-empty">{{ t('pvp.emptySlot') }}</span>
-              </li>
-            </ul>
-            <div class="pvp-active-row">
-              <button
-                v-if="theirSlot(0)"
-                type="button"
-                class="pvp-slot is-active"
-                :class="{ 'is-selected': selection?.kind === 'theirs' && selection.pos === 0, 'is-target': pending?.need === 'target' && pending.anyTarget }"
-                :aria-label="`${t('pvp.active')}: ${cardName(theirSlot(0).card)}, ${t('pvp.hp', { left: theirSlot(0).hp_left, hp: theirSlot(0).card.hp })}`"
-                :disabled="pending?.need === 'target' && !pending.anyTarget"
-                @click="tapTheirs(0)"
-              >
-                <PvpCard :card="theirSlot(0).card" :slot="theirSlot(0)" compact />
-                <span v-if="hitAt('theirs', 0)" class="pvp-hit" aria-hidden="true">−{{ hitAt('theirs', 0) }}</span>
-              </button>
-              <span v-else class="pvp-empty is-active">{{ t('pvp.emptySlot') }}</span>
-            </div>
-          </div>
-
-          <!-- What happened -->
-          <div ref="logEl" class="pvp-log" role="log" aria-live="polite" :aria-label="t('pvp.logTitle')">
-            <p v-for="line in logLines" :key="line.key" :class="{ 'is-turn': line.turn }">{{ line.text }}</p>
-            <p v-if="busy" class="pvp-muted">{{ t('pvp.waitHint') }}</p>
-          </div>
-
-          <!-- My side -->
-          <div class="pvp-side is-mine" role="group" data-drop="side" :aria-label="t('pvp.mySide')">
-            <div class="pvp-active-row">
-              <button
-                v-if="mySlot(0)"
-                type="button"
-                class="pvp-slot is-active"
-                :class="{
-                  'is-selected': selection?.kind === 'mine' && selection.pos === 0,
-                  'is-playable': nextStep === 'attach' || nextStep === 'attack',
-                  'is-target': energyArmed,
-                  'is-drop': isDrop('0'),
-                  'is-over': drag?.over === '0' && isDrop('0'),
-                }"
-                data-drop="0"
-                :aria-label="`${t('pvp.active')}: ${cardName(mySlot(0).card)}, ${t('pvp.hp', { left: mySlot(0).hp_left, hp: mySlot(0).card.hp })}`"
-                :disabled="!!finished || hints.promote"
-                @click="tapMine(0)"
-              >
-                <PvpCard :card="mySlot(0).card" :slot="mySlot(0)" compact />
-                <span v-if="hitAt('mine', 0)" class="pvp-hit" aria-hidden="true">−{{ hitAt('mine', 0) }}</span>
-              </button>
-              <span v-else-if="hints.setup && setupActive !== null" class="pvp-slot is-active is-setup">
-                <PvpCard :card="myCard(setupActive)" compact />
-              </span>
-              <span v-else class="pvp-empty is-active">{{ hints.setup ? t('pvp.setupActive') : t('pvp.emptySlot') }}</span>
-            </div>
-            <span class="pvp-zone-label" aria-hidden="true">{{ t('pvp.bench') }}</span>
-            <ul class="pvp-bench" :aria-label="t('pvp.bench')">
-              <li v-for="n in benchSize" :key="n">
-                <button
-                  v-if="mySlot(n)"
-                  type="button"
-                  class="pvp-slot"
-                  :class="{
-                    'is-selected': selection?.kind === 'mine' && selection.pos === n,
-                    'is-target': hints.promote || pending?.need === 'switch_to' || pending?.need === 'energy_to' || energyArmed,
-                    'is-drop': isDrop(String(n)),
-                    'is-over': drag?.over === String(n) && isDrop(String(n)),
-                  }"
-                  :data-drop="n"
-                  :aria-label="`${cardName(mySlot(n).card)}, ${t('pvp.hp', { left: mySlot(n).hp_left, hp: mySlot(n).card.hp })}`"
-                  :disabled="!!finished"
-                  @click="pending?.need === 'switch_to' || pending?.need === 'energy_to' ? chooseStep(n) : tapMine(n)"
-                >
-                  <PvpCard :card="mySlot(n).card" :slot="mySlot(n)" compact />
-                  <span v-if="hitAt('mine', n)" class="pvp-hit" aria-hidden="true">−{{ hitAt('mine', n) }}</span>
-                </button>
-                <span v-else-if="hints.setup && setupBench[n - 1] !== undefined" class="pvp-slot is-setup">
-                  <PvpCard :card="myCard(setupBench[n - 1])" compact />
-                </span>
-                <span v-else class="pvp-empty" :data-drop="`bench-${n}`" :class="{ 'is-drop': isDrop('bench'), 'is-over': drag?.over === `bench-${n}` && isDrop('bench') }">
-                  {{ t('pvp.emptySlot') }}
-                </span>
-              </li>
-            </ul>
-          </div>
-
-          <!-- My hand and what I can do: one block, stuck above the tab bar on phones -->
-          <div class="pvp-dock">
-            <div class="pvp-hand-wrap">
-              <p class="pvp-side-title">{{ t('pvp.myHand', { count: battle.me.hand.length }) }}</p>
-              <ul class="pvp-hand" :aria-label="t('pvp.myHand', { count: battle.me.hand.length })">
-                <li v-for="entry in battle.me.hand" :key="entry.index">
-                  <button
-                    type="button"
-                    class="pvp-slot"
-                    :class="{
-                      'is-selected': (selection?.kind === 'hand' && selection.index === entry.index) || setupActive === entry.index || setupBench.includes(entry.index),
-                      'is-playable': hints.setup ? entry.card.stage === 'basic' : handPlayable(entry),
-                    }"
-                    :aria-label="cardName(entry.card)"
-                    :aria-pressed="setupActive === entry.index || setupBench.includes(entry.index)"
-                    :disabled="!!finished"
-                    @pointerdown="startDrag($event, { kind: 'hand', index: entry.index })"
-                    @click="tapHand(entry)"
-                  >
-                    <PvpCard :card="entry.card" compact />
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-            <!-- What I can do -->
-            <div class="pvp-panel-actions">
-              <template v-if="finished">
-                <p class="pvp-feedback" role="status">
-                  <strong :class="finished.status === 'won' ? 'pvp-good' : finished.status === 'draw' ? '' : 'pvp-bad'">{{ resultTitle }}</strong>
-                  <span v-if="!finished.bot">{{ t('pvp.eloChange', { change: signed(finished.elo_change) }) }}</span>
-                  <span v-else-if="finished.coins" class="pvp-coins-won">{{ t('pvp.coinsWon') }} <CoinAmount :amount="finished.coins" signed /></span>
-                  <span v-else>{{ t(finished.paid ? 'pvp.noCoins' : 'pvp.unpaid') }}</span>
-                </p>
-                <button type="button" class="btn btn-primary glow-button" @click="backToLobby">{{ t('pvp.back') }}</button>
-              </template>
-
-              <template v-else-if="hints.setup">
-                <p class="pvp-panel-title">{{ t('pvp.setupTitle') }}</p>
-                <p class="pvp-note">{{ t('pvp.setupHelp') }}</p>
-                <button type="button" class="btn btn-primary glow-button" :disabled="busy || setupActive === null" @click="startBattle">
-                  {{ t('pvp.setupStart') }}
-                </button>
-              </template>
-
-              <template v-else-if="hints.promote">
-                <p class="pvp-panel-title">{{ t('pvp.promoteTitle') }}</p>
-                <p class="pvp-note">{{ t('pvp.promoteHelp') }}</p>
-              </template>
-
-              <template v-else-if="trainerPick !== null || abilityPick">
-                <PvpTrainerPicker
-                  :battle="battle"
-                  :index="trainerPick ?? -1"
-                  :ability="abilityPick"
-                  @play="act"
-                  @cancel="(trainerPick = null), (abilityPick = null)"
-                />
-              </template>
-
-              <template v-else-if="pending?.need">
-                <p class="pvp-panel-title">{{ t(pending.need === 'target' ? 'pvp.pickTarget' : pending.need === 'switch_to' ? 'pvp.pickSwitch' : 'pvp.pickEnergyTo') }}</p>
-                <div class="pvp-choice-buttons">
-                  <template v-if="pending.need === 'target'">
-                    <button v-if="pending.anyTarget && theirSlot(0)" type="button" class="pvp-choice" @click="chooseStep(0)">{{ cardName(theirSlot(0).card) }}</button>
-                    <button v-for="n in battle.them.bench.length" :key="n" type="button" class="pvp-choice" @click="chooseStep(n)">{{ cardName(theirSlot(n).card) }}</button>
-                  </template>
-                  <template v-else>
-                    <button v-for="n in battle.me.bench.length" :key="n" type="button" class="pvp-choice" @click="chooseStep(n)">{{ cardName(mySlot(n).card) }}</button>
-                  </template>
-                  <button type="button" class="btn btn-outline-secondary btn-sm" @click="pending = null">{{ t('pvp.cancel') }}</button>
-                </div>
-              </template>
-
-              <template v-else-if="selectedCard">
-                <div class="pvp-panel-head">
-                  <p class="pvp-panel-title">{{ cardName(selectedCard) }}</p>
-                  <button type="button" class="btn btn-outline-secondary btn-sm" @click="openSheet(selectedCard, selectedSlot)">{{ t('pvp.details') }}</button>
-                </div>
-                <!-- A card in my hand -->
-                <div v-if="selection.kind === 'hand' && selectedCard.stage === 'trainer'" class="pvp-choice-buttons">
-                  <button v-if="handHints?.play === null" type="button" class="pvp-choice" :disabled="busy" @click="trainerPick = selection.index">
-                    {{ t('pvp.play') }}
-                  </button>
-                  <p v-else class="pvp-note">{{ t(`pvp.playBlocks.${handHints?.play ?? 'unknown'}`) }}</p>
-                </div>
-                <div v-else-if="selection.kind === 'hand'" class="pvp-choice-buttons">
-                  <button v-if="handHints?.bench" type="button" class="pvp-choice" :disabled="busy" @click="act({ type: 'bench', card: selection.index })">
-                    {{ t('pvp.toBench') }}
-                  </button>
-                  <button
-                    v-for="pos in handHints?.evolve ?? []"
-                    :key="pos"
-                    type="button"
-                    class="pvp-choice"
-                    :disabled="busy"
-                    @click="act({ type: 'evolve', card: selection.index, pos })"
-                  >
-                    {{ t('pvp.evolveOnto', { name: cardName(mySlot(pos).card) }) }}
-                  </button>
-                </div>
-                <!-- One of my Pokémon -->
-                <div v-else-if="selection.kind === 'mine'" class="pvp-choice-buttons">
-                  <button v-if="hints.attach" type="button" class="pvp-choice" :disabled="busy" @click="act({ type: 'attach', pos: selection.pos })">
-                    <EnergyIcons v-if="myZone" :types="[myZone]" />
-                    {{ myZone ? t('pvp.attachType', { type: typeLabel(myZone) }) : t('pvp.attach') }}
-                  </button>
-                  <button
-                    v-if="selection.pos > 0 && hints.retreat"
-                    type="button"
-                    class="pvp-choice"
-                    :disabled="busy"
-                    @click="act({ type: 'retreat', pos: selection.pos })"
-                  >
-                    {{
-                      t('pvp.retreatHere', {
-                        name: cardName(mySlot(0).card),
-                        cost: retreatCost ? t('pvp.energyCount', { count: retreatCost }, retreatCost) : t('pvp.free'),
-                      })
-                    }}
-                  </button>
-                </div>
-                <!-- Its abilities (0033) -->
-                <ul v-if="selection.kind === 'mine' && selectedCard.abilities?.length" class="pvp-abilities" :aria-label="t('pvp.ability')">
-                  <li v-for="(ability, i) in selectedCard.abilities" :key="i">
-                    <button
-                      v-if="abilityBlock(selection.pos, i) === null"
-                      type="button"
-                      class="pvp-choice"
-                      :disabled="busy"
-                      @click="abilityPick = { at: selection.pos, i }"
-                    >
-                      {{ t('pvp.useAbility', { name: abilityName(ability) }) }}
-                    </button>
-                    <p v-else class="pvp-note">
-                      <strong>{{ abilityName(ability) }}</strong> · {{ t(`pvp.abilityBlocks.${abilityBlock(selection.pos, i)}`) }}
-                    </p>
-                  </li>
-                </ul>
-              </template>
-
-              <!-- Nothing picked on my turn: what to do now, and the shortest way (Pocket-like: attach, attack) -->
-              <template v-else-if="myTurn">
-                <p class="pvp-panel-title pvp-next" role="status">{{ t(`pvp.next.${nextStep}`) }}</p>
-                <div v-if="hints.attach && mySlot(0)" class="pvp-choice-buttons">
-                  <button type="button" class="pvp-choice" :disabled="busy" @click="act({ type: 'attach', pos: 0 })">
-                    <EnergyIcons v-if="myZone" :types="[myZone]" />
-                    {{ myZone ? t('pvp.attachTypeTo', { type: typeLabel(myZone), name: cardName(mySlot(0).card) }) : t('pvp.attach') }}
-                  </button>
-                </div>
-              </template>
-
-              <!-- My Active's attacks: picked, or nothing picked on my turn -->
-              <div v-if="showAttacks" class="pvp-attack-buttons" role="group" :aria-label="t('pvp.attacks')">
-                <button
-                  v-for="(attack, i) in mySlot(0).card.attacks"
-                  :key="i"
-                  type="button"
-                  class="pvp-attack-button"
-                  :disabled="busy || attackBlock(i) !== null"
-                  @click="useAttack(i)"
-                >
-                  <EnergyIcons class="pvp-attack-cost" :types="attack.energy ?? []" :count="attack.cost" free />
-                  <span class="pvp-attack-title">
-                    {{ attackName(attack, french) }}
-                    <small v-if="attackBlock(i)">{{ t(`pvp.blocks.${attackBlock(i)}`) }}</small>
-                  </span>
-                  <strong>{{ damageLabel(attack) }}</strong>
-                </button>
-              </div>
-              <p v-if="myTurn && !selection && !pending?.need && trainerPick === null && !abilityPick" class="pvp-note pvp-hint">{{ t('pvp.selectHint') }}</p>
-
-              <div v-if="!finished && !hints.setup" class="pvp-turn-bar">
-                <span class="pvp-energy-line">
-                  <button
-                    v-if="hints.attach && myZone && myTurn"
-                    type="button"
-                    class="pvp-energy-token"
-                    :class="{ 'is-armed': energyArmed }"
-                    :aria-pressed="energyArmed"
-                    :aria-label="t('pvp.energyToken', { type: typeLabel(myZone) })"
-                    :title="t('pvp.energyToken', { type: typeLabel(myZone) })"
-                    @pointerdown="startDrag($event, { kind: 'energy' })"
-                    @click="tapEnergy"
-                  >
-                    <EnergyIcons :types="[myZone]" />
-                  </button>
-                  <span class="pvp-energy-text">{{ energyLine }}</span>
-                  <span v-if="battle.me.next && !battle.winner" class="pvp-energy-next">· {{ t('pvp.nextEnergy') }} <EnergyIcons :types="[battle.me.next]" /></span>
-                </span>
-                <button
-                  type="button"
-                  class="btn"
-                  :class="nextStep === 'end' || nextStep === 'play' ? 'btn-primary glow-button' : 'btn-outline-secondary'"
-                  :disabled="busy || !myTurn || !!pending"
-                  @click="act({ type: 'end' })"
-                >
-                  {{ t('pvp.endTurn') }}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- What I'm dragging, under my finger -->
-          <div v-if="drag?.x !== undefined" class="pvp-ghost" :class="{ 'is-energy': drag.kind === 'energy' }" :style="{ left: `${drag.x}px`, top: `${drag.y}px` }" aria-hidden="true">
-            <EnergyIcons v-if="drag.kind === 'energy'" :types="[myZone]" />
-            <PvpCard v-else-if="myCard(drag.index)" :card="myCard(drag.index)" compact />
-          </div>
-
-          <div v-if="!finished" class="pvp-actions">
-            <button type="button" class="btn btn-sm" :class="confirmForfeit ? 'btn-danger' : 'btn-outline-secondary'" :disabled="busy" @click="forfeit">
-              {{ confirmForfeit ? t('pvp.forfeitConfirm') : t('pvp.forfeit') }}
-            </button>
-          </div>
-        </section>
+        <PvpBattle
+          v-if="battle"
+          :key="battle.id"
+          :battle="battle"
+          :finished="!!pvp.finished"
+          :format-name="formatLabel(battle.format)"
+          :rules="rules"
+          @back="backToLobby"
+        />
 
         <!-- ============ Lobby: format, decks, fight ============ -->
         <section v-else class="pvp-lobby" aria-labelledby="pvp-lobby-title">
@@ -1467,7 +648,7 @@ onMounted(async () => {
       </template>
 
       <RouterLink :to="{ name: 'challenge-games' }" class="pvp-back"><span aria-hidden="true">←</span> {{ t('games.back') }}</RouterLink>
-      <PvpCardSheet :card="sheet?.card ?? null" :slot="sheet?.slot ?? null" @close="sheet = null" />
+      <PvpCardSheet :card="sheet?.card ?? null" @close="sheet = null" />
     </main>
   </div>
 </template>
@@ -1503,7 +684,6 @@ onMounted(async () => {
   border-radius: var(--pb-radius-lg);
 }
 
-.pvp-battle,
 .pvp-lobby,
 .pvp-panel {
   display: flex;
@@ -1516,22 +696,7 @@ onMounted(async () => {
   background: var(--pb-surface);
 }
 
-.pvp-battle {
-  scroll-margin-top: 0.75rem;
-  padding: 0.75rem;
-  box-shadow: var(--pb-shadow-card);
-}
-
-@media (min-width: 576px) {
-  .pvp-battle {
-    padding: 1.25rem;
-  }
-}
-
-.pvp-battle-head,
-.pvp-builder-head,
-.pvp-side-head,
-.pvp-panel-head {
+.pvp-builder-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1539,37 +704,6 @@ onMounted(async () => {
   gap: 0.5rem;
 }
 
-.pvp-vs {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 800;
-  overflow-wrap: anywhere;
-}
-
-.pvp-elo {
-  margin-left: 0.35rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--pb-text-muted);
-}
-
-.pvp-format-chip,
-.pvp-chip {
-  padding: 0.15rem 0.6rem;
-  border-radius: 999px;
-  border: 1px solid var(--pb-border-strong);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--pb-text-muted);
-}
-
-.pvp-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-}
-
-.pvp-score,
 .pvp-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1577,7 +711,6 @@ onMounted(async () => {
   margin: 0;
 }
 
-.pvp-score > div,
 .pvp-stats > div {
   min-width: 0;
   padding: 0.5rem 0.6rem;
@@ -1586,14 +719,12 @@ onMounted(async () => {
   background: var(--pb-bg-elevated);
 }
 
-.pvp-score dt,
 .pvp-stats dt {
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--pb-text-muted);
 }
 
-.pvp-score dd,
 .pvp-stats dd {
   margin: 0.2rem 0 0;
   font-family: var(--pb-font-display);
@@ -1602,265 +733,11 @@ onMounted(async () => {
   overflow-wrap: anywhere;
 }
 
-.pvp-side-title,
-.pvp-panel-title {
+.pvp-side-title {
   margin: 0;
   font-size: 0.9rem;
   font-weight: 700;
   overflow-wrap: anywhere;
-}
-
-/* ----- Board ----- */
-
-.pvp-side {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 0;
-  padding: 0.6rem;
-  border-radius: var(--pb-radius-md);
-  border: 1px solid var(--pb-border);
-  background: var(--pb-bg-elevated);
-}
-
-.pvp-side.is-mine {
-  border-color: var(--pb-border-strong);
-}
-
-.pvp-bench {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
-  max-width: 20rem;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0;
-  list-style: none;
-}
-
-.pvp-bench > li {
-  min-width: 0;
-}
-
-/* Shown on PC beside each Bench tray */
-.pvp-zone-label {
-  display: none;
-  color: var(--pb-text-muted);
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.pvp-active-row {
-  display: flex;
-  justify-content: center;
-}
-
-/* After .pvp-slot's width: 100% would win otherwise */
-.pvp-active-row > .pvp-slot,
-.pvp-active-row > .pvp-empty {
-  width: min(8.5rem, 40%);
-}
-
-.pvp-slot {
-  position: relative;
-  display: block;
-  width: 100%;
-  padding: 0.25rem;
-  border-radius: var(--pb-radius-md);
-  border: 2px solid var(--pb-border-strong);
-  background: var(--pb-surface);
-  color: var(--pb-text);
-  cursor: pointer;
-  text-align: left;
-  transition:
-    transform 0.2s var(--pb-ease-out),
-    border-color 0.2s;
-}
-
-.pvp-slot.is-setup {
-  cursor: default;
-  border-style: dashed;
-}
-
-.pvp-slot:disabled {
-  cursor: default;
-}
-
-.pvp-slot.is-selected {
-  border-color: var(--pb-accent);
-  box-shadow: 0 0 0 2px var(--pb-accent);
-}
-
-.pvp-slot.is-target {
-  border-color: var(--pb-ring);
-  box-shadow: 0 0 0 2px var(--pb-ring);
-}
-
-.pvp-slot.is-playable:not(.is-selected) {
-  border-color: var(--pb-ring);
-}
-
-.pvp-slot:focus-visible {
-  outline: 2px solid var(--pb-focus);
-  outline-offset: 2px;
-}
-
-@media (hover: hover) {
-  .pvp-slot:not(:disabled):not(.is-setup):hover {
-    transform: translateY(-2px);
-  }
-}
-
-.pvp-empty {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 245 / 342;
-  border-radius: var(--pb-radius-md);
-  border: 2px dashed var(--pb-border);
-  color: var(--pb-text-muted);
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.pvp-log {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  max-height: 9rem;
-  min-height: 3rem;
-  overflow-y: auto;
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--pb-radius-md);
-  background: var(--pb-input-bg);
-  font-size: 0.82rem;
-}
-
-.pvp-log p {
-  margin: 0;
-}
-
-/* "a bot (Easy) draws a card." starts a line */
-.pvp-log p::first-letter,
-.pvp-side-head .pvp-side-title::first-letter {
-  text-transform: uppercase;
-}
-
-.pvp-side-head .pvp-side-title {
-  display: block;
-}
-
-.pvp-log p.is-turn {
-  margin-top: 0.3rem;
-  font-weight: 800;
-}
-
-.pvp-hand-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  min-width: 0;
-}
-
-/* The hand scrolls sideways inside its own box, never the page */
-.pvp-hand {
-  display: flex;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0.25rem 0.1rem 0.5rem;
-  list-style: none;
-  overflow-x: auto;
-  min-width: 0;
-}
-
-.pvp-hand > li {
-  flex: none;
-  width: 5.75rem;
-}
-
-.pvp-panel-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding: 0.75rem;
-  border-radius: var(--pb-radius-md);
-  border: 1px solid var(--pb-border-strong);
-  background: var(--pb-bg-elevated);
-}
-
-.pvp-choice-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.pvp-choice {
-  min-width: 0;
-  padding: 0.5rem 0.8rem;
-  border-radius: var(--pb-radius-md);
-  border: 2px solid var(--pb-accent);
-  background: var(--pb-surface);
-  color: var(--pb-text);
-  font-weight: 700;
-  overflow-wrap: anywhere;
-}
-
-.pvp-choice:disabled {
-  opacity: 0.5;
-}
-
-.pvp-choice:focus-visible {
-  outline: 2px solid var(--pb-focus);
-  outline-offset: 2px;
-}
-
-.pvp-attack-buttons {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
-  gap: 0.5rem;
-}
-
-.pvp-attack-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
-  padding: 0.55rem 0.75rem;
-  border-radius: var(--pb-radius-md);
-  border: 2px solid var(--pb-border-strong);
-  background: var(--pb-surface);
-  color: var(--pb-text);
-  font-weight: 700;
-  text-align: left;
-}
-
-.pvp-attack-button:not(:disabled) {
-  border-color: var(--pb-accent);
-}
-
-.pvp-attack-button:disabled {
-  opacity: 0.6;
-}
-
-.pvp-attack-button:focus-visible {
-  outline: 2px solid var(--pb-focus);
-  outline-offset: 2px;
-}
-
-@media (hover: hover) {
-  .pvp-attack-button:not(:disabled):hover,
-  .pvp-choice:not(:disabled):hover {
-    background: var(--pb-bg-elevated);
-  }
-}
-
-.pvp-attack-cost {
-  flex: none;
-  flex-wrap: nowrap;
-  padding: 0.15rem 0.4rem;
-  border-radius: 999px;
-  background: var(--pb-input-bg);
 }
 
 .pvp-attack-title {
@@ -1871,583 +748,12 @@ onMounted(async () => {
   overflow-wrap: anywhere;
 }
 
-.pvp-attack-title small {
-  font-weight: 600;
-  color: var(--pb-text-muted);
-}
-
-.pvp-turn-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--pb-border);
-}
-
-.pvp-energy-line {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--pb-text-muted);
-}
-
-.pvp-hint {
-  text-align: center;
-}
-
-.pvp-feedback {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.25rem 0.75rem;
-  margin: 0;
-  color: var(--pb-text-muted);
-  text-align: center;
-}
-
-.pvp-good {
-  color: var(--pb-success-text);
-}
-
-.pvp-bad {
-  color: var(--pb-danger-text);
-}
-
 .pvp-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem;
 }
-
-.pvp-next {
-  font-size: 0.85rem;
-}
-
-/* Drag and drop: where it can go, where it would go */
-.pvp-slot.is-drop,
-.pvp-empty.is-drop {
-  border-style: dashed;
-  border-color: var(--pb-ring);
-}
-
-.pvp-slot.is-over,
-.pvp-empty.is-over {
-  border-style: solid;
-  border-color: var(--pb-accent);
-  box-shadow: 0 0 0 3px var(--pb-accent);
-}
-
-/* While dragging, the dock fades and lets drops through to the board it covers */
-.pvp-battle.is-dragging .pvp-dock {
-  opacity: 0.3;
-  pointer-events: none;
-  transition: opacity 0.15s;
-}
-
-/* The hand scrolls sideways; any other move drags the card */
-.pvp-hand .pvp-slot {
-  touch-action: pan-x;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
-
-.pvp-ghost {
-  position: fixed;
-  z-index: 50;
-  width: 4.5rem;
-  pointer-events: none;
-  transform: translate(-50%, -70%) rotate(-4deg);
-  opacity: 0.92;
-  filter: drop-shadow(0 8px 16px rgb(0 0 0 / 0.35));
-}
-
-.pvp-ghost.is-energy {
-  width: auto;
-  transform: translate(-50%, -120%) scale(1.8);
-}
-
-.pvp-energy-token {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.45rem;
-  border-radius: 999px;
-  border: 2px solid var(--pb-accent);
-  background: var(--pb-surface);
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.pvp-energy-token.is-armed {
-  background: var(--pb-accent);
-  box-shadow: 0 0 0 3px var(--pb-ring);
-}
-
-.pvp-energy-token:focus-visible {
-  outline: 2px solid var(--pb-focus);
-  outline-offset: 2px;
-}
-
-/* Damage, on the Pokémon it hit */
-.pvp-hit {
-  position: absolute;
-  top: 25%;
-  left: 50%;
-  z-index: 2;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  background: var(--pb-danger-text);
-  color: var(--pb-bg);
-  font-family: var(--pb-font-display);
-  font-size: 0.95rem;
-  font-weight: 800;
-  pointer-events: none;
-  transform: translateX(-50%);
-  animation: pvp-hit 1.6s var(--pb-ease-out) forwards;
-}
-
-@keyframes pvp-hit {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 0.5rem) scale(0.8);
-  }
-  15% {
-    opacity: 1;
-    transform: translate(-50%, 0) scale(1.15);
-  }
-  75% {
-    opacity: 1;
-    transform: translate(-50%, -0.25rem) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -0.75rem);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pvp-hit {
-    animation: none;
-  }
-}
-
-.pvp-dock {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-width: 0;
-}
-
-/* Phones and tablets (the tab bar's widths): one screen, like Pocket (user,
-   2026-10-06: the board took 3 screens, the actions showed far below the
-   card just tapped). Each side is one row (Active, then the Bench), the
-   cards cropped to their top (name, HP, art), and my hand + the actions
-   stick above the tab bar as one block. */
-@media (max-width: 991.98px) {
-  .pvp-battle {
-    gap: 0.4rem;
-    padding: 0.5rem;
-  }
-
-  .pvp-vs {
-    font-size: 1rem;
-  }
-
-  .pvp-score > div {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: center;
-    gap: 0 0.35rem;
-    padding: 0.1rem 0.4rem;
-  }
-
-  .pvp-score dt {
-    font-size: 0.7rem;
-  }
-
-  .pvp-score dd {
-    margin: 0;
-    font-size: 0.9rem;
-  }
-
-  .pvp-side {
-    display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 3fr);
-    align-items: end;
-    gap: 0.4rem;
-    padding: 0.4rem;
-  }
-
-  .pvp-side-head {
-    grid-column: 1 / -1;
-  }
-
-  /* The battle's title already names them; the chips stay */
-  .pvp-side-head > .pvp-side-title {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-
-  .pvp-side-head .pvp-chip {
-    font-size: 0.68rem;
-  }
-
-  .pvp-side > .pvp-active-row {
-    grid-column: 1;
-    grid-row: 2;
-  }
-
-  .pvp-side > .pvp-bench {
-    grid-column: 2;
-    grid-row: 2;
-    max-width: none;
-    gap: 0.3rem;
-  }
-
-  .pvp-active-row > .pvp-slot,
-  .pvp-active-row > .pvp-empty {
-    width: 100%;
-  }
-
-  .pvp-slot {
-    padding: 0.15rem;
-  }
-
-  .pvp-battle :deep(.pvp-img),
-  .pvp-battle .pvp-empty {
-    aspect-ratio: 245 / 150;
-    object-position: top center;
-  }
-
-  .pvp-log {
-    max-height: 2.6rem;
-    min-height: 0;
-    padding: 0.3rem 0.6rem;
-    font-size: 0.78rem;
-  }
-
-  .pvp-dock {
-    gap: 0.4rem;
-    padding: 0.4rem 0.5rem;
-    border-radius: var(--pb-radius-md);
-    border: 1px solid var(--pb-border-strong);
-    background: var(--pb-bg-elevated);
-  }
-
-  .pvp-dock > .pvp-panel-actions {
-    gap: 0.45rem;
-    padding: 0;
-    border: none;
-  }
-
-  .pvp-hand-wrap {
-    gap: 0.2rem;
-  }
-
-  /* The list is named for screen readers; the cards speak for themselves */
-  .pvp-hand-wrap > .pvp-side-title {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-
-  .pvp-hand {
-    padding-bottom: 0.25rem;
-  }
-
-  .pvp-hand > li {
-    width: 4.25rem;
-  }
-
-  /* In hand: the art and the name (the details are a tap away) */
-  .pvp-hand :deep(.pvp-hp-text) {
-    display: none;
-  }
-
-  .pvp-hand :deep(.pvp-name) {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* One line per attack: why it's blocked sits beside its name */
-  .pvp-attack-buttons {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.3rem;
-  }
-
-  .pvp-attack-button {
-    gap: 0.4rem;
-    padding: 0.3rem 0.6rem;
-  }
-
-  .pvp-attack-title {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 0.4rem;
-    white-space: nowrap;
-  }
-
-  .pvp-attack-title small {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 0.72rem;
-  }
-
-  .pvp-next {
-    font-size: 0.8rem;
-  }
-
-  /* The guidance line says it already */
-  .pvp-panel-actions .pvp-hint {
-    display: none;
-  }
-
-  .pvp-turn-bar {
-    flex-wrap: nowrap;
-    padding-top: 0.4rem;
-  }
-
-  .pvp-energy-line {
-    flex-wrap: nowrap;
-    min-width: 0;
-    font-size: 0.75rem;
-  }
-
-  .pvp-energy-text {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .pvp-energy-next {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    gap: 0.3rem;
-  }
-
-  .pvp-turn-bar .btn {
-    flex: none;
-    padding: 0.35rem 0.8rem;
-  }
-}
-
-/* PC (user, 2026-10-06: "sur PC ça manque de lisibilité, je scroll en
-   boucle"; the battle was 1,860px tall at 1440x900). Two columns: the mat
-   and my hand on the left, the title, score, log and actions on the right.
-   The mat is laid out like Pokémon TCG Pocket (same day: "je ne comprends
-   plus qui est le banc", each Active sat beside its Bench at the same
-   size): mirrored, their Bench on top, both Actives face to face in the
-   middle and bigger, my Bench at the bottom, each Bench a labeled tray. */
-@media (min-width: 992px) {
-  .pvp-battle {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 23rem);
-    grid-template-areas:
-      'them head'
-      'them score'
-      'them log'
-      'mine actions'
-      'hand actions'
-      'forfeit actions';
-    grid-template-rows: auto auto 1fr auto auto 1fr;
-    align-items: start;
-    gap: 0.5rem 1rem;
-    padding: 1rem;
-  }
-
-  .pvp-battle-head {
-    grid-area: head;
-    align-self: center;
-  }
-
-  .pvp-score {
-    grid-area: score;
-  }
-
-  .pvp-score > div {
-    padding: 0.3rem 0.5rem;
-  }
-
-  .pvp-score dd {
-    margin: 0;
-  }
-
-  .pvp-side.is-theirs {
-    grid-area: them;
-    border-bottom: 2px solid var(--pb-border-strong);
-    border-radius: var(--pb-radius-lg) var(--pb-radius-lg) var(--pb-radius-sm) var(--pb-radius-sm);
-  }
-
-  .pvp-side.is-mine {
-    grid-area: mine;
-    border-top: 2px solid var(--pb-border-strong);
-    border-radius: var(--pb-radius-sm) var(--pb-radius-sm) var(--pb-radius-lg) var(--pb-radius-lg);
-  }
-
-  /* Bench tray in the middle column, the side's chips beside theirs */
-  .pvp-side {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    align-items: center;
-    gap: 0.35rem 0.75rem;
-    padding: 0.4rem 0.75rem;
-  }
-
-  .pvp-side-head {
-    grid-column: 1;
-    grid-row: 1;
-    flex-direction: column;
-    align-items: flex-start;
-    align-self: start;
-  }
-
-  .pvp-side-head .pvp-chips {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .pvp-side > .pvp-zone-label {
-    display: block;
-    grid-column: 3;
-    justify-self: start;
-  }
-
-  .pvp-side > .pvp-bench,
-  .pvp-side > .pvp-active-row {
-    grid-column: 2;
-  }
-
-  .is-theirs > .pvp-zone-label,
-  .is-theirs > .pvp-bench,
-  .is-mine > .pvp-active-row {
-    grid-row: 1;
-  }
-
-  .is-theirs > .pvp-active-row,
-  .is-mine > .pvp-zone-label,
-  .is-mine > .pvp-bench {
-    grid-row: 2;
-  }
-
-  .pvp-side > .pvp-bench {
-    grid-template-columns: repeat(3, 5.25rem);
-    gap: 0.4rem;
-    width: auto;
-    max-width: none;
-    padding: 0.35rem;
-    border-radius: var(--pb-radius-md);
-    border: 1px dashed var(--pb-border-strong);
-    background: var(--pb-input-bg);
-  }
-
-  .pvp-active-row > .pvp-slot,
-  .pvp-active-row > .pvp-empty {
-    width: 8rem;
-  }
-
-  /* The Active spot: bigger, ringed, the two facing each other across the line */
-  .pvp-active-row > .pvp-slot.is-active:not(.is-selected):not(.is-target):not(.is-playable) {
-    border-color: var(--pb-text-muted);
-  }
-
-  .pvp-slot {
-    padding: 0.2rem;
-  }
-
-  /* name, HP and art: the attacks are in the panel */
-  .pvp-battle :deep(.pvp-img),
-  .pvp-battle .pvp-empty {
-    aspect-ratio: 245 / 150;
-    object-fit: cover;
-    object-position: top center;
-  }
-
-  .pvp-bench :deep(.pvp-img),
-  .pvp-bench .pvp-empty {
-    aspect-ratio: 245 / 115;
-  }
-
-  .pvp-bench :deep(.pvp-name),
-  .pvp-hand :deep(.pvp-name),
-  .pvp-hand :deep(.pvp-hp-text) {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* As tall as what's left beside their side, scrolling inside it */
-  .pvp-log {
-    grid-area: log;
-    align-self: stretch;
-    contain: size;
-    min-height: 4rem;
-    max-height: none;
-  }
-
-  /* Hand and actions are grid cells of their own */
-  .pvp-dock {
-    display: contents;
-  }
-
-  .pvp-hand-wrap {
-    grid-area: hand;
-  }
-
-  .pvp-hand > li {
-    width: 5.75rem;
-  }
-
-  .pvp-hand :deep(.pvp-img) {
-    aspect-ratio: 245 / 120;
-  }
-
-  .pvp-panel-actions {
-    grid-area: actions;
-    position: sticky;
-    top: 0.75rem;
-  }
-
-  .pvp-battle > .pvp-actions {
-    grid-area: forfeit;
-    justify-content: flex-start;
-  }
-}
-
-/* Tall enough for the whole board and the dock: the dock sticks above the
-   tab bar. On short screens (375x667) it covered the whole board: it stays
-   in place there, a short scroll away. */
-@media (max-width: 991.98px) and (min-height: 740px) {
-  .pvp-dock {
-    position: sticky;
-    bottom: calc(92px + env(safe-area-inset-bottom));
-    z-index: 5;
-    max-height: 60vh;
-    overflow-y: auto;
-    box-shadow: var(--pb-shadow-lg);
-  }
-}
-
-/* ----- Lobby ----- */
 
 .pvp-kinds {
   display: flex;
@@ -2739,19 +1045,6 @@ onMounted(async () => {
   opacity: 0.55;
 }
 
-.pvp-abilities {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.pvp-abilities .pvp-note {
-  margin: 0;
-}
-
 .pvp-off-note {
   font-size: 0.7rem;
   text-align: center;
@@ -2811,12 +1104,6 @@ onMounted(async () => {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.3rem;
-}
-
-.pvp-zone-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
 }
 
 .pvp-pick-card {
@@ -2921,11 +1208,6 @@ onMounted(async () => {
   font-weight: 600;
   color: var(--pb-text-muted);
   overflow-wrap: anywhere;
-}
-
-.pvp-coins-won {
-  color: var(--pb-success-text);
-  font-weight: 700;
 }
 
 .pvp-history,

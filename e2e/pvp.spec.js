@@ -34,10 +34,22 @@ async function setUp(page) {
   await expect(page.locator('.pvp-log')).toContainText('You go first.')
 }
 
-// My Active is the second "Active:" button (theirs comes first); a second tap unselects it
+// My Active is the second "Active:" button (theirs comes first); a second tap unselects it.
+// On a phone the actions are in a sheet that opens on the tapped card (PC: always beside the mat)
 async function attachToActive(page) {
   if (!(await page.getByRole('button', { name: /Attach the Fire energy/ }).isVisible())) await board(page).getByRole('button', { name: /^Active: / }).nth(1).click()
   await page.getByRole('button', { name: /Attach the Fire energy/ }).click()
+}
+
+async function attack(page, name) {
+  const button = page.getByRole('button', { name })
+  if (!(await button.isVisible())) await board(page).getByRole('button', { name: /^Active: / }).nth(1).click()
+  await button.click()
+}
+
+// A card opened on a phone covers the mat (tap outside or Escape closes it, like Pocket's zoom)
+async function closeSheet(page) {
+  if (await page.locator('.pvp-sheet-backdrop').isVisible()) await page.keyboard.press('Escape')
 }
 
 test('PvP is listed with the mini-games, with its rules', async ({ page }) => {
@@ -109,7 +121,7 @@ test('a bot battle: set up, the server plays, attach, attack, knock out, win coi
   const backend = await mockSupabase(page, { challengeCollection, pvp: withDeck })
   await page.goto('/challenge/games/pvp')
   await page.getByRole('button', { name: /^Easy/ }).click()
-  await expect(page.getByText('Place your Pokémon')).toBeVisible()
+  await expect(page.locator('.pvp-next')).toContainText('Put a Basic Pokémon in your Active spot')
   await expect(hand(page).getByRole('button')).toHaveCount(5)
   await setUp(page)
   await expect(page.locator('.pvp-turn-bar')).toContainText('No energy on the first turn')
@@ -118,6 +130,7 @@ test('a bot battle: set up, the server plays, attach, attack, knock out, win coi
   await board(page).getByRole('button', { name: /^Active: Charmander/ }).click()
   await expect(page.getByRole('button', { name: /Ember/ })).toBeDisabled()
   await expect(page.getByRole('button', { name: /Ember/ })).toContainText('Not on the first turn')
+  await closeSheet(page)
   await page.getByRole('button', { name: 'End my turn' }).click()
   await expect(page.locator('.pvp-log')).toContainText('Their Oddish uses Vine Whip: 20 damage.')
   await expect(page.locator('.pvp-log')).toContainText('Your turn.')
@@ -128,14 +141,14 @@ test('a bot battle: set up, the server plays, attach, attack, knock out, win coi
   await attachToActive(page)
   await expect(page.locator('.pvp-log')).toContainText('You attach a Fire energy to Charmander.')
   await expect(page.locator('.pvp-turn-bar')).toContainText('Energy attached this turn')
-  await page.getByRole('button', { name: /Ember/ }).click()
+  await attack(page, /Ember/)
   await expect(page.locator('.pvp-log')).toContainText('Your Charmander uses Ember: 60 damage.')
   await expect(page.locator('.pvp-log')).toContainText('Oddish is knocked out: you take 1 point(s).')
-  await expect(page.locator('.pvp-score')).toContainText('1 / 3')
+  await expect(page.locator('.pvp-plate.is-mine')).toContainText('1 / 3')
 
   // Turn 5: Venusaur ex (2 points) falls too: a win
   await attachToActive(page)
-  await page.getByRole('button', { name: /Ember/ }).click()
+  await attack(page, /Ember/)
   await expect(page.locator('.pvp-feedback')).toContainText('You win!')
   await expect(page.locator('.pvp-feedback')).toContainText('You earn')
   const acts = backend.calls.filter((call) => call.path === '/rest/v1/rpc/pvp_act').map((call) => JSON.parse(call.body).p_action.type)
@@ -155,8 +168,10 @@ test('a Trainer: a Supporter, not on the first turn, once a turn (0032)', async 
   await page.getByRole('button', { name: 'Start the battle' }).click()
   await hand(page).getByRole('button', { name: "Giovanni's Charisma" }).click()
   await expect(page.locator('.pvp-panel-actions')).toContainText('No Supporter on the first turn')
+  await closeSheet(page)
   await page.getByRole('button', { name: 'End my turn' }).click()
-  await expect(page.locator('.pvp-log')).toContainText('Your turn.')
+  // "Your turn." is in the log since the first turn: wait for the bot's turn to be over
+  await expect(page.locator('.pvp-log')).toContainText('Their Oddish uses Vine Whip')
   const before = await hand(page).getByRole('button').count()
   await hand(page).getByRole('button', { name: "Giovanni's Charisma" }).click()
   await page.getByRole('button', { name: 'Play', exact: true }).click()
@@ -193,6 +208,7 @@ test('evolve, bench and retreat, with the card details', async ({ page }) => {
   // No evolving on the first turn
   await hand(page).getByRole('button', { name: 'Charmeleon' }).first().click()
   await expect(page.getByRole('button', { name: 'Evolve Charmander' })).toHaveCount(0)
+  await closeSheet(page)
   await page.getByRole('button', { name: 'End my turn' }).click()
   await expect(page.locator('.pvp-log')).toContainText('Your turn.')
   // Turn 3: Charmander evolves into Charmeleon
@@ -207,6 +223,7 @@ test('evolve, bench and retreat, with the card details', async ({ page }) => {
   await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click()
   // Retreat: an energy, then Squirtle comes in
   await attachToActive(page)
+  await closeSheet(page)
   await board(page).getByRole('list', { name: 'Bench' }).nth(1).getByRole('button', { name: /^Squirtle/ }).click()
   await page.getByRole('button', { name: /^Retreat: Charmeleon goes to the Bench/ }).click()
   await expect(page.locator('.pvp-log')).toContainText('Squirtle is now your Active Pokémon.')
@@ -218,6 +235,7 @@ test('a player battle: against Misty, giving up asks first and loses Elo', async
   await page.getByRole('button', { name: 'Find an opponent' }).click()
   await expect(page.getByRole('heading', { name: 'Against Misty' })).toBeVisible()
   await setUp(page)
+  await page.getByRole('button', { name: 'Battle menu' }).click()
   await page.getByRole('button', { name: 'Give up' }).click()
   await page.getByRole('button', { name: 'Sure? Give up (a loss)' }).click()
   await expect(page.locator('.pvp-feedback')).toContainText('You gave up.')
@@ -315,8 +333,9 @@ test('the board and the builder never scroll sideways on the narrowest phone', a
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
 })
 
-test('a phone plays a turn on one screen: what to do, attach and attack without picking anything', async ({ page }, testInfo) => {
-  // user, 2026-10-06: on phones the actions showed far below the card just tapped
+test('a phone plays a turn on one screen, like Pocket: what to do, the energy dragged or tapped, the Active tapped to attack', async ({ page }, testInfo) => {
+  // user, 2026-10-07 (screenshots of Pocket): the battle takes the whole screen,
+  // one sentence says what to do, what can be played glows
   test.skip(testInfo.project.name !== 'mobile', 'the phone layout')
   await mockSupabase(page, { challengeCollection, pvp: withDeck })
   await page.goto('/challenge/games/pvp')
@@ -325,17 +344,27 @@ test('a phone plays a turn on one screen: what to do, attach and attack without 
   await page.getByRole('button', { name: 'End my turn' }).click()
   await expect(page.locator('.pvp-log')).toContainText('Your turn.')
   await expect(page.locator('.pvp-next')).toContainText("Attach this turn's energy")
-  // the board's top and the actions on the same screen, my Active not hidden behind them
-  await page.evaluate(() => document.querySelector('.pvp-battle').scrollIntoView({ block: 'start' }))
-  const attach = page.getByRole('button', { name: 'Attach the Fire energy to Charmander' })
-  await expect(attach).toBeInViewport()
-  await expect(page.locator('.pvp-score')).toBeInViewport()
+  // no page around the mat: no tab bar, no scrolling, everything on one screen and uncovered
+  await expect(page.locator('.app-tabbar')).toBeHidden()
+  expect(await page.locator('.pvp-battle').boundingBox()).toEqual({ x: 0, y: 0, ...page.viewportSize() })
   const active = board(page).getByRole('button', { name: /^Active: Charmander/ })
+  for (const part of [page.locator('.pvp-topbar'), page.locator('.pvp-energy-token'), page.getByRole('button', { name: 'End my turn' }), active, hand(page)]) {
+    await expect(part).toBeInViewport({ ratio: 0.9 })
+  }
   const box = await active.boundingBox()
-  const onTop = await page.evaluate(([x, y]) => !!document.elementFromPoint(x, y)?.closest('.pvp-side.is-mine'), [box.x + box.width / 2, box.y + box.height - 4])
-  expect(onTop).toBe(true)
-  await attach.click()
-  await expect(page.locator('.pvp-next')).toContainText('Attack with your Active Pokémon')
+  expect(await page.evaluate(([x, y]) => !!document.elementFromPoint(x, y)?.closest('.pvp-side.is-mine'), [box.x + box.width / 2, box.y + box.height - 4])).toBe(true)
+  // what can be played glows: the Basics and evolutions of my hand
+  await expect(hand(page).locator('.pvp-hand-card.is-playable').first()).toBeVisible()
+  // the energy tapped, then my Active
+  await page.locator('.pvp-energy-token').click()
+  await expect(page.locator('.pvp-next')).toContainText('Now tap the Pokémon that gets the energy.')
+  await active.click()
+  await expect(page.locator('.pvp-log')).toContainText('You attach a Fire energy to Charmander.')
+  await expect(page.locator('.pvp-next')).toContainText('Tap your Active Pokémon to attack')
+  await expect(active).toHaveClass(/is-playable/)
+  // the Active opens big with its attacks: weak to Fire, Oddish takes double
+  await active.click()
+  await expect(page.getByRole('button', { name: /Ember/ })).toContainText('Super effective (×2)')
   await page.getByRole('button', { name: /Ember/ }).click()
   await expect(page.locator('.pvp-log')).toContainText('Your Charmander uses Ember: 60 damage.')
 })
@@ -351,7 +380,7 @@ test('a laptop sees the whole battle on one screen: both sides, the log, the han
   await page.getByRole('button', { name: 'End my turn' }).click()
   await expect(page.locator('.pvp-log')).toContainText('Your turn.')
   await page.evaluate(() => document.querySelector('.pvp-battle').scrollIntoView({ block: 'start' }))
-  for (const part of ['.pvp-score', '.pvp-side.is-theirs', '.pvp-log', '.pvp-side.is-mine', '.pvp-hand']) {
+  for (const part of ['.pvp-topbar', '.pvp-side.is-theirs', '.pvp-log', '.pvp-side.is-mine', '.pvp-hand']) {
     await expect(page.locator(part)).toBeInViewport({ ratio: 0.95 })
   }
   await expect(page.getByRole('button', { name: 'Attach the Fire energy to Charmander' })).toBeInViewport()
@@ -385,8 +414,7 @@ test('drag and drop like Pocket: a Basic onto the Bench, the energy onto a Poké
   await expect(page.locator('.pvp-panel-actions')).not.toContainText('Put on the Bench') // nothing got picked
   await page.getByRole('button', { name: 'End my turn' }).click()
   await expect(page.locator('.pvp-log')).toContainText('Your turn.')
-  // turn 3: the zone's energy dragged onto my Active (on a phone both are on screen; on a
-  // laptop the energy sits below the board: tap it, then the Pokémon)
+  // turn 3: the zone's energy dragged onto my Active (on a phone), tapped then the Pokémon (on a laptop)
   const active = board(page).getByRole('button', { name: /^Active: Charmander/ })
   if (testInfo.project.name === 'mobile') await dragOnto(page, page.locator('.pvp-energy-token'), active)
   else {
@@ -395,7 +423,7 @@ test('drag and drop like Pocket: a Basic onto the Bench, the energy onto a Poké
   }
   await expect(page.locator('.pvp-log')).toContainText('You attach a Fire energy to Charmander.')
   // Ember knocks Oddish out (no number on the Pokémon that takes its place), Vine Whip hits back: 20 on Charmander
-  await page.getByRole('button', { name: /Ember/ }).click()
+  await attack(page, /Ember/)
   await expect(board(page).getByRole('button', { name: /^Active: Charmander/ }).locator('.pvp-hit')).toHaveText('−20')
   await expect(board(page).getByRole('button', { name: /^Active: Venusaur/ }).locator('.pvp-hit')).toHaveCount(0)
   // turn 5: tap the energy, then Bulbasaur

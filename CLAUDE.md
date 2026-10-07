@@ -475,8 +475,8 @@ docs/technique/             technical doc (French, user choice): overview, front
   one): 3 paid runs, 3 coins x first 20 = 180 a day max vs 300 for the
   others. `ready` false -> "Coming soon". Mirror:
   `src/utils/evolutionChain.js`. Ledger kind `evolution_chain`.
-  **"PvP battles"** (`/challenge/games/pvp`, `PvpView` + `usePvpStore` +
-  `PvpCard` + `PvpCardSheet`), rebuilt **like Pokémon TCG Pocket** in
+  **"PvP battles"** (`/challenge/games/pvp`, `PvpView` (lobby, builder) +
+  `PvpBattle` + `usePvpStore` + `PvpCard` + `PvpCardSheet`), rebuilt **like Pokémon TCG Pocket** in
   0030 (user, 2026-10-05: a bot battle was won in 2 rounds by spamming the
   biggest attack, "aucun choix tactique"; "comme le TCG classique (genre
   pocket)", "deck de 20 avec 2x la même carte", "on reste en différé").
@@ -597,32 +597,39 @@ docs/technique/             technical doc (French, user choice): overview, front
   attack this turn. **Bot deck speed** (0036: "ça prend 4s"): live
   `pvp_bot_deck('all')` took 4.5 s vs 0.4 s in PGlite on the real cards,
   see "JIT" in Machine notes; + my cards' strength computed once each.
-  **Phone battle screen** (user, 2026-10-06: "sur mobile les contrôles
-  étaient infâmes, je ne savais jamais quand jouer, ou taper, que faire";
-  it took 3 screens and the actions opened far below the tapped card):
-  < 992px each side is one grid row (Active + Bench), cards cropped to
-  their top (`aspect-ratio` on `:deep(.pvp-img)`), 2-line log, hand =
-  art + name, and `.pvp-dock` (hand + `.pvp-panel-actions`) sticks above
-  the tab bar from 740px of height (below, 375x667, it covered the whole
-  board: stays in flow). With nothing picked on my turn the panel shows
-  `nextStep` (attach -> attack -> play -> end), "Attach the X energy to
-  <Active>" and the Active's attacks (`showAttacks`): attach + attack =
-  two taps; "End my turn" lights up only for play / end. Every pixel
-  counts on a Pixel 7 (839px): `pvp.spec.js` > "a phone plays a turn on
-  one screen" checks the score, the attach button and my Active's bottom
-  are visible and uncovered; re-screenshot after any change there.
-  **PC battle screen** (>= 992px, user, 2026-10-06: "sur PC ça manque
-  de lisibilité, je scroll en boucle"; 1,860px tall at 1440x900): a
-  2-column grid (`grid-template-areas`), mat + hand left, title, score,
-  log (beside their side, `contain: size`) + sticky `.pvp-panel-actions`
-  (beside mine) right. The mat is **mirrored like Pocket** (same day: "je
-  ne comprends plus qui est le banc", Active and Bench sat side by side at
-  one size): their Bench on top, both Actives face to face in the middle
-  (8rem), my Bench at the bottom, each Bench a dashed tray (5.25rem cards)
-  with a "Bench" label (`.pvp-zone-label`, PC only), their chips beside
-  their tray;
-  `.pvp-dock` is `display: contents` there. `pvp.spec.js` > "a laptop
-  sees the whole battle on one screen" checks 1280x720.
+  **Battle screen like Pocket** (`PvpBattle.vue`, user, 2026-10-07,
+  after sending Pocket screenshots: "la meilleure version possible";
+  replaces the 2026-10-06 `.pvp-dock` phone layout and the PC mat): a
+  mirrored mat (their Bench, their Active, a midline, my Active, my
+  Bench, my hand fanned), whole cards (`PvpBoardCard`: HP left big in
+  the corner + thin bar, energies / conditions / Tool over the art,
+  sizes in `cqw` on its children: cqw on the card's own box measure its
+  parent), points as dots by each name. The midline says **one thing to
+  do** (`prompt`: setup Active then Bench + "Start the battle", attach,
+  attack, play, end, pick a target, promote) under a "Your turn" pill;
+  what can be played **glows** (`--pb-focus`, from `hints`), "End my
+  turn" lights up only when nothing else is left; the turn's energy is
+  a pulsing token beside my Active (drag it, or tap it then a Pokémon).
+  Tapping a card opens it big in `.pvp-panel-actions`: a bottom sheet
+  over a backdrop on phones (tap outside / Escape closes; choices like
+  targets leave the mat tappable, no backdrop), attacks as big buttons
+  with their text and "Super effective (×2)" / "Resisted" from my
+  Active's types vs their Active's weaknesses / resistances, "Retreat
+  (cost)" then tap who comes in. After my turn the mat turns red for
+  ~1s (skipped under reduced motion). **< 992px it's full screen**
+  (`position: fixed`; `html.pb-pvp-arena` hides AppHeader + tab bar and
+  locks the page scroll; a ← back to the mini-games, ☰ menu with the
+  format and "Give up"); sizes follow the height (`fr` rows, `dvh`):
+  Pixel 7 and 375x667 fit. >= 992px: the mat in the page, the log
+  (beside their side) and the panel (beside mine, always open: attach +
+  attacks without picking) in a right column; 1280x720 fits. The
+  battle just over lives in the store (`pvp.finished`, set in the same
+  tick as `state`): an event emitted by `PvpBattle` after the `await`
+  was dropped, the next render had unmounted it. e2e: on phones close
+  the sheet (`closeSheet`) before tapping the mat, `attack()` taps the
+  Active first; "Your turn." is in the log from turn 1, wait for the
+  bot's line instead. `pvp.spec.js` > "a phone plays a turn on one
+  screen, like Pocket" / "a laptop sees the whole battle on one screen".
   **Drag and drop** (user, 2026-10-06: "pas fluide et compliqué de devoir
   tap partout"): pointer events on window (`startDrag` / `moveDrag` /
   `endDrag`, 10px threshold), targets = `data-drop` (slot position,
@@ -630,13 +637,9 @@ docs/technique/             technical doc (French, user choice): overview, front
   from the hints (bench, evolve, attach, or 'trainer' -> picker); hand
   cards are `touch-action: pan-x` (sideways = scroll the hand), the energy
   token `touch-action: none`; tapping the token arms it (`energyArmed`)
-  then a Pokémon attaches; `.pvp-battle.is-dragging .pvp-dock` fades with
-  `pointer-events: none` so drops reach the slots it covers; edge
-  auto-scroll (`edgeScroll`). `justDragged` swallows the click after a
-  release. On a laptop the token sits below the board (not both on
-  screen): the e2e drags it on the phone project, taps on desktop.
-  Damage numbers: `showHits(events)` from `damage` events (`s`, `pos`;
-  the e2e mock emits them since then), skipped on a knocked out slot.
+  then a Pokémon attaches; `justDragged` swallows the click after a
+  release. Damage numbers: `showHits(events)` from `damage` events (`s`,
+  `pos`; the e2e mock emits them), skipped on a knocked out slot.
   **Builder** (same day: "infâme" after Auto deck, every eligible card
   showed): `.pvp-deck-cards` thumbnails, `showEnergy` / `showPool` fold
   the energy picker and the pool once the deck is full (`autoBuild`,
@@ -881,7 +884,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   fixed: 0031's Base fixture had 57 Pokémon, under `pvp_bot_deck`'s 60, so
   the bot fell back to the whole format and took ex; 0033's scripted
   player never benched, so an opening hand without ability holders used
-  none), `npm run test:e2e` 320 (desktop + Pixel 7, incl. "no page
+  none), `npm run test:e2e` 322 (desktop + Pixel 7, incl. "no page
   scrolls sideways" and "no page logs an error"), `npm run build` passes,
   0 npm audit vulnerabilities. Community's two tablists are named
   ("Game mode", "Leaderboards"): e2e picks tabs through them.
