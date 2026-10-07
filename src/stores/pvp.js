@@ -22,7 +22,7 @@ import { deckRoles, pvpOpenTo } from '@/utils/pvp'
 // (`battle.hints`); I send one move at a time (`act`). Bots: no Elo, coins
 // (the header's wallet follows `state.coins`).
 // `unavailable` ("Coming soon") = I'm not a tester (`pvpOpenTo`, the server
-// checks it too since 0028), the server isn't on the Pocket engine yet
+// checks it too since 0028; open to all since 0037), the server isn't on the Pocket engine yet
 // (0030 not applied), or no card sync stored the attack effects (`ready`).
 const isMissingRpc = (err) => err?.code === 'PGRST202' || /could not find the function/i.test(err?.message ?? '')
 

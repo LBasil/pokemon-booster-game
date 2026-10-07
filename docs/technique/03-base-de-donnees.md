@@ -433,6 +433,7 @@ Toutes sont conçues pour pouvoir être relancées sans casse.
 | 0034 | `pvp_bot_start_fix` | Combats contre les bots qui redémarrent : `pvp_bot_deck()` remettait ses scores à zéro par un `UPDATE` sans `WHERE`, refusé par pg-safeupdate via l'API (erreur 21000 à chaque `pvp_bot_start`) ; même corps que 0032 avec un `WHERE` (écrite le 2026-10-05, appliquée : des combats contre le bot facile, avec Dresseurs, joués le jour même) |
 | 0035 | `pvp_easy_bot` | Un bot facile qui riposte : `pvp_bot_deck()` vise 85 % de la force de mon deck en facile (60 % avant), `pvp_ai_turn()` en facile choisit son attaque comme les autres niveaux avec plus d'hésitation (au lieu du hasard) et attache au hasard une fois sur 4 (écrite le 2026-10-06, **à appliquer** après 0034) |
 | 0036 | `pvp_bot_speed_energy` | Combats contre les bots lancés vite et Énergie mieux posée : `pvp_bot_deck()` sans JIT (`set jit = off` : 4,5 s en ligne pour « toutes les cartes ») et la force de mes cartes calculée une fois chacune ; `pvp_ai_turn()` attache l'Énergie là où elle aide n'importe quelle attaque, d'abord celle qu'elle rend jouable tout de suite (écrite le 2026-10-06, **à appliquer** après 0035) |
+| 0037 | `pvp_open_to_all` | PvP ouvert à tous (en alpha) : `pvp_open_to()` répond vrai pour tout joueur connecté, miroir `PVP_TESTERS = null` (écrite le 2026-10-07, **à appliquer** après 0036) |
 
 Les migrations 0001 à 0025 sont appliquées sur le projet réel (vérifié le
 2026-10-04 : `pvp_rules()` renvoie les règles de 0025).

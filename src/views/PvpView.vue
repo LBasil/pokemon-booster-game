@@ -36,6 +36,7 @@ import EnergyIcons from '@/components/EnergyIcons.vue'
 import PvpCard from '@/components/PvpCard.vue'
 import PvpBattle from '@/components/PvpBattle.vue'
 import PvpCardSheet from '@/components/PvpCardSheet.vue'
+import AlphaTag from '@/components/AlphaTag.vue'
 
 // PvP battles like Pokémon TCG Pocket (challenge mode, migration 0030),
 // asynchronous. Per format (every card, one TCG era, one set) I keep two
@@ -330,8 +331,9 @@ onMounted(async () => {
 
     <main class="container pvp">
       <header class="pvp-head">
-        <h1 class="pvp-title">{{ t('pvp.title') }}</h1>
+        <h1 class="pvp-title">{{ t('pvp.title') }} <AlphaTag /></h1>
         <p class="pvp-subtitle">{{ t('pvp.subtitle') }}</p>
+        <p v-if="!pvp.unavailable" class="pvp-alpha">{{ t('alpha.note') }}</p>
       </header>
 
       <p v-if="pvp.unavailable" class="pvp-note">{{ t('pvp.unavailable') }}</p>
@@ -670,6 +672,13 @@ onMounted(async () => {
   margin: 0 0 0.5rem;
   font-size: clamp(1.8rem, 5vw, 2.8rem);
   font-weight: 800;
+}
+
+.pvp-alpha {
+  margin: 0.6rem 0 0;
+  padding-left: 0.7rem;
+  border-left: 3px solid var(--pb-accent);
+  font-size: 0.9rem;
 }
 
 .pvp-subtitle,

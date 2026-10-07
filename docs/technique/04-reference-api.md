@@ -557,8 +557,9 @@ complète : l'import n'est pas repassé). RPC absente (`PGRST202`) ou
 Depuis 0030, des combats façon Pokémon JCC Pocket (decks de 20, Banc,
 Énergie à attacher, évolutions, effets d'attaque) ; depuis 0031,
 l'Énergie est typée (1 ou 2 types par deck, une zone qui en apporte un
-par tour) et les bots sont calés sur mon deck. Réservé aux testeurs
-(0028 : `pvp_open_to(user)`, interne, pseudos listés dans la fonction,
+par tour) et les bots sont calés sur mon deck. Ouvert à tous depuis
+0037 (`pvp_open_to()` répond vrai pour tout joueur connecté). Réservé aux
+testeurs de 0028 à 0036 (0028 : `pvp_open_to(user)`, interne, pseudos listés dans la fonction,
 miroir de `PVP_TESTERS` dans `src/utils/pvp.js`) : pour les autres,
 `pvp_state()` renvoie `{ ready: false }` (« Bientôt ») et les autres RPC
 l'erreur `pvp_closed`. 0030 vérifie ce droit dans chaque RPC et supprime

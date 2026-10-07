@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useGames } from '@/composables/useGames'
 import { useChallengeStore } from '@/stores/challenge'
 import AppHeader from '@/components/AppHeader.vue'
+import AlphaTag from '@/components/AlphaTag.vue'
 
 // The challenge's mini-games: every game in src/utils/games.js, with what
 // it still pays today. Each one opens its own page.
@@ -40,7 +41,7 @@ onMounted(() => {
               <svg viewBox="0 0 24 24"><path :d="game.icon" /></svg>
             </span>
             <span class="game-text">
-              <span class="game-title">{{ game.title }}</span>
+              <span class="game-title">{{ game.title }} <AlphaTag v-if="game.alpha && game.available" /></span>
               <span class="game-desc">{{ game.desc }}</span>
               <span v-if="game.line" class="game-status">
                 {{ game.line }}

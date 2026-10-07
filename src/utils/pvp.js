@@ -27,10 +27,10 @@ export const ENERGY_TYPES = ['Grass', 'Fire', 'Water', 'Lightning', 'Psychic', '
 export const MAX_ENERGY_TYPES = 2
 export const ENGINE = 3
 
-// Who can play while PvP is being reworked (0028, user 2026-10-05: "bloque le
-// PvP uniquement pour le joueur Bazouk"): lowercased usernames, mirrors
-// pvp_open_to(). Everyone else sees "Coming soon". null = open to all.
-export const PVP_TESTERS = ['bazouk']
+// Who can play (0028 closed it to Bazouk while the rules were reworked; 0037,
+// user 2026-10-07, opened it to all, tagged "Alpha"): lowercased usernames,
+// mirrors pvp_open_to(). Everyone else sees "Coming soon". null = open to all.
+export const PVP_TESTERS = null
 
 /** @param {string | null | undefined} username */
 export const pvpOpenTo = (username, testers = PVP_TESTERS) =>

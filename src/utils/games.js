@@ -1,6 +1,7 @@
 // The challenge mini-games, in the order the games page lists them. Adding a
 // game = an entry here (route name + icon), its EN/FR `games.items.<id>`
 // title/description, and its status in useGames() (`statusOf`).
+// `alpha: true` = playable but its rules may still change ("Alpha" tag).
 // `soon: true` = a teaser: listed as "Coming soon", no route or store yet
 // (drop the flag and add the route once the game exists).
 export const GAMES = [
@@ -31,6 +32,8 @@ export const GAMES = [
   {
     id: 'pvp',
     route: 'challenge-game-pvp',
+    // Open to all since 0037, rules still moving (user, 2026-10-07)
+    alpha: true,
     // Two crossed swords
     icon: 'M4 4l9 9M4 4h4M4 4v4M20 4l-9 9M20 4h-4M20 4v4M6 15l3 3M5 19l2-2M18 15l-3 3M19 19l-2-2',
   },

@@ -515,12 +515,16 @@ docs/technique/             technical doc (French, user choice): overview, front
   `attacks[].fx` (a sync after 0029); `engine` != 2 or `ready` false ->
   "Coming soon". The e2e mock (`e2e/support/supabase.js`) runs a small
   scripted engine (Oddish then Venusaur ex, Ember knocks both out).
-  **Testers only** (0028, user 2026-10-05: "bloque le PvP uniquement pour
-  le joueur Bazouk"): `pvp_open_to(user)` (usernames in SQL, checked
-  inline by every RPC since 0030, which dropped 0028's `*_impl`
-  wrappers) mirrored by `PVP_TESTERS` / `pvpOpenTo()`; others get
-  `pvp_state() = { ready: false }` ("Coming soon") and `pvp_closed`. The
-  e2e PvP specs play as Bazouk (mock `username` option).
+  **Open to all, in alpha** (0037, user 2026-10-07: "ouvre le PvP à tout
+  le monde mais précise avec un badge [...] que ça peut changer"; testers
+  only from 0028, user 2026-10-05: "bloque le PvP uniquement pour le
+  joueur Bazouk"): `pvp_open_to(user)` (checked inline by every RPC since
+  0030) now = signed in, mirrored by `PVP_TESTERS = null` / `pvpOpenTo()`;
+  to close it again list usernames in both. Closed -> `pvp_state() = {
+  ready: false }` ("Coming soon") and `pvp_closed` (e2e mock: `pvp: {
+  testersOnly: true }`). `AlphaTag.vue` follows the PvP page title and
+  its game tiles (`alpha: true` in `games.js`, available only), with
+  `alpha.note` under the subtitle. The e2e PvP specs still play as Bazouk.
   **Typed energy + matched bots** (0031, user 2026-10-05 after a bot
   battle won by "placer mon pokemon, mettre les énergies": "ça manque de
   profondeur"; picked "1 à 2 énergies" + bots matched to the deck):
@@ -848,7 +852,7 @@ docs/technique/             technical doc (French, user choice): overview, front
   categories, rates, unlock toasts), challenge mode (coins, daily reward,
   daily + weekly missions, recycle, craft, god packs, mini-games "Higher
   or lower", "Shiny Electrode Flip", "Super effective!" and "Evolution chain" (needs 0018 + a
-  card import), PvP battles like TCG Pocket (0030 + a sync after 0029; testers only, 0028), cards in French (0029), trades with live
+  card import), PvP battles like TCG Pocket (0030 + a sync after 0029; open to all in alpha since 0037), cards in French (0029), trades with live
   updates, opt-out and cards kept out of trades), PWA, EN/FR, both themes.
 - What each migration does (details in each file's header comment):
   0001 schema · 0002 first RPCs (unused) · 0003 realistic packs + rarity
@@ -875,9 +879,9 @@ docs/technique/             technical doc (French, user choice): overview, front
   2026-10-04) · 0026 PvP attack / defense decks + attacks without a
   cost dropped (written 2026-10-04, **to apply**, then check a full
   card sync went through) · 0027 PvP against bots for coins (written
-  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, applied: `pvp_rules().engine` = 3 the same day) · 0032 Trainer cards in PvP (written 2026-10-05, applied the same day) · 0033 Pokémon abilities in PvP (written 2026-10-05, applied: `pvp_team_has` answers on 2026-10-05) · 0034 bot battles start again (`pvp_bot_deck` had an UPDATE without a WHERE, error 21000 live; written 2026-10-05, applied: easy bot battles with Trainers were played that day) · 0035 an easy bot that fights back (deck at 85% of mine, its best attack most of the time; written 2026-10-06, **to apply** after 0034) · 0036 bot battles start fast (no JIT in `pvp_bot_deck`) + bots attach energy where it opens an attack (written 2026-10-06, **to apply** after 0035). Every one was
+  2026-10-04, **to apply** after 0026) · 0028 PvP closed to its testers (written 2026-10-05, **to apply** after 0027) · 0029 French card data + retreat costs, abilities, attack texts and effects (written 2026-10-05, **to apply** after 0028, then a full sync) · 0030 PvP like Pokémon TCG Pocket (written 2026-10-05, applied: an engine 2 battle was played that day) · 0031 PvP typed energy + bots matched to my deck (written 2026-10-05, applied: `pvp_rules().engine` = 3 the same day) · 0032 Trainer cards in PvP (written 2026-10-05, applied the same day) · 0033 Pokémon abilities in PvP (written 2026-10-05, applied: `pvp_team_has` answers on 2026-10-05) · 0034 bot battles start again (`pvp_bot_deck` had an UPDATE without a WHERE, error 21000 live; written 2026-10-05, applied: easy bot battles with Trainers were played that day) · 0035 an easy bot that fights back (deck at 85% of mine, its best attack most of the time; written 2026-10-06, **to apply** after 0034) · 0036 bot battles start fast (no JIT in `pvp_bot_deck`) + bots attach energy where it opens an attack (written 2026-10-06, **to apply** after 0035) · 0037 PvP open to every player, tagged "Alpha" (written 2026-10-07, **to apply** after 0036). Every one was
   verified locally with PGlite before being handed over; 0010-0025 have
-  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0036 too) —
+  their suites in `supabase/tests/` (`npm run test:db`, also in CI; 0026 to 0037 too) —
   the earlier checks lived in scratch scripts and are gone.
 - Tests: `npm test` 276 unit tests, `npm run test:db` 740 database
   checks (2026-10-06: CI was red 5 pushes in a row on two random tests,

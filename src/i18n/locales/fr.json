@@ -6117,5 +6117,10 @@
   "beta": {
     "badge": "Bêta-testeur",
     "why": "Inscrit pendant la bêta : merci d'avoir aidé à façonner le jeu !"
+  },
+  "alpha": {
+    "tag": "Alpha",
+    "why": "En construction : les règles peuvent changer.",
+    "note": "Le PvP est en alpha : les règles, les bots et l'équilibrage peuvent encore changer. Merci de le tester en avance !"
   }
 }

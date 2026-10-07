@@ -854,10 +854,16 @@ sequenceDiagram
 Page : [PvpView.vue](../../src/views/PvpView.vue)
 (`/challenge/games/pvp`), composants `PvpBattle` (le combat),
 `PvpBoardCard`, `PvpCard` et `PvpCardSheet`, store
-`pvp`, migrations 0024 à 0030. **Réservé à ses testeurs depuis le
-2026-10-05** (0028, `pvp_open_to()` côté serveur et `PVP_TESTERS` côté
-client : « bloque le PvP uniquement pour le joueur Bazouk ») : les autres
-joueurs voient « Bientôt ».
+`pvp`, migrations 0024 à 0037. Réservé à ses testeurs du 2026-10-05
+(0028, `pvp_open_to()` côté serveur et `PVP_TESTERS` côté client : « bloque
+le PvP uniquement pour le joueur Bazouk ») au 2026-10-07 : **ouvert à tous
+en alpha** (0037, utilisateur : « précise avec un badge […] que c'est en
+bêta voire alpha et que ça peut changer »). `AlphaTag.vue` (pastille
+« Alpha », raison en infobulle) suit le titre de la page PvP et ses tuiles
+(page des mini-jeux, hub du Défi : `alpha: true` dans `utils/games.js`),
+et une phrase sous le sous-titre dit que les règles, les bots et
+l'équilibrage peuvent encore changer. Avant 0037, les autres joueurs
+voient encore « Bientôt » (le serveur renvoie `ready: false`).
 
 Historique : du PvP en différé à 5 cartes (0024, 2026-10-03), puis
 l'énergie et les récompenses (0025), deux decks par format et « Deck

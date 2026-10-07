@@ -461,11 +461,12 @@ export async function mockSupabase(page, options = {}) {
         return json({ streak: run.streak, run_coins: run.coins, state: ecState() })
       }
     }
-    // ---- PvP battles (migration 0030: Pocket-style; 0028: testers only) ----
+    // ---- PvP battles (migration 0030: Pocket-style; 0028: testers only, until
+    // 0037 opened it to all: `pvp.testersOnly` plays a server before 0037) ----
     if (path.startsWith('/rest/v1/rpc/pvp_')) {
       const pv = state.pvp
       if (pv === 'missing') return json({ code: 'PGRST202', message: `Could not find the function public.${path.split('/').pop()} in the schema cache` }, 404)
-      if (state.profile.username.toLowerCase() !== 'bazouk') {
+      if (pv.testersOnly && state.profile.username.toLowerCase() !== 'bazouk') {
         if (path === '/rest/v1/rpc/pvp_state') return json({ ready: false })
         return raise('pvp_closed')
       }

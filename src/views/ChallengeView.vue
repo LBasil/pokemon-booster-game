@@ -29,6 +29,7 @@ import CoinAmount from '@/components/CoinAmount.vue'
 import ModeSwitch from '@/components/ModeSwitch.vue'
 import SetGoal from '@/components/SetGoal.vue'
 import RecycleDuplicates from '@/components/RecycleDuplicates.vue'
+import AlphaTag from '@/components/AlphaTag.vue'
 
 // Challenge mode hub: coins, daily reward, missions, the separate
 // challenge collection (with duplicate recycling), trades and achievements.
@@ -303,7 +304,7 @@ function openRules() {
                 >
                   <span class="ch-game-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path :d="game.icon" /></svg></span>
                   <span class="ch-game-text">
-                    <span class="ch-game-title">{{ game.title }}</span>
+                    <span class="ch-game-title">{{ game.title }} <AlphaTag v-if="game.alpha && game.available" /></span>
                     <span v-if="game.line" class="ch-game-status">{{ game.line }}</span>
                   </span>
                   <span v-if="game.available" class="ch-game-cta" aria-hidden="true">→</span>

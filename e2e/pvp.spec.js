@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
   await signIn(page)
 })
 
-// PvP is open to its testers only (0028): these tests play as Bazouk
+// PvP was open to its testers only (0028, until 0037): these tests play as Bazouk
 const mockSupabase = (page, options = {}) => mockBackend(page, { username: 'Bazouk', ...options })
 
 // 10 names, 2 copies each: a full deck of 20
@@ -289,13 +289,25 @@ test('no opponent in a format says so', async ({ page }) => {
   await expect(page.getByRole('alert')).toContainText('No opponent in this format yet')
 })
 
-test('closed to everyone but the testers', async ({ page }) => {
-  const backend = await mockBackend(page, { challengeCollection })
+test('open to every player, tagged alpha', async ({ page }) => {
+  await mockBackend(page, { challengeCollection, pvp: withDeck })
+  await page.goto('/challenge/games/pvp')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Alpha')
+  await expect(page.getByText('PvP is in alpha: rules, bots and balance may still change.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Find an opponent' })).toBeVisible()
+  await page.goto('/challenge/games')
+  const tile = page.locator('.game-tile').filter({ hasText: 'PvP battles' })
+  await expect(tile.locator('.alpha-tag')).toBeVisible()
+  await expect(page.locator('.game-tile .alpha-tag')).toHaveCount(1)
+})
+
+test('a server still closed to testers (before 0037) says it is coming', async ({ page }) => {
+  await mockBackend(page, { challengeCollection, pvp: { testersOnly: true } })
   await page.goto('/challenge/games/pvp')
   await expect(page.getByText('PvP battles are coming soon.')).toBeVisible()
+  await expect(page.locator('.pvp-alpha')).toHaveCount(0)
   await page.goto('/challenge/games')
   await expect(page.locator('.game-tile').filter({ hasText: 'PvP battles' })).toContainText('Coming soon')
-  expect(backend.calls.filter((call) => call.path.startsWith('/rest/v1/rpc/pvp_'))).toEqual([])
 })
 
 test('before the migrations, PvP says it is coming', async ({ page }) => {

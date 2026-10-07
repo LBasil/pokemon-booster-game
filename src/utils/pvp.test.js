@@ -365,11 +365,10 @@ describe('botCoins', () => {
 })
 
 describe('pvpOpenTo', () => {
-  it('lets the testers in, whatever the case, everyone with null', () => {
-    expect(pvpOpenTo('Bazouk')).toBe(true)
-    expect(pvpOpenTo('BAZOUK')).toBe(true)
-    expect(pvpOpenTo('Ash')).toBe(false)
-    expect(pvpOpenTo(null)).toBe(false)
-    expect(pvpOpenTo('Ash', null)).toBe(true)
+  it('lets everyone in since 0037, only listed testers with a list', () => {
+    expect(pvpOpenTo('Ash')).toBe(true)
+    expect(pvpOpenTo('BAZOUK', ['bazouk'])).toBe(true)
+    expect(pvpOpenTo('Ash', ['bazouk'])).toBe(false)
+    expect(pvpOpenTo(null, ['bazouk'])).toBe(false)
   })
 })
